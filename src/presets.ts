@@ -94,25 +94,93 @@ stack(
     },
   },
   {
-    id: 'mpc',
-    name: { en: 'MIDI controller', es: 'Controlador MIDI' },
+    id: 'mpk',
+    name: { en: 'MPK Mini', es: 'MPK Mini' },
     code: {
-      en: `// A MIDI controller (MPK, MPC…) playing the studio
-// 1. Open the MIDI panel (top right) and hit "Enable MIDI"
-// 2. Play pads and turn knobs to see their numbers
-// 3. Swap 'MPK' and the knob(...) numbers for yours
-// 4. Pick "From the code" in Visual to see this pattern's visual
+      en: `// Akai MPK Mini Mk II
+// Keys → piano · bank B pads → drums (bank A shares notes with the keys)
+// Knob 1 is left free: the joystick sends the same message (CC 1)
+// Knobs start at 0: turn 4 to bring the beat in and 2 to open the filter
+// 1. Open the MIDI panel and hit "Enable MIDI"
+// 2. Pick "From the code" in Visual to see this pattern's visual
 await initHydra()
 
-const knob = await midin('MPK')
-const pads = await midikeys('MPK')
+const mpk = 'MPK Mini'
+const knob = await midin(mpk)
+const keys = await midikeys(mpk)
 
-// knob 1 rotates the visuals
+// knob 5: how many mirrors · knob 6: how fast it spins
 osc(10, 0.05, 1)
   .color(0.34, 0.4, 0.12)
-  .rotate(H(knob(1).mul(3.14)))
-  .modulate(noise(3), 0.3)
+  .kaleid(H(knob(5).range(2, 8)))
+  .rotate(0, H(knob(6).range(0, 0.3)))
+  .scale(() => 1 + bass())
   .out()
+
+setcps(90 / 60 / 4)
+
+// bank B pads send notes 32 to 39
+const kit = ['bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'lt', 'ht']
+
+stack(
+  // a beat to play over · knob 4: its volume
+  s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4).range(0, 0.9)),
+  // knob 2: filter · knob 3: reverb
+  keys().s("piano")
+    .lpf(knob(2).range(300, 8000)).room(knob(3).range(0, 0.8))
+    // pads become drums, hit harder = louder; keys stay piano
+    .withValue(v => v.note < 40
+      ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity }
+      : v)
+).analyze(1)`,
+      es: `// Akai MPK Mini Mk II
+// Teclas → piano · pads del banco B → batería (el banco A comparte notas con las teclas)
+// El knob 1 queda libre: el joystick manda lo mismo (CC 1)
+// Los knobs empiezan en 0: sube el 4 para que entre el ritmo y el 2 para abrir el filtro
+// 1. Abre el panel MIDI y pulsa "Activar MIDI"
+// 2. Elige "Del código" en Visual para ver el visual de este patrón
+await initHydra()
+
+const mpk = 'MPK Mini'
+const knob = await midin(mpk)
+const keys = await midikeys(mpk)
+
+// knob 5: cuántos espejos · knob 6: lo rápido que gira
+osc(10, 0.05, 1)
+  .color(0.34, 0.4, 0.12)
+  .kaleid(H(knob(5).range(2, 8)))
+  .rotate(0, H(knob(6).range(0, 0.3)))
+  .scale(() => 1 + bass())
+  .out()
+
+setcps(90 / 60 / 4)
+
+// los pads del banco B mandan las notas 32 a 39
+const kit = ['bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'lt', 'ht']
+
+stack(
+  // un ritmo sobre el que tocar · knob 4: su volumen
+  s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4).range(0, 0.9)),
+  // knob 2: filtro · knob 3: reverb
+  keys().s("piano")
+    .lpf(knob(2).range(300, 8000)).room(knob(3).range(0, 0.8))
+    // los pads pasan a batería, más fuerte = más volumen; las teclas siguen siendo piano
+    .withValue(v => v.note < 40
+      ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity }
+      : v)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'mpc',
+    name: { en: 'Any MIDI controller', es: 'Cualquier controlador MIDI' },
+    code: {
+      en: `// Any MIDI controller: a starting point
+// 1. Open the MIDI panel and hit "Enable MIDI"
+// 2. Play pads and turn knobs to see their numbers
+// 3. Swap 'MIDI' for part of your device's name and the knob(...) numbers for yours
+const knob = await midin('MIDI')
+const pads = await midikeys('MIDI')
 
 setcps(90 / 60 / 4)
 
@@ -121,22 +189,12 @@ stack(
   // keys and pads play the piano; knob 2 opens the filter
   pads().s("piano").lpf(knob(2).range(300, 5000))
 ).analyze(1)`,
-      es: `// Un controlador MIDI (MPK, MPC…) tocando el estudio
-// 1. Abre el panel MIDI (arriba a la derecha) y pulsa "Activar MIDI"
+      es: `// Cualquier controlador MIDI: un punto de partida
+// 1. Abre el panel MIDI y pulsa "Activar MIDI"
 // 2. Toca pads y gira knobs para ver sus números
-// 3. Cambia 'MPK' y los números de knob(...) por los tuyos
-// 4. Elige "Del código" en Visual para ver el visual de este patrón
-await initHydra()
-
-const knob = await midin('MPK')
-const pads = await midikeys('MPK')
-
-// el knob 1 gira los visuales
-osc(10, 0.05, 1)
-  .color(0.34, 0.4, 0.12)
-  .rotate(H(knob(1).mul(3.14)))
-  .modulate(noise(3), 0.3)
-  .out()
+// 3. Cambia 'MIDI' por parte del nombre de tu aparato y los números de knob(...) por los tuyos
+const knob = await midin('MIDI')
+const pads = await midikeys('MIDI')
 
 setcps(90 / 60 / 4)
 
