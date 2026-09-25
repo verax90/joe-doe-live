@@ -2,7 +2,8 @@
 
 A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound with [Strudel](https://strudel.cc), visuals with [Hydra](https://hydra.ojack.xyz) and MIDI control, all in one editor. English and Spanish.
 
-- **Built-in patterns**: lofi, a bare-minimum example, a template for your own samples and one for a MIDI controller.
+- **Built-in patterns**: lofi, boom bap on the E-mu SP-1200 and the Akai MPC60, trap on the 808, house on the 909, a bare-minimum example, and templates for your own samples, the MPK Mini and any MIDI controller.
+- **Help** (More → Help, or `?`): getting started, shortcuts, every MPK Mini control in each mode, the panels and troubleshooting.
 - **Visuals apart from the sound**: pick one in the selector and pair it with any pattern. Some follow the bar (`H("...")`), others listen to the audio.
 - **Share**: the button copies a link with the pattern and the visual inside the URL.
 - **Your samples**: drop audio files on the page and use them with `s("name")`. They stay in the browser (IndexedDB).

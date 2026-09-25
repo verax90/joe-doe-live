@@ -10,6 +10,7 @@ import { isAsciiOn, readAsciiSetting, setAscii } from './ascii';
 import { setupCheatsheet } from './cheatsheet';
 import { setupDebug } from './debug';
 import { setupFreePlay } from './freeplay';
+import { setupHelp } from './help';
 import { setupRecorder } from './record';
 import { ensureLimiter } from './limiter';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
@@ -285,6 +286,14 @@ function toggleCode() {
 }
 codeToggle.addEventListener('click', () => toggleCode());
 
+// "?" opens the help, unless you are typing in the editor or a field
+window.addEventListener('keydown', (event) => {
+  const target = event.target as HTMLElement;
+  if (event.key !== '?' || target.closest('.cm-editor, input, select, textarea')) return;
+  event.preventDefault();
+  document.querySelector<HTMLButtonElement>('#toggle-help')!.click();
+});
+
 // Atajos globales para cuando el foco no está en el editor
 window.addEventListener('keydown', (event) => {
   const mod = event.ctrlKey || event.metaKey;
@@ -305,6 +314,7 @@ window.addEventListener('keydown', (event) => {
 
 setupMidiPanel();
 setupCheatsheet();
+setupHelp();
 setupRecorder();
 // Free play stays out of the way when the playing pattern reads the keys itself
 setupFreePlay(

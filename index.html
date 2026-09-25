@@ -65,6 +65,7 @@
             <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
             <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
             <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
+            <button id="toggle-help" class="menu-item" type="button" aria-pressed="false" data-panel="help" aria-keyshortcuts="?" data-i18n="help">Help</button>
             <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
           </div>
           <div class="menu-section menu-row">
@@ -109,6 +110,11 @@
           allow="autoplay; midi; microphone; clipboard-read; clipboard-write; fullscreen"
         ></iframe>
       </section>
+
+      <aside class="panel panel-wide" id="help" hidden>
+        <h2 data-i18n="help">Help</h2>
+        <div id="help-content"></div>
+      </aside>
 
       <aside class="panel" id="cheats" hidden>
         <h2 data-i18n="cheatsheet">Cheatsheet</h2>

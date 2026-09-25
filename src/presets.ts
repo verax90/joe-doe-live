@@ -46,6 +46,132 @@ stack(
     },
   },
   {
+    id: 'boombap-sp1200',
+    name: { en: 'Boom bap SP-1200', es: 'Boom bap SP-1200' },
+    code: {
+      en: `// Boom bap 90: SP-1200 drums, jazz chords and upright bass
+setcps(90 / 60 / 4)
+
+stack(
+  // kick and snare from the E-mu SP-1200, the sampler that shaped boom bap
+  s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("EmuSP12").gain(1),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("EmuSP12"),
+  // swung hi-hats
+  s("hh*8").bank("EmuSP12").gain("0.5 0.3").swing(4),
+  // jazz chords on electric piano
+  chord("<Dm9 G13 C^9 A7b9>").voicing().s("gm_epiano1").gain(0.5).lpf(2200).room(0.3),
+  // upright bass
+  note("<d2 g1 c2 a1>").s("gm_acoustic_bass").gain(0.8)
+).analyze(1)`,
+      es: `// Boom bap 90: batería SP-1200, acordes de jazz y contrabajo
+setcps(90 / 60 / 4)
+
+stack(
+  // bombo y caja de la E-mu SP-1200, el sampler que definió el boom bap
+  s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("EmuSP12").gain(1),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("EmuSP12"),
+  // charles con swing
+  s("hh*8").bank("EmuSP12").gain("0.5 0.3").swing(4),
+  // acordes de jazz en piano eléctrico
+  chord("<Dm9 G13 C^9 A7b9>").voicing().s("gm_epiano1").gain(0.5).lpf(2200).room(0.3),
+  // contrabajo
+  note("<d2 g1 c2 a1>").s("gm_acoustic_bass").gain(0.8)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'boombap-mpc60',
+    name: { en: 'Boom bap MPC60', es: 'Boom bap MPC60' },
+    code: {
+      en: `// Boom bap 94: MPC60 drums and vibraphone
+setcps(94 / 60 / 4)
+
+stack(
+  // drums from the Akai MPC60
+  s("bd ~ ~ bd ~ ~ ~ ~, ~ ~ sd ~ ~ ~ sd ~").bank("AkaiMPC60").gain(0.9),
+  s("hh*8").bank("AkaiMPC60").gain("0.45 0.25").swing(4),
+  // vibraphone phrases in A minor
+  n("<[0 2 4] [2 4 7] [4 6 9] [3 5 8]>").scale("A:minor").s("gm_vibraphone").gain(0.45).room(0.4),
+  note("<a1 c2 e2 d2>").s("gm_acoustic_bass").gain(0.8)
+).analyze(1)`,
+      es: `// Boom bap 94: batería MPC60 y vibráfono
+setcps(94 / 60 / 4)
+
+stack(
+  // batería de la Akai MPC60
+  s("bd ~ ~ bd ~ ~ ~ ~, ~ ~ sd ~ ~ ~ sd ~").bank("AkaiMPC60").gain(0.9),
+  s("hh*8").bank("AkaiMPC60").gain("0.45 0.25").swing(4),
+  // frases de vibráfono en La menor
+  n("<[0 2 4] [2 4 7] [4 6 9] [3 5 8]>").scale("A:minor").s("gm_vibraphone").gain(0.45).room(0.4),
+  note("<a1 c2 e2 d2>").s("gm_acoustic_bass").gain(0.8)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'trap-808',
+    name: { en: 'Trap 808', es: 'Trap 808' },
+    code: {
+      en: `// Trap 140: 808, hi-hat rolls and a choir pad
+setcps(140 / 60 / 4)
+
+stack(
+  // Roland TR-808
+  s("bd ~ ~ ~ ~ ~ ~ ~ ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR808").gain(1.3),
+  s("~ ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~").bank("RolandTR808").gain(1.1),
+  // hi-hat rolls: ply repeats each hit
+  s("hh*8").bank("RolandTR808").gain(0.45).ply("<1 1 2 [1 3]>"),
+  // sub bass
+  note("<c2 c2 eb2 g1>").s("sawtooth").lpf(300).gain(0.9).decay(0.6),
+  n("0 ~ 3 ~ 5 ~ 3 ~").scale("C:minor").s("gm_pad_choir").gain(0.35).slow(2)
+).analyze(1)`,
+      es: `// Trap 140: 808, redobles de charles y pad de coro
+setcps(140 / 60 / 4)
+
+stack(
+  // Roland TR-808
+  s("bd ~ ~ ~ ~ ~ ~ ~ ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR808").gain(1.3),
+  s("~ ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~").bank("RolandTR808").gain(1.1),
+  // redobles de charles: ply repite cada golpe
+  s("hh*8").bank("RolandTR808").gain(0.45).ply("<1 1 2 [1 3]>"),
+  // subgrave
+  note("<c2 c2 eb2 g1>").s("sawtooth").lpf(300).gain(0.9).decay(0.6),
+  n("0 ~ 3 ~ 5 ~ 3 ~").scale("C:minor").s("gm_pad_choir").gain(0.35).slow(2)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'house-909',
+    name: { en: 'House 909', es: 'House 909' },
+    code: {
+      en: `// House 124: 909 and organ
+setcps(124 / 60 / 4)
+
+stack(
+  // Roland TR-909, four on the floor
+  s("bd*4").bank("RolandTR909").gain(0.85),
+  s("~ cp ~ cp").bank("RolandTR909").gain(0.7),
+  s("~ oh ~ oh ~ oh ~ oh").bank("RolandTR909").gain(0.35),
+  s("hh*16").bank("RolandTR909").gain(0.2),
+  // organ stabs
+  chord("<Am7 Dm7 G7 C^7>").voicing().s("gm_drawbar_organ").struct("~ x ~ ~ ~ x ~ ~").gain(0.4),
+  note("<a1 d2 g1 c2>*4").s("triangle").lpf(400).gain(0.6)
+).analyze(1)`,
+      es: `// House 124: 909 y órgano
+setcps(124 / 60 / 4)
+
+stack(
+  // Roland TR-909, bombo a negras
+  s("bd*4").bank("RolandTR909").gain(0.85),
+  s("~ cp ~ cp").bank("RolandTR909").gain(0.7),
+  s("~ oh ~ oh ~ oh ~ oh").bank("RolandTR909").gain(0.35),
+  s("hh*16").bank("RolandTR909").gain(0.2),
+  // golpes de órgano
+  chord("<Am7 Dm7 G7 C^7>").voicing().s("gm_drawbar_organ").struct("~ x ~ ~ ~ x ~ ~").gain(0.4),
+  note("<a1 d2 g1 c2>*4").s("triangle").lpf(400).gain(0.6)
+).analyze(1)`,
+    },
+  },
+  {
     id: 'hola',
     name: { en: 'Hello Strudel', es: 'Hola Strudel' },
     code: {

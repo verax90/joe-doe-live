@@ -652,6 +652,52 @@ select.control {
   color: var(--fg);
 }
 
+/* Help */
+.panel-wide {
+  width: min(30rem, 92vw);
+}
+
+.help-steps {
+  margin: 0 0 0.5rem;
+  padding-left: 1.2rem;
+  color: var(--fg);
+  line-height: 1.55;
+}
+
+.help-steps li + li {
+  margin-top: 0.3rem;
+}
+
+.help-table {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.help-table th,
+.help-table td {
+  padding: 0.4rem 0.5rem 0.4rem 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.help-table thead th {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.help-table tbody th {
+  width: 36%;
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* Cheatsheet */
 .cheat-filter {
   width: 100%;
