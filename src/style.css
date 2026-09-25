@@ -203,6 +203,23 @@ select.control {
   max-width: min(14rem, 100%);
 }
 
+/* Tempo: BPM field and Tap */
+.tempo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.tempo-input {
+  width: 4.2rem;
+  padding: 0 0.4rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  cursor: text;
+}
+
 /* "More" menu */
 .menu {
   position: relative;

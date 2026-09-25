@@ -38,6 +38,11 @@
         <select id="preset" class="control"></select>
         <label class="visually-hidden" for="visual" data-i18n="visual">Visual</label>
         <select id="visual" class="control" title="Visuals" data-i18n-title="visuals"></select>
+        <label class="tempo" title="Tempo (BPM)" data-i18n-title="tempoTitle">
+          <span class="tempo-label">BPM</span>
+          <input id="bpm" class="control tempo-input" type="number" min="40" max="300" step="1" inputmode="numeric" />
+        </label>
+        <button id="tap" class="control" type="button" title="Tap four times to the beat" data-i18n-title="tapTitle">Tap</button>
       </div>
 
       <div class="bar-group">

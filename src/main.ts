@@ -19,6 +19,7 @@ import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
 import { setupStatus } from './status';
+import { setupTempo } from './tempo';
 import { setupToolsPanel } from './tools';
 import { applyVisual, useBundledHydra, visuals } from './visuals';
 // Ruta directa: el paquete no exporta dist/ por su nombre
@@ -325,6 +326,7 @@ setupCheatsheet({
   },
 });
 setupHelp();
+setupTempo(editor as unknown as Parameters<typeof setupTempo>[0]);
 setupKnobs();
 setupRecorder();
 // Free play stays out of the way when the playing pattern reads the keys itself

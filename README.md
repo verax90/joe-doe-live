@@ -5,6 +5,7 @@ A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound 
 - **Built-in patterns**: lofi, boom bap on the E-mu SP-1200 and the Akai MPC60, trap on the 808, drum and bass, house on the 909, a bare-minimum example, and templates for your own samples, the MPK Mini and any MIDI controller.
 - **Help** (More → Help, or `?`): getting started, shortcuts, every MPK Mini control in each mode, the panels and troubleshooting.
 - **Visuals apart from the sound**: pick one in the selector and pair it with any pattern. Some follow the bar (`H("...")`), others listen to the audio.
+- **Tempo**: BPM field and Tap in the bar; changes apply at once and are written into the pattern's `setcps` line.
 - **Share**: the button copies a link with the pattern and the visual inside the URL.
 - **Your samples**: drop audio files on the page and use them with `s("name")`. They stay in the browser (IndexedDB).
 - **Tools**: other browser-based live coding tools, read from the [joedoe.dev/art](https://joedoe.dev/art?cat=livecoding) shelf. A few open inside the studio.
