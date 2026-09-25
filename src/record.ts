@@ -114,6 +114,27 @@ export function setupRecorder() {
   const startVideo = async (output: AudioNode, context: AudioContext) => {
     const canvas = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
     if (!canvas) throw new Error(t('recordNoVisual'));
+    // Visuals normally draw at half resolution to spare CPU; a video deserves
+    // the full window, so bump it while recording and put it back afterwards
+    const hydra = (await (globalThis as { initHydra?: () => Promise<unknown> }).initHydra?.()) as
+      | { setResolution?: (width: number, height: number) => void }
+      | undefined;
+    const previous = { width: canvas.width, height: canvas.height };
+    const full = { width: Math.round(window.innerWidth), height: Math.round(window.innerHeight) };
+    canvas.width = full.width;
+    canvas.height = full.height;
+    hydra?.setResolution?.(full.width, full.height);
+    const restore = () => {
+      canvas.width = previous.width;
+      canvas.height = previous.height;
+      hydra?.setResolution?.(previous.width, previous.height);
+    };
+    // One drawn frame first, so the video does not open on black
+    // (a hidden tab draws no frames, hence the 200 ms cap)
+    await Promise.race([
+      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+      new Promise((resolve) => setTimeout(resolve, 200)),
+    ]);
     const audio = context.createMediaStreamDestination();
     output.connect(audio);
     const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...audio.stream.getAudioTracks()]);
@@ -127,6 +148,7 @@ export function setupRecorder() {
     return () =>
       new Promise<void>((resolve) => {
         recorder.onstop = () => {
+          restore();
           output.disconnect(audio);
           stream.getTracks().forEach((track) => track.stop());
           download(new Blob(chunks, { type: 'video/webm' }), 'webm');
