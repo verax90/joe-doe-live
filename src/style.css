@@ -161,6 +161,12 @@ select.control {
   min-height: 0;
 }
 
+/* Los paneles quedan por encima de la herramienta incrustada */
+.stage > .panel {
+  position: relative;
+  z-index: 3;
+}
+
 .editor {
   flex: 1;
   min-width: 0;
@@ -350,6 +356,79 @@ select.control {
 
 .is-dropping .drop-hint {
   display: grid;
+}
+
+/* Herramientas */
+.panel-help a {
+  color: var(--fg);
+}
+
+.tool-list li {
+  padding: 0.6rem 0;
+}
+
+.tool-name {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tool-name:hover {
+  text-decoration: underline;
+}
+
+.tool-note {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.tool-try {
+  height: 1.8rem;
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+}
+
+/* Herramienta incrustada: ocupa el sitio del editor */
+.embed {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.embed[hidden] {
+  display: none;
+}
+
+.embed-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.embed-title {
+  margin: 0 auto 0 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.embed-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.embed-frame {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: #fff;
 }
 
 .muted {

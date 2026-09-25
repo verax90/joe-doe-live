@@ -1,0 +1,182 @@
+[
+  {
+    "title": "Hydra",
+    "url": "https://hydra.ojack.xyz/?sketch_id=malitzin_1",
+    "category": "livecoding",
+    "note": {
+      "en": "Live visuals in the browser: video synthesis chains you rewrite while they run. It's painting the moment you open it.",
+      "es": "Visuales en vivo en el navegador: cadenas de síntesis de vídeo que se reescriben mientras corren. Abre y ya está pintando."
+    },
+    "embed": false
+  },
+  {
+    "title": "Strudel",
+    "url": "https://strudel.cc/",
+    "category": "livecoding",
+    "note": {
+      "en": "TidalCycles ported to JavaScript. Tidal's algorithmic patterns without installing Haskell or SuperCollider.",
+      "es": "TidalCycles portado a JavaScript. Los patrones algorítmicos de Tidal sin instalar Haskell ni SuperCollider."
+    },
+    "embed": false
+  },
+  {
+    "title": "cascade",
+    "url": "https://raphaelbastide.com/cascade/",
+    "category": "livecoding",
+    "note": {
+      "en": "Live coding with CSS. The shortest bridge between your day job and everything else in this section.",
+      "es": "Live coding con CSS. El puente más directo entre lo que haces a diario y todo lo demás de esta sección."
+    },
+    "embed": false
+  },
+  {
+    "title": "Dittytoy",
+    "url": "https://dittytoy.net/",
+    "category": "livecoding",
+    "note": {
+      "en": "Code-driven music with a minimal JS API and a gallery to hear what others made.",
+      "es": "Música por código con una API JS mínima y una galería para escuchar lo que hace la gente."
+    },
+    "embed": true
+  },
+  {
+    "title": "Estuary",
+    "url": "https://estuary.mcmaster.ca/",
+    "category": "livecoding",
+    "note": {
+      "en": "Collaborative platform for networked performance across several languages at once, from the browser.",
+      "es": "Plataforma colaborativa para tocar en red con varios lenguajes a la vez, desde el navegador."
+    },
+    "embed": false
+  },
+  {
+    "title": "Faust IDE",
+    "url": "https://faustide.grame.fr/",
+    "category": "livecoding",
+    "note": {
+      "en": "IDE for the Faust DSP language. Write the signal processor, compile it to a plugin or to the web.",
+      "es": "IDE del lenguaje Faust para DSP. Escribes el procesador de señal y te lo compila a plugin o a web."
+    },
+    "embed": false
+  },
+  {
+    "title": "flok",
+    "url": "https://flok.cc/",
+    "category": "livecoding",
+    "note": {
+      "en": "Collaborative P2P editor: several people writing sound and visuals into the same document.",
+      "es": "Editor P2P colaborativo: varias personas escribiendo sonido y visuales en el mismo documento."
+    },
+    "embed": true
+  },
+  {
+    "title": "Gibber",
+    "url": "https://gibber.cc/playground/",
+    "category": "livecoding",
+    "note": {
+      "en": "A complete audiovisual environment in the browser: sound, visuals, and notation in one tab.",
+      "es": "Entorno audiovisual completo en el navegador: sonido, visuales y notación, todo en la misma pestaña."
+    },
+    "embed": true
+  },
+  {
+    "title": "Glicol Playground",
+    "url": "https://glicol.web.app/",
+    "category": "livecoding",
+    "note": {
+      "en": "Glicol's REPL. Walk in, write two lines, it plays.",
+      "es": "El REPL de Glicol. Entras, escribes dos líneas y suena."
+    },
+    "embed": true
+  },
+  {
+    "title": "jsfxr",
+    "url": "https://sfxr.me/",
+    "category": "sound",
+    "note": {
+      "en": "8-bit sound effect generator. One “randomize” button and you have your game's jump.",
+      "es": "Generador de efectos de 8 bits. Un botón «randomize» y ya tienes el salto de tu juego."
+    },
+    "embed": false
+  },
+  {
+    "title": "Lines — FLUUUID",
+    "url": "https://labs.fluuu.id/lines/",
+    "category": "sound",
+    "note": {
+      "en": "Experiment from a collective of creative technologists. Worth it for how it's built, not just what it does.",
+      "es": "Experimento de un colectivo de tecnólogos creativos. Vale la pena por cómo está hecho, no solo por lo que hace."
+    },
+    "embed": false
+  },
+  {
+    "title": "Live input effects",
+    "url": "https://cwilso.github.io/Audio-Input-Effects/",
+    "category": "sound",
+    "note": {
+      "en": "Effects on live mic input in real time, by Chris Wilson. Plug a guitar in and try it.",
+      "es": "Efectos aplicados a la entrada del micrófono en tiempo real, por Chris Wilson. Enchufa la guitarra y prueba."
+    },
+    "embed": false
+  },
+  {
+    "title": "Music Box Fun",
+    "url": "https://musicbox.fun/",
+    "category": "livecoding",
+    "note": {
+      "en": "Compose for a music box by punching pins on a roll, then share it by URL. Charming and deliberately limited.",
+      "es": "Compones para caja de música marcando púas en un rollo y lo compartes por URL. Encantador y limitado a propósito."
+    },
+    "embed": false
+  },
+  {
+    "title": "SplitMySong",
+    "url": "https://splitmysong.com/",
+    "category": "sound",
+    "note": {
+      "en": "Same job as the previous one, different implementation. Keep two, because these services go down.",
+      "es": "Lo mismo que el anterior, otra implementación. Ten dos porque estos servicios caen."
+    },
+    "embed": false
+  },
+  {
+    "title": "Vocal Remover",
+    "url": "https://vocalremover.org/",
+    "category": "sound",
+    "note": {
+      "en": "Split vocals and instrumental with no install. Useful for pulling acapellas out of your own archive.",
+      "es": "Separar voz e instrumental sin instalar nada. Útil para sacar acapellas de un archivo propio."
+    },
+    "embed": false
+  },
+  {
+    "title": "wafxr",
+    "url": "https://fenomas.github.io/wafxr/",
+    "category": "livecoding",
+    "note": {
+      "en": "Game sound effect generator in the browser. A direct descendant of sfxr.",
+      "es": "Generador de efectos de sonido de videojuego en el navegador. Heredero directo de sfxr."
+    },
+    "embed": false
+  },
+  {
+    "title": "wavepot",
+    "url": "https://wavepot.com/",
+    "category": "livecoding",
+    "note": {
+      "en": "A DAW where every track is a JavaScript function returning samples. Raw, straight to the ear.",
+      "es": "Un DAW donde cada pista es una función JavaScript que devuelve muestras. Crudo y directo al oído."
+    },
+    "embed": false
+  },
+  {
+    "title": "WebChucK",
+    "url": "https://chuck.stanford.edu/webchuck/",
+    "category": "livecoding",
+    "note": {
+      "en": "ChucK, Stanford's strongly-timed language, compiled to WebAssembly and running in a tab.",
+      "es": "ChucK, el lenguaje strongly-timed de Stanford, compilado a WebAssembly y corriendo en una pestaña."
+    },
+    "embed": false
+  }
+]

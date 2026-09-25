@@ -7,6 +7,7 @@ import { builtInPresets, type Preset } from './presets';
 import { setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
+import { setupToolsPanel } from './tools';
 import { CODE_VISUAL, applyVisual, visuals } from './visuals';
 
 type StrudelMirror = {
@@ -209,3 +210,4 @@ window.addEventListener('keydown', (event) => {
 });
 
 setupMidiPanel();
+setupToolsPanel(() => editor.stop());

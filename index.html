@@ -35,6 +35,7 @@
 
       <div class="bar-group">
         <button id="toggle-code" class="control" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H">Código</button>
+        <button id="toggle-tools" class="control" type="button" aria-pressed="false" data-panel="tools">Herramientas</button>
         <button id="toggle-samples" class="control" type="button" aria-pressed="false" data-panel="samples">Samples</button>
         <button id="toggle-midi" class="control" type="button" aria-pressed="false" data-panel="midi">
           MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span>
@@ -46,6 +47,31 @@
       <section class="editor" id="editor">
         <strudel-editor id="repl"></strudel-editor>
       </section>
+
+      <section class="embed" id="embed" hidden aria-labelledby="embed-title">
+        <header class="embed-bar">
+          <h2 id="embed-title" class="embed-title"></h2>
+          <a id="embed-open" class="control embed-link" href="#" target="_blank" rel="noopener">Abrir en pestaña ↗</a>
+          <button id="embed-close" class="control" type="button">Cerrar</button>
+        </header>
+        <iframe
+          id="embed-frame"
+          class="embed-frame"
+          title="Herramienta incrustada"
+          src="about:blank"
+          allow="autoplay; midi; microphone; clipboard-read; clipboard-write; fullscreen"
+        ></iframe>
+      </section>
+
+      <aside class="panel" id="tools" hidden>
+        <h2>Herramientas</h2>
+        <p class="panel-help">
+          Otras herramientas que funcionan en el navegador, de la estantería de
+          <a href="https://joedoe.dev/art?cat=livecoding" target="_blank" rel="noopener">joedoe.dev/art</a>.
+          Las que dicen "Probar aquí" se abren dentro del estudio (tu patrón se para para que no choquen).
+        </p>
+        <div id="tool-list"><p class="muted">Cargando…</p></div>
+      </aside>
 
       <aside class="panel" id="samples" hidden>
         <h2>Samples</h2>
