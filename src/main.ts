@@ -129,7 +129,10 @@ document.documentElement.classList.remove('booting');
 for (const visual of visuals) visualSelect.append(new Option(pick(visual.name), visual.id));
 const storedVisual = readStorage<string>(VISUAL_KEY, 'lima');
 const initialVisual = shared.visualId ?? storedVisual;
-visualSelect.value = visuals.some((v) => v.id === initialVisual) ? initialVisual : 'lima';
+// The camera only switches on when you pick a webcam visual yourself: a saved
+// or shared one does not turn it on just by opening the page
+const startsCamera = visuals.find((v) => v.id === initialVisual)?.camera;
+visualSelect.value = visuals.some((v) => v.id === initialVisual) && !startsCamera ? initialVisual : 'lima';
 
 const runVisual = () => applyVisual(visualSelect.value).catch((error) => console.warn('[visual]', error));
 

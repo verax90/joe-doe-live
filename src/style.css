@@ -552,6 +552,19 @@ select.control {
   outline-offset: 2px;
 }
 
+.sample-pickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.sample-count {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
 .sample-list li {
   display: flex;
   align-items: center;

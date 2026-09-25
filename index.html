@@ -128,10 +128,16 @@
       <aside class="panel" id="samples" hidden>
         <h2 data-i18n="samples">Samples</h2>
         <p class="panel-help" data-i18n-html="samplesHelp"></p>
-        <label class="control file-button">
-          <span data-i18n="chooseFiles">Choose files</span>
-          <input id="sample-input" type="file" accept="audio/*,.wav,.mp3,.ogg,.flac,.aif,.aiff" multiple />
-        </label>
+        <div class="sample-pickers">
+          <label class="control file-button">
+            <span data-i18n="chooseFiles">Choose files</span>
+            <input id="sample-input" type="file" accept="audio/*,.wav,.mp3,.ogg,.flac,.aif,.aiff" multiple />
+          </label>
+          <label class="control file-button">
+            <span data-i18n="chooseFolder">Choose folder</span>
+            <input id="sample-folder" type="file" webkitdirectory multiple />
+          </label>
+        </div>
         <p id="sample-status" class="panel-status" role="status"></p>
         <h3 data-i18n="yourSamples">Your samples</h3>
         <ul id="sample-list" class="panel-list sample-list"></ul>
