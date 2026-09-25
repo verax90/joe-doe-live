@@ -165,6 +165,13 @@
         <h3 data-i18n="devices">Devices</h3>
         <ul id="midi-devices" class="panel-list"><li class="muted" data-i18n="noPermission">No permission yet</li></ul>
         <button id="midi-enable" class="control" type="button" data-i18n="enableMidi">Enable MIDI</button>
+        <label class="panel-field" for="program-target">
+          <span data-i18n="programTarget">PROG CHANGE pads change</span>
+          <select id="program-target" class="control">
+            <option value="visual" data-i18n="programVisual">the visual</option>
+            <option value="pattern" data-i18n="programPattern">the pattern</option>
+          </select>
+        </label>
         <h3 data-i18n="freePlayTitle">Play without Play</h3>
         <p class="panel-help" data-i18n="freePlayHelp">Keys and bank B pads sound straight away while the studio is stopped, or over a pattern that does not use midikeys.</p>
         <label class="visually-hidden" for="freeplay-sound" data-i18n="freePlaySound">Sound for the keys</label>
@@ -177,6 +184,7 @@
     <div class="drop-hint" aria-hidden="true" data-i18n="dropHere">Drop your samples here</div>
 
     <footer class="foot">
+      <div id="parts" class="parts" role="group" aria-label="Parts" data-i18n-label="partsLabel" hidden></div>
       <span data-i18n="shortcuts">Ctrl+Enter play · Ctrl+. stop · Ctrl+Shift+H hides the code</span>
       <a href="https://github.com/verax90/joe-doe-live" data-i18n="source">Source code (AGPL-3.0)</a>
     </footer>

@@ -18,6 +18,7 @@ import { ensureLimiter } from './limiter';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
+import { setupScenes } from './scenes';
 import { setupStatus } from './status';
 import { setupTempo } from './tempo';
 import { applyTheme, readTheme, themes } from './themes';
@@ -113,6 +114,7 @@ function whenStrudelReady(): Promise<void> {
 
 const editor = await whenEditorReady();
 setupStatus(repl);
+const resetParts = setupScenes(() => editor.code);
 
 // Theme before the UI shows, so it does not flash in the default colours
 const themeSelect = document.querySelector<HTMLSelectElement>('#theme')!;
@@ -172,9 +174,23 @@ visualSelect.addEventListener('change', () => {
   runVisual();
 });
 
-// A MIDI program change picks a visual: program 0 is the first in the list
+// A MIDI program change picks a visual or, if chosen in the MIDI panel, a
+// pattern: program 0 is the first in its list
+const programTarget = document.querySelector<HTMLSelectElement>('#program-target')!;
+programTarget.value = readStorage<string>('jdl:program-target', 'visual');
+programTarget.addEventListener('change', () => writeStorage('jdl:program-target', programTarget.value));
 window.addEventListener(PROGRAM_EVENT, (event) => {
-  const visual = visuals[(event as CustomEvent<number>).detail % visuals.length];
+  const program = (event as CustomEvent<number>).detail;
+  if (programTarget.value === 'pattern') {
+    const all = [...builtInPresets(), ...savedPresets];
+    const preset = all[program % all.length];
+    presetSelect.value = preset.id;
+    resetParts();
+    withTransition(() => editor.setCode(preset.code));
+    editor.evaluate();
+    return;
+  }
+  const visual = visuals[program % visuals.length];
   visualSelect.value = visual.id;
   writeStorage(VISUAL_KEY, visual.id);
   runVisual();
@@ -274,7 +290,10 @@ onLangChange(() => {
 presetSelect.addEventListener('change', () => {
   const preset = findPreset(presetSelect.value);
   deleteButton.hidden = !savedPresets.some((p) => p.id === presetSelect.value);
-  if (preset) withTransition(() => editor.setCode(preset.code));
+  if (preset) {
+    resetParts();
+    withTransition(() => editor.setCode(preset.code));
+  }
 });
 
 saveButton.addEventListener('click', () => {

@@ -46,6 +46,40 @@ stack(
     },
   },
   {
+    id: 'scenes',
+    name: { en: 'Scenes (parts)', es: 'Escenas (partes)' },
+    code: {
+      en: `// Scenes: switch parts on and off while it plays
+// 1 kick · 2 snare · 3 hats · 4 chords · 5 bass · 6 pad
+// Number keys 1-6, a click on the numbers at the bottom, or MPK pads in CC mode
+// Any pattern can do it: add .mask(part(n)) to a layer
+setcps(90 / 60 / 4)
+
+stack(
+  s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("EmuSP12").mask(part(1)),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("EmuSP12").mask(part(2)),
+  s("hh*8").bank("EmuSP12").gain("0.5 0.3").swing(4).mask(part(3)),
+  chord("<Dm9 G13 C^9 A7b9>").voicing().s("gm_epiano1").gain(0.5).lpf(2200).room(0.3).mask(part(4)),
+  note("<d2 g1 c2 a1>").s("gm_acoustic_bass").gain(0.8).mask(part(5)),
+  chord("<Dm9 G13 C^9 A7b9>").voicing().s("gm_pad_warm").gain(0.25).room(0.6).mask(part(6))
+).analyze(1)`,
+      es: `// Escenas: enciende y apaga partes mientras suena
+// 1 bombo · 2 caja · 3 charles · 4 acordes · 5 bajo · 6 pad
+// Teclas 1-6, clic en los números de abajo, o pads del MPK en modo CC
+// Vale para cualquier patrón: añade .mask(part(n)) a una capa
+setcps(90 / 60 / 4)
+
+stack(
+  s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("EmuSP12").mask(part(1)),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("EmuSP12").mask(part(2)),
+  s("hh*8").bank("EmuSP12").gain("0.5 0.3").swing(4).mask(part(3)),
+  chord("<Dm9 G13 C^9 A7b9>").voicing().s("gm_epiano1").gain(0.5).lpf(2200).room(0.3).mask(part(4)),
+  note("<d2 g1 c2 a1>").s("gm_acoustic_bass").gain(0.8).mask(part(5)),
+  chord("<Dm9 G13 C^9 A7b9>").voicing().s("gm_pad_warm").gain(0.25).room(0.6).mask(part(6))
+).analyze(1)`,
+    },
+  },
+  {
     id: 'boombap-sp1200',
     name: { en: 'Boom bap SP-1200', es: 'Boom bap SP-1200' },
     code: {

@@ -15,6 +15,7 @@ A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound 
 - **MIDI program change picks the visual**: program 0 is the first visual in the list, 1 the second, and so on (on the MPK Mini, the pads in PROG CHANGE mode).
 - **MPK Mini Mk II preset**, mapped from the controller: keys, bank B pads, knobs, joystick, and CC-mode pads as hold-to-apply effects.
 - **Themes** (More → Theme): eight pairings of an accent colour and one of Strudel's code themes (Lime, Teletext, Amber monitor, Terminal green, Sonic Pi pink, Tokyo night, Dracula, Monochrome). The UI, the ASCII filter and the built-in visuals follow; in your own visuals use `.color(...tint(0.4))`.
+- **Scenes**: in a pattern that uses `.mask(part(n))`, parts switch on and off with the number keys 1-8, a click on the strip at the bottom, or MPK pads in CC mode. The "Scenes" pattern is a ready example. MIDI program change can also switch patterns instead of visuals (MIDI panel).
 - **Performance mode**: `Ctrl+Shift+H` hides the code and leaves only the visuals.
 
 ## Language

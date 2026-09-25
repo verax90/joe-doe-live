@@ -854,9 +854,47 @@ select.control {
   color: var(--muted);
 }
 
+/* Parts strip (patterns that use part(n)) */
+.parts {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.part {
+  width: 1.7rem;
+  height: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.25rem;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.part[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.part:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.panel-field {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 1rem;
+  color: var(--muted);
+}
+
 /* Pie */
 .foot {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   padding: 0.5rem 1rem;
