@@ -22,7 +22,7 @@ const sections: Section[] = [
           L('Pick a visual next to the pattern. "Auto" changes by itself every 4 bars.', 'Elige un visual al lado del patrón. "Automático" cambia solo cada 4 compases.'),
           L('Change the tempo in BPM, or tap Tap four times to the beat (on the MPK, match its Tap Tempo).', 'Cambia el tempo en BPM, o pulsa Tap cuatro veces al ritmo (con el MPK, iguálalo a su Tap Tempo).'),
           L('Ctrl+. stops. Mistakes show up at the bottom in plain words.', 'Ctrl+. para. Los errores salen abajo explicados.'),
-          L('No idea where to start? More → Compose builds a song layer by layer. More → Cheatsheet has examples.', '¿No sabes por dónde empezar? Más → Componer monta una canción capa a capa. Más → Chuleta tiene ejemplos.'),
+          L('New to this? More → Learn goes step by step, More → Compose builds a song layer by layer, More → Cheatsheet has examples.', '¿Empiezas de cero? Más → Aprender va paso a paso, Más → Componer monta una canción capa a capa, Más → Chuleta tiene ejemplos.'),
         ],
       },
     ],
@@ -107,6 +107,7 @@ const sections: Section[] = [
         kind: 'table',
         head: [L('In More', 'En Más'), L('What it is for', 'Para qué sirve')],
         rows: [
+          [L('Learn', 'Aprender'), L('14 short steps from one sound to a song with visuals; each one plays with a click and ends with a small challenge', '14 pasos cortos de un sonido a una canción con visuales; cada uno suena con un clic y acaba con un pequeño reto')],
           [L('Compose', 'Componer'), L('A song layer by layer without writing code: drums, hi-hats, bass, chords, melody and background, all in one key and tempo. Each layer is a named line (bass:) you can read and change', 'Una canción capa a capa sin escribir código: batería, charles, bajo, acordes, melodía y ambiente, todo en el mismo tono y tempo. Cada capa es una línea con nombre (bass:) que puedes leer y cambiar')],
           [L('Cheatsheet', 'Chuleta'), L('Examples to try, insert or copy. Insert adds a pattern as a new $: track, so every track plays together', 'Ejemplos para probar, insertar o copiar. Insertar añade un patrón como pista $: nueva, así suenan todas las pistas juntas')],
           [L('Copy / Download the code', 'Copiar / Descargar el código'), L('Your code to the clipboard, or as a .js file that opens in any Strudel', 'Tu código al portapapeles, o como archivo .js que se abre en cualquier Strudel')],

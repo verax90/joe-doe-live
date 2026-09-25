@@ -21,6 +21,7 @@ import { buildShareUrl, readSharedPattern } from './share';
 import { setupScenes } from './scenes';
 import { setupStatus } from './status';
 import { setupCompose } from './compose';
+import { setupLearn } from './learn';
 import { setupExport } from './export';
 import { toast } from './toast';
 import { setupUndo } from './undo';
@@ -375,14 +376,13 @@ window.addEventListener('keydown', (event) => {
 });
 
 setupMidiPanel();
-setupCheatsheet({
-  editor,
-  // Hydra examples need their own visual to show
-  useCodeVisual: () => {
-    visualSelect.value = 'code';
-    writeStorage(VISUAL_KEY, 'code');
-  },
-});
+// Hydra examples need their own visual to show
+const useCodeVisual = () => {
+  visualSelect.value = 'code';
+  writeStorage(VISUAL_KEY, 'code');
+};
+setupCheatsheet({ editor, useCodeVisual });
+setupLearn({ editor, useCodeVisual });
 setupHelp();
 setupTempo(editor as unknown as Parameters<typeof setupTempo>[0]);
 setupKnobs();

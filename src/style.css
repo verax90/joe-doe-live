@@ -1078,3 +1078,37 @@ select.control {
 .compose-layer.is-muted .compose-label {
   opacity: 0.45;
 }
+
+/* Learn panel */
+.learn-progress {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.learn-title {
+  margin: 0.25rem 0 0.5rem;
+}
+
+.learn-code {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--accent);
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.learn-challenge {
+  margin: 0 0 1rem;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.learn-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}

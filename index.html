@@ -73,6 +73,7 @@
             <button id="toggle-ascii" class="menu-item" type="button" aria-pressed="false" data-i18n="asciiFilter">ASCII filter</button>
           </div>
           <div class="menu-section">
+            <button id="toggle-learn" class="menu-item" type="button" aria-pressed="false" data-panel="learn" data-i18n="learn">Learn</button>
             <button id="toggle-compose" class="menu-item" type="button" aria-pressed="false" data-panel="compose" data-i18n="compose">Compose</button>
             <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
             <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
@@ -131,6 +132,23 @@
       <aside class="panel panel-wide" id="help" hidden>
         <h2 data-i18n="help">Help</h2>
         <div id="help-content"></div>
+      </aside>
+
+      <aside class="panel" id="learn" hidden>
+        <h2 data-i18n="learn">Learn</h2>
+        <p id="learn-progress" class="learn-progress"></p>
+        <h3 id="learn-title" class="learn-title"></h3>
+        <p id="learn-text" class="panel-help"></p>
+        <pre class="learn-code"><code id="learn-code"></code></pre>
+        <div class="compose-buttons">
+          <button id="learn-try" class="control control-accent" type="button" data-i18n="learnTry">▶ Try it</button>
+          <button id="learn-back" class="control" type="button" data-i18n="backToCode" hidden>Back to my code</button>
+        </div>
+        <p class="learn-challenge"><strong data-i18n="learnYourTurn">Your turn:</strong> <span id="learn-challenge"></span></p>
+        <div class="learn-nav">
+          <button id="learn-previous" class="control" type="button" data-i18n="learnPrevious">← Previous</button>
+          <button id="learn-next" class="control" type="button" data-i18n="learnNext">Next →</button>
+        </div>
       </aside>
 
       <aside class="panel" id="compose" hidden>
