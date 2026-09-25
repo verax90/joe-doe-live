@@ -106,8 +106,27 @@ g.level = () => band(20, 10000);
 export function useBundledHydra(src: string) {
   const original = g.initHydra as ((options?: Record<string, unknown>) => Promise<unknown>) | undefined;
   if (!original) return;
-  g.initHydra = (options: Record<string, unknown> = {}) =>
-    original({ src, pixelRatio: 0.5, pixelated: false, ...options });
+  g.initHydra = async (options: Record<string, unknown> = {}) => {
+    const hydra = await original({ src, pixelRatio: 0.5, pixelated: false, ...options });
+    followWindowSize(hydra as { setResolution?: (width: number, height: number) => void });
+    return hydra;
+  };
+}
+
+// Strudel resizes the canvas when the window changes, but Hydra keeps drawing
+// at the old size in a corner. Tell it the new size once the canvas has settled.
+let followed: unknown;
+function followWindowSize(hydra: { setResolution?: (width: number, height: number) => void }) {
+  if (followed === hydra || !hydra?.setResolution) return;
+  followed = hydra;
+  let timer: number | undefined;
+  window.addEventListener('resize', () => {
+    clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      const canvas = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
+      if (canvas && followed === hydra) hydra.setResolution!(canvas.width, canvas.height);
+    }, 300);
+  });
 }
 
 export async function applyVisual(id: string) {

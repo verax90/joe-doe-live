@@ -78,6 +78,7 @@ export function setupRecorder() {
     button.classList.remove('is-recording');
     button.setAttribute('aria-pressed', 'false');
     label.textContent = t('record');
+    button.setAttribute('aria-label', t('record'));
     modeSelect.disabled = false;
     clearInterval(timer);
   };
@@ -90,6 +91,7 @@ export function setupRecorder() {
     const tick = () => {
       const seconds = Math.floor((performance.now() - startedAt) / 1000);
       label.textContent = `${t('stopRecording')} ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+      button.setAttribute('aria-label', label.textContent);
     };
     tick();
     timer = window.setInterval(tick, 500);

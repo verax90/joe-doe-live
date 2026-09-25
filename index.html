@@ -26,47 +26,54 @@
         <span class="brand-name">joe doe</span><span class="brand-dot">·</span><span class="brand-live">live</span>
       </a>
 
-      <div class="bar-group">
+      <!-- Only what you reach for while playing stays in the bar -->
+      <div class="bar-group bar-pickers">
         <label class="visually-hidden" for="preset" data-i18n="pattern">Pattern</label>
         <select id="preset" class="control"></select>
-        <button id="save" class="control" type="button" title="Save in this browser" data-i18n="save" data-i18n-title="saveTitle">Save</button>
-        <button id="delete" class="control" type="button" title="Delete the saved pattern" data-i18n="delete" data-i18n-title="deleteTitle" hidden>Delete</button>
-      </div>
-
-      <div class="bar-group">
         <label class="visually-hidden" for="visual" data-i18n="visual">Visual</label>
         <select id="visual" class="control" title="Visuals" data-i18n-title="visuals"></select>
-        <button id="share" class="control" type="button" data-i18n="share">Share</button>
       </div>
 
       <div class="bar-group">
-        <button id="play" class="control control-accent" type="button" aria-keyshortcuts="Control+Enter">▶ Play</button>
-        <button id="stop" class="control" type="button" aria-keyshortcuts="Control+.">■ Stop</button>
-      </div>
-
-      <div class="bar-group">
-        <label class="visually-hidden" for="record-mode" data-i18n="recordMode">What to record</label>
-        <select id="record-mode" class="control">
-          <option value="audio" data-i18n="recordAudio">Audio (WAV)</option>
-          <option value="video" data-i18n="recordVideo">Video (WebM)</option>
-        </select>
-        <button id="record" class="control control-record" type="button" aria-pressed="false">
-          <span class="record-dot" aria-hidden="true"></span><span class="record-label" data-i18n="record">Record</span>
+        <button id="play" class="control control-accent" type="button" aria-label="Play" aria-keyshortcuts="Control+Enter">▶<span class="btn-text"> Play</span></button>
+        <button id="stop" class="control" type="button" aria-label="Stop" aria-keyshortcuts="Control+.">■<span class="btn-text"> Stop</span></button>
+        <button id="record" class="control control-record" type="button" aria-pressed="false" aria-label="Record" data-i18n-label="record">
+          <span class="record-dot" aria-hidden="true"></span><span class="record-label btn-text" data-i18n="record">Record</span>
         </button>
         <span id="record-status" class="record-status" role="status"></span>
       </div>
 
-      <div class="bar-group">
-        <button id="toggle-code" class="control" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
-        <button id="toggle-cheats" class="control" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
-        <button id="toggle-tools" class="control" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
-        <button id="toggle-samples" class="control" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
-        <button id="toggle-midi" class="control" type="button" aria-pressed="false" data-panel="midi">
-          MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span>
+      <div class="menu">
+        <button id="menu-toggle" class="control menu-toggle" type="button" aria-expanded="false" aria-controls="menu">
+          <span data-i18n="more">More</span> <span id="midi-dot" class="dot" aria-hidden="true"></span>
         </button>
-        <button id="lang" class="control control-lang" type="button" aria-label="Español" data-i18n-label="langSwitch">
-          <span class="lang-option" data-lang="en">EN</span><span class="lang-option" data-lang="es">ES</span>
-        </button>
+        <div id="menu" class="menu-panel" hidden>
+          <div class="menu-section">
+            <button id="save" class="menu-item" type="button" title="Save in this browser" data-i18n="save" data-i18n-title="saveTitle">Save</button>
+            <button id="delete" class="menu-item" type="button" data-i18n="delete" data-i18n-title="deleteTitle" hidden>Delete</button>
+            <button id="share" class="menu-item" type="button" data-i18n="share">Share</button>
+            <button id="toggle-code" class="menu-item" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
+          </div>
+          <div class="menu-section">
+            <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
+            <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
+            <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
+            <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-panel="midi">MIDI</button>
+          </div>
+          <div class="menu-section menu-row">
+            <label for="record-mode" data-i18n="recordMode">What to record</label>
+            <select id="record-mode" class="control">
+              <option value="audio" data-i18n="recordAudio">Audio (WAV)</option>
+              <option value="video" data-i18n="recordVideo">Video (WebM)</option>
+            </select>
+          </div>
+          <div class="menu-section menu-row">
+            <span data-i18n="language">Language</span>
+            <button id="lang" class="control control-lang" type="button" aria-label="Español" data-i18n-label="langSwitch">
+              <span class="lang-option" data-lang="en">EN</span><span class="lang-option" data-lang="es">ES</span>
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 

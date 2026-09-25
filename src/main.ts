@@ -165,6 +165,28 @@ shareButton.addEventListener('click', async () => {
   setTimeout(() => (shareButton.textContent = label), 2000);
 });
 
+// "More" menu: everything that is not needed while playing
+const menuToggle = document.querySelector<HTMLButtonElement>('#menu-toggle')!;
+const menu = document.querySelector<HTMLElement>('#menu')!;
+const setMenu = (open: boolean) => {
+  menu.hidden = !open;
+  menuToggle.setAttribute('aria-expanded', String(open));
+};
+menuToggle.addEventListener('click', () => setMenu(Boolean(menu.hidden)));
+document.addEventListener('click', (event) => {
+  if (!menu.hidden && !(event.target as HTMLElement).closest('.menu')) setMenu(false);
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !menu.hidden) {
+    setMenu(false);
+    menuToggle.focus();
+  }
+});
+// Picking an action closes the menu; the recording select stays open to change it
+menu.addEventListener('click', (event) => {
+  if ((event.target as HTMLElement).closest('.menu-item')) setMenu(false);
+});
+
 // Paneles laterales: solo uno abierto a la vez
 const panelButtons = document.querySelectorAll<HTMLButtonElement>('[data-panel]');
 panelButtons.forEach((button) => {
