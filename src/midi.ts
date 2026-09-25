@@ -85,6 +85,25 @@ export function setupMidiPanel() {
     if (connected) return;
     try {
       const access = await navigator.requestMIDIAccess();
+      const onMessage = (event: Event) => {
+        const { data, target } = event as MIDIMessageEvent;
+        if (!data) return;
+        const [status, low, high] = data;
+        if ((status & 0xf0) === 0xe0) bendValue = (((high << 7) | low) - 8192) / 8192;
+        if ((status & 0xf0) === 0x90 && high > 0) {
+          midiStats.notes++;
+          window.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: low, velocity: high / 127 } }));
+        }
+        if ((status & 0xf0) === 0xc0) window.dispatchEvent(new CustomEvent(PROGRAM_EVENT, { detail: low }));
+        if ((status & 0xf0) === 0xb0) {
+          const detail: CcDetail = { cc: low, value: high / 127, channel: (status & 0x0f) + 1 };
+          window.dispatchEvent(new CustomEvent<CcDetail>(CC_EVENT, { detail }));
+        }
+        const text = describe(data);
+        if (!text) return;
+        flash();
+        addLog((target as MIDIInput | null)?.name ?? '', text);
+      };
       const render = () => {
         deviceList.replaceChildren();
         if (!access.inputs.size) {
@@ -94,24 +113,10 @@ export function setupMidiPanel() {
           const item = document.createElement('li');
           item.textContent = input.name ?? input.id;
           deviceList.append(item);
-          input.onmidimessage = (event) => {
-            if (!event.data) return;
-            const [status, low, high] = event.data;
-            if ((status & 0xf0) === 0xe0) bendValue = (((high << 7) | low) - 8192) / 8192;
-            if ((status & 0xf0) === 0x90 && high > 0) {
-              midiStats.notes++;
-              window.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: low, velocity: high / 127 } }));
-            }
-            if ((status & 0xf0) === 0xc0) window.dispatchEvent(new CustomEvent(PROGRAM_EVENT, { detail: low }));
-            if ((status & 0xf0) === 0xb0) {
-              const detail: CcDetail = { cc: low, value: high / 127, channel: (status & 0x0f) + 1 };
-              window.dispatchEvent(new CustomEvent<CcDetail>(CC_EVENT, { detail }));
-            }
-            const text = describe(event.data);
-            if (!text) return;
-            flash();
-            addLog(input.name ?? '', text);
-          };
+          // A listener, not onmidimessage: Strudel's midin (WebMidi.js) assigns
+          // onmidimessage too, and whichever came last would silence the other.
+          // The same function added twice is ignored, so re-renders are safe
+          input.addEventListener('midimessage', onMessage);
         });
       };
       connected = true;
