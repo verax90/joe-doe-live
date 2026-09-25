@@ -5,17 +5,10 @@
 const MAX_LOG = 12;
 
 export function setupMidiPanel() {
-  const panel = document.querySelector<HTMLElement>('#midi')!;
-  const toggle = document.querySelector<HTMLButtonElement>('#toggle-midi')!;
   const enable = document.querySelector<HTMLButtonElement>('#midi-enable')!;
   const deviceList = document.querySelector<HTMLUListElement>('#midi-devices')!;
   const log = document.querySelector<HTMLOListElement>('#midi-log')!;
   const dot = document.querySelector<HTMLElement>('#midi-dot')!;
-
-  toggle.addEventListener('click', () => {
-    panel.hidden = !panel.hidden;
-    toggle.setAttribute('aria-pressed', String(!panel.hidden));
-  });
 
   if (!('requestMIDIAccess' in navigator)) {
     deviceList.innerHTML = '<li class="muted">Este navegador no soporta Web MIDI (prueba Chrome o Edge)</li>';

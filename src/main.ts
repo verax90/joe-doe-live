@@ -5,6 +5,9 @@ import '@strudel/repl';
 import './style.css';
 import { builtInPresets, type Preset } from './presets';
 import { setupMidiPanel } from './midi';
+import { setupSamplesPanel } from './samples';
+import { buildShareUrl, readSharedPattern } from './share';
+import { CODE_VISUAL, applyVisual, visuals } from './visuals';
 
 type StrudelMirror = {
   code: string;
@@ -15,6 +18,7 @@ type StrudelMirror = {
 
 const DRAFT_KEY = 'jdl:draft';
 const SAVED_KEY = 'jdl:saved';
+const VISUAL_KEY = 'jdl:visual';
 
 const repl = document.querySelector('strudel-editor') as HTMLElement & { editor: StrudelMirror | null };
 const presetSelect = document.querySelector<HTMLSelectElement>('#preset')!;
@@ -23,6 +27,8 @@ const deleteButton = document.querySelector<HTMLButtonElement>('#delete')!;
 const playButton = document.querySelector<HTMLButtonElement>('#play')!;
 const stopButton = document.querySelector<HTMLButtonElement>('#stop')!;
 const codeToggle = document.querySelector<HTMLButtonElement>('#toggle-code')!;
+const visualSelect = document.querySelector<HTMLSelectElement>('#visual')!;
+const shareButton = document.querySelector<HTMLButtonElement>('#share')!;
 
 // localStorage puede fallar (modo privado, datos bloqueados): la página debe funcionar igual
 function readStorage<T>(key: string, fallback: T): T {
@@ -74,11 +80,75 @@ function whenEditorReady(): Promise<StrudelMirror> {
   });
 }
 
+// Las funciones de Strudel (samples, initHydra…) se registran como globales al terminar
+// de cargar; hasta entonces no se pueden usar
+function whenStrudelReady(): Promise<void> {
+  return new Promise((resolve) => {
+    const g = globalThis as { samples?: unknown; initHydra?: unknown };
+    const check = () => (g.samples && g.initHydra ? resolve() : setTimeout(check, 100));
+    check();
+  });
+}
+
 const editor = await whenEditorReady();
 
+const shared = readSharedPattern();
+// Quita el enlace compartido de la URL: al recargar manda tu borrador, no el patrón original
+if (shared.code) history.replaceState(null, '', location.pathname);
 const draft = readStorage<string | null>(DRAFT_KEY, null);
-editor.setCode(draft ?? builtInPresets[0].code);
-renderPresetOptions(draft ? undefined : builtInPresets[0].id);
+editor.setCode(shared.code ?? draft ?? builtInPresets[0].code);
+renderPresetOptions(shared.code || draft ? undefined : builtInPresets[0].id);
+
+// Visuales: se eligen aparte y se vuelven a aplicar tras cada play,
+// salvo con "Del código", que deja mandar al patrón
+for (const visual of visuals) visualSelect.append(new Option(visual.name, visual.id));
+const storedVisual = readStorage<string>(VISUAL_KEY, 'lima');
+const initialVisual = shared.visualId ?? storedVisual;
+visualSelect.value = visuals.some((v) => v.id === initialVisual) ? initialVisual : 'lima';
+
+const runVisual = () => applyVisual(visualSelect.value).catch((error) => console.warn('[visual]', error));
+
+visualSelect.addEventListener('change', () => {
+  writeStorage(VISUAL_KEY, visualSelect.value);
+  runVisual();
+});
+
+const originalEvaluate = editor.evaluate.bind(editor);
+editor.evaluate = async (autostart?: boolean) => {
+  await originalEvaluate(autostart);
+  if (visualSelect.value !== CODE_VISUAL) runVisual();
+};
+
+whenStrudelReady().then(() => {
+  runVisual();
+  setupSamplesPanel();
+});
+
+shareButton.addEventListener('click', async () => {
+  const url = buildShareUrl(editor.code, visualSelect.value);
+  history.replaceState(null, '', url);
+  const label = shareButton.textContent;
+  try {
+    await navigator.clipboard.writeText(url);
+    shareButton.textContent = '¡Enlace copiado!';
+  } catch {
+    shareButton.textContent = 'Copia la URL de arriba';
+  }
+  setTimeout(() => (shareButton.textContent = label), 2000);
+});
+
+// Paneles laterales: solo uno abierto a la vez
+const panelButtons = document.querySelectorAll<HTMLButtonElement>('[data-panel]');
+panelButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    panelButtons.forEach((other) => {
+      const panel = document.getElementById(other.dataset.panel!)!;
+      const open = other === button ? panel.hidden : false;
+      panel.hidden = !open;
+      other.setAttribute('aria-pressed', String(open));
+    });
+  });
+});
 
 // Guarda el borrador cada pocos segundos para no perder nada al recargar
 setInterval(() => writeStorage(DRAFT_KEY, editor.code), 3000);

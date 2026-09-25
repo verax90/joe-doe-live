@@ -20,13 +20,20 @@
       </div>
 
       <div class="bar-group">
+        <label class="visually-hidden" for="visual">Visual</label>
+        <select id="visual" class="control" title="Visuales"></select>
+        <button id="share" class="control" type="button">Compartir</button>
+      </div>
+
+      <div class="bar-group">
         <button id="play" class="control control-accent" type="button" aria-keyshortcuts="Control+Enter">▶ Play</button>
         <button id="stop" class="control" type="button" aria-keyshortcuts="Control+.">■ Stop</button>
       </div>
 
       <div class="bar-group">
         <button id="toggle-code" class="control" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H">Código</button>
-        <button id="toggle-midi" class="control" type="button" aria-pressed="false">
+        <button id="toggle-samples" class="control" type="button" aria-pressed="false" data-panel="samples">Samples</button>
+        <button id="toggle-midi" class="control" type="button" aria-pressed="false" data-panel="midi">
           MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span>
         </button>
       </div>
@@ -37,19 +44,36 @@
         <strudel-editor id="repl"></strudel-editor>
       </section>
 
-      <aside class="midi" id="midi" hidden>
+      <aside class="panel" id="samples" hidden>
+        <h2>Samples</h2>
+        <p class="panel-help">
+          Arrastra archivos de audio a cualquier parte de la página (o elígelos abajo) y úsalos con
+          <code>s("nombre")</code>. Se guardan en este navegador.
+        </p>
+        <label class="control file-button">
+          Elegir archivos
+          <input id="sample-input" type="file" accept="audio/*,.wav,.mp3,.ogg,.flac,.aif,.aiff" multiple />
+        </label>
+        <p id="sample-status" class="panel-status" role="status"></p>
+        <h3>Tus samples</h3>
+        <ul id="sample-list" class="panel-list sample-list"></ul>
+      </aside>
+
+      <aside class="panel" id="midi" hidden>
         <h2>MIDI</h2>
-        <p class="midi-help">
+        <p class="panel-help">
           Toca un pad o gira un knob para ver qué número manda. Úsalo en el código con
           <code>midin('nombre')</code> (knobs) o <code>midikeys('nombre')</code> (pads).
         </p>
         <h3>Dispositivos</h3>
-        <ul id="midi-devices" class="midi-devices"><li class="muted">Sin permiso todavía</li></ul>
+        <ul id="midi-devices" class="panel-list"><li class="muted">Sin permiso todavía</li></ul>
         <button id="midi-enable" class="control" type="button">Activar MIDI</button>
         <h3>Últimos mensajes</h3>
-        <ol id="midi-log" class="midi-log"></ol>
+        <ol id="midi-log" class="panel-list midi-log"></ol>
       </aside>
     </main>
+
+    <div class="drop-hint" aria-hidden="true">Suelta aquí tus samples</div>
 
     <footer class="foot">
       <span>Ctrl+Enter play · Ctrl+. stop · Ctrl+Shift+H oculta el código</span>
