@@ -13,6 +13,7 @@ import { setupFreePlay } from './freeplay';
 import { setupHelp } from './help';
 import { setupKnobs } from './knobs';
 import { setupRecorder } from './record';
+import { ensureAudio } from './audio';
 import { ensureLimiter } from './limiter';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
@@ -163,6 +164,7 @@ window.addEventListener(PROGRAM_EVENT, (event) => {
 
 const originalEvaluate = editor.evaluate.bind(editor);
 editor.evaluate = async (autostart?: boolean) => {
+  await ensureAudio();
   await originalEvaluate(autostart);
   ensureLimiter();
   // Always: with "From the code" it only re-attaches the ASCII filter and the

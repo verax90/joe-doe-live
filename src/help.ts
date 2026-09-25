@@ -59,7 +59,7 @@ const sections: Section[] = [
           [L('Normal, bank B', 'Normal, banco B'), L('Drums: kick, snare, hat, open hat, clap, rim, low tom, high tom', 'Batería: bombo, caja, charles, charles abierto, palmada, rim, tom grave, tom agudo')],
           [L('Normal, bank A', 'Normal, banco A'), L('Same notes as the lowest keys: avoid it for drums', 'Las mismas notas que las teclas más graves: mejor no usarlo para batería')],
           ['CC', L('Hold to apply ("MPK Mini" pattern): pad 1 cuts the beat, pad 2 crushes the piano', 'Mantener para aplicar (patrón "MPK Mini"): pad 1 corta el ritmo, pad 2 ensucia el piano')],
-          ['PROG CHANGE', L('Pick a visual: pad 1 From the code, 2 Lime, 3 Pulse, 4 Tunnel, 5 Cells, 6 Echo, 7 and 8 webcam', 'Elegir visual: pad 1 Del código, 2 Lima, 3 Pulso, 4 Túnel, 5 Celdas, 6 Eco, 7 y 8 webcam')],
+          ['PROG CHANGE', L('Pick one of the first 8 visuals: pad 1 From the code, 2 Lime, 3 Pulse, 4 Tunnel, 5 Cells, 6 Echo, 7 Glitch, 8 Plasma (webcam visuals only from the list)', 'Elegir uno de los 8 primeros visuales: pad 1 Del código, 2 Lima, 3 Pulso, 4 Túnel, 5 Celdas, 6 Eco, 7 Glitch, 8 Plasma (los de webcam, solo desde la lista)')],
         ],
       },
     ],

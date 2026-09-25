@@ -1,6 +1,7 @@
 // Free play: the controller's keys and pads sound straight away, without
 // pressing Play. Also while a pattern plays, as long as that pattern does not
 // read the keys itself (midikeys), so you can jam over the lofi.
+import { ensureAudio } from './audio';
 import { onLangChange, pick, type Localized } from './i18n';
 import { ensureLimiter } from './limiter';
 import { freePlayKnobs } from './knobs';
@@ -26,6 +27,7 @@ export const freePlaySounds: { id: string; name: Localized }[] = [
   { id: 'gm_acoustic_bass', name: { en: 'Double bass', es: 'Contrabajo' } },
   { id: 'gm_lead_2_sawtooth', name: { en: 'Saw lead', es: 'Lead de sierra' } },
   { id: 'sawtooth', name: { en: 'Saw synth', es: 'Sinte de sierra' } },
+  { id: 'supersaw', name: { en: 'Supersaw synth', es: 'Sinte supersaw' } },
 ];
 
 // Bank B pads of the MPK Mini (notes 32-39), same kit as the MPK pattern
@@ -48,12 +50,13 @@ export function setupFreePlay(patternReadsKeys: () => boolean) {
     [...select.options].forEach((option, index) => (option.text = pick(freePlaySounds[index].name)));
   });
 
-  const play = (value: Record<string, unknown>) => {
+  const play = async (value: Record<string, unknown>) => {
     const g = globalThis as Global;
     const context = g.getAudioContext?.();
     if (!g.superdough || !context) return;
-    // Browsers keep audio off until the page gets a click; a MIDI note does not count
-    if (context.state !== 'running') context.resume();
+    // Browsers keep audio off until the page gets a click; a MIDI note does not
+    // count, and Strudel's effects only load on that click, so load them here
+    await ensureAudio();
     ensureLimiter();
     g.superdough(value, context.currentTime + 0.01, 0.8).catch(() => {});
   };

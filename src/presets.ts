@@ -140,6 +140,44 @@ stack(
     },
   },
   {
+    id: 'dnb',
+    name: { en: 'Drum and bass 174', es: 'Drum and bass 174' },
+    code: {
+      en: `// Drum and bass 174: two-step, ghost snares, reese bass and a pad
+setcps(174 / 60 / 4)
+
+stack(
+  // two-step: kick on 1 and the \"and\" of 3, snare on 2 and 4
+  s("bd ~ ~ ~ ~ ~ ~ ~ ~ ~ bd ~ ~ ~ ~ ~").bank("EmuSP12").gain(1.1),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("EmuSP12").room(0.2),
+  // ghost snares, the soft hits in between
+  s("~ ~ ~ ~ ~ ~ ~ sd ~ sd ~ ~ ~ ~ ~ sd").bank("EmuSP12").gain(0.3),
+  // hats crushed so the kit sounds like a sampled break
+  s("hh*8, ~ oh").bank("EmuSP12").gain("0.35 0.2").crush(9),
+  // reese bass: two saws slightly out of tune, a slow filter sweep
+  note("<e1 e1 g1 [d1 c1]>").s("sawtooth").lpf(sine.range(200, 900).slow(8)).gain(0.45),
+  note("<e1 e1 g1 [d1 c1]>").add(note(0.12)).s("sawtooth").lpf(sine.range(200, 900).slow(8)).gain(0.45),
+  chord("<Em9 Em9 G^7 D>").voicing().s("gm_pad_warm").gain(0.3).room(0.6)
+).analyze(1)`,
+      es: `// Drum and bass 174: two-step, cajas fantasma, bajo reese y un pad
+setcps(174 / 60 / 4)
+
+stack(
+  // two-step: bombo en la 1 y a la mitad de la 3, caja en la 2 y la 4
+  s("bd ~ ~ ~ ~ ~ ~ ~ ~ ~ bd ~ ~ ~ ~ ~").bank("EmuSP12").gain(1.1),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("EmuSP12").room(0.2),
+  // cajas fantasma, los golpes flojos de en medio
+  s("~ ~ ~ ~ ~ ~ ~ sd ~ sd ~ ~ ~ ~ ~ sd").bank("EmuSP12").gain(0.3),
+  // charles ensuciados para que suene a break sampleado
+  s("hh*8, ~ oh").bank("EmuSP12").gain("0.35 0.2").crush(9),
+  // bajo reese: dos sierras un poco desafinadas y un filtro que se abre despacio
+  note("<e1 e1 g1 [d1 c1]>").s("sawtooth").lpf(sine.range(200, 900).slow(8)).gain(0.45),
+  note("<e1 e1 g1 [d1 c1]>").add(note(0.12)).s("sawtooth").lpf(sine.range(200, 900).slow(8)).gain(0.45),
+  chord("<Em9 Em9 G^7 D>").voicing().s("gm_pad_warm").gain(0.3).room(0.6)
+).analyze(1)`,
+    },
+  },
+  {
     id: 'house-909',
     name: { en: 'House 909', es: 'House 909' },
     code: {

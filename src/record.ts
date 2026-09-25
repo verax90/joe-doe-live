@@ -2,6 +2,7 @@
 // Audacity) or the visuals plus sound as a WebM video. It taps the signal
 // after the limiter, so it records exactly what you hear: patterns and free play.
 import { onLangChange, t } from './i18n';
+import { ensureAudio } from './audio';
 import { ensureLimiter, getLimiter } from './limiter';
 
 type Mode = 'audio' | 'video';
@@ -178,7 +179,7 @@ export function setupRecorder() {
     const context = (globalThis as { getAudioContext?: () => AudioContext }).getAudioContext?.();
     if (!context) return;
     try {
-      if (context.state !== 'running') await context.resume();
+      await ensureAudio();
       ensureLimiter();
       const limiter = getLimiter();
       if (!limiter) throw new Error(t('recordNoAudio'));

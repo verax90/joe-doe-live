@@ -61,6 +61,45 @@ export const visuals: Visual[] = [
   .out()`,
   },
   {
+    id: 'glitch',
+    name: { en: 'Glitch (highs)', es: 'Glitch (agudos)' },
+    code: `osc(40, 0.1, 1.2)
+  .color(0.34, 0.4, 0.12)
+  .modulate(noise(3).pixelate(8, 8), () => high() * 0.6)
+  .posterize(3, 0.6)
+  .scrollX(() => (Math.random() - 0.5) * high() * 0.08)
+  .out()`,
+  },
+  {
+    id: 'plasma',
+    name: { en: 'Plasma (bar)', es: 'Plasma (compás)' },
+    code: `voronoi(8, 0.4, 0.3)
+  .modulateScale(osc(6, 0.05), 0.6)
+  .color(0.3, 0.42, 0.12)
+  .hue(H("<0 0.05 0 -0.05>"))
+  .out()`,
+  },
+  {
+    id: 'anillos',
+    name: { en: 'Rings (kick)', es: 'Anillos (bombo)' },
+    code: `shape(64, 0.42, 0.01)
+  .diff(shape(64, 0.3, 0.01))
+  .repeat(2, 2)
+  .scale(() => 0.9 + bass() * 0.5)
+  .color(0.5, 0.6, 0.18)
+  .modulateRotate(osc(1, 0.05), 0.2)
+  .out()`,
+  },
+  {
+    id: 'estela',
+    name: { en: 'Trails (bar)', es: 'Estela (compás)' },
+    code: `shape(H("<3 4 6 8>"), 0.2, 0.01)
+  .rotate(0, 0.2)
+  .color(0.34, 0.4, 0.12)
+  .blend(src(o0).scale(1.02).rotate(0.01), 0.85)
+  .out()`,
+  },
+  {
     id: 'cam',
     name: { en: 'Webcam (warp)', es: 'Webcam (deformada)' },
     camera: true,
@@ -88,6 +127,44 @@ export const visuals: Visual[] = [
   .pixelate(() => 90 - bass() * 70, () => 60 - bass() * 45)
   .posterize(4, 0.6)
   .color(0.7, 1, 0.45)
+  .out()`,
+  },
+  {
+    id: 'cam-trails',
+    name: { en: 'Webcam (trails)', es: 'Webcam (estela)' },
+    camera: true,
+    code: `src(s0)
+  .color(0.7, 1, 0.45)
+  .blend(src(o0).scale(1.01), 0.8)
+  .out()`,
+  },
+  {
+    id: 'cam-thermal',
+    name: { en: 'Webcam (thermal)', es: 'Webcam (térmica)' },
+    camera: true,
+    code: `src(s0)
+  .saturate(0)
+  .contrast(1.4)
+  .colorama(() => 0.2 + bass() * 0.2)
+  .out()`,
+  },
+  {
+    id: 'cam-rgb',
+    name: { en: 'Webcam (RGB split)', es: 'Webcam (RGB desplazado)' },
+    camera: true,
+    code: `src(s0)
+  .color(1, 0, 0)
+  .add(src(s0).scrollX(() => 0.01 + bass() * 0.04).color(0, 1, 0))
+  .add(src(s0).scrollX(() => -0.01 - bass() * 0.04).color(0, 0, 1))
+  .out()`,
+  },
+  {
+    id: 'cam-contrast',
+    name: { en: 'Webcam (high contrast)', es: 'Webcam (alto contraste)' },
+    camera: true,
+    code: `src(s0)
+  .thresh(() => 0.45 + mid() * 0.2, 0.04)
+  .color(0.84, 1, 0.29)
   .out()`,
   },
   { id: 'ninguno', name: { en: 'No visuals', es: 'Sin visuales' }, code: `solid(0, 0, 0, 0).out()` },

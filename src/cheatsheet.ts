@@ -50,6 +50,7 @@ const sections: Section[] = [
       { code: '.s("gm_vibraphone")', note: { en: 'Vibraphone; also gm_marimba, gm_kalimba', es: 'Vibráfono; también gm_marimba, gm_kalimba' } },
       { code: '.s("gm_acoustic_bass")', note: { en: 'Double bass; also gm_synth_bass_1', es: 'Contrabajo; también gm_synth_bass_1' } },
       { code: '.s("sawtooth")', note: { en: 'Synth: also square, triangle, sine', es: 'Sinte: también square, triangle, sine' } },
+      { code: '.s("supersaw")', note: { en: 'Several detuned saws at once: big and wide', es: 'Varias sierras desafinadas a la vez: gordo y ancho' } },
     ],
   },
   {
