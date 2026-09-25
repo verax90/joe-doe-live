@@ -138,10 +138,12 @@ stack(
     .lpf(knob(2, 1).range(300, 8000)).room(knob(3, 1).range(0, 0.8))
     .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
     .crush(pad(2).range(16, 3))
-    // pads become drums, hit harder = louder; keys stay piano
-    .withValue(v => v.note < 40
+    // pads become drums, hit harder = louder; keys stay piano.
+    // The bitcrusher only switches on while pad 2 is held: each crushed note
+    // costs its own audio processor, and chords pile them up fast
+    .withValue(({ crush, ...v }) => v.note < 40
       ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity * 0.8 }
-      : v)
+      : crush < 15 ? { ...v, crush } : v)
 ).analyze(1)`,
       es: `// Akai MPK Mini Mk II
 // Teclas → piano · pads del banco B → batería (el banco A comparte notas con las teclas)
@@ -184,10 +186,12 @@ stack(
     .lpf(knob(2, 1).range(300, 8000)).room(knob(3, 1).range(0, 0.8))
     .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
     .crush(pad(2).range(16, 3))
-    // los pads pasan a batería, más fuerte = más volumen; las teclas siguen siendo piano
-    .withValue(v => v.note < 40
+    // los pads pasan a batería, más fuerte = más volumen; las teclas siguen siendo piano.
+    // El bitcrush solo se activa mientras mantienes el pad 2: cada nota con bitcrush
+    // necesita su propio procesador de audio, y con acordes se acumulan enseguida
+    .withValue(({ crush, ...v }) => v.note < 40
       ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity * 0.8 }
-      : v)
+      : crush < 15 ? { ...v, crush } : v)
 ).analyze(1)`,
     },
   },
