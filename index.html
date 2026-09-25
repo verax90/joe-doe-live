@@ -8,6 +8,17 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>joe doe · live</title>
+    <!-- Preview when the link is pasted in a chat or a social network -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="joe doe" />
+    <meta property="og:title" content="joe doe · live" />
+    <meta property="og:description" content="Live coding studio in the browser: Strudel, Hydra and MIDI." />
+    <meta property="og:url" content="https://live.joedoe.dev/" />
+    <meta property="og:image" content="https://live.joedoe.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="joe doe · live: a line of Strudel and a line of Hydra code" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <header class="bar">
@@ -35,6 +46,7 @@
 
       <div class="bar-group">
         <button id="toggle-code" class="control" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
+        <button id="toggle-cheats" class="control" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
         <button id="toggle-tools" class="control" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
         <button id="toggle-samples" class="control" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
         <button id="toggle-midi" class="control" type="button" aria-pressed="false" data-panel="midi">
@@ -71,6 +83,15 @@
           allow="autoplay; midi; microphone; clipboard-read; clipboard-write; fullscreen"
         ></iframe>
       </section>
+
+      <aside class="panel" id="cheats" hidden>
+        <h2 data-i18n="cheatsheet">Cheatsheet</h2>
+        <p class="panel-help" data-i18n="cheatHelp">Click an example to copy it.</p>
+        <label class="visually-hidden" for="cheat-filter" data-i18n="cheatFilter">Search</label>
+        <input id="cheat-filter" class="control cheat-filter" type="search" autocomplete="off" placeholder="Search" data-i18n-placeholder="cheatFilter" />
+        <p id="cheat-status" class="panel-status" role="status"></p>
+        <div id="cheat-list"></div>
+      </aside>
 
       <aside class="panel" id="tools" hidden>
         <h2 data-i18n="tools">Tools</h2>

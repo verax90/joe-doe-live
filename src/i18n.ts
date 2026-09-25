@@ -67,6 +67,9 @@ const strings = {
     shareManual: 'Copy the URL above',
     code: 'Code',
     tools: 'Tools',
+    cheatsheet: 'Cheatsheet',
+    cheatHelp: 'Click an example to copy it, then paste it into your pattern.',
+    cheatFilter: 'Search: filter, reverb, kick…',
     samples: 'Samples',
     langSwitch: 'Español',
     shortcuts: 'Ctrl+Enter play · Ctrl+. stop · Ctrl+Shift+H hides the code',
@@ -136,6 +139,9 @@ const strings = {
     shareManual: 'Copia la URL de arriba',
     code: 'Código',
     tools: 'Herramientas',
+    cheatsheet: 'Chuleta',
+    cheatHelp: 'Haz clic en un ejemplo para copiarlo y pégalo en tu patrón.',
+    cheatFilter: 'Buscar: filtro, reverb, bombo…',
     samples: 'Samples',
     langSwitch: 'English',
     shortcuts: 'Ctrl+Enter play · Ctrl+. stop · Ctrl+Shift+H oculta el código',
@@ -208,6 +214,9 @@ export function translatePage() {
   });
   document.querySelectorAll<HTMLElement>('[data-i18n-title]').forEach((el) => {
     el.title = t(el.dataset.i18nTitle as StringKey);
+  });
+  document.querySelectorAll<HTMLInputElement>('[data-i18n-placeholder]').forEach((el) => {
+    el.placeholder = t(el.dataset.i18nPlaceholder as StringKey);
   });
   document.querySelectorAll<HTMLElement>('[data-i18n-label]').forEach((el) => {
     el.setAttribute('aria-label', t(el.dataset.i18nLabel as StringKey));

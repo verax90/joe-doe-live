@@ -5,6 +5,7 @@ import '@strudel/repl';
 import './style.css';
 import { lang, pick, setLang, t, translatePage } from './i18n';
 import { builtInPresets, translateIfBuiltIn, type Preset } from './presets';
+import { setupCheatsheet } from './cheatsheet';
 import { setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
@@ -228,4 +229,5 @@ window.addEventListener('keydown', (event) => {
 });
 
 setupMidiPanel();
+setupCheatsheet();
 setupToolsPanel(() => editor.stop());
