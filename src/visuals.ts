@@ -73,14 +73,24 @@ type Global = typeof globalThis & {
 
 const g = globalThis as Global;
 
+// One analysis per frame: bass(), mid(), high() and level() are called several
+// times per frame by a single visual, and each read used to copy the spectrum
+let cached: { at: number; data: Float32Array | undefined } = { at: -1, data: undefined };
+function spectrum() {
+  const now = performance.now();
+  if (now - cached.at > 8) {
+    try {
+      cached = { at: now, data: g.getAnalyzerData?.('frequency', 1) };
+    } catch {
+      cached = { at: now, data: undefined };
+    }
+  }
+  return cached.data;
+}
+
 // Energía media de una banda de frecuencias, de 0 a 1
 function band(lowHz: number, highHz: number) {
-  let data: Float32Array | undefined;
-  try {
-    data = g.getAnalyzerData?.('frequency', 1);
-  } catch {
-    return 0;
-  }
+  const data = spectrum();
   if (!data?.length || !g.getAudioContext) return 0;
   const nyquist = g.getAudioContext().sampleRate / 2;
   const from = Math.floor((lowHz / nyquist) * data.length);
@@ -108,6 +118,11 @@ export function useBundledHydra(src: string) {
   if (!original) return;
   g.initHydra = async (options: Record<string, unknown> = {}) => {
     const hydra = await original({ src, pixelRatio: 0.5, pixelated: false, ...options });
+    // 30 frames a second instead of 60: Hydra draws on the same thread that
+    // schedules the notes, and these visuals look the same at half the work.
+    // A pattern can still ask for more with fps = 60
+    const synth = (hydra as { synth?: { fps?: number } }).synth;
+    if (synth && !synth.fps) synth.fps = 30;
     followWindowSize(hydra as { setResolution?: (width: number, height: number) => void });
     return hydra;
   };

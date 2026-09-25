@@ -58,6 +58,18 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
     // longtask is Chromium only
   }
 
+  // Which GPU draws the visuals: a software renderer here would explain stutter
+  const gpu = (() => {
+    const gl = document.createElement('canvas').getContext('webgl');
+    const info = gl?.getExtension('WEBGL_debug_renderer_info');
+    const name = info ? gl!.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl?.getParameter(gl.RENDERER);
+    return String(name ?? 'no WebGL').replace(/^ANGLE \((.*)\)$/, '$1');
+  })();
+  let hydraSynth: { stats?: { fps?: number } } | undefined;
+  (globalThis as { initHydra?: () => Promise<unknown> }).initHydra?.().then((hydra) => {
+    hydraSynth = (hydra as { synth?: typeof hydraSynth })?.synth;
+  });
+
   let analyser: AnalyserNode | undefined;
   let tapped: GainNode | undefined;
   const buffer = new Float32Array(2048);
@@ -107,6 +119,8 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
       `MIDI notes/s  ${snap.notesPerSec}`,
       `audio         ${snap.audio}`,
       `scheduler     ${snap.playing ? 'playing' : 'stopped'}`,
+      `visuals fps   ${hydraSynth?.stats?.fps ?? '–'}`,
+      `gpu           ${gpu}`,
     ].join('\n');
 
     // Dropout: at least a second of silence while notes keep arriving

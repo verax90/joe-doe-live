@@ -107,6 +107,11 @@ function whenStrudelReady(): Promise<void> {
 
 const editor = await whenEditorReady();
 setupStatus(repl);
+// Schedule notes 0.2 s ahead instead of 0.1 s: a frame of visuals that runs
+// long no longer makes notes late (clicks, gaps). Keys played on a controller
+// are triggered on their own path and stay immediate
+const scheduler = (editor as unknown as { repl?: { scheduler?: { latency?: number } } }).repl?.scheduler;
+if (scheduler) scheduler.latency = 0.2;
 
 const shared = readSharedPattern();
 // Quita el enlace compartido de la URL: al recargar manda tu borrador, no el patrón original
