@@ -94,6 +94,15 @@ body {
   }
 }
 
+/* ASCII filter: sits exactly where the Hydra canvas is, behind the UI */
+.ascii-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 /* El canvas de Hydra va fijo detrás de todo: la interfaz se pinta encima */
 .bar,
 .stage,

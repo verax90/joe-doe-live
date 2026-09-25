@@ -6,6 +6,7 @@ import './style.css';
 import { lang, onLangChange, pick, setLang, t, translatePage } from './i18n';
 import { withTransition } from './transition';
 import { builtInPresets, translateIfBuiltIn, type Preset } from './presets';
+import { isAsciiOn, readAsciiSetting, setAscii } from './ascii';
 import { setupCheatsheet } from './cheatsheet';
 import { setupDebug } from './debug';
 import { setupFreePlay } from './freeplay';
@@ -16,7 +17,7 @@ import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
 import { setupStatus } from './status';
 import { setupToolsPanel } from './tools';
-import { CODE_VISUAL, applyVisual, useBundledHydra, visuals } from './visuals';
+import { applyVisual, useBundledHydra, visuals } from './visuals';
 // Ruta directa: el paquete no exporta dist/ por su nombre
 import hydraUrl from '../node_modules/hydra-synth/dist/hydra-synth.js?url';
 
@@ -132,6 +133,16 @@ visualSelect.value = visuals.some((v) => v.id === initialVisual) ? initialVisual
 
 const runVisual = () => applyVisual(visualSelect.value).catch((error) => console.warn('[visual]', error));
 
+// ASCII filter over whatever visual is showing, remembered between visits
+const asciiToggle = document.querySelector<HTMLButtonElement>('#toggle-ascii')!;
+asciiToggle.setAttribute('aria-pressed', String(readAsciiSetting()));
+asciiToggle.addEventListener('click', async () => {
+  const initHydra = (globalThis as { initHydra?: () => Promise<unknown> }).initHydra;
+  if (!initHydra) return;
+  setAscii(!isAsciiOn(), await initHydra());
+  asciiToggle.setAttribute('aria-pressed', String(isAsciiOn()));
+});
+
 visualSelect.addEventListener('change', () => {
   writeStorage(VISUAL_KEY, visualSelect.value);
   runVisual();
@@ -149,7 +160,9 @@ const originalEvaluate = editor.evaluate.bind(editor);
 editor.evaluate = async (autostart?: boolean) => {
   await originalEvaluate(autostart);
   ensureLimiter();
-  if (visualSelect.value !== CODE_VISUAL) runVisual();
+  // Always: with "From the code" it only re-attaches the ASCII filter and the
+  // frame cap, which a hush() in the pattern may have reset
+  runVisual();
   // A pattern using midin() may have just granted MIDI: start reading the pitch bend
   connectMidiIfAllowed();
 };

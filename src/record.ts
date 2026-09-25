@@ -114,6 +114,9 @@ export function setupRecorder() {
   const startVideo = async (output: AudioNode, context: AudioContext) => {
     const canvas = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
     if (!canvas) throw new Error(t('recordNoVisual'));
+    // With the ASCII filter on, what you see (and record) is its overlay
+    const ascii = document.getElementById('ascii-canvas') as HTMLCanvasElement | null;
+    const shown = ascii && !ascii.hidden ? ascii : canvas;
     // Visuals normally draw at half resolution to spare CPU; a video deserves
     // the full window, so bump it while recording and put it back afterwards
     const hydra = (await (globalThis as { initHydra?: () => Promise<unknown> }).initHydra?.()) as
@@ -137,7 +140,7 @@ export function setupRecorder() {
     ]);
     const audio = context.createMediaStreamDestination();
     output.connect(audio);
-    const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...audio.stream.getAudioTracks()]);
+    const stream = new MediaStream([...shown.captureStream(30).getVideoTracks(), ...audio.stream.getAudioTracks()]);
     const type = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find((candidate) =>
       MediaRecorder.isTypeSupported(candidate),
     );

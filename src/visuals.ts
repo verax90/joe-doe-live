@@ -3,9 +3,11 @@
 // - H("...") sigue el reloj de Strudel: golpea exactamente en el tiempo.
 // - bass(), mid(), high(), level() escuchan el audio (el patrón necesita .analyze(1)).
 
+import { attachAscii } from './ascii';
 import type { Localized } from './i18n';
 
-export type Visual = { id: string; name: Localized; code: string };
+// camera: the visual uses the webcam (s0); it is switched on only while picked
+export type Visual = { id: string; name: Localized; code: string; camera?: boolean };
 
 export const CODE_VISUAL = 'code';
 
@@ -56,6 +58,36 @@ export const visuals: Visual[] = [
   .color(0.34, 0.4, 0.12)
   .rotate(0, 0.1)
   .diff(src(o0).scale(1.02).rotate(0.01))
+  .out()`,
+  },
+  {
+    id: 'cam',
+    name: { en: 'Webcam (warp)', es: 'Webcam (deformada)' },
+    camera: true,
+    code: `src(s0)
+  .saturate(0.3)
+  .color(0.7, 1, 0.45)
+  .modulate(noise(3), () => bass() * 0.2)
+  .out()`,
+  },
+  {
+    id: 'cam-kaleid',
+    name: { en: 'Webcam (kaleidoscope)', es: 'Webcam (caleidoscopio)' },
+    camera: true,
+    code: `src(s0)
+  .kaleid(H("<4 6 8>"))
+  .rotate(0, 0.05)
+  .color(0.7, 1, 0.45)
+  .out()`,
+  },
+  {
+    id: 'cam-pixel',
+    name: { en: 'Webcam (pixels)', es: 'Webcam (píxeles)' },
+    camera: true,
+    code: `src(s0)
+  .pixelate(() => 90 - bass() * 70, () => 60 - bass() * 45)
+  .posterize(4, 0.6)
+  .color(0.7, 1, 0.45)
   .out()`,
   },
   { id: 'ninguno', name: { en: 'No visuals', es: 'Sin visuales' }, code: `solid(0, 0, 0, 0).out()` },
@@ -118,14 +150,19 @@ export function useBundledHydra(src: string) {
   if (!original) return;
   g.initHydra = async (options: Record<string, unknown> = {}) => {
     const hydra = await original({ src, pixelRatio: 0.5, pixelated: false, ...options });
-    // 30 frames a second instead of 60: Hydra draws on the same thread that
-    // schedules the notes, and these visuals look the same at half the work.
-    // A pattern can still ask for more with fps = 60
-    const synth = (hydra as { synth?: { fps?: number } }).synth;
-    if (synth && !synth.fps) synth.fps = 30;
+    capFrameRate();
     followWindowSize(hydra as { setResolution?: (width: number, height: number) => void });
     return hydra;
   };
+}
+
+// 30 frames a second instead of 60: Hydra draws on the same thread that
+// schedules the notes, and these visuals look the same at half the work.
+// Hydra copies the global fps into its settings on every frame, so the global
+// is what has to be set. A pattern can still ask for more with fps = 60
+function capFrameRate() {
+  const globals = globalThis as { fps?: number };
+  if (!globals.fps) globals.fps = 30;
 }
 
 // Strudel resizes the canvas when the window changes, but Hydra keeps drawing
@@ -144,9 +181,26 @@ function followWindowSize(hydra: { setResolution?: (width: number, height: numbe
   });
 }
 
+type Source = { initCam?: (index?: number) => void; clear?: () => void };
+let cameraOn = false;
+
+// The camera light stays on only while a webcam visual is picked
+function setCamera(on: boolean) {
+  const s0 = (globalThis as { s0?: Source }).s0;
+  if (on === cameraOn || !s0) return;
+  if (on) s0.initCam?.();
+  else s0.clear?.();
+  cameraOn = on;
+}
+
 export async function applyVisual(id: string) {
   const visual = visuals.find((v) => v.id === id);
-  if (!visual || visual.id === CODE_VISUAL || !g.initHydra) return;
-  await g.initHydra();
+  if (!visual || !g.initHydra) return;
+  const hydra = await g.initHydra();
+  // hush() in a pattern resets both, so they are set again on every visual
+  capFrameRate();
+  attachAscii(hydra);
+  if (visual.id === CODE_VISUAL) return;
+  setCamera(Boolean(visual.camera));
   new Function(visual.code)();
 }
