@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addTrack, isPatternSnippet } from './tracks';
+import { addTrack, findLabel, isPatternSnippet, trackInsertPoint } from './tracks';
 
 describe('addTrack', () => {
   it('turns the bare patterns into tracks so all of them sound', () => {
@@ -19,6 +19,10 @@ describe('addTrack', () => {
     expect(addTrack('', 's("cp")')).toBe('$: s("cp")\n');
   });
 
+  it('leaves all(...) alone: it transforms the tracks, it is not one', () => {
+    expect(addTrack('$: s("bd")\nall(x => x.analyze(1))', 's("cp")')).toBe('$: s("bd")\nall(x => x.analyze(1))\n$: s("cp")\n');
+  });
+
   it('still adds the track when the code does not parse', () => {
     expect(addTrack('s("bd"', 's("cp")')).toBe('s("bd"\n$: s("cp")\n');
   });
@@ -31,5 +35,22 @@ describe('isPatternSnippet', () => {
     expect(isPatternSnippet('.lpf(800)')).toBe(false);
     expect(isPatternSnippet('setcps(90 / 60 / 4)')).toBe(false);
     expect(isPatternSnippet('osc(10).out()')).toBe(false);
+  });
+});
+
+describe('named tracks', () => {
+  const code = 'setcps(1)\ndrums: s("bd")\n_bass: note("a1")\n  .s("sine")\nall(x => x.analyze(1))\n';
+  it('finds a track by name, muted or not, across lines', () => {
+    const drums = findLabel(code, 'drums')!;
+    expect(code.slice(drums.from, drums.to)).toBe('drums: s("bd")');
+    expect(drums.muted).toBe(false);
+    const bass = findLabel(code, 'bass')!;
+    expect(code.slice(bass.from, bass.to)).toBe('_bass: note("a1")\n  .s("sine")');
+    expect(bass.muted).toBe(true);
+    expect(findLabel(code, 'melody')).toBeNull();
+  });
+  it('adds new tracks before all(...)', () => {
+    expect(code.slice(trackInsertPoint(code))).toBe('all(x => x.analyze(1))\n');
+    expect(trackInsertPoint('s("bd")')).toBe(7);
   });
 });

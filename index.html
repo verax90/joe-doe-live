@@ -73,6 +73,7 @@
             <button id="toggle-ascii" class="menu-item" type="button" aria-pressed="false" data-i18n="asciiFilter">ASCII filter</button>
           </div>
           <div class="menu-section">
+            <button id="toggle-compose" class="menu-item" type="button" aria-pressed="false" data-panel="compose" data-i18n="compose">Compose</button>
             <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
             <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
             <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
@@ -130,6 +131,29 @@
       <aside class="panel panel-wide" id="help" hidden>
         <h2 data-i18n="help">Help</h2>
         <div id="help-content"></div>
+      </aside>
+
+      <aside class="panel" id="compose" hidden>
+        <h2 data-i18n="compose">Compose</h2>
+        <p class="panel-help" data-i18n="composeHelp">Build a song layer by layer without writing code.</p>
+        <div class="compose-song">
+          <label class="panel-field" for="compose-style">
+            <span data-i18n="composeStyle">Style</span>
+            <select id="compose-style" class="control"></select>
+          </label>
+          <label class="panel-field" for="compose-key">
+            <span data-i18n="composeKey">Key</span>
+            <select id="compose-key" class="control"></select>
+          </label>
+        </div>
+        <p id="compose-progression" class="compose-progression"></p>
+        <div class="compose-buttons">
+          <button id="compose-new" class="control control-accent" type="button" data-i18n="composeNew">Start from scratch</button>
+          <button id="compose-surprise" class="control" type="button" data-i18n="composeSurprise">Surprise me</button>
+          <button id="compose-chords" class="control" type="button" data-i18n="composeChords">Other chords</button>
+        </div>
+        <ul id="compose-layers" class="panel-list compose-layers"></ul>
+        <p id="compose-status" class="panel-status" role="status"></p>
       </aside>
 
       <aside class="panel" id="cheats" hidden>

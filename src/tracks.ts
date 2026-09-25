@@ -5,10 +5,10 @@
 import { parse, type Node } from 'acorn';
 
 // Calls that set things up rather than make sound
-const SETUP = new Set(['setcps', 'setcpm', 'setCps', 'samples', 'initHydra', 'initAudio', 'hush', 'aliasBank', 'soundAlias']);
+const SETUP = new Set(['setcps', 'setcpm', 'setCps', 'samples', 'initHydra', 'initAudio', 'hush', 'aliasBank', 'soundAlias', 'all', 'each']);
 
 type Expression = Node & { type: string; callee?: Expression; object?: Expression; property?: { name?: string }; name?: string };
-type Statement = Node & { type: string; expression?: Expression };
+type Statement = Node & { type: string; expression?: Expression; label?: { name: string } };
 
 // The name a chain starts from: s in s("bd").gain(0.8)
 function root(node: Expression | undefined): string | null {
@@ -61,11 +61,28 @@ export function trackChanges(code: string, snippet: string) {
   return { changes: [...prefixes, { from: code.length, insert: track }], anchor };
 }
 
-// The same edits applied to a string
-export function addTrack(code: string, snippet: string) {
+export type Change = { from: number; to?: number; insert: string };
+
+// Edits (positions in the original code, not overlapping) applied to a string
+export function applyChanges(code: string, changes: Change[]) {
   let next = code;
-  for (const { from, insert } of [...trackChanges(code, snippet).changes].reverse()) {
-    next = next.slice(0, from) + insert + next.slice(from);
+  for (const { from, to = from, insert } of [...changes].sort((a, b) => b.from - a.from)) {
+    next = next.slice(0, from) + insert + next.slice(to);
   }
   return next;
+}
+
+export const addTrack = (code: string, snippet: string) => applyChanges(code, trackChanges(code, snippet).changes);
+
+// A named track ("bass: note(...)", or "_bass:" while muted): where its whole
+// statement is, so it can be swapped for another
+export function findLabel(code: string, name: string) {
+  const statement = statements(code)?.find((s) => s.type === 'LabeledStatement' && (s.label?.name === name || s.label?.name === `_${name}`));
+  return statement ? { from: statement.start, to: statement.end, muted: statement.label!.name.startsWith('_') } : null;
+}
+
+// Where new tracks go: before all(...), which has to stay last to reach them
+export function trackInsertPoint(code: string) {
+  const all = statements(code)?.find((s) => s.type === 'ExpressionStatement' && root(s.expression) === 'all');
+  return all?.start ?? code.length;
 }

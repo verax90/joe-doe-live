@@ -1026,3 +1026,44 @@ select.control {
   font-size: 1.1rem;
   line-height: 1;
 }
+
+/* Compose panel */
+.compose-song {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.compose-progression {
+  margin: 0.5rem 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.compose-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.compose-layer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+}
+
+.compose-layer .cheat-actions {
+  grid-column: 1 / -1;
+}
+
+.compose-label {
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.compose-layer.is-muted .compose-name,
+.compose-layer.is-muted .compose-label {
+  opacity: 0.45;
+}

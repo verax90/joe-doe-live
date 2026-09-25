@@ -20,6 +20,7 @@ import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
 import { setupScenes } from './scenes';
 import { setupStatus } from './status';
+import { setupCompose } from './compose';
 import { setupExport } from './export';
 import { toast } from './toast';
 import { setupUndo } from './undo';
@@ -244,6 +245,7 @@ shareButton.addEventListener('click', async () => {
 });
 
 setupExport(editor);
+setupCompose(editor as unknown as Parameters<typeof setupCompose>[0]);
 setupUndo(editor as unknown as Parameters<typeof setupUndo>[0]);
 
 // "More" menu: everything that is not needed while playing
