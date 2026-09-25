@@ -174,6 +174,202 @@ stack(
     },
   },
   {
+    id: 'drill',
+    name: { en: 'UK drill', es: 'Drill UK' },
+    code: {
+      en: `// UK drill 142: sliding 808, triplet hats, the snare on beat three
+// Every $: line is a track that plays with the rest: write _$: to mute one
+setcps(142 / 60 / 4)
+
+// kick, off the grid
+$: s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR808").gain(1.1)
+// the snare on beat three gives drill its half-time feel
+$: s("~ ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ <~ sd>").bank("RolandTR808")
+// triplet hats with a roll every other bar
+$: s("hh*12").bank("RolandTR808").gain("0.5 0.3 0.35").ply("<1 [1 1 2 1] 1 [1 3 1 1]>")
+// 808: a sine with a bit of drive, following the kick
+$: note("<[c#2 ~ ~ ~ ~ ~ ~ c#2 ~ ~ e2 ~ ~ ~ ~ ~] [c#2 ~ ~ ~ ~ ~ ~ c#2 ~ ~ f#2 ~ ~ ~ g#1 ~]>")
+  .s("sine").decay(0.8).sustain(0).shape(0.35).lpf(500).gain(0.9)
+// dark strings in C# minor
+$: n("<[0 ~ ~ 3 ~ ~ 2 ~] [0 ~ ~ 3 ~ 5 4 ~]>").scale("C#4:minor")
+  .s("gm_string_ensemble_1").gain(0.3).room(0.4)
+
+// .analyze(1) on every track so the visuals hear it
+all(x => x.analyze(1))`,
+      es: `// Drill UK 142: 808 que desliza, charles en tresillos, caja en el tercer tiempo
+// Cada línea $: es una pista que suena con el resto: escribe _$: para silenciar una
+setcps(142 / 60 / 4)
+
+// bombo, fuera de la rejilla
+$: s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR808").gain(1.1)
+// la caja en el tercer tiempo da al drill su sensación de medio tiempo
+$: s("~ ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ <~ sd>").bank("RolandTR808")
+// charles en tresillos con un redoble cada dos compases
+$: s("hh*12").bank("RolandTR808").gain("0.5 0.3 0.35").ply("<1 [1 1 2 1] 1 [1 3 1 1]>")
+// 808: una senoidal algo saturada, siguiendo al bombo
+$: note("<[c#2 ~ ~ ~ ~ ~ ~ c#2 ~ ~ e2 ~ ~ ~ ~ ~] [c#2 ~ ~ ~ ~ ~ ~ c#2 ~ ~ f#2 ~ ~ ~ g#1 ~]>")
+  .s("sine").decay(0.8).sustain(0).shape(0.35).lpf(500).gain(0.9)
+// cuerdas oscuras en do# menor
+$: n("<[0 ~ ~ 3 ~ ~ 2 ~] [0 ~ ~ 3 ~ 5 4 ~]>").scale("C#4:minor")
+  .s("gm_string_ensemble_1").gain(0.3).room(0.4)
+
+// .analyze(1) en todas las pistas para que los visuales lo oigan
+all(x => x.analyze(1))`,
+    },
+  },
+  {
+    id: 'gfunk',
+    name: { en: 'G-funk', es: 'G-funk' },
+    code: {
+      en: `// G-funk 92: LinnDrum, rolling synth bass, the whiny lead and Rhodes chords
+// Every $: line is a track that plays with the rest: write _$: to mute one
+setcps(92 / 60 / 4)
+
+$: s("bd ~ ~ bd ~ ~ bd ~ ~ ~ bd ~ ~ ~ ~ ~").bank("LinnDrum")
+$: s("~ [sd,cp]").bank("LinnDrum").gain(0.9)
+// swung sixteenths
+$: s("hh*16").bank("LinnDrum").gain("0.35 0.2").swing(4)
+// the bass that rolls under everything
+$: note("<[g1 ~ g1 bb1 ~ c2 ~ d2] [eb1 ~ eb1 g1 ~ bb1 ~ c2]>")
+  .s("gm_synth_bass_1").lpf(900).gain(0.8)
+// Rhodes, ninth chords
+$: chord("<Gm9 Eb^9>").voicing().s("gm_epiano1").gain(0.35).room(0.3)
+// the whistle-like lead: a sine with vibrato
+$: note("<[d5 ~ ~ ~ f5 ~ d5 c5] [bb4 ~ ~ ~ ~ ~ g4 ~]>")
+  .s("sine").vib(5).vibmod(0.25).attack(0.05).release(0.4).gain(0.3)
+
+// .analyze(1) on every track so the visuals hear it
+all(x => x.analyze(1))`,
+      es: `// G-funk 92: LinnDrum, bajo de sinte que rueda, el lead chillón y acordes de Rhodes
+// Cada línea $: es una pista que suena con el resto: escribe _$: para silenciar una
+setcps(92 / 60 / 4)
+
+$: s("bd ~ ~ bd ~ ~ bd ~ ~ ~ bd ~ ~ ~ ~ ~").bank("LinnDrum")
+$: s("~ [sd,cp]").bank("LinnDrum").gain(0.9)
+// semicorcheas con swing
+$: s("hh*16").bank("LinnDrum").gain("0.35 0.2").swing(4)
+// el bajo que rueda por debajo de todo
+$: note("<[g1 ~ g1 bb1 ~ c2 ~ d2] [eb1 ~ eb1 g1 ~ bb1 ~ c2]>")
+  .s("gm_synth_bass_1").lpf(900).gain(0.8)
+// Rhodes, acordes de novena
+$: chord("<Gm9 Eb^9>").voicing().s("gm_epiano1").gain(0.35).room(0.3)
+// el lead que parece un silbido: una senoidal con vibrato
+$: note("<[d5 ~ ~ ~ f5 ~ d5 c5] [bb4 ~ ~ ~ ~ ~ g4 ~]>")
+  .s("sine").vib(5).vibmod(0.25).attack(0.05).release(0.4).gain(0.3)
+
+// .analyze(1) en todas las pistas para que los visuales lo oigan
+all(x => x.analyze(1))`,
+    },
+  },
+  {
+    id: 'phonk',
+    name: { en: 'Phonk', es: 'Phonk' },
+    code: {
+      en: `// Phonk 130: the Memphis cowbell melody, a driven 808 and a dusty choir
+// Every $: line is a track that plays with the rest: write _$: to mute one
+setcps(130 / 60 / 4)
+
+$: s("bd ~ ~ bd ~ ~ bd ~ ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR808").gain(1.2)
+$: s("~ cp ~ cp").bank("RolandTR808")
+$: s("hh*8").bank("RolandTR808").gain("0.5 0.3").ply("<1 1 1 2>")
+// the cowbell plays the tune
+$: note("<[c4 c4 eb4 c4 g4 f4 eb4 c4] [c4 c4 eb4 f4 g4 bb4 g4 f4]>")
+  .s("cb").bank("RolandTR808").gain(0.45)
+// 808 on the kick's rhythm, one note per bar
+$: note("<c2 c2 eb2 g1>").struct("x ~ ~ x ~ ~ x ~ ~ ~ x ~ ~ ~ ~ ~")
+  .s("sine").decay(0.5).sustain(0).shape(0.45).gain(0.9)
+$: n("<0 3>").scale("C3:minor").s("gm_choir_aahs").gain(0.25).room(0.5)
+
+// .analyze(1) on every track so the visuals hear it
+all(x => x.analyze(1))`,
+      es: `// Phonk 130: la melodía de cencerro de Memphis, un 808 saturado y un coro polvoriento
+// Cada línea $: es una pista que suena con el resto: escribe _$: para silenciar una
+setcps(130 / 60 / 4)
+
+$: s("bd ~ ~ bd ~ ~ bd ~ ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR808").gain(1.2)
+$: s("~ cp ~ cp").bank("RolandTR808")
+$: s("hh*8").bank("RolandTR808").gain("0.5 0.3").ply("<1 1 1 2>")
+// el cencerro toca la melodía
+$: note("<[c4 c4 eb4 c4 g4 f4 eb4 c4] [c4 c4 eb4 f4 g4 bb4 g4 f4]>")
+  .s("cb").bank("RolandTR808").gain(0.45)
+// 808 al ritmo del bombo, una nota por compás
+$: note("<c2 c2 eb2 g1>").struct("x ~ ~ x ~ ~ x ~ ~ ~ x ~ ~ ~ ~ ~")
+  .s("sine").decay(0.5).sustain(0).shape(0.45).gain(0.9)
+$: n("<0 3>").scale("C3:minor").s("gm_choir_aahs").gain(0.25).room(0.5)
+
+// .analyze(1) en todas las pistas para que los visuales lo oigan
+all(x => x.analyze(1))`,
+    },
+  },
+  {
+    id: 'oldschool',
+    name: { en: 'Old school 808', es: 'Old school 808' },
+    code: {
+      en: `// Old school 100: the mid-80s 808, claps on the snare and orchestra stabs
+// Every $: line is a track that plays with the rest: write _$: to mute one
+setcps(100 / 60 / 4)
+
+$: s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR808").gain(1.2)
+$: s("~ [sd,cp]").bank("RolandTR808")
+$: s("[~ hh]*4").bank("RolandTR808").gain(0.5)
+$: s("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ oh ~").bank("RolandTR808").gain(0.4)
+// the stab every 80s record had
+$: note("<[e3 ~ ~ ~ ~ ~ ~ ~] [g3 ~ ~ ~ ~ ~ a3 ~]>").s("gm_orchestra_hit").gain(0.4)
+
+// .analyze(1) on every track so the visuals hear it
+all(x => x.analyze(1))`,
+      es: `// Old school 100: el 808 de mediados de los 80, palmas con la caja y golpes de orquesta
+// Cada línea $: es una pista que suena con el resto: escribe _$: para silenciar una
+setcps(100 / 60 / 4)
+
+$: s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR808").gain(1.2)
+$: s("~ [sd,cp]").bank("RolandTR808")
+$: s("[~ hh]*4").bank("RolandTR808").gain(0.5)
+$: s("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ oh ~").bank("RolandTR808").gain(0.4)
+// el golpe de orquesta que llevaba cualquier disco de los 80
+$: note("<[e3 ~ ~ ~ ~ ~ ~ ~] [g3 ~ ~ ~ ~ ~ a3 ~]>").s("gm_orchestra_hit").gain(0.4)
+
+// .analyze(1) en todas las pistas para que los visuales lo oigan
+all(x => x.analyze(1))`,
+    },
+  },
+  {
+    id: 'dembow',
+    name: { en: 'Dembow', es: 'Dembow' },
+    code: {
+      en: `// Dembow 95: kick on every beat, the 3-3-2 snare and a minor loop
+// Every $: line is a track that plays with the rest: write _$: to mute one
+setcps(95 / 60 / 4)
+
+$: s("bd*4").bank("RolandTR808").gain(1.1)
+// the dembow: snare on the 4th, 7th, 12th and 15th sixteenths
+$: s("~ ~ ~ sd ~ ~ sd ~ ~ ~ ~ sd ~ ~ sd ~").bank("RolandTR808")
+$: s("hh*8").bank("RolandTR808").gain("0.4 0.25")
+$: note("<a1 f1 c2 g1>").struct("x ~ ~ x ~ ~ x ~ x ~ ~ x ~ ~ x ~")
+  .s("sine").decay(0.4).sustain(0).shape(0.3).gain(0.85)
+// i - VI - III - VII in A minor
+$: chord("<Am F C G>").voicing().s("gm_pad_poly").gain(0.3).room(0.3)
+
+// .analyze(1) on every track so the visuals hear it
+all(x => x.analyze(1))`,
+      es: `// Dembow 95: bombo en cada tiempo, la caja 3-3-2 y un bucle menor
+// Cada línea $: es una pista que suena con el resto: escribe _$: para silenciar una
+setcps(95 / 60 / 4)
+
+$: s("bd*4").bank("RolandTR808").gain(1.1)
+// el dembow: caja en la 4.ª, 7.ª, 12.ª y 15.ª semicorchea
+$: s("~ ~ ~ sd ~ ~ sd ~ ~ ~ ~ sd ~ ~ sd ~").bank("RolandTR808")
+$: s("hh*8").bank("RolandTR808").gain("0.4 0.25")
+$: note("<a1 f1 c2 g1>").struct("x ~ ~ x ~ ~ x ~ x ~ ~ x ~ ~ x ~")
+  .s("sine").decay(0.4).sustain(0).shape(0.3).gain(0.85)
+// i - VI - III - VII en la menor
+$: chord("<Am F C G>").voicing().s("gm_pad_poly").gain(0.3).room(0.3)
+
+// .analyze(1) en todas las pistas para que los visuales lo oigan
+all(x => x.analyze(1))`,
+    },
+  },
+  {
     id: 'dnb',
     name: { en: 'Drum and bass 174', es: 'Drum and bass 174' },
     code: {

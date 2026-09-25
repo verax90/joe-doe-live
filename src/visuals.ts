@@ -105,6 +105,54 @@ export const visuals: Visual[] = [
   .out()`,
   },
   {
+    id: 'moire',
+    name: { en: 'Moiré (bass)', es: 'Moiré (graves)' },
+    code: `osc(60, -0.015, 0.3)
+  .diff(osc(60, 0.08).rotate(Math.PI / 2))
+  .modulateScale(noise(3.5, 0.25), 0.6)
+  .color(...tint(0.5))
+  .scale(() => 1 + bass() * 0.3)
+  .out()`,
+  },
+  {
+    id: 'chispas',
+    name: { en: 'Sparks (highs)', es: 'Chispas (agudos)' },
+    code: `noise(300, 0.1)
+  .thresh(() => 0.55 - high() * 0.3, 0.02)
+  .color(...tint(1))
+  .scrollY(0, -0.05)
+  .blend(src(o0).scale(1.01), 0.6)
+  .out()`,
+  },
+  {
+    id: 'vortice',
+    name: { en: 'Vortex (bar)', es: 'Vórtice (compás)' },
+    code: `osc(12, 0.05, 0)
+  .modulateKaleid(voronoi(6, 0.5, 0.3), 8)
+  .rotate(0, H("<0.1 0.25>"))
+  .contrast(1.4)
+  .color(...tint(0.7))
+  .out()`,
+  },
+  {
+    id: 'liquido',
+    name: { en: 'Liquid (mids)', es: 'Líquido (medios)' },
+    code: `osc(4, 0.1, 1.2)
+  .modulate(noise(2).add(gradient(), -1), () => 0.4 + mid() * 0.6)
+  .color(...tint(0.4))
+  .saturate(0.6)
+  .out()`,
+  },
+  {
+    id: 'flash',
+    name: { en: 'Flash (beat)', es: 'Destello (pulso)' },
+    // On the beat, not on the bass: a long 808 keeps bass() high between kicks
+    code: `solid(...tint(0.7))
+  .mult(shape(4, H("[1.4 0 0 0]*4"), 0.5))
+  .blend(src(o0).scale(1.03), 0.75)
+  .out()`,
+  },
+  {
     id: 'cam',
     name: { en: 'Webcam (warp)', es: 'Webcam (deformada)' },
     camera: true,
@@ -183,9 +231,18 @@ type Global = typeof globalThis & {
   mid?: () => number;
   high?: () => number;
   level?: () => number;
+  H?: (pattern: unknown) => () => number;
+  mini?: (text: string) => unknown;
 };
 
 const g = globalThis as Global;
+
+// The built-in visuals run as plain JavaScript, without the Strudel transpiler
+// that turns "..." into mini-notation in your code: there H("<3 4>") got the
+// bare string and Hydra ignored it, so they never followed the bar. This H
+// parses the string first
+const barH = (pattern: unknown) => g.H!(typeof pattern === 'string' && g.mini ? g.mini(pattern) : pattern);
+const run = (code: string) => new Function('H', code)(barH);
 
 // One analysis per frame: bass(), mid(), high() and level() are called several
 // times per frame by a single visual, and each read used to copy the spectrum
@@ -291,7 +348,7 @@ function startAuto() {
   const next = () => {
     const choices = pool.filter((v) => v !== autoCurrent);
     autoCurrent = choices[Math.floor(Math.random() * choices.length)];
-    new Function(autoCurrent.code)();
+    run(autoCurrent.code);
   };
   let last = step();
   next();
@@ -317,10 +374,10 @@ export async function applyVisual(id: string) {
     // Already running (Ctrl+Enter runs the visual again): redraw the current
     // one instead of jumping to another
     if (autoTimer === undefined) startAuto();
-    else if (autoCurrent) new Function(autoCurrent.code)();
+    else if (autoCurrent) run(autoCurrent.code);
     return;
   }
   // The webcam, or the video or tab chosen in the Video panel
   connectSource(Boolean(visual.camera));
-  new Function(visual.code)();
+  run(visual.code);
 }
