@@ -9,7 +9,9 @@
   --accent-ink: #12151c;
   --ok: #5dffb0;
   --danger: #ff6b5a;
-  --panel: rgba(18, 21, 28, 0.72);
+  /* Solid enough to read over the visuals without a blur: blurring over an
+     animated canvas is recomputed every frame and eats the audio's CPU */
+  --panel: rgba(18, 21, 28, 0.88);
   --font-display: 'Syne Variable', 'Syne', 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -66,7 +68,6 @@ body {
   padding: 0.5rem 1rem;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
-  backdrop-filter: blur(8px);
 }
 
 .brand {
@@ -283,7 +284,6 @@ select.control {
   padding: 1rem;
   border-left: 1px solid var(--line);
   background: var(--panel);
-  backdrop-filter: blur(8px);
   overflow-y: auto;
 }
 

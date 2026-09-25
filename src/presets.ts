@@ -134,13 +134,13 @@ stack(
   s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4, 1).range(0, 0.9).mul(pad(1).mul(-1).add(1))),
   // knob 2: filter · knob 3: reverb
   // joystick up: echo · sideways: up to a semitone of bend
-  keys().s("piano")
+  keys().s("piano").gain(0.7)
     .lpf(knob(2, 1).range(300, 8000)).room(knob(3, 1).range(0, 0.8))
     .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
     .crush(pad(2).range(16, 3))
     // pads become drums, hit harder = louder; keys stay piano
     .withValue(v => v.note < 40
-      ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity }
+      ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity * 0.8 }
       : v)
 ).analyze(1)`,
       es: `// Akai MPK Mini Mk II
@@ -180,13 +180,13 @@ stack(
   s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4, 1).range(0, 0.9).mul(pad(1).mul(-1).add(1))),
   // knob 2: filtro · knob 3: reverb
   // joystick arriba: eco · a los lados: hasta un semitono de bend
-  keys().s("piano")
+  keys().s("piano").gain(0.7)
     .lpf(knob(2, 1).range(300, 8000)).room(knob(3, 1).range(0, 0.8))
     .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
     .crush(pad(2).range(16, 3))
     // los pads pasan a batería, más fuerte = más volumen; las teclas siguen siendo piano
     .withValue(v => v.note < 40
-      ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity }
+      ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity * 0.8 }
       : v)
 ).analyze(1)`,
     },

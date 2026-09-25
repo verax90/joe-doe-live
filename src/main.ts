@@ -6,6 +6,7 @@ import './style.css';
 import { lang, pick, setLang, t, translatePage } from './i18n';
 import { builtInPresets, translateIfBuiltIn, type Preset } from './presets';
 import { setupCheatsheet } from './cheatsheet';
+import { ensureLimiter } from './limiter';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
@@ -136,6 +137,7 @@ window.addEventListener(PROGRAM_EVENT, (event) => {
 const originalEvaluate = editor.evaluate.bind(editor);
 editor.evaluate = async (autostart?: boolean) => {
   await originalEvaluate(autostart);
+  ensureLimiter();
   if (visualSelect.value !== CODE_VISUAL) runVisual();
   // A pattern using midin() may have just granted MIDI: start reading the pitch bend
   connectMidiIfAllowed();

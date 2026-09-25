@@ -101,10 +101,13 @@ g.level = () => band(20, 10000);
 
 // Strudel carga Hydra desde unpkg.com; así se usa la copia que va con el estudio.
 // Vale también para el initHydra() que escribas en tus patrones.
+// Half resolution by default: a quarter of the pixels to draw, which leaves CPU
+// for the audio. These visuals are soft anyway; initHydra({ pixelRatio: 1 }) for full.
 export function useBundledHydra(src: string) {
   const original = g.initHydra as ((options?: Record<string, unknown>) => Promise<unknown>) | undefined;
   if (!original) return;
-  g.initHydra = (options: Record<string, unknown> = {}) => original({ src, ...options });
+  g.initHydra = (options: Record<string, unknown> = {}) =>
+    original({ src, pixelRatio: 0.5, pixelated: false, ...options });
 }
 
 export async function applyVisual(id: string) {
