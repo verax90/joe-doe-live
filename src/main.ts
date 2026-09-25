@@ -243,7 +243,7 @@ shareButton.addEventListener('click', async () => {
   }
 });
 
-setupExport(() => editor.code);
+setupExport(editor);
 setupUndo(editor as unknown as Parameters<typeof setupUndo>[0]);
 
 // "More" menu: everything that is not needed while playing

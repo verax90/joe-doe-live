@@ -1,6 +1,7 @@
 // Samples propios: arrastra archivos de audio a la página y úsalos con s("nombre").
 // Se guardan en IndexedDB para que sigan ahí al recargar (solo en este navegador).
 
+import { isCodeFile } from './export';
 import { onLangChange, t } from './i18n';
 
 type Global = typeof globalThis & {
@@ -221,6 +222,8 @@ export function setupSamplesPanel() {
     event.preventDefault();
     dragDepth = 0;
     document.body.classList.remove('is-dropping');
+    // A code file (.js) is opened by the export module, not added as a sample
+    if ([...event.dataTransfer.files].every(isCodeFile)) return;
     // Items are only readable during the event: take the entries now
     readDropped(event.dataTransfer.items).then(addPicked);
   });
