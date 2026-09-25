@@ -25,7 +25,10 @@ class Onset extends AudioWorkletProcessor {
     const channel = inputs[0][0];
     if (!channel) return true;
     if (currentTime < this.peakUntil) {
-      for (let i = 0; i < channel.length; i++) this.peak = Math.max(this.peak, Math.abs(channel[i]));
+      // Loudest block by its average level, so a single click or tap does not count
+      let sum = 0;
+      for (let i = 0; i < channel.length; i++) sum += channel[i] * channel[i];
+      this.peak = Math.max(this.peak, Math.sqrt(sum / channel.length));
     } else if (this.peakUntil > 0) {
       this.port.postMessage({ type: 'noise', peak: this.peak });
       this.peakUntil = -1;
@@ -77,11 +80,17 @@ export async function measureLatency(context: AudioContext, clicks = 5): Promise
     const onset = new AudioWorkletNode(context, 'jdl-onset', { numberOfOutputs: 0 });
     input.connect(onset);
 
-    // 1. The room: the threshold goes well above whatever is already there
-    onset.port.postMessage({ type: 'noise', seconds: 0.6 });
+    // 1. The room, after half a second so the click on the button itself is
+    //    over; the threshold goes well above its average level
+    await new Promise((r) => setTimeout(r, 500));
+    onset.port.postMessage({ type: 'noise', seconds: 0.8 });
     const noise = (await nextMessage(onset.port, 'noise', 3000)) as { peak: number };
-    if (noise.peak > 0.3) throw new Error('too noisy: stop the music and anything playing, then try again');
-    const threshold = Math.min(0.6, Math.max(0.05, noise.peak * 3));
+    if (noise.peak > 0.2) {
+      throw new Error(
+        `too noisy (room level ${noise.peak.toFixed(2)}, needs under 0.20): stop anything playing, or lower the microphone volume in the system settings`,
+      );
+    }
+    const threshold = Math.min(0.5, Math.max(0.03, noise.peak * 8));
 
     // 2. The clicks: only a sound that starts after the click counts
     const results: number[] = [];
