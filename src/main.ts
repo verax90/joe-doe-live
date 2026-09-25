@@ -173,9 +173,17 @@ const setMenu = (open: boolean) => {
   menuToggle.setAttribute('aria-expanded', String(open));
 };
 menuToggle.addEventListener('click', () => setMenu(Boolean(menu.hidden)));
-document.addEventListener('click', (event) => {
-  if (!menu.hidden && !(event.target as HTMLElement).closest('.menu')) setMenu(false);
-});
+// Capture phase: the editor and panels cannot swallow the click before we see it
+document.addEventListener(
+  'pointerdown',
+  (event) => {
+    if (!menu.hidden && !(event.target as HTMLElement).closest('.menu')) setMenu(false);
+  },
+  true,
+);
+// Switching to another window closes it too
+window.addEventListener('blur', () => setMenu(false));
+document.querySelector('#record-mode')!.addEventListener('change', () => setMenu(false));
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && !menu.hidden) {
     setMenu(false);
