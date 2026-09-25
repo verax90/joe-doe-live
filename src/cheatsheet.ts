@@ -3,11 +3,22 @@
 import { onLangChange, pick, t, type Localized } from './i18n';
 
 type Entry = { code: string; note: Localized };
-type Section = { title: Localized; entries: Entry[] };
+// How "Try" turns an example into a pattern that plays; null: it needs a
+// controller, so it can only be inserted
+type Demo = (code: string) => string | null;
+type Section = { title: Localized; entries: Entry[]; demo: Demo };
+
+const beat = 's("bd*2, ~ sd, hh*4").bank("RolandTR909").gain(0.8)';
+const notes = 'note("c3 e3 g3 b3")';
+const onNotes: Demo = (code) => (code.startsWith('.') ? `${notes}.s("piano")${code}` : code);
+const standalone: Demo = (code) => (code.startsWith('setcps') ? `${code}\ns("bd sd [~ bd] sd")` : code);
+const hydra: Demo = (code) =>
+  `await initHydra()\n${code.startsWith('.') ? `osc(10, 0.1, 1).color(0.34, 0.4, 0.12)${code}.out()` : code}\n\n${beat}.analyze(1)`;
 
 const sections: Section[] = [
   {
     title: { en: 'Basics', es: 'Lo básico' },
+    demo: standalone,
     entries: [
       { code: 's("bd sd hh sd")', note: { en: 'Sounds in sequence, one per step', es: 'Sonidos en secuencia, uno por paso' } },
       { code: 'note("c3 e3 g3").s("piano")', note: { en: 'Notes played by an instrument', es: 'Notas tocadas por un instrumento' } },
@@ -17,6 +28,7 @@ const sections: Section[] = [
   },
   {
     title: { en: 'Mini-notation (inside the quotes)', es: 'Mini-notación (dentro de las comillas)' },
+    demo: standalone,
     entries: [
       { code: 's("bd*4")', note: { en: '* repeats within the step', es: '* repite dentro del paso' } },
       { code: 's("bd ~ sd ~")', note: { en: '~ is a rest', es: '~ es un silencio' } },
@@ -28,6 +40,7 @@ const sections: Section[] = [
   },
   {
     title: { en: 'Sound', es: 'Sonido' },
+    demo: onNotes,
     entries: [
       { code: '.gain(0.8)', note: { en: 'Volume', es: 'Volumen' } },
       { code: '.lpf(800)', note: { en: 'Low-pass filter: darker', es: 'Filtro paso bajo: más apagado' } },
@@ -42,6 +55,7 @@ const sections: Section[] = [
   },
   {
     title: { en: 'Instruments', es: 'Instrumentos' },
+    demo: (code) => `${notes}${code}`,
     entries: [
       { code: '.s("gm_epiano1")', note: { en: 'Electric piano', es: 'Piano eléctrico' } },
       { code: '.s("gm_drawbar_organ")', note: { en: 'Drawbar (Hammond) organ; also gm_rock_organ, gm_church_organ', es: 'Órgano Hammond; también gm_rock_organ, gm_church_organ' } },
@@ -55,6 +69,7 @@ const sections: Section[] = [
   },
   {
     title: { en: 'Harmony', es: 'Armonía' },
+    demo: standalone,
     entries: [
       { code: 'chord("<Am7 Dm7 G7 C^7>").voicing()', note: { en: 'Chords, voiced for you', es: 'Acordes ya colocados' } },
       { code: 'n("0 2 4 7").scale("C:minor")', note: { en: 'Scale degrees', es: 'Grados de una escala' } },
@@ -62,6 +77,7 @@ const sections: Section[] = [
   },
   {
     title: { en: 'Variation', es: 'Variación' },
+    demo: onNotes,
     entries: [
       { code: '.fast(2)', note: { en: 'Twice as fast (.slow for slower)', es: 'El doble de rápido (.slow para más lento)' } },
       { code: '.rev()', note: { en: 'Backwards', es: 'Al revés' } },
@@ -73,6 +89,7 @@ const sections: Section[] = [
   },
   {
     title: { en: 'Hydra (visuals)', es: 'Hydra (visuales)' },
+    demo: hydra,
     entries: [
       { code: 'osc(10, 0.1, 1).out()', note: { en: 'Oscillator: stripes', es: 'Oscilador: franjas' } },
       { code: 'noise(3).out()', note: { en: 'Noise', es: 'Ruido' } },
@@ -87,6 +104,7 @@ const sections: Section[] = [
   },
   {
     title: { en: 'MIDI', es: 'MIDI' },
+    demo: () => null,
     entries: [
       { code: "const knob = await midin('MPK')", note: { en: 'Read knobs; knob(1) goes 0 to 1', es: 'Leer knobs; knob(1) va de 0 a 1' } },
       { code: '.lpf(knob(1).range(300, 5000))', note: { en: 'A knob moves the filter', es: 'Un knob mueve el filtro' } },
@@ -98,10 +116,65 @@ const sections: Section[] = [
   },
 ];
 
-export function setupCheatsheet() {
+type Editor = {
+  code: string;
+  setCode(code: string): void;
+  evaluate(): Promise<void>;
+  editor?: {
+    state: { replaceSelection(text: string): unknown; doc: { lineAt(pos: number): { number: number } }; selection: { main: { head: number } } };
+    dispatch(transaction: unknown): void;
+    focus(): void;
+  };
+};
+
+// "Try" puts a complete example in the editor and plays it, keeping your code
+// to go back to; "Insert" drops the snippet into your code where the cursor is
+export function setupCheatsheet({ editor, useCodeVisual }: { editor: Editor; useCodeVisual: () => void }) {
   const list = document.querySelector<HTMLElement>('#cheat-list')!;
   const filter = document.querySelector<HTMLInputElement>('#cheat-filter')!;
   const status = document.querySelector<HTMLElement>('#cheat-status')!;
+  const back = document.querySelector<HTMLButtonElement>('#cheat-back')!;
+
+  let yourCode: string | null = null;
+
+  const tryIt = async (demo: string, isVisual: boolean) => {
+    yourCode ??= editor.code; // only the first try: the rest are examples too
+    editor.setCode(demo);
+    if (isVisual) useCodeVisual();
+    await editor.evaluate();
+    status.textContent = t('tryingExample');
+    back.hidden = false;
+  };
+
+  back.addEventListener('click', () => {
+    if (yourCode !== null) editor.setCode(yourCode);
+    yourCode = null;
+    back.hidden = true;
+    status.textContent = t('backToCodeDone');
+  });
+
+  const insert = (code: string) => {
+    const view = editor.editor;
+    if (!view) return;
+    // A method (.lpf(800)) chains onto what is before the cursor; a whole
+    // expression (s("bd sd")) goes on a line of its own
+    const head = view.state.selection.main.head;
+    const atLineStart = head === 0 || editor.code[head - 1] === '\n';
+    const text = code.startsWith('.') || atLineStart ? code : `\n${code}`;
+    view.dispatch(view.state.replaceSelection(text));
+    view.focus();
+    const line = view.state.doc.lineAt(view.state.selection.main.head).number;
+    status.textContent = t('inserted', { line });
+  };
+
+  const button = (label: string, className: string, onClick: () => void) => {
+    const element = document.createElement('button');
+    element.type = 'button';
+    element.className = `cheat-action ${className}`;
+    element.textContent = label;
+    element.addEventListener('click', onClick);
+    return element;
+  };
 
   const render = () => {
     list.replaceChildren();
@@ -115,23 +188,28 @@ export function setupCheatsheet() {
       for (const entry of section.entries) {
         const li = document.createElement('li');
         li.dataset.search = `${entry.code} ${entry.note.en} ${entry.note.es}`.toLowerCase();
-        const code = document.createElement('button');
-        code.type = 'button';
+        const code = document.createElement('code');
         code.className = 'cheat-code';
         code.textContent = entry.code;
-        code.title = t('copy');
-        code.addEventListener('click', async () => {
-          try {
-            await navigator.clipboard.writeText(entry.code);
-            status.textContent = t('copied', { code: entry.code });
-          } catch {
-            status.textContent = t('copyFailed');
-          }
-        });
         const note = document.createElement('p');
         note.className = 'cheat-note';
         note.textContent = pick(entry.note);
-        li.append(code, note);
+        const actions = document.createElement('div');
+        actions.className = 'cheat-actions';
+        const demo = section.demo(entry.code);
+        if (demo) actions.append(button(t('tryIt'), 'cheat-try', () => tryIt(demo, section.demo === hydra)));
+        actions.append(button(t('insert'), '', () => insert(entry.code)));
+        actions.append(
+          button(t('copy'), '', async () => {
+            try {
+              await navigator.clipboard.writeText(entry.code);
+              status.textContent = t('copied', { code: entry.code });
+            } catch {
+              status.textContent = t('copyFailed');
+            }
+          }),
+        );
+        li.append(code, note, actions);
         ul.append(li);
       }
       group.append(heading, ul);

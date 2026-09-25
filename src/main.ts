@@ -316,7 +316,14 @@ window.addEventListener('keydown', (event) => {
 });
 
 setupMidiPanel();
-setupCheatsheet();
+setupCheatsheet({
+  editor,
+  // Hydra examples need their own visual to show
+  useCodeVisual: () => {
+    visualSelect.value = 'code';
+    writeStorage(VISUAL_KEY, 'code');
+  },
+});
 setupHelp();
 setupKnobs();
 setupRecorder();
