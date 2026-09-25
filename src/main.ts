@@ -8,6 +8,7 @@ import { builtInPresets, translateIfBuiltIn, type Preset } from './presets';
 import { setupCheatsheet } from './cheatsheet';
 import { setupDebug } from './debug';
 import { setupFreePlay } from './freeplay';
+import { setupRecorder } from './record';
 import { ensureLimiter } from './limiter';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
@@ -244,6 +245,7 @@ window.addEventListener('keydown', (event) => {
 
 setupMidiPanel();
 setupCheatsheet();
+setupRecorder();
 // Free play stays out of the way when the playing pattern reads the keys itself
 setupFreePlay(
   () =>

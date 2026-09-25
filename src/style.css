@@ -139,6 +139,51 @@ select.control {
   max-width: min(14rem, 100%);
 }
 
+/* Record: a red dot that pulses while recording */
+.control-record {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.record-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--danger);
+}
+
+.control-record.is-recording {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.control-record.is-recording .record-dot {
+  animation: record-pulse 1s ease-in-out infinite;
+}
+
+@keyframes record-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control-record.is-recording .record-dot {
+    animation: none;
+  }
+}
+
+.record-status {
+  align-self: center;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.record-status:empty {
+  display: none;
+}
+
 /* EN / ES: the active language stands out */
 .control-lang {
   display: inline-flex;

@@ -45,6 +45,18 @@
       </div>
 
       <div class="bar-group">
+        <label class="visually-hidden" for="record-mode" data-i18n="recordMode">What to record</label>
+        <select id="record-mode" class="control">
+          <option value="audio" data-i18n="recordAudio">Audio (WAV)</option>
+          <option value="video" data-i18n="recordVideo">Video (WebM)</option>
+        </select>
+        <button id="record" class="control control-record" type="button" aria-pressed="false">
+          <span class="record-dot" aria-hidden="true"></span><span class="record-label" data-i18n="record">Record</span>
+        </button>
+        <span id="record-status" class="record-status" role="status"></span>
+      </div>
+
+      <div class="bar-group">
         <button id="toggle-code" class="control" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
         <button id="toggle-cheats" class="control" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
         <button id="toggle-tools" class="control" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
