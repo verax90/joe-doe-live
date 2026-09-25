@@ -49,6 +49,9 @@ function draw(source: HTMLCanvasElement) {
   context.fillStyle = styles.getPropertyValue('--bg').trim() || '#12151c';
   context.fillRect(0, 0, window.innerWidth, window.innerHeight);
   context.fillStyle = styles.getPropertyValue('--accent').trim() || '#d6ff4b';
+  // Same font and colour as the code: with the code on screen the characters
+  // step back so the code stays readable; full strength in performance mode
+  context.globalAlpha = document.body.classList.contains('hide-code') ? 1 : 0.4;
   context.font = `${CELL_HEIGHT - 2}px 'IBM Plex Mono', monospace`;
   context.textBaseline = 'top';
   // Auto contrast: the darkest cell becomes a space and the brightest an @, so
@@ -74,6 +77,7 @@ function draw(source: HTMLCanvasElement) {
     }
     context.fillText(line, 0, row * CELL_HEIGHT, window.innerWidth);
   }
+  context.globalAlpha = 1;
 }
 
 // Hook into Hydra right after it renders, while its frame is still readable

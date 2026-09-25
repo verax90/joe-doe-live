@@ -457,7 +457,8 @@ select.control {
 }
 
 .editor .cm-line {
-  background: rgba(18, 21, 28, 0.55);
+  /* opaque enough to read over any visual, the ASCII filter included */
+  background: rgba(18, 21, 28, 0.82);
   width: fit-content;
   padding-right: 0.5rem;
 }
