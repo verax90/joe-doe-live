@@ -3,15 +3,17 @@
 // - H("...") sigue el reloj de Strudel: golpea exactamente en el tiempo.
 // - bass(), mid(), high(), level() escuchan el audio (el patrón necesita .analyze(1)).
 
-export type Visual = { id: string; name: string; code: string };
+import type { Localized } from './i18n';
+
+export type Visual = { id: string; name: Localized; code: string };
 
 export const CODE_VISUAL = 'code';
 
 export const visuals: Visual[] = [
-  { id: CODE_VISUAL, name: 'Del código', code: '' },
+  { id: CODE_VISUAL, name: { en: 'From the code', es: 'Del código' }, code: '' },
   {
     id: 'lima',
-    name: 'Lima (compás)',
+    name: { en: 'Lime (bar)', es: 'Lima (compás)' },
     code: `osc(6, 0.03, 0.8)
   .color(0.34, 0.4, 0.12)
   .modulate(noise(1.5), 0.25)
@@ -20,7 +22,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'corcheas',
-    name: 'Pulso (corcheas)',
+    name: { en: 'Pulse (eighths)', es: 'Pulso (corcheas)' },
     code: `shape(4, 0.35, 0.02)
   .repeat(3, 3)
   .scale(H("1.25 1 1 1.1 1 1.25 1 1"))
@@ -30,7 +32,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'graves',
-    name: 'Túnel (graves)',
+    name: { en: 'Tunnel (bass)', es: 'Túnel (graves)' },
     code: `osc(20, 0.05, 0.4)
   .kaleid(4)
   .color(0.34, 0.4, 0.12)
@@ -40,7 +42,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'celdas',
-    name: 'Celdas (volumen)',
+    name: { en: 'Cells (volume)', es: 'Celdas (volumen)' },
     code: `voronoi(6, 0.3, 0.2)
   .color(0.2, 0.35, 0.1)
   .modulate(osc(3, 0.05), () => mid() * 0.6)
@@ -49,14 +51,14 @@ export const visuals: Visual[] = [
   },
   {
     id: 'eco',
-    name: 'Eco (compás)',
+    name: { en: 'Echo (bar)', es: 'Eco (compás)' },
     code: `shape(H("<3 4 5 6>"), 0.3, 0.01)
   .color(0.34, 0.4, 0.12)
   .rotate(0, 0.1)
   .diff(src(o0).scale(1.02).rotate(0.01))
   .out()`,
   },
-  { id: 'ninguno', name: 'Sin visuales', code: `solid(0, 0, 0, 0).out()` },
+  { id: 'ninguno', name: { en: 'No visuals', es: 'Sin visuales' }, code: `solid(0, 0, 0, 0).out()` },
 ];
 
 type Global = typeof globalThis & {

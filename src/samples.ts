@@ -1,6 +1,8 @@
 // Samples propios: arrastra archivos de audio a la página y úsalos con s("nombre").
 // Se guardan en IndexedDB para que sigan ahí al recargar (solo en este navegador).
 
+import { t } from './i18n';
+
 type Global = typeof globalThis & {
   samples?: (map: Record<string, string[]>, baseUrl?: string) => Promise<unknown>;
 };
@@ -31,7 +33,7 @@ export function sampleName(fileName: string) {
   const base = fileName
     .replace(/\.[^.]+$/, '')
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
@@ -60,7 +62,7 @@ export function setupSamplesPanel() {
   const render = () => {
     list.replaceChildren();
     if (!names.size) {
-      list.innerHTML = '<li class="muted">Todavía no hay samples</li>';
+      list.innerHTML = `<li class="muted">${t('noSamples')}</li>`;
       return;
     }
     for (const name of [...names].sort()) {
@@ -69,20 +71,20 @@ export function setupSamplesPanel() {
       copy.type = 'button';
       copy.className = 'sample-name';
       copy.textContent = `s("${name}")`;
-      copy.title = 'Copiar';
+      copy.title = t('copy');
       copy.addEventListener('click', async () => {
         try {
           await navigator.clipboard.writeText(`s("${name}")`);
-          status.textContent = `Copiado s("${name}")`;
+          status.textContent = t('copied', { code: `s("${name}")` });
         } catch {
-          status.textContent = 'No se pudo copiar';
+          status.textContent = t('copyFailed');
         }
       });
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.className = 'sample-remove';
       remove.textContent = '×';
-      remove.setAttribute('aria-label', `Borrar ${name}`);
+      remove.setAttribute('aria-label', t('deleteSample', { name }));
       remove.addEventListener('click', async () => {
         names.delete(name);
         render();
@@ -100,7 +102,7 @@ export function setupSamplesPanel() {
   const addFiles = async (files: Iterable<File>) => {
     const audio = [...files].filter((file) => file.type.startsWith('audio/') || /\.(wav|mp3|ogg|flac|aif+)$/i.test(file.name));
     if (!audio.length) {
-      status.textContent = 'Solo se aceptan archivos de audio (WAV, MP3, OGG, FLAC)';
+      status.textContent = t('onlyAudio');
       return;
     }
     for (const file of audio) {
@@ -113,7 +115,7 @@ export function setupSamplesPanel() {
         // sin IndexedDB: el sample funciona hasta recargar
       }
     }
-    status.textContent = `${audio.length} sample${audio.length > 1 ? 's' : ''} listo${audio.length > 1 ? 's' : ''}`;
+    status.textContent = t('samplesReady', { count: audio.length });
     render();
   };
 
@@ -156,7 +158,7 @@ export function setupSamplesPanel() {
         }
       }
     } catch {
-      status.textContent = 'Este navegador no permite guardar samples: se perderán al recargar';
+      status.textContent = t('noStorage');
     }
     render();
   };

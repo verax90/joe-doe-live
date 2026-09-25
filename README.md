@@ -1,41 +1,47 @@
 # joe doe · live
 
-Estudio de live coding en el navegador para [joedoe.dev](https://joedoe.dev): sonido con [Strudel](https://strudel.cc), visuales con [Hydra](https://hydra.ojack.xyz) y control por MIDI, todo en un mismo editor.
+A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound with [Strudel](https://strudel.cc), visuals with [Hydra](https://hydra.ojack.xyz) and MIDI control, all in one editor. English and Spanish.
 
-- **Patrones incluidos**: lofi, ejemplo mínimo, plantilla para tus samples y plantilla para controlador MIDI.
-- **Visuales aparte del sonido**: elige uno en el selector y combínalo con cualquier patrón. Unos siguen el compás (`H("...")`) y otros escuchan el audio.
-- **Compartir**: el botón copia un enlace con el patrón y el visual dentro de la URL.
-- **Tus samples**: arrastra archivos de audio a la página y úsalos con `s("nombre")`. Se guardan en el navegador (IndexedDB).
-- **Guardar** patrones en el navegador (localStorage). El borrador se guarda solo cada pocos segundos.
-- **Panel MIDI**: muestra qué nota o `cc` manda cada pad o knob, para usarlos con `midin()` y `midikeys()`.
-- **Modo concierto**: `Ctrl+Shift+H` oculta el código y deja solo los visuales.
+- **Built-in patterns**: lofi, a bare-minimum example, a template for your own samples and one for a MIDI controller.
+- **Visuals apart from the sound**: pick one in the selector and pair it with any pattern. Some follow the bar (`H("...")`), others listen to the audio.
+- **Share**: the button copies a link with the pattern and the visual inside the URL.
+- **Your samples**: drop audio files on the page and use them with `s("name")`. They stay in the browser (IndexedDB).
+- **Tools**: other browser-based live coding tools, read from the [joedoe.dev/art](https://joedoe.dev/art?cat=livecoding) shelf. A few open inside the studio.
+- **Errors you can read**: syntax slips, misspelled names and missing sounds show up in plain words, not only in the console.
+- **Save** patterns in the browser (localStorage). The draft saves itself every few seconds.
+- **MIDI panel**: shows which note or `cc` each pad or knob sends, to use with `midin()` and `midikeys()`.
+- **Performance mode**: `Ctrl+Shift+H` hides the code and leaves only the visuals.
 
-## Visuales que escuchan el audio
+## Language
 
-Añade `.analyze(1)` al final de tu patrón y usa estas funciones en el código de Hydra (devuelven de 0 a 1):
+English by default. The studio follows `?lang=en|es`, then the `jd-lang` cookie shared with joedoe.dev, then the browser language. The EN / ES button switches and remembers it.
 
-| Función | Qué mide |
+## Shortcuts
+
+| Key | Action |
 |---|---|
-| `bass()` | graves (20–150 Hz), ideal para el bombo |
-| `mid()` | medios (150–2000 Hz) |
-| `high()` | agudos (2–10 kHz), charles y platos |
-| `level()` | volumen general |
+| `Ctrl+Enter` | Play / update |
+| `Ctrl+.` | Stop |
+| `Ctrl+Shift+H` | Show or hide the code |
+
+## Visuals that listen to the audio
+
+Add `.analyze(1)` at the end of your pattern and use these in Hydra code (they return 0 to 1):
+
+| Function | Measures |
+|---|---|
+| `bass()` | lows (20–150 Hz), made for the kick |
+| `mid()` | mids (150–2000 Hz) |
+| `high()` | highs (2–10 kHz), hats and cymbals |
+| `level()` | overall volume |
 
 ```js
 osc(10, 0.1).scale(() => 1 + bass()).out()
 ```
 
-## Atajos
+## Development
 
-| Tecla | Acción |
-|---|---|
-| `Ctrl+Enter` | Play / actualizar |
-| `Ctrl+.` | Stop |
-| `Ctrl+Shift+H` | Mostrar u ocultar el código |
-
-## Desarrollo
-
-Requiere Node 22 y pnpm.
+Needs Node 22 and pnpm.
 
 ```bash
 pnpm install
@@ -43,8 +49,8 @@ pnpm dev
 pnpm build
 ```
 
-Web MIDI solo funciona en navegadores Chromium (Chrome, Edge, Brave) y en `localhost` o HTTPS.
+Web MIDI only works in Chromium browsers (Chrome, Edge, Brave) and on `localhost` or HTTPS.
 
-## Licencia
+## License
 
-[AGPL-3.0-or-later](LICENSE), la misma que Strudel y Hydra, en los que se basa.
+[AGPL-3.0-or-later](LICENSE), the same as Strudel and Hydra, which it builds on.

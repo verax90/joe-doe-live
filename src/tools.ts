@@ -2,6 +2,7 @@
 // en el navegador. La lista vive en joedoe.dev/art (un .md por enlace) y aquí
 // solo se lee; si no se puede leer, se usa la copia que va con el estudio.
 import fallback from './tools-fallback.json';
+import { pick, t, type StringKey } from './i18n';
 
 type Tool = {
   title: string;
@@ -13,9 +14,9 @@ type Tool = {
 
 const SOURCE = 'https://joedoe.dev/art/runs.json';
 
-const groups: { category: Tool['category']; label: string }[] = [
-  { category: 'livecoding', label: 'Live coding' },
-  { category: 'sound', label: 'Sonido en el navegador' },
+const groups: { category: Tool['category']; label: StringKey }[] = [
+  { category: 'livecoding', label: 'groupLivecoding' },
+  { category: 'sound', label: 'groupSound' },
 ];
 
 async function loadTools(): Promise<Tool[]> {
@@ -65,7 +66,7 @@ export function setupToolsPanel(onEmbedOpen: () => void) {
       const items = tools.filter((tool) => tool.category === group.category);
       if (!items.length) continue;
       const heading = document.createElement('h3');
-      heading.textContent = group.label;
+      heading.textContent = t(group.label);
       const ul = document.createElement('ul');
       ul.className = 'panel-list tool-list';
       for (const tool of items) {
@@ -78,13 +79,13 @@ export function setupToolsPanel(onEmbedOpen: () => void) {
         link.textContent = `${tool.title} ↗`;
         const note = document.createElement('p');
         note.className = 'tool-note';
-        note.textContent = tool.note.es;
+        note.textContent = pick(tool.note);
         li.append(link, note);
         if (tool.embed) {
           const tryHere = document.createElement('button');
           tryHere.type = 'button';
           tryHere.className = 'control tool-try';
-          tryHere.textContent = 'Probar aquí';
+          tryHere.textContent = t('tryHere');
           tryHere.addEventListener('click', () => openEmbed(tool));
           li.append(tryHere);
         }

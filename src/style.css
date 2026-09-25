@@ -138,6 +138,23 @@ select.control {
   max-width: min(14rem, 100%);
 }
 
+/* EN / ES: the active language stands out */
+.control-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.lang-option {
+  color: var(--muted);
+}
+
+.control-lang[data-current='en'] .lang-option[data-lang='en'],
+.control-lang[data-current='es'] .lang-option[data-lang='es'] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .dot {
   display: inline-block;
   width: 0.55rem;

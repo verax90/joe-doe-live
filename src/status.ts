@@ -2,6 +2,8 @@
 // Strudel informa por dos vías: el evento "update" del editor (errores al evaluar
 // o al sonar) y el evento "strudel.log" del documento (carga de samples).
 
+import { t } from './i18n';
+
 type ReplState = { error?: unknown; pending?: boolean };
 type LogDetail = { message: string; type?: string };
 
@@ -9,14 +11,14 @@ type LogDetail = { message: string; type?: string };
 export function explainError(error: unknown) {
   const raw = error instanceof Error ? error.message : String(error);
   const at = raw.match(/\((\d+):(\d+)\)/);
-  const line = at ? `Línea ${at[1]}: ` : '';
+  const line = at ? t('line', { line: at[1] }) : '';
   const rules: [RegExp, (m: RegExpMatchArray) => string][] = [
-    [/Unterminated string/i, () => 'faltan unas comillas por cerrar'],
-    [/Unexpected token/i, () => 'algo sobra o falta: ¿un paréntesis, una coma o unas comillas?'],
-    [/sound (\S+?) not found/i, (m) => `no existe el sonido ${m[1]}. Revisa el nombre o mira tu lista en Samples`],
-    [/(\w+) is not defined/i, (m) => `"${m[1]}" no existe: ¿está bien escrito?`],
-    [/([\w.]+) is not a function/i, (m) => `${m[1]} no es una función: revisa el nombre`],
-    [/midi device .* not found|No MIDI devices found/i, () => 'no encuentro ese dispositivo MIDI. Mira el nombre exacto en el panel MIDI'],
+    [/Unterminated string/i, () => t('errString')],
+    [/Unexpected token/i, () => t('errToken')],
+    [/sound (\S+?) not found/i, (m) => t('errSound', { name: m[1] })],
+    [/(\w+) is not defined/i, (m) => t('errUndefined', { name: m[1] })],
+    [/([\w.]+) is not a function/i, (m) => t('errFunction', { name: m[1] })],
+    [/midi device .* not found|No MIDI devices found/i, () => t('errMidi')],
   ];
   const sentence = (text: string) => (line ? line + text : text.charAt(0).toUpperCase() + text.slice(1));
   for (const [pattern, explain] of rules) {
@@ -48,7 +50,7 @@ export function setupStatus(repl: HTMLElement) {
       bar.hidden = false;
     } else if (loading) {
       bar.dataset.kind = 'loading';
-      text.textContent = 'Cargando sonidos…';
+      text.textContent = t('loadingSounds');
       detail.textContent = '';
       bar.hidden = false;
     } else {
@@ -77,7 +79,7 @@ export function setupStatus(repl: HTMLElement) {
       render();
     } else if (type === 'error' && /could not load/.test(message)) {
       const name = message.match(/"([^"]+)"/)?.[1] ?? '';
-      runtimeError = { text: `No se pudo descargar el sonido ${name}. ¿Hay conexión?`, raw: message };
+      runtimeError = { text: t('errDownload', { name }), raw: message };
       render();
     } else {
       // Errores mientras suena, p. ej. "[getTrigger] error: sound x not found!"

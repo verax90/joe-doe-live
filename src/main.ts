@@ -3,7 +3,8 @@ import '@fontsource/ibm-plex-mono/600.css';
 import '@fontsource-variable/syne';
 import '@strudel/repl';
 import './style.css';
-import { builtInPresets, type Preset } from './presets';
+import { lang, pick, setLang, t, translatePage } from './i18n';
+import { builtInPresets, translateIfBuiltIn, type Preset } from './presets';
 import { setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
@@ -33,6 +34,10 @@ const stopButton = document.querySelector<HTMLButtonElement>('#stop')!;
 const codeToggle = document.querySelector<HTMLButtonElement>('#toggle-code')!;
 const visualSelect = document.querySelector<HTMLSelectElement>('#visual')!;
 const shareButton = document.querySelector<HTMLButtonElement>('#share')!;
+const langButton = document.querySelector<HTMLButtonElement>('#lang')!;
+
+translatePage();
+langButton.dataset.current = lang;
 
 // localStorage puede fallar (modo privado, datos bloqueados): la página debe funcionar igual
 function readStorage<T>(key: string, fallback: T): T {
@@ -65,9 +70,9 @@ function renderPresetOptions(selectedId?: string) {
     }
     presetSelect.append(group);
   };
-  presetSelect.append(new Option('— Patrones —', ''));
-  addGroup('Incluidos', builtInPresets);
-  addGroup('Guardados', savedPresets);
+  presetSelect.append(new Option(t('patternsPlaceholder'), ''));
+  addGroup(t('groupIncluded'), builtInPresets);
+  addGroup(t('groupSaved'), savedPresets);
   presetSelect.value = selectedId ?? '';
   deleteButton.hidden = !savedPresets.some((p) => p.id === presetSelect.value);
 }
@@ -100,13 +105,14 @@ setupStatus(repl);
 const shared = readSharedPattern();
 // Quita el enlace compartido de la URL: al recargar manda tu borrador, no el patrón original
 if (shared.code) history.replaceState(null, '', location.pathname);
-const draft = readStorage<string | null>(DRAFT_KEY, null);
+const storedDraft = readStorage<string | null>(DRAFT_KEY, null);
+const draft = storedDraft === null ? null : translateIfBuiltIn(storedDraft);
 editor.setCode(shared.code ?? draft ?? builtInPresets[0].code);
 renderPresetOptions(shared.code || draft ? undefined : builtInPresets[0].id);
 
 // Visuales: se eligen aparte y se vuelven a aplicar tras cada play,
 // salvo con "Del código", que deja mandar al patrón
-for (const visual of visuals) visualSelect.append(new Option(visual.name, visual.id));
+for (const visual of visuals) visualSelect.append(new Option(pick(visual.name), visual.id));
 const storedVisual = readStorage<string>(VISUAL_KEY, 'lima');
 const initialVisual = shared.visualId ?? storedVisual;
 visualSelect.value = visuals.some((v) => v.id === initialVisual) ? initialVisual : 'lima';
@@ -136,9 +142,9 @@ shareButton.addEventListener('click', async () => {
   const label = shareButton.textContent;
   try {
     await navigator.clipboard.writeText(url);
-    shareButton.textContent = '¡Enlace copiado!';
+    shareButton.textContent = t('shareCopied');
   } catch {
-    shareButton.textContent = 'Copia la URL de arriba';
+    shareButton.textContent = t('shareManual');
   }
   setTimeout(() => (shareButton.textContent = label), 2000);
 });
@@ -159,6 +165,13 @@ panelButtons.forEach((button) => {
 // Guarda el borrador cada pocos segundos para no perder nada al recargar
 setInterval(() => writeStorage(DRAFT_KEY, editor.code), 3000);
 
+// Cambiar de idioma recarga la página; antes se guarda el borrador
+langButton.addEventListener('click', () => {
+  writeStorage(DRAFT_KEY, editor.code);
+  setLang(lang === 'es' ? 'en' : 'es');
+  location.reload();
+});
+
 presetSelect.addEventListener('change', () => {
   const preset = findPreset(presetSelect.value);
   deleteButton.hidden = !savedPresets.some((p) => p.id === presetSelect.value);
@@ -167,7 +180,7 @@ presetSelect.addEventListener('change', () => {
 
 saveButton.addEventListener('click', () => {
   const current = savedPresets.find((p) => p.id === presetSelect.value);
-  const name = prompt('Nombre del patrón', current?.name ?? '');
+  const name = prompt(t('savePrompt'), current?.name ?? '');
   if (!name) return;
   const existing = savedPresets.find((p) => p.name === name);
   if (existing) {
@@ -181,7 +194,7 @@ saveButton.addEventListener('click', () => {
 
 deleteButton.addEventListener('click', () => {
   const preset = savedPresets.find((p) => p.id === presetSelect.value);
-  if (!preset || !confirm(`¿Borrar "${preset.name}"?`)) return;
+  if (!preset || !confirm(t('deleteConfirm', { name: preset.name }))) return;
   savedPresets = savedPresets.filter((p) => p !== preset);
   writeStorage(SAVED_KEY, savedPresets);
   renderPresetOptions();

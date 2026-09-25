@@ -2,6 +2,8 @@
 // qué número manda cada pad o knob. Strudel abre sus propias conexiones con
 // midin()/midikeys(); esto es solo un monitor.
 
+import { t } from './i18n';
+
 const MAX_LOG = 12;
 
 export function setupMidiPanel() {
@@ -11,7 +13,7 @@ export function setupMidiPanel() {
   const dot = document.querySelector<HTMLElement>('#midi-dot')!;
 
   if (!('requestMIDIAccess' in navigator)) {
-    deviceList.innerHTML = '<li class="muted">Este navegador no soporta Web MIDI (prueba Chrome o Edge)</li>';
+    deviceList.innerHTML = `<li class="muted">${t('noWebMidi')}</li>`;
     enable.hidden = true;
     return;
   }
@@ -26,11 +28,11 @@ export function setupMidiPanel() {
   const describe = ([status, a, b]: Uint8Array) => {
     const type = status & 0xf0;
     const channel = (status & 0x0f) + 1;
-    if (type === 0x90 && b > 0) return `pad/nota ${a} · fuerza ${b} · canal ${channel}`;
+    if (type === 0x90 && b > 0) return t('midiNote', { note: a, velocity: b, channel });
     if (type === 0x80 || type === 0x90) return null; // note off: ruido para el monitor
-    if (type === 0xb0) return `knob cc(${a}) = ${b} · canal ${channel}`;
-    if (type === 0xe0) return `pitch bend ${(b << 7) | a} · canal ${channel}`;
-    if (type === 0xd0 || type === 0xa0) return `aftertouch ${a} · canal ${channel}`;
+    if (type === 0xb0) return t('midiCc', { cc: a, value: b, channel });
+    if (type === 0xe0) return t('midiBend', { value: (b << 7) | a, channel });
+    if (type === 0xd0 || type === 0xa0) return t('midiTouch', { value: a, channel });
     return null;
   };
 
@@ -49,7 +51,7 @@ export function setupMidiPanel() {
       const render = () => {
         deviceList.replaceChildren();
         if (!access.inputs.size) {
-          deviceList.innerHTML = '<li class="muted">No hay dispositivos conectados</li>';
+          deviceList.innerHTML = `<li class="muted">${t('noDevices')}</li>`;
         }
         access.inputs.forEach((input) => {
           const item = document.createElement('li');
@@ -69,7 +71,7 @@ export function setupMidiPanel() {
       enable.hidden = true;
       dot.classList.add('is-on');
     } catch {
-      deviceList.innerHTML = '<li class="muted">Permiso de MIDI denegado</li>';
+      deviceList.innerHTML = `<li class="muted">${t('midiDenied')}</li>`;
     }
   };
 

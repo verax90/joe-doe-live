@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Estudio de live coding en el navegador: Strudel, Hydra y MIDI." />
+    <meta name="description" content="Live coding studio in the browser: Strudel, Hydra and MIDI." />
     <meta name="theme-color" content="#12151c" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -11,21 +11,21 @@
   </head>
   <body>
     <header class="bar">
-      <a class="brand" href="https://joedoe.dev/music" title="Volver a joedoe.dev">
+      <a class="brand" href="https://joedoe.dev/music" title="Back to joedoe.dev" data-i18n-title="backHome">
         <span class="brand-name">joe doe</span><span class="brand-dot">·</span><span class="brand-live">live</span>
       </a>
 
       <div class="bar-group">
-        <label class="visually-hidden" for="preset">Patrón</label>
+        <label class="visually-hidden" for="preset" data-i18n="pattern">Pattern</label>
         <select id="preset" class="control"></select>
-        <button id="save" class="control" type="button" title="Guardar en este navegador">Guardar</button>
-        <button id="delete" class="control" type="button" title="Borrar el patrón guardado" hidden>Borrar</button>
+        <button id="save" class="control" type="button" title="Save in this browser" data-i18n="save" data-i18n-title="saveTitle">Save</button>
+        <button id="delete" class="control" type="button" title="Delete the saved pattern" data-i18n="delete" data-i18n-title="deleteTitle" hidden>Delete</button>
       </div>
 
       <div class="bar-group">
-        <label class="visually-hidden" for="visual">Visual</label>
-        <select id="visual" class="control" title="Visuales"></select>
-        <button id="share" class="control" type="button">Compartir</button>
+        <label class="visually-hidden" for="visual" data-i18n="visual">Visual</label>
+        <select id="visual" class="control" title="Visuals" data-i18n-title="visuals"></select>
+        <button id="share" class="control" type="button" data-i18n="share">Share</button>
       </div>
 
       <div class="bar-group">
@@ -34,11 +34,14 @@
       </div>
 
       <div class="bar-group">
-        <button id="toggle-code" class="control" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H">Código</button>
-        <button id="toggle-tools" class="control" type="button" aria-pressed="false" data-panel="tools">Herramientas</button>
-        <button id="toggle-samples" class="control" type="button" aria-pressed="false" data-panel="samples">Samples</button>
+        <button id="toggle-code" class="control" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
+        <button id="toggle-tools" class="control" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
+        <button id="toggle-samples" class="control" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
         <button id="toggle-midi" class="control" type="button" aria-pressed="false" data-panel="midi">
           MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span>
+        </button>
+        <button id="lang" class="control control-lang" type="button" aria-label="Español" data-i18n-label="langSwitch">
+          <span class="lang-option" data-lang="en">EN</span><span class="lang-option" data-lang="es">ES</span>
         </button>
       </div>
     </header>
@@ -56,62 +59,53 @@
       <section class="embed" id="embed" hidden aria-labelledby="embed-title">
         <header class="embed-bar">
           <h2 id="embed-title" class="embed-title"></h2>
-          <a id="embed-open" class="control embed-link" href="#" target="_blank" rel="noopener">Abrir en pestaña ↗</a>
-          <button id="embed-close" class="control" type="button">Cerrar</button>
+          <a id="embed-open" class="control embed-link" href="#" target="_blank" rel="noopener" data-i18n="openInTab">Open in tab ↗</a>
+          <button id="embed-close" class="control" type="button" data-i18n="close">Close</button>
         </header>
         <iframe
           id="embed-frame"
           class="embed-frame"
-          title="Herramienta incrustada"
+          title="Embedded tool"
+          data-i18n-title="embeddedTool"
           src="about:blank"
           allow="autoplay; midi; microphone; clipboard-read; clipboard-write; fullscreen"
         ></iframe>
       </section>
 
       <aside class="panel" id="tools" hidden>
-        <h2>Herramientas</h2>
-        <p class="panel-help">
-          Otras herramientas que funcionan en el navegador, de la estantería de
-          <a href="https://joedoe.dev/art?cat=livecoding" target="_blank" rel="noopener">joedoe.dev/art</a>.
-          Las que dicen "Probar aquí" se abren dentro del estudio (tu patrón se para para que no choquen).
-        </p>
-        <div id="tool-list"><p class="muted">Cargando…</p></div>
+        <h2 data-i18n="tools">Tools</h2>
+        <p class="panel-help" data-i18n-html="toolsHelp"></p>
+        <div id="tool-list"><p class="muted" data-i18n="loading">Loading…</p></div>
       </aside>
 
       <aside class="panel" id="samples" hidden>
-        <h2>Samples</h2>
-        <p class="panel-help">
-          Arrastra archivos de audio a cualquier parte de la página (o elígelos abajo) y úsalos con
-          <code>s("nombre")</code>. Se guardan en este navegador.
-        </p>
+        <h2 data-i18n="samples">Samples</h2>
+        <p class="panel-help" data-i18n-html="samplesHelp"></p>
         <label class="control file-button">
-          Elegir archivos
+          <span data-i18n="chooseFiles">Choose files</span>
           <input id="sample-input" type="file" accept="audio/*,.wav,.mp3,.ogg,.flac,.aif,.aiff" multiple />
         </label>
         <p id="sample-status" class="panel-status" role="status"></p>
-        <h3>Tus samples</h3>
+        <h3 data-i18n="yourSamples">Your samples</h3>
         <ul id="sample-list" class="panel-list sample-list"></ul>
       </aside>
 
       <aside class="panel" id="midi" hidden>
         <h2>MIDI</h2>
-        <p class="panel-help">
-          Toca un pad o gira un knob para ver qué número manda. Úsalo en el código con
-          <code>midin('nombre')</code> (knobs) o <code>midikeys('nombre')</code> (pads).
-        </p>
-        <h3>Dispositivos</h3>
-        <ul id="midi-devices" class="panel-list"><li class="muted">Sin permiso todavía</li></ul>
-        <button id="midi-enable" class="control" type="button">Activar MIDI</button>
-        <h3>Últimos mensajes</h3>
+        <p class="panel-help" data-i18n-html="midiHelp"></p>
+        <h3 data-i18n="devices">Devices</h3>
+        <ul id="midi-devices" class="panel-list"><li class="muted" data-i18n="noPermission">No permission yet</li></ul>
+        <button id="midi-enable" class="control" type="button" data-i18n="enableMidi">Enable MIDI</button>
+        <h3 data-i18n="lastMessages">Last messages</h3>
         <ol id="midi-log" class="panel-list midi-log"></ol>
       </aside>
     </main>
 
-    <div class="drop-hint" aria-hidden="true">Suelta aquí tus samples</div>
+    <div class="drop-hint" aria-hidden="true" data-i18n="dropHere">Drop your samples here</div>
 
     <footer class="foot">
-      <span>Ctrl+Enter play · Ctrl+. stop · Ctrl+Shift+H oculta el código</span>
-      <a href="https://github.com/verax90/joe-doe-live">Código fuente (AGPL-3.0)</a>
+      <span data-i18n="shortcuts">Ctrl+Enter play · Ctrl+. stop · Ctrl+Shift+H hides the code</span>
+      <a href="https://github.com/verax90/joe-doe-live" data-i18n="source">Source code (AGPL-3.0)</a>
     </footer>
 
     <script type="module" src="/src/main.ts"></script>
