@@ -1,9 +1,9 @@
 // Video in the studio, two ways:
-// - Source of the webcam visuals: the webcam, a video file of yours or a
+// - Source of the webcam visuals: the webcam, video files of yours (in turn) or a
 //   browser tab you capture (YouTube playing there, say). Hydra reads its
 //   pixels, so effects, the ASCII filter and recording all apply.
 // - YouTube behind everything: an embedded player, muted and looped, under the
-//   visuals. YouTube does not let a page read its pixels, so no effect touches
+//   visuals; several links or a YouTube playlist play one after another. YouTube does not let a page read its pixels, so no effect touches
 //   it and recordings leave it out; capture its tab for that.
 import { t } from './i18n';
 
@@ -46,7 +46,7 @@ function dispose(old?: HTMLVideoElement) {
   if (!old) return;
   old.pause();
   (old.srcObject as MediaStream | null)?.getTracks().forEach((track) => track.stop());
-  if (old.src.startsWith('blob:')) URL.revokeObjectURL(old.src);
+  fileUrls.get(old)?.forEach((url) => URL.revokeObjectURL(url));
   old.srcObject = null;
   old.removeAttribute('src');
 }
@@ -69,10 +69,17 @@ function makeVideo() {
   return element;
 }
 
-export async function useFile(file: File) {
+// Blob URLs of each file video, freed when it is replaced
+const fileUrls = new WeakMap<HTMLVideoElement, string[]>();
+
+// One or more files: several play one after another and the list loops
+export async function useFiles(files: File[]) {
   const next = makeVideo();
-  next.loop = true;
-  next.src = URL.createObjectURL(file);
+  const urls = files.map((file) => URL.createObjectURL(file));
+  fileUrls.set(next, urls);
+  let index = 0;
+  next.loop = urls.length === 1;
+  next.src = urls[0];
   // Hydra needs the first frame before it can make a texture of it
   await new Promise<void>((resolve, reject) => {
     next.onloadeddata = () => resolve();
@@ -80,6 +87,14 @@ export async function useFile(file: File) {
   }).catch((error) => {
     dispose(next);
     throw error;
+  });
+  // Same element, new source: Hydra keeps reading it and resizes to the new video
+  next.onerror = null;
+  // autoplay: a play() right after changing src can land before it loads
+  next.autoplay = true;
+  next.addEventListener('ended', () => {
+    index = (index + 1) % urls.length;
+    next.src = urls[index];
   });
   replace('file', next);
 }
@@ -122,18 +137,54 @@ export function youtubeId(input: string) {
   return valid(url.searchParams.get('v'));
 }
 
+// What plays behind: a YouTube playlist link (list=…) plays that list; else
+// every video link or id in the text, one after another. Either way it loops
+export type YoutubeSource = { list: string } | { ids: string[] };
+
+export function youtubeSource(text: string): YoutubeSource | null {
+  const list = text.match(/[?&]list=([\w-]+)/)?.[1];
+  if (list) return { list };
+  const ids = text
+    .split(/[\s,]+/)
+    .map(youtubeId)
+    .filter((id): id is string => id !== null);
+  return ids.length ? { ids } : null;
+}
+
+export function youtubeEmbedUrl(source: YoutubeSource) {
+  // Muted so it may autoplay; loop=1 needs playlist= even for a single video
+  const params = new URLSearchParams({
+    autoplay: '1',
+    mute: '1',
+    loop: '1',
+    controls: '0',
+    playsinline: '1',
+    disablekb: '1',
+    rel: '0',
+    iv_load_policy: '3',
+  });
+  if ('list' in source) {
+    params.set('list', source.list);
+    return `https://www.youtube-nocookie.com/embed/videoseries?${params}`;
+  }
+  params.set('playlist', source.ids.join(','));
+  return `https://www.youtube-nocookie.com/embed/${source.ids[0]}?${params}`;
+}
+
+// The text you pasted is remembered, so the same list comes back next time
 const YOUTUBE_KEY = 'jdl:youtube';
 
-function setYoutube(id: string | null) {
+function setYoutube(text: string | null) {
   document.getElementById('youtube-bg')?.remove();
-  document.body.classList.toggle('has-youtube', Boolean(id));
+  const source = text ? youtubeSource(text) : null;
+  document.body.classList.toggle('has-youtube', Boolean(source));
   try {
-    if (id) localStorage.setItem(YOUTUBE_KEY, id);
+    if (source) localStorage.setItem(YOUTUBE_KEY, text!);
     else localStorage.removeItem(YOUTUBE_KEY);
   } catch {
     // not remembered, still shown
   }
-  if (!id) return;
+  if (!source) return null;
   const frame = document.createElement('iframe');
   frame.id = 'youtube-bg';
   frame.className = 'youtube-bg';
@@ -142,26 +193,15 @@ function setYoutube(id: string | null) {
   frame.setAttribute('aria-hidden', 'true');
   frame.allow = 'autoplay; encrypted-media';
   frame.referrerPolicy = 'strict-origin-when-cross-origin';
-  // Muted so it may autoplay; playlist=id is what makes a single video loop
-  const params = new URLSearchParams({
-    autoplay: '1',
-    mute: '1',
-    loop: '1',
-    playlist: id,
-    controls: '0',
-    playsinline: '1',
-    disablekb: '1',
-    rel: '0',
-    iv_load_policy: '3',
-  });
-  frame.src = `https://www.youtube-nocookie.com/embed/${id}?${params}`;
+  frame.src = youtubeEmbedUrl(source);
   document.body.prepend(frame);
+  return source;
 }
 
 export function setupVideo(options: { showSource: () => void }) {
   const status = document.querySelector<HTMLElement>('#video-status')!;
   const form = document.querySelector<HTMLFormElement>('#youtube-form')!;
-  const input = document.querySelector<HTMLInputElement>('#youtube-url')!;
+  const input = document.querySelector<HTMLTextAreaElement>('#youtube-url')!;
   const off = document.querySelector<HTMLButtonElement>('#youtube-off')!;
   const fileInput = document.querySelector<HTMLInputElement>('#video-file')!;
   const tab = document.querySelector<HTMLButtonElement>('#video-tab')!;
@@ -172,11 +212,10 @@ export function setupVideo(options: { showSource: () => void }) {
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    const id = youtubeId(input.value);
-    if (!id) return say(t('youtubeBad'));
-    setYoutube(id);
+    const source = setYoutube(input.value);
     showOff();
-    say(t('youtubeOn'));
+    if (!source) return say(t('youtubeBad'));
+    say('list' in source ? t('youtubeList') : source.ids.length > 1 ? t('youtubeMany', { count: source.ids.length }) : t('youtubeOn'));
   });
   off.addEventListener('click', () => {
     setYoutube(null);
@@ -186,15 +225,16 @@ export function setupVideo(options: { showSource: () => void }) {
   });
 
   fileInput.addEventListener('change', async () => {
-    const file = fileInput.files?.[0];
+    const files = [...(fileInput.files ?? [])];
     fileInput.value = '';
-    if (!file) return;
+    if (!files.length) return;
+    const names = files.map((file) => file.name).join(', ');
     try {
-      await useFile(file);
+      await useFiles(files);
       options.showSource();
-      say(t('videoUsingFile', { name: file.name }));
+      say(files.length > 1 ? t('videoUsingFiles', { count: files.length, names }) : t('videoUsingFile', { name: names }));
     } catch {
-      say(t('videoBadFile', { name: file.name }));
+      say(t('videoBadFile', { name: names }));
     }
   });
 
@@ -213,16 +253,13 @@ export function setupVideo(options: { showSource: () => void }) {
     say(t('videoUsingWebcam'));
   });
 
-  // The YouTube video you left on comes back
+  // The YouTube video or list you left on comes back
   let saved: string | null = null;
   try {
     saved = localStorage.getItem(YOUTUBE_KEY);
   } catch {
     // nothing saved
   }
-  if (saved && youtubeId(saved)) {
-    setYoutube(saved);
-    input.value = `https://youtu.be/${saved}`;
-  }
+  if (saved && setYoutube(saved)) input.value = saved;
   showOff();
 }

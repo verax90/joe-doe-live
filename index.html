@@ -196,7 +196,7 @@
         <p class="panel-help" data-i18n="youtubeHelp">A YouTube video plays muted and looped behind the code and the visuals.</p>
         <form id="youtube-form" class="video-row">
           <label class="visually-hidden" for="youtube-url" data-i18n="youtubeLink">YouTube link</label>
-          <input id="youtube-url" class="control" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://youtu.be/…" />
+          <textarea id="youtube-url" class="control youtube-links" rows="3" autocomplete="off" spellcheck="false" placeholder="https://youtu.be/…" data-i18n-placeholder="youtubePlaceholder"></textarea>
           <button class="control" type="submit" data-i18n="youtubePut">Put</button>
         </form>
         <button id="youtube-off" class="control" type="button" data-i18n="youtubeOff" hidden>Remove the video</button>
@@ -204,8 +204,8 @@
         <p class="panel-help" data-i18n="videoSourceHelp">The webcam visuals can use a video of yours or a tab instead of the camera.</p>
         <div class="sample-pickers">
           <label class="control file-button">
-            <span data-i18n="videoFile">Your video</span>
-            <input id="video-file" type="file" accept="video/*" />
+            <span data-i18n="videoFile">Your videos</span>
+            <input id="video-file" type="file" accept="video/*" multiple />
           </label>
           <button id="video-tab" class="control" type="button" data-i18n="videoTab">Capture a tab</button>
           <button id="video-webcam" class="control" type="button" data-i18n="videoWebcam">Back to the webcam</button>

@@ -607,9 +607,20 @@ select.control {
   margin-bottom: 0.5rem;
 }
 
-.video-row input {
+.video-row {
+  align-items: flex-start;
+}
+
+.video-row input,
+.video-row textarea {
   flex: 1;
   min-width: 0;
+}
+
+.youtube-links {
+  resize: vertical;
+  font: inherit;
+  font-size: 12px;
 }
 
 .sample-pickers {
