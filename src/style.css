@@ -1,0 +1,315 @@
+/* Tokens de joedoe.dev (tema oscuro): el estudio es siempre oscuro para tocar */
+:root {
+  --bg: #12151c;
+  --bg-elevated: #1a1e28;
+  --fg: #eceae4;
+  --muted: #9a9aa3;
+  --line: rgba(236, 234, 228, 0.12);
+  --accent: #d6ff4b;
+  --accent-ink: #12151c;
+  --ok: #5dffb0;
+  --danger: #ff6b5a;
+  --panel: rgba(18, 21, 28, 0.72);
+  --font-display: 'Syne Variable', 'Syne', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --bar-h: 3.5rem;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  /* sin esto, las líneas largas de código ensanchan toda la página */
+  grid-template-columns: minmax(0, 1fr);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  overflow: hidden;
+}
+
+/* El canvas de Hydra va fijo detrás de todo: la interfaz se pinta encima */
+.bar,
+.stage,
+.foot {
+  position: relative;
+  z-index: 1;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Barra superior */
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  min-height: var(--bar-h);
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+  backdrop-filter: blur(8px);
+}
+
+.brand {
+  margin-right: auto;
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.brand-dot {
+  margin: 0 0.35em;
+  color: var(--muted);
+}
+
+.brand-live {
+  color: var(--accent);
+}
+
+.bar-group {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.control {
+  height: 2.1rem;
+  padding: 0 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  background: var(--bg-elevated);
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.control:hover {
+  border-color: var(--accent);
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.control[aria-pressed='true'] {
+  border-color: var(--accent);
+}
+
+.control-accent {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.control-accent:hover {
+  background: transparent;
+  color: var(--accent);
+}
+
+select.control {
+  max-width: 14rem;
+}
+
+.dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-left: 0.3rem;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.5;
+}
+
+.dot.is-on {
+  background: var(--ok);
+  opacity: 1;
+}
+
+.dot.is-active {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* Zona principal */
+.stage {
+  display: flex;
+  min-height: 0;
+}
+
+.editor {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  transition: opacity 0.3s var(--ease);
+}
+
+.hide-code .editor {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Editor de Strudel: fondo transparente para ver Hydra detrás.
+   El componente mete el editor en un div con fondo propio del tema. */
+.editor > div,
+.editor .cm-editor {
+  min-height: 100%;
+  background: transparent !important;
+  font-family: var(--font-mono);
+  font-size: 15px;
+}
+
+.editor .cm-scroller {
+  font-family: var(--font-mono) !important;
+}
+
+.editor .cm-content {
+  padding: 1rem 0;
+}
+
+.editor .cm-line > span,
+.editor .cm-line {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.editor .cm-line {
+  background: rgba(18, 21, 28, 0.55);
+  width: fit-content;
+  padding-right: 0.5rem;
+}
+
+.editor .cm-gutters {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Panel MIDI */
+.midi {
+  width: min(22rem, 90vw);
+  padding: 1rem;
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  backdrop-filter: blur(8px);
+  overflow-y: auto;
+}
+
+.midi[hidden] {
+  display: none;
+}
+
+.midi h2 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.midi h3 {
+  margin: 1.25rem 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.midi-help {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.midi code {
+  color: var(--accent);
+}
+
+.midi-devices,
+.midi-log {
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.midi-devices li,
+.midi-log li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--line);
+  line-height: 1.4;
+}
+
+.midi-device {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.midi-text {
+  color: var(--accent);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* Pie */
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.foot a {
+  color: var(--muted);
+}
+
+.foot a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 700px) {
+  .bar {
+    gap: 0.5rem;
+  }
+
+  .brand-dot,
+  .brand-name {
+    display: none;
+  }
+
+  .foot span {
+    display: none;
+  }
+
+  .midi {
+    position: absolute;
+    inset: 0 0 0 auto;
+  }
+}

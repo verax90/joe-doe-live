@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Estudio de live coding en el navegador: Strudel, Hydra y MIDI." />
+    <title>joe doe · live</title>
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="https://joedoe.dev/music" title="Volver a joedoe.dev">
+        <span class="brand-name">joe doe</span><span class="brand-dot">·</span><span class="brand-live">live</span>
+      </a>
+
+      <div class="bar-group">
+        <label class="visually-hidden" for="preset">Patrón</label>
+        <select id="preset" class="control"></select>
+        <button id="save" class="control" type="button" title="Guardar en este navegador">Guardar</button>
+        <button id="delete" class="control" type="button" title="Borrar el patrón guardado" hidden>Borrar</button>
+      </div>
+
+      <div class="bar-group">
+        <button id="play" class="control control-accent" type="button" aria-keyshortcuts="Control+Enter">▶ Play</button>
+        <button id="stop" class="control" type="button" aria-keyshortcuts="Control+.">■ Stop</button>
+      </div>
+
+      <div class="bar-group">
+        <button id="toggle-code" class="control" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H">Código</button>
+        <button id="toggle-midi" class="control" type="button" aria-pressed="false">
+          MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <section class="editor" id="editor">
+        <strudel-editor id="repl"></strudel-editor>
+      </section>
+
+      <aside class="midi" id="midi" hidden>
+        <h2>MIDI</h2>
+        <p class="midi-help">
+          Toca un pad o gira un knob para ver qué número manda. Úsalo en el código con
+          <code>midin('nombre')</code> (knobs) o <code>midikeys('nombre')</code> (pads).
+        </p>
+        <h3>Dispositivos</h3>
+        <ul id="midi-devices" class="midi-devices"><li class="muted">Sin permiso todavía</li></ul>
+        <button id="midi-enable" class="control" type="button">Activar MIDI</button>
+        <h3>Últimos mensajes</h3>
+        <ol id="midi-log" class="midi-log"></ol>
+      </aside>
+    </main>
+
+    <footer class="foot">
+      <span>Ctrl+Enter play · Ctrl+. stop · Ctrl+Shift+H oculta el código</span>
+      <a href="https://github.com/verax90/joe-doe-live">Código fuente (AGPL-3.0)</a>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
