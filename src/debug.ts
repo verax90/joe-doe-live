@@ -3,6 +3,7 @@
 // limiter, how late the main thread runs and how many MIDI notes arrive, and
 // it logs every dropout (silence while notes keep coming in).
 import { getLimiter } from './limiter';
+import { measureLatency } from './latency';
 import { midiStats } from './midi';
 
 type Scheduler = { started?: boolean };
@@ -30,7 +31,9 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
     <pre class="debug-now"></pre>
     <strong>dropouts</strong>
     <pre class="debug-log">none yet</pre>
-    <button type="button" class="control debug-copy">Copy report</button>`;
+    <button type="button" class="control debug-copy">Copy report</button>
+    <button type="button" class="control debug-latency">Measure latency</button>
+    <pre class="debug-latency-result"></pre>`;
   document.body.append(box);
   const now = box.querySelector<HTMLElement>('.debug-now')!;
   const logView = box.querySelector<HTMLElement>('.debug-log')!;
@@ -124,6 +127,26 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
       quietSince = null;
     }
   }, 250);
+
+  // Real round trip, speakers to microphone: what Chrome reports can be off
+  const latencyButton = box.querySelector<HTMLButtonElement>('.debug-latency')!;
+  const latencyResult = box.querySelector<HTMLElement>('.debug-latency-result')!;
+  latencyButton.addEventListener('click', async () => {
+    const context = (globalThis as { getAudioContext?: () => AudioContext }).getAudioContext?.();
+    if (!context) return;
+    latencyButton.disabled = true;
+    latencyResult.textContent = 'listening… (speakers on, no headphones)';
+    try {
+      if (context.state !== 'running') await context.resume();
+      const seconds = await measureLatency(context);
+      const reported = Math.round((context.baseLatency + (context.outputLatency || 0)) * 1000);
+      latencyResult.textContent = `measured round trip ${Math.round(seconds * 1000)} ms\nChrome reports ${reported} ms (output only)`;
+    } catch (error) {
+      latencyResult.textContent = error instanceof Error ? error.message : String(error);
+    } finally {
+      latencyButton.disabled = false;
+    }
+  });
 
   copy.addEventListener('click', async () => {
     const report = JSON.stringify({ userAgent: navigator.userAgent, dropouts, lastSeconds: history }, null, 1);
