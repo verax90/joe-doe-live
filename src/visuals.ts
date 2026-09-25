@@ -60,7 +60,7 @@ export const visuals: Visual[] = [
 ];
 
 type Global = typeof globalThis & {
-  initHydra?: () => Promise<unknown>;
+  initHydra?: (options?: Record<string, unknown>) => Promise<unknown>;
   getAnalyzerData?: (type: 'frequency' | 'time', id?: number) => Float32Array;
   getAudioContext?: () => AudioContext;
   bass?: () => number;
@@ -96,6 +96,14 @@ g.bass = () => band(20, 150);
 g.mid = () => band(150, 2000);
 g.high = () => band(2000, 10000);
 g.level = () => band(20, 10000);
+
+// Strudel carga Hydra desde unpkg.com; así se usa la copia que va con el estudio.
+// Vale también para el initHydra() que escribas en tus patrones.
+export function useBundledHydra(src: string) {
+  const original = g.initHydra as ((options?: Record<string, unknown>) => Promise<unknown>) | undefined;
+  if (!original) return;
+  g.initHydra = (options: Record<string, unknown> = {}) => original({ src, ...options });
+}
 
 export async function applyVisual(id: string) {
   const visual = visuals.find((v) => v.id === id);

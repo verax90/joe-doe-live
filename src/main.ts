@@ -7,8 +7,11 @@ import { builtInPresets, type Preset } from './presets';
 import { setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
+import { setupStatus } from './status';
 import { setupToolsPanel } from './tools';
-import { CODE_VISUAL, applyVisual, visuals } from './visuals';
+import { CODE_VISUAL, applyVisual, useBundledHydra, visuals } from './visuals';
+// Ruta directa: el paquete no exporta dist/ por su nombre
+import hydraUrl from '../node_modules/hydra-synth/dist/hydra-synth.js?url';
 
 type StrudelMirror = {
   code: string;
@@ -92,6 +95,7 @@ function whenStrudelReady(): Promise<void> {
 }
 
 const editor = await whenEditorReady();
+setupStatus(repl);
 
 const shared = readSharedPattern();
 // Quita el enlace compartido de la URL: al recargar manda tu borrador, no el patrón original
@@ -121,6 +125,7 @@ editor.evaluate = async (autostart?: boolean) => {
 };
 
 whenStrudelReady().then(() => {
+  useBundledHydra(hydraUrl);
   runVisual();
   setupSamplesPanel();
 });
