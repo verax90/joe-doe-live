@@ -150,6 +150,10 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
     if (!context) return;
     latencyButton.disabled = true;
     latencyResult.textContent = 'listening… (speakers on, no headphones)';
+    // The studio goes silent while measuring (a latched arpeggiator included),
+    // so the microphone only hears the clicks
+    const output = getLimiter()?.limiter;
+    output?.disconnect(context.destination);
     try {
       if (context.state !== 'running') await context.resume();
       const seconds = await measureLatency(context);
@@ -158,6 +162,7 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
     } catch (error) {
       latencyResult.textContent = error instanceof Error ? error.message : String(error);
     } finally {
+      output?.connect(context.destination);
       latencyButton.disabled = false;
     }
   });
