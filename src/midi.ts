@@ -10,6 +10,9 @@ const MAX_LOG = 12;
 // sideways) is read here and offered as bend(), from -1 to 1, for patterns and
 // Hydra: note("c3").speed(ref(() => 1 + bend() * 0.06))
 let bendValue = 0;
+
+// For the ?debug panel: how many notes arrive
+export const midiStats = { notes: 0 };
 (globalThis as { bend?: () => number }).bend = () => bendValue;
 
 let connectMidi: (() => Promise<void>) | undefined;
@@ -87,6 +90,7 @@ export function setupMidiPanel() {
             if (!event.data) return;
             const [status, low, high] = event.data;
             if ((status & 0xf0) === 0xe0) bendValue = (((high << 7) | low) - 8192) / 8192;
+            if ((status & 0xf0) === 0x90 && high > 0) midiStats.notes++;
             if ((status & 0xf0) === 0xc0) window.dispatchEvent(new CustomEvent(PROGRAM_EVENT, { detail: low }));
             const text = describe(event.data);
             if (!text) return;

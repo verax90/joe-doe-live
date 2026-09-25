@@ -6,6 +6,7 @@ import './style.css';
 import { lang, pick, setLang, t, translatePage } from './i18n';
 import { builtInPresets, translateIfBuiltIn, type Preset } from './presets';
 import { setupCheatsheet } from './cheatsheet';
+import { setupDebug } from './debug';
 import { ensureLimiter } from './limiter';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
@@ -242,4 +243,5 @@ window.addEventListener('keydown', (event) => {
 
 setupMidiPanel();
 setupCheatsheet();
+setupDebug(() => (editor as unknown as { repl?: { scheduler?: { started?: boolean } } }).repl?.scheduler);
 setupToolsPanel(() => editor.stop());

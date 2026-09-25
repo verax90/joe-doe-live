@@ -9,6 +9,10 @@ type Global = typeof globalThis & {
 
 // Strudel rebuilds its output node now and then; each new one gets its own limiter
 const limited = new WeakSet<GainNode>();
+let current: { master: GainNode; limiter: DynamicsCompressorNode } | undefined;
+
+// For the ?debug panel: the signal before the limiter and how much it cuts
+export const getLimiter = () => current;
 
 export function ensureLimiter() {
   const output = (globalThis as Global).getSuperdoughAudioController?.()?.output;
@@ -28,4 +32,5 @@ export function ensureLimiter() {
   master.disconnect();
   master.connect(limiter).connect(context.destination);
   limited.add(master);
+  current = { master, limiter };
 }

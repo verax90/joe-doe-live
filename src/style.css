@@ -422,6 +422,28 @@ select.control {
   display: grid;
 }
 
+/* ?debug panel */
+.debug {
+  position: fixed;
+  right: 1rem;
+  bottom: 3rem;
+  z-index: 20;
+  width: min(26rem, calc(100% - 2rem));
+  max-height: 60vh;
+  overflow: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--accent);
+  border-radius: 0.4rem;
+  background: var(--bg-elevated);
+  font-size: 12px;
+}
+
+.debug pre {
+  margin: 0.25rem 0 0.75rem;
+  white-space: pre-wrap;
+  color: var(--fg);
+}
+
 /* Cheatsheet */
 .cheat-filter {
   width: 100%;
