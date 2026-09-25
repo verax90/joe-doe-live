@@ -227,6 +227,7 @@ stack(
 // Keys → piano · bank B pads → drums (bank A shares notes with the keys)
 // Joystick: up (same as knob 1) adds echo, sideways bends the piano and the visual
 // Knobs start at 0: turn 4 to bring the beat in and 2 to open the filter
+// Knob 7 is the master volume and 8 the ASCII size, in any pattern
 // Full Level, Note Repeat and the arpeggiator work on the MPK itself.
 // They run at the MPK's tempo (120 unless you tap another): keep setcps in step
 // CC mode: hold pad 1 to cut the beat, pad 2 to crush the piano
@@ -282,6 +283,7 @@ stack(
 // Teclas → piano · pads del banco B → batería (el banco A comparte notas con las teclas)
 // Joystick: arriba (igual que el knob 1) añade eco, a los lados desafina el piano y el visual
 // Los knobs empiezan en 0: sube el 4 para que entre el ritmo y el 2 para abrir el filtro
+// El knob 7 es el volumen general y el 8 el tamaño del ASCII, en cualquier patrón
 // Full Level, Note Repeat y el arpegiador funcionan en el propio MPK.
 // Van al tempo del MPK (120 si no marcas otro): mantén setcps igual
 // Modo CC: mantén el pad 1 para cortar el ritmo y el pad 2 para ensuciar el piano

@@ -3,6 +3,7 @@
 // read the keys itself (midikeys), so you can jam over the lofi.
 import { onLangChange, pick, type Localized } from './i18n';
 import { ensureLimiter } from './limiter';
+import { freePlayKnobs } from './knobs';
 import { NOTE_EVENT, type NoteDetail } from './midi';
 
 type Global = typeof globalThis & {
@@ -76,7 +77,17 @@ export function setupFreePlay(patternReadsKeys: () => boolean) {
       play({ s: kit[note - 32], gain: velocity * 0.8 });
     } else {
       // never below 35%: the arpeggiator repeats soft velocities
-      play({ s: select.value, note, velocity: 0.35 + velocity * 0.65, gain: 0.7 });
+      // Knobs 1-3: echo, filter (squared, so the low end of the knob has room) and reverb
+      const { echo, filter, reverb } = freePlayKnobs;
+      play({
+        s: select.value,
+        note,
+        velocity: 0.35 + velocity * 0.65,
+        gain: 0.7,
+        cutoff: 300 + filter * filter * 7700,
+        room: reverb * 0.8,
+        delay: echo * 0.6,
+      });
     }
   });
 }

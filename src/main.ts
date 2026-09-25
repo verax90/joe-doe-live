@@ -11,6 +11,7 @@ import { setupCheatsheet } from './cheatsheet';
 import { setupDebug } from './debug';
 import { setupFreePlay } from './freeplay';
 import { setupHelp } from './help';
+import { setupKnobs } from './knobs';
 import { setupRecorder } from './record';
 import { ensureLimiter } from './limiter';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
@@ -315,6 +316,7 @@ window.addEventListener('keydown', (event) => {
 setupMidiPanel();
 setupCheatsheet();
 setupHelp();
+setupKnobs();
 setupRecorder();
 // Free play stays out of the way when the playing pattern reads the keys itself
 setupFreePlay(

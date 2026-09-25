@@ -25,6 +25,10 @@ export const PROGRAM_EVENT = 'jdl:program-change';
 export const NOTE_EVENT = 'jdl:note-on';
 export type NoteDetail = { note: number; velocity: number };
 
+// Every knob or slider move (control change), value from 0 to 1
+export const CC_EVENT = 'jdl:cc';
+export type CcDetail = { cc: number; value: number; channel: number };
+
 // Once MIDI permission exists (a pattern with midin() asks for it too), start
 // listening without asking again
 export async function connectMidiIfAllowed() {
@@ -99,6 +103,10 @@ export function setupMidiPanel() {
               window.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: low, velocity: high / 127 } }));
             }
             if ((status & 0xf0) === 0xc0) window.dispatchEvent(new CustomEvent(PROGRAM_EVENT, { detail: low }));
+            if ((status & 0xf0) === 0xb0) {
+              const detail: CcDetail = { cc: low, value: high / 127, channel: (status & 0x0f) + 1 };
+              window.dispatchEvent(new CustomEvent<CcDetail>(CC_EVENT, { detail }));
+            }
             const text = describe(event.data);
             if (!text) return;
             flash();

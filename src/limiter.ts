@@ -14,6 +14,13 @@ let current: { master: GainNode; limiter: DynamicsCompressorNode } | undefined;
 // For the ?debug panel: the signal before the limiter and how much it cuts
 export const getLimiter = () => current;
 
+// Master volume (MPK knob 7). 0.8 leaves some headroom before the limiter
+let volume = 0.8;
+export function setMasterVolume(value: number) {
+  volume = value;
+  if (current) current.master.gain.setTargetAtTime(value, current.master.context.currentTime, 0.05);
+}
+
 export function ensureLimiter() {
   const output = (globalThis as Global).getSuperdoughAudioController?.()?.output;
   const master = output?.destinationGain;
@@ -28,7 +35,7 @@ export function ensureLimiter() {
     release: 0.15,
   });
   // A little headroom before the limiter so it works less
-  master.gain.value = 0.8;
+  master.gain.value = volume;
   master.disconnect();
   master.connect(limiter).connect(context.destination);
   limited.add(master);

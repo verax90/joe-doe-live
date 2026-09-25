@@ -7,8 +7,13 @@
 type Globals = { afterUpdate?: (dt: number) => void };
 
 const RAMP = ' .:-=+*#%@';
-const CELL_WIDTH = 9;
-const CELL_HEIGHT = 16;
+// Character size, from fine (8 px) to chunky (28 px); MPK knob 8
+let cellHeight = 16;
+let cellWidth = 9;
+export function setAsciiScale(value: number) {
+  cellHeight = Math.round(8 + value * 20);
+  cellWidth = Math.max(5, Math.round(cellHeight * 0.56));
+}
 const STORAGE_KEY = 'jdl:ascii';
 
 let enabled = false;
@@ -37,8 +42,8 @@ function draw(source: HTMLCanvasElement) {
     target.width = width;
     target.height = height;
   }
-  const cols = Math.max(1, Math.floor(window.innerWidth / CELL_WIDTH));
-  const rows = Math.max(1, Math.floor(window.innerHeight / CELL_HEIGHT));
+  const cols = Math.max(1, Math.floor(window.innerWidth / cellWidth));
+  const rows = Math.max(1, Math.floor(window.innerHeight / cellHeight));
   sampler.canvas.width = cols;
   sampler.canvas.height = rows;
   sampler.drawImage(source, 0, 0, cols, rows);
@@ -52,7 +57,7 @@ function draw(source: HTMLCanvasElement) {
   // Same font and colour as the code: with the code on screen the characters
   // step back so the code stays readable; full strength in performance mode
   context.globalAlpha = document.body.classList.contains('hide-code') ? 1 : 0.4;
-  context.font = `${CELL_HEIGHT - 2}px 'IBM Plex Mono', monospace`;
+  context.font = `${cellHeight - 2}px 'IBM Plex Mono', monospace`;
   context.textBaseline = 'top';
   // Auto contrast: the darkest cell becomes a space and the brightest an @, so
   // dark visuals (and dim webcams) still use the whole ramp
@@ -75,7 +80,7 @@ function draw(source: HTMLCanvasElement) {
       const value = (light[row * cols + col] - darkest) / range;
       line += RAMP[Math.max(0, Math.min(RAMP.length - 1, Math.floor(value * RAMP.length)))];
     }
-    context.fillText(line, 0, row * CELL_HEIGHT, window.innerWidth);
+    context.fillText(line, 0, row * cellHeight, window.innerWidth);
   }
   context.globalAlpha = 1;
 }
