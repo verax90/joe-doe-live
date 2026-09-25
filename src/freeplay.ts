@@ -5,7 +5,7 @@ import { ensureAudio } from './audio';
 import { onLangChange, pick, type Localized } from './i18n';
 import { ensureLimiter } from './limiter';
 import { freePlayKnobs } from './knobs';
-import { NOTE_EVENT, type NoteDetail } from './midi';
+import { NOTE_EVENT, currentBend, type NoteDetail } from './midi';
 
 type Global = typeof globalThis & {
   superdough?: (value: Record<string, unknown>, time: number, duration: number) => Promise<void>;
@@ -80,11 +80,12 @@ export function setupFreePlay(patternReadsKeys: () => boolean) {
       play({ s: kit[note - 32], gain: velocity * 0.8 });
     } else {
       // never below 35%: the arpeggiator repeats soft velocities
-      // Knobs 1-3: echo, filter (squared, so the low end of the knob has room) and reverb
+      // Knobs 1-3: echo, filter (squared, so the low end of the knob has room) and reverb;
+      // the joystick bends each new note up to two semitones
       const { echo, filter, reverb } = freePlayKnobs;
       play({
         s: select.value,
-        note,
+        note: note + currentBend() * 2,
         velocity: 0.35 + velocity * 0.65,
         gain: 0.7,
         cutoff: 300 + filter * filter * 7700,

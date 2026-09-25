@@ -14,7 +14,8 @@ let bendValue = 0;
 
 // For the ?debug panel: how many notes arrive
 export const midiStats = { notes: 0 };
-(globalThis as { bend?: () => number }).bend = () => bendValue;
+export const currentBend = () => bendValue;
+(globalThis as { bend?: () => number }).bend = currentBend;
 
 let connectMidi: (() => Promise<void>) | undefined;
 
@@ -25,6 +26,9 @@ export const PROGRAM_EVENT = 'jdl:program-change';
 // Every note-on, for free play (keys sounding without pressing Play)
 export const NOTE_EVENT = 'jdl:note-on';
 export type NoteDetail = { note: number; velocity: number };
+
+// Every pitch bend move (the MPK joystick sideways), from -1 to 1
+export const BEND_EVENT = 'jdl:bend';
 
 // Every knob or slider move (control change), value from 0 to 1
 export const CC_EVENT = 'jdl:cc';
@@ -64,7 +68,7 @@ export function setupMidiPanel() {
     const type = status & 0xf0;
     const channel = (status & 0x0f) + 1;
     if (type === 0x90 && b > 0) return t('midiNote', { note: a, velocity: b, channel });
-    if (type === 0x80 || type === 0x90) return null; // note off: ruido para el monitor
+    if (type === 0x80 || type === 0x90) return null; // note off: noise for the monitor
     if (type === 0xb0) return t('midiCc', { cc: a, value: b, channel });
     if (type === 0xe0) return t('midiBend', { value: (b << 7) | a, channel });
     if (type === 0xd0 || type === 0xa0) return t('midiTouch', { value: a, channel });
@@ -90,7 +94,10 @@ export function setupMidiPanel() {
         const { data, target } = event as MIDIMessageEvent;
         if (!data) return;
         const [status, low, high] = data;
-        if ((status & 0xf0) === 0xe0) bendValue = (((high << 7) | low) - 8192) / 8192;
+        if ((status & 0xf0) === 0xe0) {
+          bendValue = (((high << 7) | low) - 8192) / 8192;
+          window.dispatchEvent(new CustomEvent<number>(BEND_EVENT, { detail: bendValue }));
+        }
         if ((status & 0xf0) === 0x90 && high > 0) {
           midiStats.notes++;
           window.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: low, velocity: high / 127 } }));

@@ -14,6 +14,7 @@ import { setupExport } from './export';
 import { setupFreePlay } from './freeplay';
 import { setupHelp } from './help';
 import { lang, onLangChange, pick, setLang, t, translatePage } from './i18n';
+import { setupKnobHud } from './knob-hud';
 import { setupKnobs } from './knobs';
 import { setupLearn } from './learn';
 import { setupLibrary } from './library';
@@ -201,6 +202,7 @@ setupHelp();
 setupTempo(editor);
 setupMidiPanel();
 setupKnobs();
+setupKnobHud(() => ({ code: editor.code, playing: Boolean(scheduler?.started), visual: visualSelect.value, ascii: isAsciiOn() }));
 setupRecorder();
 // Free play stays out of the way when the playing pattern reads the keys itself
 setupFreePlay(() => Boolean(scheduler?.started) && editor.code.includes('midikeys'));

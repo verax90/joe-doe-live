@@ -51,8 +51,8 @@ const sections: Section[] = [
       {
         kind: 'text',
         body: L(
-          'Enable MIDI once in More → MIDI. The keys play straight away without pressing Play (pick their sound in the MIDI panel), or through the "MPK Mini" pattern while it plays. Click the page once first so the browser lets it make sound.',
-          'Activa el MIDI una vez en Más → MIDI. Las teclas suenan directamente sin pulsar Play (su sonido se elige en el panel MIDI), o a través del patrón "MPK Mini" mientras suena. Haz clic una vez en la página antes para que el navegador deje sonar.',
+          'Moving a knob or the joystick shows what it just did at the bottom right, and what it needs if nothing seems to change. Enable MIDI once in More → MIDI. The keys play straight away without pressing Play (pick their sound in the MIDI panel), or through the "MPK Mini" pattern while it plays. Click the page once first so the browser lets it make sound.',
+          'Al mover un knob o el joystick, abajo a la derecha sale qué acaba de hacer, y qué hace falta si no parece cambiar nada. Activa el MIDI una vez en Más → MIDI. Las teclas suenan directamente sin pulsar Play (su sonido se elige en el panel MIDI), o a través del patrón "MPK Mini" mientras suena. Haz clic una vez en la página antes para que el navegador deje sonar.',
         ),
       },
       {
@@ -81,8 +81,8 @@ const sections: Section[] = [
           ['Knob 5', L('How many mirrors the "MPK Mini" visual has (Visual: From the code)', 'Cuántos espejos tiene el visual del "MPK Mini" (Visual: Del código)')],
           ['Knob 6', L('How fast that visual spins', 'Lo rápido que gira ese visual')],
           ['Knob 7', L('Master volume, always', 'Volumen general, siempre')],
-          ['Knob 8', L('Size of the ASCII characters, always', 'Tamaño de los caracteres ASCII, siempre')],
-          [L('Joystick sideways', 'Joystick a los lados'), L('Bends the piano up to two semitones and shifts the visual. It applies to each new note, so it shows most with the arpeggiator or fast playing; a held note does not bend', 'Desafina el piano hasta dos semitonos y desplaza el visual. Se aplica a cada nota nueva, así que se nota más con el arpegiador o tocando rápido; una nota mantenida no se desafina')],
+          ['Knob 8', L('Size of the ASCII characters, always (with the ASCII filter on)', 'Tamaño de los caracteres ASCII, siempre (con el filtro ASCII activado)')],
+          [L('Joystick sideways', 'Joystick a los lados'), L('Bends up to two semitones, in the "MPK Mini" pattern and when playing without Play, and shifts that pattern\'s visual. It applies to each new note, so it shows most with the arpeggiator or fast playing; a held note does not bend', 'Desafina hasta dos semitonos, en el patrón "MPK Mini" y al tocar sin Play, y desplaza el visual de ese patrón. Se aplica a cada nota nueva, así que se nota más con el arpegiador o tocando rápido; una nota mantenida no se desafina')],
         ],
       },
       {
