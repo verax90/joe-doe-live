@@ -6,7 +6,7 @@ import './style.css';
 import { lang, pick, setLang, t, translatePage } from './i18n';
 import { builtInPresets, translateIfBuiltIn, type Preset } from './presets';
 import { setupCheatsheet } from './cheatsheet';
-import { connectMidiIfAllowed, setupMidiPanel } from './midi';
+import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
 import { setupStatus } from './status';
@@ -122,6 +122,14 @@ const runVisual = () => applyVisual(visualSelect.value).catch((error) => console
 
 visualSelect.addEventListener('change', () => {
   writeStorage(VISUAL_KEY, visualSelect.value);
+  runVisual();
+});
+
+// A MIDI program change picks a visual: program 0 is the first in the list
+window.addEventListener(PROGRAM_EVENT, (event) => {
+  const visual = visuals[(event as CustomEvent<number>).detail % visuals.length];
+  visualSelect.value = visual.id;
+  writeStorage(VISUAL_KEY, visual.id);
   runVisual();
 });
 

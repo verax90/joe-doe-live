@@ -77,6 +77,7 @@ const sections: Section[] = [
     entries: [
       { code: "const knob = await midin('MPK')", note: { en: 'Read knobs; knob(1) goes 0 to 1', es: 'Leer knobs; knob(1) va de 0 a 1' } },
       { code: '.lpf(knob(1).range(300, 5000))', note: { en: 'A knob moves the filter', es: 'Un knob mueve el filtro' } },
+      { code: 'knob(1, 10)', note: { en: 'Only CC 1 on channel 10 (MPK pads in CC mode)', es: 'Solo el CC 1 del canal 10 (pads del MPK en modo CC)' } },
       { code: "const pads = await midikeys('MPK')", note: { en: 'Keys and pads as notes', es: 'Teclas y pads como notas' } },
       { code: 'pads().s("piano")', note: { en: 'Play them with an instrument', es: 'Tocarlas con un instrumento' } },
       { code: '.speed(ref(() => 1 + bend() * 0.06))', note: { en: 'Pitch bend (joystick sideways), -1 to 1', es: 'Pitch bend (joystick a los lados), de -1 a 1' } },

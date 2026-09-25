@@ -103,6 +103,9 @@ stack(
 // Knobs start at 0: turn 4 to bring the beat in and 2 to open the filter
 // Full Level, Note Repeat and the arpeggiator work on the MPK itself.
 // They run at the MPK's tempo (120 unless you tap another): keep setcps in step
+// CC mode: hold pad 1 to cut the beat, pad 2 to crush the piano
+// PROG CHANGE mode: each pad picks a visual
+// Knobs are channel 1 and CC-mode pads channel 10, hence knob(n, 1) and pad(n)
 // 1. Open the MIDI panel and hit "Enable MIDI"
 // 2. Pick "From the code" in Visual to see this pattern's visual
 await initHydra()
@@ -110,12 +113,13 @@ await initHydra()
 const mpk = 'MPK Mini'
 const knob = await midin(mpk)
 const keys = await midikeys(mpk)
+const pad = (n) => knob(n - 1, 10)
 
 // knob 5: how many mirrors · knob 6: how fast it spins
 osc(10, 0.05, 1)
   .color(0.34, 0.4, 0.12)
-  .kaleid(H(knob(5).range(2, 8)))
-  .rotate(0, H(knob(6).range(0, 0.3)))
+  .kaleid(H(knob(5, 1).range(2, 8)))
+  .rotate(0, H(knob(6, 1).range(0, 0.3)))
   .scale(() => 1 + bass())
   .scrollX(() => bend() * 0.2)
   .out()
@@ -127,12 +131,13 @@ const kit = ['bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'lt', 'ht']
 
 stack(
   // a beat to play over · knob 4: its volume
-  s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4).range(0, 0.9)),
+  s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4, 1).range(0, 0.9).mul(pad(1).mul(-1).add(1))),
   // knob 2: filter · knob 3: reverb
   // joystick up: echo · sideways: up to a semitone of bend
   keys().s("piano")
-    .lpf(knob(2).range(300, 8000)).room(knob(3).range(0, 0.8))
-    .delay(knob(1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
+    .lpf(knob(2, 1).range(300, 8000)).room(knob(3, 1).range(0, 0.8))
+    .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
+    .crush(pad(2).range(16, 3))
     // pads become drums, hit harder = louder; keys stay piano
     .withValue(v => v.note < 40
       ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity }
@@ -144,6 +149,9 @@ stack(
 // Los knobs empiezan en 0: sube el 4 para que entre el ritmo y el 2 para abrir el filtro
 // Full Level, Note Repeat y el arpegiador funcionan en el propio MPK.
 // Van al tempo del MPK (120 si no marcas otro): mantén setcps igual
+// Modo CC: mantén el pad 1 para cortar el ritmo y el pad 2 para ensuciar el piano
+// Modo PROG CHANGE: cada pad elige un visual
+// Los knobs van por el canal 1 y los pads en modo CC por el 10: de ahí knob(n, 1) y pad(n)
 // 1. Abre el panel MIDI y pulsa "Activar MIDI"
 // 2. Elige "Del código" en Visual para ver el visual de este patrón
 await initHydra()
@@ -151,12 +159,13 @@ await initHydra()
 const mpk = 'MPK Mini'
 const knob = await midin(mpk)
 const keys = await midikeys(mpk)
+const pad = (n) => knob(n - 1, 10)
 
 // knob 5: cuántos espejos · knob 6: lo rápido que gira
 osc(10, 0.05, 1)
   .color(0.34, 0.4, 0.12)
-  .kaleid(H(knob(5).range(2, 8)))
-  .rotate(0, H(knob(6).range(0, 0.3)))
+  .kaleid(H(knob(5, 1).range(2, 8)))
+  .rotate(0, H(knob(6, 1).range(0, 0.3)))
   .scale(() => 1 + bass())
   .scrollX(() => bend() * 0.2)
   .out()
@@ -168,12 +177,13 @@ const kit = ['bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'lt', 'ht']
 
 stack(
   // un ritmo sobre el que tocar · knob 4: su volumen
-  s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4).range(0, 0.9)),
+  s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4, 1).range(0, 0.9).mul(pad(1).mul(-1).add(1))),
   // knob 2: filtro · knob 3: reverb
   // joystick arriba: eco · a los lados: hasta un semitono de bend
   keys().s("piano")
-    .lpf(knob(2).range(300, 8000)).room(knob(3).range(0, 0.8))
-    .delay(knob(1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
+    .lpf(knob(2, 1).range(300, 8000)).room(knob(3, 1).range(0, 0.8))
+    .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
+    .crush(pad(2).range(16, 3))
     // los pads pasan a batería, más fuerte = más volumen; las teclas siguen siendo piano
     .withValue(v => v.note < 40
       ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity }

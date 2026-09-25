@@ -14,6 +14,10 @@ let bendValue = 0;
 
 let connectMidi: (() => Promise<void>) | undefined;
 
+// Program change from any controller (the MPK pads in PROG CHANGE mode):
+// main.ts turns it into a visual change
+export const PROGRAM_EVENT = 'jdl:program-change';
+
 // Once MIDI permission exists (a pattern with midin() asks for it too), start
 // listening without asking again
 export async function connectMidiIfAllowed() {
@@ -52,6 +56,7 @@ export function setupMidiPanel() {
     if (type === 0xb0) return t('midiCc', { cc: a, value: b, channel });
     if (type === 0xe0) return t('midiBend', { value: (b << 7) | a, channel });
     if (type === 0xd0 || type === 0xa0) return t('midiTouch', { value: a, channel });
+    if (type === 0xc0) return t('midiProgram', { program: a, channel });
     return null;
   };
 
@@ -82,6 +87,7 @@ export function setupMidiPanel() {
             if (!event.data) return;
             const [status, low, high] = event.data;
             if ((status & 0xf0) === 0xe0) bendValue = (((high << 7) | low) - 8192) / 8192;
+            if ((status & 0xf0) === 0xc0) window.dispatchEvent(new CustomEvent(PROGRAM_EVENT, { detail: low }));
             const text = describe(event.data);
             if (!text) return;
             flash();

@@ -10,6 +10,8 @@ A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound 
 - **Errors you can read**: syntax slips, misspelled names and missing sounds show up in plain words, not only in the console.
 - **Save** patterns in the browser (localStorage). The draft saves itself every few seconds.
 - **MIDI panel**: shows which note or `cc` each pad or knob sends, to use with `midin()` and `midikeys()`.
+- **MIDI program change picks the visual**: program 0 is the first visual in the list, 1 the second, and so on (on the MPK Mini, the pads in PROG CHANGE mode).
+- **MPK Mini Mk II preset**, mapped from the controller: keys, bank B pads, knobs, joystick, and CC-mode pads as hold-to-apply effects.
 - **Performance mode**: `Ctrl+Shift+H` hides the code and leaves only the visuals.
 
 ## Language
