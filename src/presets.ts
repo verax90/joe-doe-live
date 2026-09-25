@@ -110,6 +110,11 @@ stack(
 // 2. Pick "From the code" in Visual to see this pattern's visual
 await initHydra()
 
+// the keys' instrument: 'piano', 'gm_epiano1', 'gm_drawbar_organ',
+// 'gm_church_organ', 'gm_string_ensemble_1', 'gm_pad_warm', 'gm_vibraphone',
+// 'gm_marimba', 'gm_acoustic_bass', 'sawtooth'… (more in the Cheatsheet)
+const sound = 'piano'
+
 const mpk = 'MPK Mini'
 const knob = await midin(mpk)
 const keys = await midikeys(mpk)
@@ -134,7 +139,7 @@ stack(
   s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4, 1).range(0, 0.9).mul(pad(1).mul(-1).add(1))),
   // knob 2: filter · knob 3: reverb
   // joystick up: echo · sideways: up to a semitone of bend
-  keys().s("piano").gain(0.7)
+  keys().s(sound).gain(0.7)
     .lpf(knob(2, 1).range(300, 8000)).room(knob(3, 1).range(0, 0.8))
     .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
     .crush(pad(2).range(16, 3))
@@ -160,6 +165,11 @@ stack(
 // 2. Elige "Del código" en Visual para ver el visual de este patrón
 await initHydra()
 
+// el instrumento de las teclas: 'piano', 'gm_epiano1', 'gm_drawbar_organ',
+// 'gm_church_organ', 'gm_string_ensemble_1', 'gm_pad_warm', 'gm_vibraphone',
+// 'gm_marimba', 'gm_acoustic_bass', 'sawtooth'… (más en la Chuleta)
+const sound = 'piano'
+
 const mpk = 'MPK Mini'
 const knob = await midin(mpk)
 const keys = await midikeys(mpk)
@@ -184,7 +194,7 @@ stack(
   s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4, 1).range(0, 0.9).mul(pad(1).mul(-1).add(1))),
   // knob 2: filtro · knob 3: reverb
   // joystick arriba: eco · a los lados: hasta un semitono de bend
-  keys().s("piano").gain(0.7)
+  keys().s(sound).gain(0.7)
     .lpf(knob(2, 1).range(300, 8000)).room(knob(3, 1).range(0, 0.8))
     .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
     .crush(pad(2).range(16, 3))

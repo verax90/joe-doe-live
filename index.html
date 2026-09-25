@@ -117,6 +117,10 @@
         <h3 data-i18n="devices">Devices</h3>
         <ul id="midi-devices" class="panel-list"><li class="muted" data-i18n="noPermission">No permission yet</li></ul>
         <button id="midi-enable" class="control" type="button" data-i18n="enableMidi">Enable MIDI</button>
+        <h3 data-i18n="freePlayTitle">Play without Play</h3>
+        <p class="panel-help" data-i18n="freePlayHelp">Keys and bank B pads sound straight away while the studio is stopped, or over a pattern that does not use midikeys.</p>
+        <label class="visually-hidden" for="freeplay-sound" data-i18n="freePlaySound">Sound for the keys</label>
+        <select id="freeplay-sound" class="control freeplay-select"></select>
         <h3 data-i18n="lastMessages">Last messages</h3>
         <ol id="midi-log" class="panel-list midi-log"></ol>
       </aside>

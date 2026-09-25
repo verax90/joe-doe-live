@@ -422,6 +422,11 @@ select.control {
   display: grid;
 }
 
+.freeplay-select {
+  width: 100%;
+  max-width: none;
+}
+
 /* ?debug panel */
 .debug {
   position: fixed;

@@ -7,6 +7,7 @@ import { lang, pick, setLang, t, translatePage } from './i18n';
 import { builtInPresets, translateIfBuiltIn, type Preset } from './presets';
 import { setupCheatsheet } from './cheatsheet';
 import { setupDebug } from './debug';
+import { setupFreePlay } from './freeplay';
 import { ensureLimiter } from './limiter';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
@@ -243,5 +244,11 @@ window.addEventListener('keydown', (event) => {
 
 setupMidiPanel();
 setupCheatsheet();
+// Free play stays out of the way when the playing pattern reads the keys itself
+setupFreePlay(
+  () =>
+    Boolean((editor as unknown as { repl?: { scheduler?: { started?: boolean } } }).repl?.scheduler?.started) &&
+    editor.code.includes('midikeys'),
+);
 setupDebug(() => (editor as unknown as { repl?: { scheduler?: { started?: boolean } } }).repl?.scheduler);
 setupToolsPanel(() => editor.stop());

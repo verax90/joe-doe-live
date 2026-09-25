@@ -41,6 +41,18 @@ const sections: Section[] = [
     ],
   },
   {
+    title: { en: 'Instruments', es: 'Instrumentos' },
+    entries: [
+      { code: '.s("gm_epiano1")', note: { en: 'Electric piano', es: 'Piano eléctrico' } },
+      { code: '.s("gm_drawbar_organ")', note: { en: 'Drawbar (Hammond) organ; also gm_rock_organ, gm_church_organ', es: 'Órgano Hammond; también gm_rock_organ, gm_church_organ' } },
+      { code: '.s("gm_string_ensemble_1")', note: { en: 'Strings; also gm_violin, gm_cello', es: 'Cuerdas; también gm_violin, gm_cello' } },
+      { code: '.s("gm_pad_warm")', note: { en: 'Warm pad; also gm_pad_choir, gm_pad_halo', es: 'Pad cálido; también gm_pad_choir, gm_pad_halo' } },
+      { code: '.s("gm_vibraphone")', note: { en: 'Vibraphone; also gm_marimba, gm_kalimba', es: 'Vibráfono; también gm_marimba, gm_kalimba' } },
+      { code: '.s("gm_acoustic_bass")', note: { en: 'Double bass; also gm_synth_bass_1', es: 'Contrabajo; también gm_synth_bass_1' } },
+      { code: '.s("sawtooth")', note: { en: 'Synth: also square, triangle, sine', es: 'Sinte: también square, triangle, sine' } },
+    ],
+  },
+  {
     title: { en: 'Harmony', es: 'Armonía' },
     entries: [
       { code: 'chord("<Am7 Dm7 G7 C^7>").voicing()', note: { en: 'Chords, voiced for you', es: 'Acordes ya colocados' } },
