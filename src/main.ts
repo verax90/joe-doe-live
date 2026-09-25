@@ -20,6 +20,9 @@ import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
 import { setupScenes } from './scenes';
 import { setupStatus } from './status';
+import { setupExport } from './export';
+import { toast } from './toast';
+import { setupUndo } from './undo';
 import { setupTempo } from './tempo';
 import { applyTheme, readTheme, themes } from './themes';
 import { setupToolsPanel } from './tools';
@@ -232,15 +235,16 @@ whenStrudelReady().then(() => {
 shareButton.addEventListener('click', async () => {
   const url = buildShareUrl(editor.code, visualSelect.value);
   history.replaceState(null, '', url);
-  const label = shareButton.textContent;
   try {
     await navigator.clipboard.writeText(url);
-    shareButton.textContent = t('shareCopied');
+    toast(t('shareCopied'));
   } catch {
-    shareButton.textContent = t('shareManual');
+    toast(t('shareManual'));
   }
-  setTimeout(() => (shareButton.textContent = label), 2000);
 });
+
+setupExport(() => editor.code);
+setupUndo(editor as unknown as Parameters<typeof setupUndo>[0]);
 
 // "More" menu: everything that is not needed while playing
 const menuToggle = document.querySelector<HTMLButtonElement>('#menu-toggle')!;

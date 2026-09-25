@@ -1,6 +1,7 @@
 // Cheatsheet panel: the Strudel and Hydra basics, each with a short example
 // that copies with one click. Checked against Strudel 1.3 / hydra-synth 1.4.
 import { onLangChange, pick, t, type Localized } from './i18n';
+import { isPatternSnippet, trackChanges } from './tracks';
 
 type Entry = { code: string; note: Localized };
 // How "Try" turns an example into a pattern that plays; null: it needs a
@@ -121,8 +122,13 @@ type Editor = {
   code: string;
   setCode(code: string): void;
   evaluate(): Promise<void>;
+  repl?: { scheduler?: { started?: boolean } };
   editor?: {
-    state: { replaceSelection(text: string): unknown; doc: { lineAt(pos: number): { number: number } }; selection: { main: { head: number } } };
+    state: {
+      replaceSelection(text: string): unknown;
+      doc: { length: number; lines: number; lineAt(pos: number): { number: number } };
+      selection: { main: { head: number } };
+    };
     dispatch(transaction: unknown): void;
     focus(): void;
   };
@@ -157,8 +163,22 @@ export function setupCheatsheet({ editor, useCodeVisual }: { editor: Editor; use
   const insert = (code: string) => {
     const view = editor.editor;
     if (!view) return;
-    // A method (.lpf(800)) chains onto what is before the cursor; a whole
-    // expression (s("bd sd")) goes on a line of its own
+    // A whole pattern becomes a new "$:" track at the end, and the bare
+    // patterns already there become tracks too: otherwise only the last one
+    // would sound. While it plays, it joins in straight away
+    if (isPatternSnippet(code)) {
+      const { changes, anchor } = trackChanges(editor.code, code);
+      // One transaction, so a single undo takes it all back
+      view.dispatch({ changes, selection: { anchor }, scrollIntoView: true });
+      view.focus();
+      if (editor.repl?.scheduler?.started) {
+        void editor.evaluate();
+        status.textContent = t('trackAddedPlaying');
+      } else status.textContent = t('trackAdded');
+      return;
+    }
+    // A method (.lpf(800)) chains onto what is before the cursor; anything
+    // else (setcps, Hydra) goes on a line of its own
     const head = view.state.selection.main.head;
     const atLineStart = head === 0 || editor.code[head - 1] === '\n';
     const text = code.startsWith('.') || atLineStart ? code : `\n${code}`;

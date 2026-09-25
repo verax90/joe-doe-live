@@ -36,6 +36,7 @@ const sections: Section[] = [
         rows: [
           ['Ctrl+Enter', L('Play / apply the changes', 'Play / aplicar los cambios')],
           ['Ctrl+.', L('Stop', 'Stop')],
+          ['Ctrl+Z · ↶ / Ctrl+Shift+Z · ↷', L('Undo / redo; with the buttons, while it plays you hear each step', 'Deshacer / rehacer; con los botones, mientras suena oyes cada paso')],
           ['Ctrl+Shift+H', L('Hide the code (performance mode)', 'Ocultar el código (modo concierto)')],
           ['?', L('This help', 'Esta ayuda')],
           ['1 – 8', L('Switch parts on and off in a pattern that uses them (Scenes)', 'Encender y apagar partes en un patrón que las use (Escenas)')],
@@ -106,7 +107,9 @@ const sections: Section[] = [
         kind: 'table',
         head: [L('In More', 'En Más'), L('What it is for', 'Para qué sirve')],
         rows: [
-          [L('Cheatsheet', 'Chuleta'), L('Strudel, Hydra, instruments and MIDI examples, one click to copy', 'Ejemplos de Strudel, Hydra, instrumentos y MIDI, se copian con un clic')],
+          [L('Cheatsheet', 'Chuleta'), L('Examples to try, insert or copy. Insert adds a pattern as a new $: track, so every track plays together', 'Ejemplos para probar, insertar o copiar. Insertar añade un patrón como pista $: nueva, así suenan todas las pistas juntas')],
+          [L('Copy / Download the code', 'Copiar / Descargar el código'), L('Your code to the clipboard, or as a .js file that opens in any Strudel', 'Tu código al portapapeles, o como archivo .js que se abre en cualquier Strudel')],
+          [L('Video', 'Vídeo'), L('YouTube behind everything, or your video or a tab through the webcam visuals', 'YouTube de fondo, o tu vídeo o una pestaña a través de los visuales de webcam')],
           [L('Tools', 'Herramientas'), L('Other browser live coding tools; some open inside', 'Otras herramientas de live coding; algunas se abren dentro')],
           [L('Samples', 'Samples'), L('Your sounds: files, or folders that become kits (s("kicks:3"))', 'Tus sonidos: archivos, o carpetas que se convierten en kits (s("kicks:3"))')],
           ['MIDI', L('Which number each pad and knob sends, and the sound of the keys', 'Qué número manda cada pad y knob, y el sonido de las teclas')],

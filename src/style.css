@@ -228,6 +228,12 @@ select.control {
   max-width: min(14rem, 100%);
 }
 
+/* A fixed cap in the bar: a percentage one is ignored when the bar works out
+   how wide the group is, and More wrapped to a second row at 1280 px */
+.bar-pickers select.control {
+  max-width: 11rem;
+}
+
 /* Tempo: BPM field and Tap */
 .tempo {
   display: inline-flex;
@@ -996,4 +1002,27 @@ select.control {
     position: absolute;
     inset: 0 0 0 auto;
   }
+}
+
+/* Short confirmation for menu actions (copy, download, share) */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 3.5rem;
+  z-index: 40;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 2rem);
+  margin: 0;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 13px;
+}
+
+.control-icon {
+  min-width: 2.25rem;
+  font-size: 1.1rem;
+  line-height: 1;
 }

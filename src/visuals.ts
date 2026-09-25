@@ -83,7 +83,7 @@ export const visuals: Visual[] = [
   .out()`,
   },
   // Picks the others by itself; after the first eight so the PROG CHANGE pads keep theirs
-  { id: AUTO_VISUAL, name: { en: 'Auto (changes by itself)', es: 'Automático (cambia solo)' }, code: '' },
+  { id: AUTO_VISUAL, name: { en: 'Auto', es: 'Automático' }, code: '' },
   {
     id: 'anillos',
     name: { en: 'Rings (kick)', es: 'Anillos (bombo)' },
