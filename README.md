@@ -34,6 +34,7 @@ Add `.analyze(1)` at the end of your pattern and use these in Hydra code (they r
 | `mid()` | mids (150–2000 Hz) |
 | `high()` | highs (2–10 kHz), hats and cymbals |
 | `level()` | overall volume |
+| `bend()` | MIDI pitch bend, from -1 to 1 (e.g. the MPK joystick sideways) |
 
 ```js
 osc(10, 0.1).scale(() => 1 + bass()).out()

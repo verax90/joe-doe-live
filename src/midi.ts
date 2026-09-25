@@ -6,6 +6,25 @@ import { t } from './i18n';
 
 const MAX_LOG = 12;
 
+// Strudel's midin() only reads CC messages. The pitch bend (the MPK joystick
+// sideways) is read here and offered as bend(), from -1 to 1, for patterns and
+// Hydra: note("c3").speed(ref(() => 1 + bend() * 0.06))
+let bendValue = 0;
+(globalThis as { bend?: () => number }).bend = () => bendValue;
+
+let connectMidi: (() => Promise<void>) | undefined;
+
+// Once MIDI permission exists (a pattern with midin() asks for it too), start
+// listening without asking again
+export async function connectMidiIfAllowed() {
+  try {
+    const permission = await navigator.permissions?.query({ name: 'midi' as PermissionName });
+    if (permission?.state === 'granted') await connectMidi?.();
+  } catch {
+    // browsers without the Permissions API for MIDI: the button still works
+  }
+}
+
 export function setupMidiPanel() {
   const enable = document.querySelector<HTMLButtonElement>('#midi-enable')!;
   const deviceList = document.querySelector<HTMLUListElement>('#midi-devices')!;
@@ -45,7 +64,9 @@ export function setupMidiPanel() {
     while (log.children.length > MAX_LOG) log.lastElementChild!.remove();
   };
 
+  let connected = false;
   const connect = async () => {
+    if (connected) return;
     try {
       const access = await navigator.requestMIDIAccess();
       const render = () => {
@@ -59,6 +80,8 @@ export function setupMidiPanel() {
           deviceList.append(item);
           input.onmidimessage = (event) => {
             if (!event.data) return;
+            const [status, low, high] = event.data;
+            if ((status & 0xf0) === 0xe0) bendValue = (((high << 7) | low) - 8192) / 8192;
             const text = describe(event.data);
             if (!text) return;
             flash();
@@ -66,6 +89,7 @@ export function setupMidiPanel() {
           };
         });
       };
+      connected = true;
       render();
       access.onstatechange = render;
       enable.hidden = true;
@@ -76,4 +100,6 @@ export function setupMidiPanel() {
   };
 
   enable.addEventListener('click', connect);
+  connectMidi = connect;
+  connectMidiIfAllowed();
 }

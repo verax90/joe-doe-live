@@ -6,7 +6,7 @@ import './style.css';
 import { lang, pick, setLang, t, translatePage } from './i18n';
 import { builtInPresets, translateIfBuiltIn, type Preset } from './presets';
 import { setupCheatsheet } from './cheatsheet';
-import { setupMidiPanel } from './midi';
+import { connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
 import { setupStatus } from './status';
@@ -129,6 +129,8 @@ const originalEvaluate = editor.evaluate.bind(editor);
 editor.evaluate = async (autostart?: boolean) => {
   await originalEvaluate(autostart);
   if (visualSelect.value !== CODE_VISUAL) runVisual();
+  // A pattern using midin() may have just granted MIDI: start reading the pitch bend
+  connectMidiIfAllowed();
 };
 
 whenStrudelReady().then(() => {

@@ -99,8 +99,10 @@ stack(
     code: {
       en: `// Akai MPK Mini Mk II
 // Keys → piano · bank B pads → drums (bank A shares notes with the keys)
-// Knob 1 is left free: the joystick sends the same message (CC 1)
+// Joystick: up (same as knob 1) adds echo, sideways bends the piano and the visual
 // Knobs start at 0: turn 4 to bring the beat in and 2 to open the filter
+// Full Level, Note Repeat and the arpeggiator work on the MPK itself.
+// They run at the MPK's tempo (120 unless you tap another): keep setcps in step
 // 1. Open the MIDI panel and hit "Enable MIDI"
 // 2. Pick "From the code" in Visual to see this pattern's visual
 await initHydra()
@@ -115,9 +117,10 @@ osc(10, 0.05, 1)
   .kaleid(H(knob(5).range(2, 8)))
   .rotate(0, H(knob(6).range(0, 0.3)))
   .scale(() => 1 + bass())
+  .scrollX(() => bend() * 0.2)
   .out()
 
-setcps(90 / 60 / 4)
+setcps(120 / 60 / 4)
 
 // bank B pads send notes 32 to 39
 const kit = ['bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'lt', 'ht']
@@ -126,8 +129,10 @@ stack(
   // a beat to play over · knob 4: its volume
   s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4).range(0, 0.9)),
   // knob 2: filter · knob 3: reverb
+  // joystick up: echo · sideways: up to a semitone of bend
   keys().s("piano")
     .lpf(knob(2).range(300, 8000)).room(knob(3).range(0, 0.8))
+    .delay(knob(1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
     // pads become drums, hit harder = louder; keys stay piano
     .withValue(v => v.note < 40
       ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity }
@@ -135,8 +140,10 @@ stack(
 ).analyze(1)`,
       es: `// Akai MPK Mini Mk II
 // Teclas → piano · pads del banco B → batería (el banco A comparte notas con las teclas)
-// El knob 1 queda libre: el joystick manda lo mismo (CC 1)
+// Joystick: arriba (igual que el knob 1) añade eco, a los lados desafina el piano y el visual
 // Los knobs empiezan en 0: sube el 4 para que entre el ritmo y el 2 para abrir el filtro
+// Full Level, Note Repeat y el arpegiador funcionan en el propio MPK.
+// Van al tempo del MPK (120 si no marcas otro): mantén setcps igual
 // 1. Abre el panel MIDI y pulsa "Activar MIDI"
 // 2. Elige "Del código" en Visual para ver el visual de este patrón
 await initHydra()
@@ -151,9 +158,10 @@ osc(10, 0.05, 1)
   .kaleid(H(knob(5).range(2, 8)))
   .rotate(0, H(knob(6).range(0, 0.3)))
   .scale(() => 1 + bass())
+  .scrollX(() => bend() * 0.2)
   .out()
 
-setcps(90 / 60 / 4)
+setcps(120 / 60 / 4)
 
 // los pads del banco B mandan las notas 32 a 39
 const kit = ['bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'lt', 'ht']
@@ -162,8 +170,10 @@ stack(
   // un ritmo sobre el que tocar · knob 4: su volumen
   s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4).range(0, 0.9)),
   // knob 2: filtro · knob 3: reverb
+  // joystick arriba: eco · a los lados: hasta un semitono de bend
   keys().s("piano")
     .lpf(knob(2).range(300, 8000)).room(knob(3).range(0, 0.8))
+    .delay(knob(1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
     // los pads pasan a batería, más fuerte = más volumen; las teclas siguen siendo piano
     .withValue(v => v.note < 40
       ? { s: kit[v.note - 32] ?? 'bd', gain: v.velocity }
