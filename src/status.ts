@@ -1,13 +1,13 @@
-// Barra de estado: errores del código en español y aviso mientras se cargan sonidos.
-// Strudel informa por dos vías: el evento "update" del editor (errores al evaluar
-// o al sonar) y el evento "strudel.log" del documento (carga de samples).
+// Status bar: code errors in plain words and a notice while sounds load.
+// Strudel reports two ways: the editor's "update" event (errors when evaluating
+// or playing) and the document's "strudel.log" event (samples loading).
 
 import { t } from './i18n';
 
 type ReplState = { error?: unknown; pending?: boolean };
 type LogDetail = { message: string; type?: string };
 
-// Traduce los errores más habituales a algo que se entienda en pleno directo
+// Turns the usual errors into something you can follow mid-performance
 export function explainError(error: unknown) {
   const raw = error instanceof Error ? error.message : String(error);
   const at = raw.match(/\((\d+):(\d+)\)/);
@@ -34,8 +34,8 @@ export function setupStatus(repl: HTMLElement) {
   const detail = bar.querySelector<HTMLElement>('.status-detail')!;
 
   type Shown = { text: string; raw: string };
-  // Errores al evaluar (vienen con el estado del editor) y errores mientras suena
-  // (solo llegan como mensaje de registro); estos duran hasta el siguiente play
+  // Errors when evaluating (they come with the editor state) and while playing
+  // (only as log messages); these last until the next play
   let evalError: Shown | null = null;
   let runtimeError: Shown | null = null;
   let loading = false;
@@ -68,8 +68,8 @@ export function setupStatus(repl: HTMLElement) {
   document.addEventListener('strudel.log', (event) => {
     const { message, type } = (event as CustomEvent<LogDetail>).detail;
     if (type === 'load-sample' || type === 'loaded-sample') {
-      // Los avisos de carga se repiten y a veces se agrupan: en vez de contarlos,
-      // se muestra "cargando" hasta que pasa un rato sin ninguno
+      // Loading notices repeat and sometimes come grouped: instead of counting
+      // them, "loading" shows until a while passes without one
       loading = true;
       clearTimeout(loadingTimer);
       loadingTimer = window.setTimeout(() => {

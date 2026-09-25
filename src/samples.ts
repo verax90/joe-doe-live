@@ -1,5 +1,6 @@
-// Samples propios: arrastra archivos de audio a la página y úsalos con s("nombre").
-// Se guardan en IndexedDB para que sigan ahí al recargar (solo en este navegador).
+// Your own samples: drop audio files (or folders, which become kits) on the
+// page and play them with s("name"). They are kept in IndexedDB so they are
+// still there after a reload (in this browser only).
 
 import { isCodeFile } from './export';
 import { onLangChange, t } from './i18n';
@@ -29,7 +30,7 @@ async function withStore<T>(mode: IDBTransactionMode, run: (store: IDBObjectStor
   });
 }
 
-// "Kick Gordo 01.wav" -> "kick_gordo_01" (válido dentro de s("..."))
+// "Kick Gordo 01.wav" -> "kick_gordo_01" (valid inside s("..."))
 export function sampleName(fileName: string, { isFolder = false } = {}) {
   const base = (isFolder ? fileName : fileName.replace(/\.[^.]+$/, ''))
     .normalize('NFD')
@@ -151,7 +152,7 @@ export function setupSamplesPanel() {
         try {
           await withStore('readwrite', (store) => store.delete(name));
         } catch {
-          // sin IndexedDB: solo se borra de la lista
+          // no IndexedDB: it only leaves the list
         }
       });
       if (count > 1) {
@@ -182,7 +183,7 @@ export function setupSamplesPanel() {
       try {
         await withStore('readwrite', (store) => store.put(files, name));
       } catch {
-        // sin IndexedDB: el sample funciona hasta recargar
+        // no IndexedDB: the sample works until a reload
       }
     }
     status.textContent = t('samplesReady', { count: total });
@@ -203,7 +204,7 @@ export function setupSamplesPanel() {
     folderInput.value = '';
   });
 
-  // Soltar archivos en cualquier parte de la página
+  // Drop files anywhere on the page
   let dragDepth = 0;
   window.addEventListener('dragenter', (event) => {
     if (!event.dataTransfer?.types.includes('Files')) return;
@@ -228,7 +229,7 @@ export function setupSamplesPanel() {
     readDropped(event.dataTransfer.items).then(addPicked);
   });
 
-  // Recupera los samples guardados en visitas anteriores
+  // Bring back the samples saved on earlier visits
   const restore = async () => {
     try {
       const keys = (await withStore('readonly', (store) => store.getAllKeys())) as string[];

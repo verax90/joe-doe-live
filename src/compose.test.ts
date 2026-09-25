@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { bassNotes, chords, LAYERS, layerChanges, layerCode, muteChanges, newSong, removeChanges, STYLES } from './compose';
-import { applyChanges, findLabel } from './tracks';
+import { applyChanges, findLabel, tracksReady } from './tracks';
+
+beforeAll(() => tracksReady);
 
 const song = { style: 'boombap', key: 'A', progression: 0 };
 const state = { variant: 0, motif: '<[0 2 4 ~] [4 2 0 ~]>' };

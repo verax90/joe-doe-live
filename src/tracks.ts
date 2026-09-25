@@ -2,7 +2,15 @@
 // start with "$:", and then it plays every "$:" line together (and drops the
 // bare one). So a pattern added to your code becomes a "$:" track, and the
 // bare patterns already there become tracks too, or they would go quiet.
-import { parse, type Node } from 'acorn';
+import type { Node } from 'acorn';
+
+// acorn (the JavaScript parser) is only needed once you insert or compose, so
+// it loads in the background after the page instead of with it. Until then
+// the code counts as not parseable and nothing is rewritten
+let parse: typeof import('acorn').parse | undefined;
+export const tracksReady = import('acorn').then((acorn) => {
+  parse = acorn.parse;
+});
 
 // Calls that set things up rather than make sound
 const SETUP = new Set(['setcps', 'setcpm', 'setCps', 'samples', 'initHydra', 'initAudio', 'hush', 'aliasBank', 'soundAlias', 'all', 'each']);
@@ -31,6 +39,7 @@ function isPattern(statement: Statement) {
 }
 
 function statements(code: string): Statement[] | null {
+  if (!parse) return null;
   try {
     const program = parse(code, { ecmaVersion: 'latest', sourceType: 'module', allowAwaitOutsideFunction: true });
     return program.body as Statement[];

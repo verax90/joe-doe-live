@@ -1,6 +1,6 @@
-// Panel "Herramientas": otras herramientas de live coding y sonido que funcionan
-// en el navegador. La lista vive en joedoe.dev/art (un .md por enlace) y aquí
-// solo se lee; si no se puede leer, se usa la copia que va con el estudio.
+// Tools panel: other live coding and sound tools that run in the browser. The
+// list lives on joedoe.dev/art (one .md per link) and is only read here; if it
+// cannot be read, the copy bundled with the studio is used.
 import fallback from './tools-fallback.json';
 import { onLangChange, pick, t, type StringKey } from './i18n';
 
@@ -39,7 +39,7 @@ export function setupToolsPanel(onEmbedOpen: () => void) {
 
   const openEmbed = (tool: Tool) => {
     onEmbedOpen();
-    // Cierra el panel para dejar la herramienta a la vista
+    // Close the panel so the tool is in view
     document.querySelector<HTMLElement>('#tools')!.hidden = true;
     document.querySelector('#toggle-tools')!.setAttribute('aria-pressed', 'false');
     title.textContent = tool.title;
@@ -50,7 +50,7 @@ export function setupToolsPanel(onEmbedOpen: () => void) {
   };
 
   const closeEmbed = () => {
-    // Vaciar el iframe corta también su sonido
+    // Emptying the iframe cuts its sound too
     frame.src = 'about:blank';
     embed.hidden = true;
   };

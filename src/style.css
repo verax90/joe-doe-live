@@ -1,4 +1,4 @@
-/* Tokens de joedoe.dev (tema oscuro): el estudio es siempre oscuro para tocar */
+/* joedoe.dev tokens (dark theme): the studio is always dark, to play in */
 :root {
   --bg: #12151c;
   --bg-elevated: #1a1e28;
@@ -37,7 +37,7 @@ body {
 body {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  /* sin esto, las líneas largas de código ensanchan toda la página */
+  /* without this, long lines of code widen the whole page */
   grid-template-columns: minmax(0, 1fr);
   background: var(--bg);
   color: var(--fg);
@@ -128,7 +128,7 @@ body {
   mix-blend-mode: screen;
 }
 
-/* El canvas de Hydra va fijo detrás de todo: la interfaz se pinta encima */
+/* The Hydra canvas is fixed behind everything: the UI is painted on top */
 .bar,
 .stage,
 .foot {
@@ -419,7 +419,7 @@ select.control {
   min-height: 0;
 }
 
-/* Barra de estado: errores y carga, abajo del editor */
+/* Status bar: errors and loading, under the editor */
 .status {
   position: absolute;
   left: 1rem;
@@ -463,7 +463,7 @@ select.control {
   display: none;
 }
 
-/* Los paneles quedan por encima de la herramienta incrustada */
+/* Panels stay above the embedded tool */
 .stage > .panel {
   position: relative;
   z-index: 3;
@@ -481,8 +481,8 @@ select.control {
   pointer-events: none;
 }
 
-/* Editor de Strudel: fondo transparente para ver Hydra detrás.
-   El componente mete el editor en un div con fondo propio del tema. */
+/* Strudel's editor: transparent, so Hydra shows behind it.
+   The component wraps the editor in a div with the theme's own background. */
 .editor > div,
 .editor .cm-editor {
   min-height: 100%;
@@ -583,7 +583,7 @@ select.control {
   color: var(--accent);
 }
 
-/* Botón que envuelve el input de archivos */
+/* A button wrapping the file input */
 .file-button {
   display: inline-flex;
   align-items: center;
@@ -675,7 +675,7 @@ select.control {
   color: var(--danger);
 }
 
-/* Aviso al arrastrar archivos sobre la página */
+/* Hint while dragging files over the page */
 .drop-hint {
   position: fixed;
   inset: 1rem;
@@ -862,7 +862,7 @@ select.control {
   font-size: 0.8rem;
 }
 
-/* Herramienta incrustada: ocupa el sitio del editor */
+/* Embedded tool: takes the editor's place */
 .embed {
   position: absolute;
   inset: 0;

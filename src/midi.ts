@@ -1,6 +1,7 @@
-// Panel MIDI: lista dispositivos y muestra los últimos mensajes para saber
-// qué número manda cada pad o knob. Strudel abre sus propias conexiones con
-// midin()/midikeys(); esto es solo un monitor.
+// MIDI panel: lists the devices and shows the latest messages, to find out
+// which number each pad or knob sends. Strudel opens its own connections with
+// midin()/midikeys(); the studio listens alongside for the knobs, pitch bend,
+// program changes and free play.
 
 import { t } from './i18n';
 

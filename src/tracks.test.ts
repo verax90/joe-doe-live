@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest';
-import { addTrack, findLabel, isPatternSnippet, trackInsertPoint } from './tracks';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { addTrack, findLabel, isPatternSnippet, trackInsertPoint, tracksReady } from './tracks';
+
+beforeAll(() => tracksReady);
 
 describe('addTrack', () => {
   it('turns the bare patterns into tracks so all of them sound', () => {

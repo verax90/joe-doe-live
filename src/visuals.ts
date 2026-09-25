@@ -1,7 +1,6 @@
-// Visuales de Hydra que se eligen aparte del sonido.
-// Dos tipos de sincronía:
-// - H("...") sigue el reloj de Strudel: golpea exactamente en el tiempo.
-// - bass(), mid(), high(), level() escuchan el audio (el patrón necesita .analyze(1)).
+// Hydra visuals, picked apart from the sound. Two kinds of sync:
+// - H("...") follows Strudel's clock: it lands exactly on the beat.
+// - bass(), mid(), high(), level() listen to the audio (the pattern needs .analyze(1)).
 
 import { attachAscii } from './ascii';
 import { connectSource } from './video';
@@ -259,7 +258,7 @@ function spectrum() {
   return cached.data;
 }
 
-// Energía media de una banda de frecuencias, de 0 a 1
+// Average energy of a frequency band, from 0 to 1
 function band(lowHz: number, highHz: number) {
   const data = spectrum();
   if (!data?.length || !g.getAudioContext) return 0;
@@ -274,14 +273,14 @@ function band(lowHz: number, highHz: number) {
   return sum / (to - from);
 }
 
-// Disponibles en el código de Hydra (en los visuales y en tus patrones)
+// Available in Hydra code (the built-in visuals and your patterns)
 g.bass = () => band(20, 150);
 g.mid = () => band(150, 2000);
 g.high = () => band(2000, 10000);
 g.level = () => band(20, 10000);
 
-// Strudel carga Hydra desde unpkg.com; así se usa la copia que va con el estudio.
-// Vale también para el initHydra() que escribas en tus patrones.
+// Strudel loads Hydra from unpkg.com; this uses the copy bundled with the
+// studio instead, also for an initHydra() written in your patterns.
 // Half resolution by default: a quarter of the pixels to draw, which leaves CPU
 // for the audio. These visuals are soft anyway; initHydra({ pixelRatio: 1 }) for full.
 export function useBundledHydra(src: string) {

@@ -1,4 +1,4 @@
-// Comparte el patrón en la propia URL: #v=<visual>&c=<código en base64url>
+// Shares the pattern in the URL itself: #v=<visual>&c=<code in base64url>
 
 function toBase64Url(text: string) {
   const bytes = new TextEncoder().encode(text);
