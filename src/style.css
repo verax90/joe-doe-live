@@ -103,6 +103,31 @@ body {
   pointer-events: none;
 }
 
+/* YouTube behind everything: covers the window like a background image, a
+   little dim while the code is on screen. The visuals are laid over it with
+   screen, so their black is see-through and their colour lights it up */
+.youtube-bg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: max(100vw, 177.78vh);
+  height: max(100vh, 56.25vw);
+  transform: translate(-50%, -50%);
+  border: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  transition: opacity 0.35s var(--ease);
+}
+
+.hide-code .youtube-bg {
+  opacity: 1;
+}
+
+.has-youtube #hydra-canvas,
+.has-youtube .ascii-canvas {
+  mix-blend-mode: screen;
+}
+
 /* El canvas de Hydra va fijo detrás de todo: la interfaz se pinta encima */
 .bar,
 .stage,
@@ -568,6 +593,17 @@ select.control {
 .file-button:focus-within {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+.video-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.video-row input {
+  flex: 1;
+  min-width: 0;
 }
 
 .sample-pickers {

@@ -81,7 +81,7 @@ const sections: Section[] = [
           ['Knob 6', L('How fast that visual spins', 'Lo rápido que gira ese visual')],
           ['Knob 7', L('Master volume, always', 'Volumen general, siempre')],
           ['Knob 8', L('Size of the ASCII characters, always', 'Tamaño de los caracteres ASCII, siempre')],
-          [L('Joystick sideways', 'Joystick a los lados'), L('Bends the piano up to a semitone and shifts the visual', 'Desafina el piano hasta un semitono y desplaza el visual')],
+          [L('Joystick sideways', 'Joystick a los lados'), L('Bends the piano up to two semitones and shifts the visual. It applies to each new note, so it shows most with the arpeggiator or fast playing; a held note does not bend', 'Desafina el piano hasta dos semitonos y desplaza el visual. Se aplica a cada nota nueva, así que se nota más con el arpegiador o tocando rápido; una nota mantenida no se desafina')],
         ],
       },
       {

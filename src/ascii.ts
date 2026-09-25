@@ -51,8 +51,12 @@ function draw(source: HTMLCanvasElement) {
 
   const styles = getComputedStyle(document.documentElement);
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
-  context.fillStyle = styles.getPropertyValue('--bg').trim() || '#12151c';
-  context.fillRect(0, 0, window.innerWidth, window.innerHeight);
+  // With a YouTube video behind, the characters float over it
+  if (document.body.classList.contains('has-youtube')) context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  else {
+    context.fillStyle = styles.getPropertyValue('--bg').trim() || '#12151c';
+    context.fillRect(0, 0, window.innerWidth, window.innerHeight);
+  }
   context.fillStyle = styles.getPropertyValue('--accent').trim() || '#d6ff4b';
   // Same font and colour as the code: with the code on screen the characters
   // step back so the code stays readable; full strength in performance mode

@@ -24,6 +24,7 @@ import { setupTempo } from './tempo';
 import { applyTheme, readTheme, themes } from './themes';
 import { setupToolsPanel } from './tools';
 import { applyVisual, useBundledHydra, visuals } from './visuals';
+import { setupVideo } from './video';
 // Ruta directa: el paquete no exporta dist/ por su nombre
 import hydraUrl from '../node_modules/hydra-synth/dist/hydra-synth.js?url';
 
@@ -172,6 +173,17 @@ asciiToggle.addEventListener('click', async () => {
 visualSelect.addEventListener('change', () => {
   writeStorage(VISUAL_KEY, visualSelect.value);
   runVisual();
+});
+
+// A video or tab picked in the Video panel shows through the webcam visuals:
+// switch to one if the current visual does not use it
+setupVideo({
+  showSource: () => {
+    if (visuals.find((v) => v.id === visualSelect.value)?.camera) return;
+    visualSelect.value = 'cam';
+    writeStorage(VISUAL_KEY, visualSelect.value);
+    runVisual();
+  },
 });
 
 // A MIDI program change picks a visual or, if chosen in the MIDI panel, a

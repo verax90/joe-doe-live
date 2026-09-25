@@ -4,9 +4,11 @@
 // - bass(), mid(), high(), level() escuchan el audio (el patrón necesita .analyze(1)).
 
 import { attachAscii } from './ascii';
+import { connectSource } from './video';
 import type { Localized } from './i18n';
 
-// camera: the visual uses the webcam (s0); it is switched on only while picked
+// camera: the visual uses s0 (the webcam, or the video or tab picked in the
+// Video panel); it is switched on only while picked
 export type Visual = { id: string; name: Localized; code: string; camera?: boolean };
 
 export const CODE_VISUAL = 'code';
@@ -258,18 +260,6 @@ function followWindowSize(hydra: { setResolution?: (width: number, height: numbe
   });
 }
 
-type Source = { initCam?: (index?: number) => void; clear?: () => void };
-let cameraOn = false;
-
-// The camera light stays on only while a webcam visual is picked
-function setCamera(on: boolean) {
-  const s0 = (globalThis as { s0?: Source }).s0;
-  if (on === cameraOn || !s0) return;
-  if (on) s0.initCam?.();
-  else s0.clear?.();
-  cameraOn = on;
-}
-
 export async function applyVisual(id: string) {
   const visual = visuals.find((v) => v.id === id);
   if (!visual || !g.initHydra) return;
@@ -278,6 +268,7 @@ export async function applyVisual(id: string) {
   capFrameRate();
   attachAscii(hydra);
   if (visual.id === CODE_VISUAL) return;
-  setCamera(Boolean(visual.camera));
+  // The webcam, or the video or tab chosen in the Video panel
+  connectSource(Boolean(visual.camera));
   new Function(visual.code)();
 }

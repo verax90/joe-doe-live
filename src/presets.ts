@@ -337,10 +337,10 @@ stack(
   // a beat to play over · knob 4: its volume
   s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4, 1).range(0, 0.9).mul(pad(1).mul(-1).add(1))),
   // knob 2: filter · knob 3: reverb
-  // joystick up: echo · sideways: up to a semitone of bend
+  // joystick up: echo · sideways: bends up to two semitones (each new note)
   keys().s(sound).gain(0.7)
     .lpf(knob(2, 1).range(300, 8000)).room(knob(3, 1).range(0, 0.8))
-    .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
+    .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 2 ** (bend() * 2 / 12)))
     .crush(pad(2).range(16, 3))
     // pads become drums, hit harder = louder; keys stay piano.
     // The bitcrusher only switches on while pad 2 is held: each crushed note
@@ -393,10 +393,10 @@ stack(
   // un ritmo sobre el que tocar · knob 4: su volumen
   s("bd ~ ~ bd, ~ sd, hh*8").gain(knob(4, 1).range(0, 0.9).mul(pad(1).mul(-1).add(1))),
   // knob 2: filtro · knob 3: reverb
-  // joystick arriba: eco · a los lados: hasta un semitono de bend
+  // joystick arriba: eco · a los lados: desafina hasta dos semitonos (cada nota nueva)
   keys().s(sound).gain(0.7)
     .lpf(knob(2, 1).range(300, 8000)).room(knob(3, 1).range(0, 0.8))
-    .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 1 + bend() * 0.06))
+    .delay(knob(1, 1).range(0, 0.6)).speed(ref(() => 2 ** (bend() * 2 / 12)))
     .crush(pad(2).range(16, 3))
     // los pads pasan a batería, más fuerte = más volumen; las teclas siguen siendo piano.
     // El bitcrush solo se activa mientras mantienes el pad 2: cada nota con bitcrush

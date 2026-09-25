@@ -70,6 +70,7 @@
             <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
             <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
             <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
+            <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-panel="video" data-i18n="video">Video</button>
             <button id="toggle-help" class="menu-item" type="button" aria-pressed="false" data-panel="help" aria-keyshortcuts="?" data-i18n="help">Help</button>
             <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
           </div>
@@ -157,6 +158,29 @@
         <p id="sample-status" class="panel-status" role="status"></p>
         <h3 data-i18n="yourSamples">Your samples</h3>
         <ul id="sample-list" class="panel-list sample-list"></ul>
+      </aside>
+
+      <aside class="panel" id="video" hidden>
+        <h2 data-i18n="video">Video</h2>
+        <h3 data-i18n="youtubeTitle">YouTube behind</h3>
+        <p class="panel-help" data-i18n="youtubeHelp">A YouTube video plays muted and looped behind the code and the visuals.</p>
+        <form id="youtube-form" class="video-row">
+          <label class="visually-hidden" for="youtube-url" data-i18n="youtubeLink">YouTube link</label>
+          <input id="youtube-url" class="control" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://youtu.be/…" />
+          <button class="control" type="submit" data-i18n="youtubePut">Put</button>
+        </form>
+        <button id="youtube-off" class="control" type="button" data-i18n="youtubeOff" hidden>Remove the video</button>
+        <h3 data-i18n="videoSourceTitle">With effects</h3>
+        <p class="panel-help" data-i18n="videoSourceHelp">The webcam visuals can use a video of yours or a tab instead of the camera.</p>
+        <div class="sample-pickers">
+          <label class="control file-button">
+            <span data-i18n="videoFile">Your video</span>
+            <input id="video-file" type="file" accept="video/*" />
+          </label>
+          <button id="video-tab" class="control" type="button" data-i18n="videoTab">Capture a tab</button>
+          <button id="video-webcam" class="control" type="button" data-i18n="videoWebcam">Back to the webcam</button>
+        </div>
+        <p id="video-status" class="panel-status" role="status"></p>
       </aside>
 
       <aside class="panel" id="midi" hidden>

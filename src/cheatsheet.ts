@@ -112,7 +112,7 @@ const sections: Section[] = [
       { code: 'knob(1, 10)', note: { en: 'Only CC 1 on channel 10 (MPK pads in CC mode)', es: 'Solo el CC 1 del canal 10 (pads del MPK en modo CC)' } },
       { code: "const pads = await midikeys('MPK')", note: { en: 'Keys and pads as notes', es: 'Teclas y pads como notas' } },
       { code: 'pads().s("piano")', note: { en: 'Play them with an instrument', es: 'Tocarlas con un instrumento' } },
-      { code: '.speed(ref(() => 1 + bend() * 0.06))', note: { en: 'Pitch bend (joystick sideways), -1 to 1', es: 'Pitch bend (joystick a los lados), de -1 a 1' } },
+      { code: '.speed(ref(() => 2 ** (bend() * 2 / 12)))', note: { en: 'Pitch bend (joystick sideways), -1 to 1', es: 'Pitch bend (joystick a los lados), de -1 a 1' } },
     ],
   },
 ];
