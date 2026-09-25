@@ -23,7 +23,7 @@ import { setupStatus } from './status';
 import { setupTempo } from './tempo';
 import { applyTheme, readTheme, themes } from './themes';
 import { setupToolsPanel } from './tools';
-import { applyVisual, useBundledHydra, visuals } from './visuals';
+import { applyVisual, setVisualClock, useBundledHydra, visuals } from './visuals';
 import { setupVideo } from './video';
 // Ruta directa: el paquete no exporta dist/ por su nombre
 import hydraUrl from '../node_modules/hydra-synth/dist/hydra-synth.js?url';
@@ -127,8 +127,11 @@ applyTheme(startTheme, themeEditor);
 // Schedule notes 0.2 s ahead instead of 0.1 s: a frame of visuals that runs
 // long no longer makes notes late (clicks, gaps). Keys played on a controller
 // are triggered on their own path and stay immediate
-const scheduler = (editor as unknown as { repl?: { scheduler?: { latency?: number } } }).repl?.scheduler;
+const scheduler = (editor as unknown as { repl?: { scheduler?: { latency?: number; started?: boolean; now?: () => number } } }).repl
+  ?.scheduler;
 if (scheduler) scheduler.latency = 0.2;
+// The Auto visual changes on the bar line while it plays
+setVisualClock(() => (scheduler?.started && scheduler.now ? scheduler.now() : null));
 
 const shared = readSharedPattern();
 // Quita el enlace compartido de la URL: al recargar manda tu borrador, no el patrón original

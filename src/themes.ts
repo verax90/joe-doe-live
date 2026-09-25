@@ -1,5 +1,7 @@
 // Studio themes: an accent colour (buttons, brand, ASCII filter and the
 // built-in visuals) paired with one of Strudel's code themes that suits it.
+// Only dark code themes whose text reads over the visuals (algoboy and redText
+// did not).
 import type { Localized } from './i18n';
 
 export type Theme = { id: string; name: Localized; accent: string; code: string };
@@ -12,6 +14,12 @@ export const themes: Theme[] = [
   { id: 'pink', name: { en: 'Sonic Pi pink', es: 'Rosa Sonic Pi' }, accent: '#ff4fa8', code: 'sonicPink' },
   { id: 'tokyo', name: { en: 'Tokyo night', es: 'Noche Tokio' }, accent: '#7aa2f7', code: 'tokyoNight' },
   { id: 'dracula', name: { en: 'Dracula', es: 'Drácula' }, accent: '#bd93f9', code: 'dracula' },
+  { id: 'red', name: { en: 'Alarm red', es: 'Rojo alarma' }, accent: '#ff5356', code: 'darcula' },
+  { id: 'gameboy', name: { en: 'Game Boy', es: 'Game Boy' }, accent: '#9bbc0f', code: 'terminal' },
+  { id: 'nord', name: { en: 'Nord', es: 'Nórdico' }, accent: '#88c0d0', code: 'nord' },
+  { id: 'solarized', name: { en: 'Solarized', es: 'Solarizado' }, accent: '#2aa198', code: 'solarizedDark' },
+  { id: 'aura', name: { en: 'Aura mint', es: 'Aura menta' }, accent: '#61ffca', code: 'aura' },
+  { id: 'monokai', name: { en: 'Monokai yellow', es: 'Monokai amarillo' }, accent: '#e6db74', code: 'monokai' },
   { id: 'mono', name: { en: 'Monochrome', es: 'Monocromo' }, accent: '#eceae4', code: 'blackscreen' },
 ];
 

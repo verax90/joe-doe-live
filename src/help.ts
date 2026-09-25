@@ -19,7 +19,7 @@ const sections: Section[] = [
         items: [
           L('Pick a pattern and press Play (Ctrl+Enter).', 'Elige un patrón y pulsa Play (Ctrl+Enter).'),
           L('Change a number or a word in the code and press Ctrl+Enter again: it changes while it plays.', 'Cambia un número o una palabra del código y pulsa otra vez Ctrl+Enter: cambia mientras suena.'),
-          L('Pick a visual next to the pattern.', 'Elige un visual al lado del patrón.'),
+          L('Pick a visual next to the pattern. "Auto" changes by itself every 4 bars.', 'Elige un visual al lado del patrón. "Automático" cambia solo cada 4 compases.'),
           L('Change the tempo in BPM, or tap Tap four times to the beat (on the MPK, match its Tap Tempo).', 'Cambia el tempo en BPM, o pulsa Tap cuatro veces al ritmo (con el MPK, iguálalo a su Tap Tempo).'),
           L('Ctrl+. stops. Mistakes show up at the bottom in plain words.', 'Ctrl+. para. Los errores salen abajo explicados.'),
           L('More → Cheatsheet has examples to copy.', 'Más → Chuleta tiene ejemplos para copiar.'),

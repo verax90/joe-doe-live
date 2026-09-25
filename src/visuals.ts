@@ -12,6 +12,7 @@ import type { Localized } from './i18n';
 export type Visual = { id: string; name: Localized; code: string; camera?: boolean };
 
 export const CODE_VISUAL = 'code';
+export const AUTO_VISUAL = 'auto';
 
 export const visuals: Visual[] = [
   { id: CODE_VISUAL, name: { en: 'From the code', es: 'Del código' }, code: '' },
@@ -81,6 +82,8 @@ export const visuals: Visual[] = [
   .hue(H("<0 0.05 0 -0.05>"))
   .out()`,
   },
+  // Picks the others by itself; after the first eight so the PROG CHANGE pads keep theirs
+  { id: AUTO_VISUAL, name: { en: 'Auto (changes by itself)', es: 'Automático (cambia solo)' }, code: '' },
   {
     id: 'anillos',
     name: { en: 'Rings (kick)', es: 'Anillos (bombo)' },
@@ -260,14 +263,63 @@ function followWindowSize(hydra: { setResolution?: (width: number, height: numbe
   });
 }
 
+// Auto: another built-in visual every few bars while it plays (every few
+// seconds while stopped), on the bar line, never the same twice in a row and
+// never a webcam one, so the camera only turns on when you ask for it
+const AUTO_BARS = 4;
+const AUTO_SECONDS = 8;
+let clock: () => number | null = () => null;
+let autoTimer: number | undefined;
+let autoCurrent: Visual | undefined;
+
+// Cycles since Play, or null while stopped
+export function setVisualClock(read: () => number | null) {
+  clock = read;
+}
+
+function stopAuto() {
+  clearInterval(autoTimer);
+  autoTimer = undefined;
+}
+
+function startAuto() {
+  const pool = visuals.filter((v) => v.code && !v.camera && v.id !== 'ninguno');
+  const step = () => {
+    const cycles = clock();
+    return cycles === null ? Math.floor(performance.now() / 1000 / AUTO_SECONDS) : Math.floor(cycles / AUTO_BARS);
+  };
+  const next = () => {
+    const choices = pool.filter((v) => v !== autoCurrent);
+    autoCurrent = choices[Math.floor(Math.random() * choices.length)];
+    new Function(autoCurrent.code)();
+  };
+  let last = step();
+  next();
+  autoTimer = window.setInterval(() => {
+    const now = step();
+    if (now === last) return;
+    last = now;
+    next();
+  }, 50);
+}
+
 export async function applyVisual(id: string) {
   const visual = visuals.find((v) => v.id === id);
   if (!visual || !g.initHydra) return;
+  if (id !== AUTO_VISUAL) stopAuto();
   const hydra = await g.initHydra();
   // hush() in a pattern resets both, so they are set again on every visual
   capFrameRate();
   attachAscii(hydra);
   if (visual.id === CODE_VISUAL) return;
+  if (visual.id === AUTO_VISUAL) {
+    connectSource(false);
+    // Already running (Ctrl+Enter runs the visual again): redraw the current
+    // one instead of jumping to another
+    if (autoTimer === undefined) startAuto();
+    else if (autoCurrent) new Function(autoCurrent.code)();
+    return;
+  }
   // The webcam, or the video or tab chosen in the Video panel
   connectSource(Boolean(visual.camera));
   new Function(visual.code)();
