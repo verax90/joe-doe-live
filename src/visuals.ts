@@ -17,7 +17,7 @@ export const visuals: Visual[] = [
     id: 'lima',
     name: { en: 'Lime (bar)', es: 'Lima (compás)' },
     code: `osc(6, 0.03, 0.8)
-  .color(0.34, 0.4, 0.12)
+  .color(...tint(0.4))
   .modulate(noise(1.5), 0.25)
   .kaleid(H("<3 3 4 6>"))
   .out()`,
@@ -28,7 +28,7 @@ export const visuals: Visual[] = [
     code: `shape(4, 0.35, 0.02)
   .repeat(3, 3)
   .scale(H("1.25 1 1 1.1 1 1.25 1 1"))
-  .color(0.34, 0.4, 0.12)
+  .color(...tint(0.4))
   .modulateRotate(osc(2, 0.1), 0.3)
   .out()`,
   },
@@ -37,7 +37,7 @@ export const visuals: Visual[] = [
     name: { en: 'Tunnel (bass)', es: 'Túnel (graves)' },
     code: `osc(20, 0.05, 0.4)
   .kaleid(4)
-  .color(0.34, 0.4, 0.12)
+  .color(...tint(0.4))
   .scale(() => 0.8 + bass() * 1.2)
   .modulate(noise(2), () => high() * 0.3)
   .out()`,
@@ -46,7 +46,7 @@ export const visuals: Visual[] = [
     id: 'celdas',
     name: { en: 'Cells (volume)', es: 'Celdas (volumen)' },
     code: `voronoi(6, 0.3, 0.2)
-  .color(0.2, 0.35, 0.1)
+  .color(...tint(0.3))
   .modulate(osc(3, 0.05), () => mid() * 0.6)
   .brightness(() => level() * 0.3 - 0.1)
   .out()`,
@@ -55,7 +55,7 @@ export const visuals: Visual[] = [
     id: 'eco',
     name: { en: 'Echo (bar)', es: 'Eco (compás)' },
     code: `shape(H("<3 4 5 6>"), 0.3, 0.01)
-  .color(0.34, 0.4, 0.12)
+  .color(...tint(0.4))
   .rotate(0, 0.1)
   .diff(src(o0).scale(1.02).rotate(0.01))
   .out()`,
@@ -64,7 +64,7 @@ export const visuals: Visual[] = [
     id: 'glitch',
     name: { en: 'Glitch (highs)', es: 'Glitch (agudos)' },
     code: `osc(40, 0.1, 1.2)
-  .color(0.34, 0.4, 0.12)
+  .color(...tint(0.4))
   .modulate(noise(3).pixelate(8, 8), () => high() * 0.6)
   .posterize(3, 0.6)
   .scrollX(() => (Math.random() - 0.5) * high() * 0.08)
@@ -75,7 +75,7 @@ export const visuals: Visual[] = [
     name: { en: 'Plasma (bar)', es: 'Plasma (compás)' },
     code: `voronoi(8, 0.4, 0.3)
   .modulateScale(osc(6, 0.05), 0.6)
-  .color(0.3, 0.42, 0.12)
+  .color(...tint(0.42))
   .hue(H("<0 0.05 0 -0.05>"))
   .out()`,
   },
@@ -86,7 +86,7 @@ export const visuals: Visual[] = [
   .diff(shape(64, 0.3, 0.01))
   .repeat(2, 2)
   .scale(() => 0.9 + bass() * 0.5)
-  .color(0.5, 0.6, 0.18)
+  .color(...tint(0.6))
   .modulateRotate(osc(1, 0.05), 0.2)
   .out()`,
   },
@@ -95,7 +95,7 @@ export const visuals: Visual[] = [
     name: { en: 'Trails (bar)', es: 'Estela (compás)' },
     code: `shape(H("<3 4 6 8>"), 0.2, 0.01)
   .rotate(0, 0.2)
-  .color(0.34, 0.4, 0.12)
+  .color(...tint(0.4))
   .blend(src(o0).scale(1.02).rotate(0.01), 0.85)
   .out()`,
   },
@@ -105,7 +105,7 @@ export const visuals: Visual[] = [
     camera: true,
     code: `src(s0)
   .saturate(0.3)
-  .color(0.7, 1, 0.45)
+  .color(...tint(0.9))
   .modulate(noise(3), () => bass() * 0.2)
   .out()`,
   },
@@ -116,7 +116,7 @@ export const visuals: Visual[] = [
     code: `src(s0)
   .kaleid(H("<4 6 8>"))
   .rotate(0, 0.05)
-  .color(0.7, 1, 0.45)
+  .color(...tint(0.9))
   .out()`,
   },
   {
@@ -126,7 +126,7 @@ export const visuals: Visual[] = [
     code: `src(s0)
   .pixelate(() => 90 - bass() * 70, () => 60 - bass() * 45)
   .posterize(4, 0.6)
-  .color(0.7, 1, 0.45)
+  .color(...tint(0.9))
   .out()`,
   },
   {
@@ -134,7 +134,7 @@ export const visuals: Visual[] = [
     name: { en: 'Webcam (trails)', es: 'Webcam (estela)' },
     camera: true,
     code: `src(s0)
-  .color(0.7, 1, 0.45)
+  .color(...tint(0.9))
   .blend(src(o0).scale(1.01), 0.8)
   .out()`,
   },
@@ -164,7 +164,7 @@ export const visuals: Visual[] = [
     camera: true,
     code: `src(s0)
   .thresh(() => 0.45 + mid() * 0.2, 0.04)
-  .color(0.84, 1, 0.29)
+  .color(...tint(1))
   .out()`,
   },
   { id: 'ninguno', name: { en: 'No visuals', es: 'Sin visuales' }, code: `solid(0, 0, 0, 0).out()` },

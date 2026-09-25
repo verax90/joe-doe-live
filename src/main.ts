@@ -20,6 +20,7 @@ import { setupSamplesPanel } from './samples';
 import { buildShareUrl, readSharedPattern } from './share';
 import { setupStatus } from './status';
 import { setupTempo } from './tempo';
+import { applyTheme, readTheme, themes } from './themes';
 import { setupToolsPanel } from './tools';
 import { applyVisual, useBundledHydra, visuals } from './visuals';
 // Ruta directa: el paquete no exporta dist/ por su nombre
@@ -112,6 +113,14 @@ function whenStrudelReady(): Promise<void> {
 
 const editor = await whenEditorReady();
 setupStatus(repl);
+
+// Theme before the UI shows, so it does not flash in the default colours
+const themeSelect = document.querySelector<HTMLSelectElement>('#theme')!;
+const themeEditor = editor as unknown as { setTheme?: (name: string) => void };
+for (const theme of themes) themeSelect.append(new Option(pick(theme.name), theme.id));
+const startTheme = readTheme();
+themeSelect.value = startTheme.id;
+applyTheme(startTheme, themeEditor);
 // Schedule notes 0.2 s ahead instead of 0.1 s: a frame of visuals that runs
 // long no longer makes notes late (clicks, gaps). Keys played on a controller
 // are triggered on their own path and stay immediate
@@ -139,6 +148,14 @@ const startsCamera = visuals.find((v) => v.id === initialVisual)?.camera;
 visualSelect.value = visuals.some((v) => v.id === initialVisual) && !startsCamera ? initialVisual : 'lima';
 
 const runVisual = () => applyVisual(visualSelect.value).catch((error) => console.warn('[visual]', error));
+
+// A theme recolours the UI, the code and the ASCII at once; the visual is
+// redrawn so its tint() follows too
+themeSelect.addEventListener('change', () => {
+  const theme = themes.find((t) => t.id === themeSelect.value) ?? themes[0];
+  withTransition(() => applyTheme(theme, themeEditor));
+  runVisual();
+});
 
 // ASCII filter over whatever visual is showing, remembered between visits
 const asciiToggle = document.querySelector<HTMLButtonElement>('#toggle-ascii')!;
@@ -248,6 +265,7 @@ onLangChange(() => {
   langButton.dataset.current = lang;
   renderPresetOptions(presetSelect.value || undefined);
   [...visualSelect.options].forEach((option, index) => (option.text = pick(visuals[index].name)));
+  [...themeSelect.options].forEach((option, index) => (option.text = pick(themes[index].name)));
   // An untouched built-in pattern follows the language; edited code stays as is
   const translated = translateIfBuiltIn(editor.code);
   if (translated !== editor.code) editor.setCode(translated);

@@ -98,6 +98,7 @@ const sections: Section[] = [
       { code: '.rotate(0, 0.1)', note: { en: 'Slow rotation', es: 'Rotación lenta' } },
       { code: '.modulate(noise(2), 0.2)', note: { en: 'Warp with noise', es: 'Deformar con ruido' } },
       { code: '.color(0.34, 0.4, 0.12)', note: { en: 'Tint (red, green, blue)', es: 'Tintar (rojo, verde, azul)' } },
+      { code: '.color(...tint(0.4))', note: { en: 'Tint with the theme colour (0 dark to 1 full)', es: 'Tintar con el color del tema (de 0 oscuro a 1 pleno)' } },
       { code: '.scale(() => 1 + bass())', note: { en: 'Grow with the kick (pattern needs .analyze(1))', es: 'Crece con el bombo (el patrón necesita .analyze(1))' } },
       { code: '.kaleid(H("<3 4 6>"))', note: { en: 'Follow the bar with H("...")', es: 'Seguir el compás con H("...")' } },
     ],

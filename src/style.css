@@ -278,7 +278,7 @@ select.control {
 
 .menu-item:hover,
 .menu-item:focus-visible {
-  background: rgba(214, 255, 75, 0.08);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
   outline: none;
 }
 
