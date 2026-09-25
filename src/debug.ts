@@ -107,8 +107,10 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
     ].join('\n');
 
     // Dropout: at least a second of silence while notes keep arriving
+    // Only while the studio is actually playing: notes arriving before Play
+    // are not a dropout
     const silent = snap.peakDb < -60;
-    if (silent && notesPerSec > 0) {
+    if (silent && notesPerSec > 0 && snap.playing && context?.state === 'running') {
       quietSince ??= nowMs;
       if (nowMs - quietSince > 1000 && dropouts.at(-1)?.time !== snap.time) {
         dropouts.push(snap);
