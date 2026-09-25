@@ -46,6 +46,54 @@ body {
   overflow: hidden;
 }
 
+/* Boot: the UI fades in once translated and loaded (class set in index.html) */
+.bar,
+.stage,
+.foot {
+  transition: opacity 0.35s var(--ease);
+}
+
+.booting .bar,
+.booting .stage,
+.booting .foot {
+  opacity: 0;
+}
+
+/* View Transitions (language switch, pattern change): only these parts are
+   snapshotted, so the Hydra canvas behind keeps moving during the fade */
+:root {
+  view-transition-name: none;
+}
+
+.bar {
+  view-transition-name: bar;
+}
+
+.editor {
+  view-transition-name: editor;
+}
+
+.foot {
+  view-transition-name: foot;
+}
+
+.panel:not([hidden]) {
+  view-transition-name: panel;
+}
+
+::view-transition-group(*) {
+  animation-duration: 0.28s;
+  animation-timing-function: var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .stage,
+  .foot {
+    transition: none;
+  }
+}
+
 /* El canvas de Hydra va fijo detrás de todo: la interfaz se pinta encima */
 .bar,
 .stage,

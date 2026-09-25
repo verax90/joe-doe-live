@@ -2,7 +2,7 @@
 // en el navegador. La lista vive en joedoe.dev/art (un .md por enlace) y aquí
 // solo se lee; si no se puede leer, se usa la copia que va con el estudio.
 import fallback from './tools-fallback.json';
-import { pick, t, type StringKey } from './i18n';
+import { onLangChange, pick, t, type StringKey } from './i18n';
 
 type Tool = {
   title: string;
@@ -60,7 +60,8 @@ export function setupToolsPanel(onEmbedOpen: () => void) {
     if (event.key === 'Escape' && !embed.hidden) closeEmbed();
   });
 
-  loadTools().then((tools) => {
+  let loaded: Tool[] = [];
+  const render = (tools: Tool[]) => {
     list.replaceChildren();
     for (const group of groups) {
       const items = tools.filter((tool) => tool.category === group.category);
@@ -93,5 +94,10 @@ export function setupToolsPanel(onEmbedOpen: () => void) {
       }
       list.append(heading, ul);
     }
+  };
+  loadTools().then((tools) => {
+    loaded = tools;
+    render(tools);
   });
+  onLangChange(() => loaded.length && render(loaded));
 }

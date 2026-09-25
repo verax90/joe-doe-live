@@ -8,6 +8,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>joe doe · live</title>
+    <script>
+      // Keep the UI out of sight until it is translated and the editor holds its
+      // code, then fade it in: no English flash, no "// LOADING". Never longer than 4 s.
+      document.documentElement.classList.add('booting');
+      setTimeout(() => document.documentElement.classList.remove('booting'), 4000);
+    </script>
     <!-- Preview when the link is pasted in a chat or a social network -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="joe doe" />

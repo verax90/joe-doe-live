@@ -1,7 +1,7 @@
 // Free play: the controller's keys and pads sound straight away, without
 // pressing Play. Also while a pattern plays, as long as that pattern does not
 // read the keys itself (midikeys), so you can jam over the lofi.
-import { pick, type Localized } from './i18n';
+import { onLangChange, pick, type Localized } from './i18n';
 import { ensureLimiter } from './limiter';
 import { NOTE_EVENT, type NoteDetail } from './midi';
 
@@ -43,6 +43,9 @@ export function setupFreePlay(patternReadsKeys: () => boolean) {
   const select = document.querySelector<HTMLSelectElement>('#freeplay-sound')!;
   for (const sound of freePlaySounds) select.append(new Option(pick(sound.name), sound.id));
   select.value = readSound();
+  onLangChange(() => {
+    [...select.options].forEach((option, index) => (option.text = pick(freePlaySounds[index].name)));
+  });
 
   const play = (value: Record<string, unknown>) => {
     const g = globalThis as Global;

@@ -1,7 +1,7 @@
 // Recording: the studio's output as a WAV (full quality, for Reaper or
 // Audacity) or the visuals plus sound as a WebM video. It taps the signal
 // after the limiter, so it records exactly what you hear: patterns and free play.
-import { t } from './i18n';
+import { onLangChange, t } from './i18n';
 import { ensureLimiter, getLimiter } from './limiter';
 
 type Mode = 'audio' | 'video';
@@ -135,6 +135,10 @@ export function setupRecorder() {
         recorder.stop();
       });
   };
+
+  onLangChange(() => {
+    if (!stop) setIdle();
+  });
 
   button.addEventListener('click', async () => {
     if (stop) {

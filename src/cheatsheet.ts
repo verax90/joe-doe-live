@@ -1,6 +1,6 @@
 // Cheatsheet panel: the Strudel and Hydra basics, each with a short example
 // that copies with one click. Checked against Strudel 1.3 / hydra-synth 1.4.
-import { pick, t, type Localized } from './i18n';
+import { onLangChange, pick, t, type Localized } from './i18n';
 
 type Entry = { code: string; note: Localized };
 type Section = { title: Localized; entries: Entry[] };
@@ -102,41 +102,45 @@ export function setupCheatsheet() {
   const filter = document.querySelector<HTMLInputElement>('#cheat-filter')!;
   const status = document.querySelector<HTMLElement>('#cheat-status')!;
 
-  for (const section of sections) {
-    const group = document.createElement('section');
-    group.className = 'cheat-group';
-    const heading = document.createElement('h3');
-    heading.textContent = pick(section.title);
-    const ul = document.createElement('ul');
-    ul.className = 'panel-list cheat-entries';
-    for (const entry of section.entries) {
-      const li = document.createElement('li');
-      li.dataset.search = `${entry.code} ${entry.note.en} ${entry.note.es}`.toLowerCase();
-      const code = document.createElement('button');
-      code.type = 'button';
-      code.className = 'cheat-code';
-      code.textContent = entry.code;
-      code.title = t('copy');
-      code.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(entry.code);
-          status.textContent = t('copied', { code: entry.code });
-        } catch {
-          status.textContent = t('copyFailed');
-        }
-      });
-      const note = document.createElement('p');
-      note.className = 'cheat-note';
-      note.textContent = pick(entry.note);
-      li.append(code, note);
-      ul.append(li);
+  const render = () => {
+    list.replaceChildren();
+    for (const section of sections) {
+      const group = document.createElement('section');
+      group.className = 'cheat-group';
+      const heading = document.createElement('h3');
+      heading.textContent = pick(section.title);
+      const ul = document.createElement('ul');
+      ul.className = 'panel-list cheat-entries';
+      for (const entry of section.entries) {
+        const li = document.createElement('li');
+        li.dataset.search = `${entry.code} ${entry.note.en} ${entry.note.es}`.toLowerCase();
+        const code = document.createElement('button');
+        code.type = 'button';
+        code.className = 'cheat-code';
+        code.textContent = entry.code;
+        code.title = t('copy');
+        code.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(entry.code);
+            status.textContent = t('copied', { code: entry.code });
+          } catch {
+            status.textContent = t('copyFailed');
+          }
+        });
+        const note = document.createElement('p');
+        note.className = 'cheat-note';
+        note.textContent = pick(entry.note);
+        li.append(code, note);
+        ul.append(li);
+      }
+      group.append(heading, ul);
+      list.append(group);
     }
-    group.append(heading, ul);
-    list.append(group);
-  }
+  };
+  render();
 
   // Searches the code and both languages, so "filtro" and "filter" both find .lpf
-  filter.addEventListener('input', () => {
+  const applyFilter = () => {
     const query = filter.value.trim().toLowerCase();
     list.querySelectorAll<HTMLElement>('.cheat-group').forEach((group) => {
       let visible = 0;
@@ -147,5 +151,11 @@ export function setupCheatsheet() {
       });
       group.hidden = visible === 0;
     });
+  };
+  filter.addEventListener('input', applyFilter);
+
+  onLangChange(() => {
+    render();
+    applyFilter();
   });
 }

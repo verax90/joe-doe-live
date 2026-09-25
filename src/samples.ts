@@ -1,7 +1,7 @@
 // Samples propios: arrastra archivos de audio a la página y úsalos con s("nombre").
 // Se guardan en IndexedDB para que sigan ahí al recargar (solo en este navegador).
 
-import { t } from './i18n';
+import { onLangChange, t } from './i18n';
 
 type Global = typeof globalThis & {
   samples?: (map: Record<string, string[]>, baseUrl?: string) => Promise<unknown>;
@@ -118,6 +118,8 @@ export function setupSamplesPanel() {
     status.textContent = t('samplesReady', { count: audio.length });
     render();
   };
+
+  onLangChange(render);
 
   input.addEventListener('change', () => {
     if (input.files) addFiles(input.files);

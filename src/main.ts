@@ -3,7 +3,8 @@ import '@fontsource/ibm-plex-mono/600.css';
 import '@fontsource-variable/syne';
 import '@strudel/repl';
 import './style.css';
-import { lang, pick, setLang, t, translatePage } from './i18n';
+import { lang, onLangChange, pick, setLang, t, translatePage } from './i18n';
+import { withTransition } from './transition';
 import { builtInPresets, translateIfBuiltIn, type Preset } from './presets';
 import { setupCheatsheet } from './cheatsheet';
 import { setupDebug } from './debug';
@@ -76,14 +77,14 @@ function renderPresetOptions(selectedId?: string) {
     presetSelect.append(group);
   };
   presetSelect.append(new Option(t('patternsPlaceholder'), ''));
-  addGroup(t('groupIncluded'), builtInPresets);
+  addGroup(t('groupIncluded'), builtInPresets());
   addGroup(t('groupSaved'), savedPresets);
   presetSelect.value = selectedId ?? '';
   deleteButton.hidden = !savedPresets.some((p) => p.id === presetSelect.value);
 }
 
 function findPreset(id: string) {
-  return [...builtInPresets, ...savedPresets].find((p) => p.id === id);
+  return [...builtInPresets(), ...savedPresets].find((p) => p.id === id);
 }
 
 // El editor se crea dentro de un setTimeout del componente: esperamos a que exista
@@ -112,8 +113,10 @@ const shared = readSharedPattern();
 if (shared.code) history.replaceState(null, '', location.pathname);
 const storedDraft = readStorage<string | null>(DRAFT_KEY, null);
 const draft = storedDraft === null ? null : translateIfBuiltIn(storedDraft);
-editor.setCode(shared.code ?? draft ?? builtInPresets[0].code);
-renderPresetOptions(shared.code || draft ? undefined : builtInPresets[0].id);
+editor.setCode(shared.code ?? draft ?? builtInPresets()[0].code);
+renderPresetOptions(shared.code || draft ? undefined : builtInPresets()[0].id);
+// Translated and holding its code: show it (see the inline script in index.html)
+document.documentElement.classList.remove('booting');
 
 // Visuales: se eligen aparte y se vuelven a aplicar tras cada play,
 // salvo con "Del código", que deja mandar al patrón
@@ -211,17 +214,23 @@ panelButtons.forEach((button) => {
 // Guarda el borrador cada pocos segundos para no perder nada al recargar
 setInterval(() => writeStorage(DRAFT_KEY, editor.code), 3000);
 
-// Cambiar de idioma recarga la página; antes se guarda el borrador
+// Language switch in place, cross-faded: nothing stops playing
 langButton.addEventListener('click', () => {
-  writeStorage(DRAFT_KEY, editor.code);
-  setLang(lang === 'es' ? 'en' : 'es');
-  location.reload();
+  withTransition(() => setLang(lang === 'es' ? 'en' : 'es'));
+});
+onLangChange(() => {
+  langButton.dataset.current = lang;
+  renderPresetOptions(presetSelect.value || undefined);
+  [...visualSelect.options].forEach((option, index) => (option.text = pick(visuals[index].name)));
+  // An untouched built-in pattern follows the language; edited code stays as is
+  const translated = translateIfBuiltIn(editor.code);
+  if (translated !== editor.code) editor.setCode(translated);
 });
 
 presetSelect.addEventListener('change', () => {
   const preset = findPreset(presetSelect.value);
   deleteButton.hidden = !savedPresets.some((p) => p.id === presetSelect.value);
-  if (preset) editor.setCode(preset.code);
+  if (preset) withTransition(() => editor.setCode(preset.code));
 });
 
 saveButton.addEventListener('click', () => {

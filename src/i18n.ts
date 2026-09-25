@@ -38,10 +38,21 @@ function detect(): Lang {
   return browser.some((code) => code?.toLowerCase().startsWith('es')) ? 'es' : 'en';
 }
 
-export const lang: Lang = detect();
+export let lang: Lang = detect();
+
+// Switching language re-renders in place instead of reloading: static texts
+// here, and every module that builds text listens for LANG_EVENT
+export const LANG_EVENT = 'jdl:lang';
 
 export function setLang(next: Lang) {
   writeCookie(next);
+  lang = next;
+  translatePage();
+  window.dispatchEvent(new Event(LANG_EVENT));
+}
+
+export function onLangChange(listener: () => void) {
+  window.addEventListener(LANG_EVENT, listener);
 }
 
 export const pick = (value: Localized) => value[lang] ?? value.en;

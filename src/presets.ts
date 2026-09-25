@@ -245,11 +245,13 @@ stack(
   },
 ];
 
-export const builtInPresets: Preset[] = presets.map((preset) => ({
-  id: preset.id,
-  name: pick(preset.name),
-  code: pick(preset.code),
-}));
+// A function, not a constant: names and comments follow the current language
+export const builtInPresets = (): Preset[] =>
+  presets.map((preset) => ({
+    id: preset.id,
+    name: pick(preset.name),
+    code: pick(preset.code),
+  }));
 
 // An untouched built-in pattern in the other language comes back translated;
 // anything you edited stays exactly as it is
