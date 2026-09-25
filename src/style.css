@@ -617,9 +617,25 @@ select.control {
   min-width: 0;
 }
 
+/* Room for several links, one per line: .control fixes one line's height */
+#youtube-form {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+#youtube-form button {
+  align-self: flex-end;
+}
+
 .youtube-links {
+  height: auto;
+  min-height: 8rem;
+  padding: 0.5rem 0.8rem;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-x: auto;
+  cursor: text;
   resize: vertical;
-  font: inherit;
   font-size: 12px;
 }
 
