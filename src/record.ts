@@ -18,7 +18,7 @@ class Tap extends AudioWorkletProcessor {
 registerProcessor('jdl-tap', Tap);
 `;
 
-function encodeWav(channels: Float32Array[][], sampleRate: number) {
+export function encodeWav(channels: Float32Array[][], sampleRate: number) {
   const channelCount = 2;
   const length = channels.reduce((sum, block) => sum + block[0].length, 0);
   const buffer = new ArrayBuffer(44 + length * channelCount * 2);
@@ -44,7 +44,7 @@ function encodeWav(channels: Float32Array[][], sampleRate: number) {
     for (let i = 0; i < left.length; i++) {
       for (const sample of [left[i], right[i]]) {
         const clamped = Math.max(-1, Math.min(1, sample));
-        view.setInt16(offset, clamped < 0 ? clamped * 0x8000 : clamped * 0x7fff, true);
+        view.setInt16(offset, Math.round(clamped < 0 ? clamped * 0x8000 : clamped * 0x7fff), true);
         offset += 2;
       }
     }

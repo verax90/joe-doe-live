@@ -54,6 +54,19 @@ pnpm build
 
 Web MIDI only works in Chromium browsers (Chrome, Edge, Brave) and on `localhost` or HTTPS.
 
+## Strudel internals this relies on
+
+Strudel is pinned to an exact version (`@strudel/repl` 1.3.0) because the studio
+reaches past its public editor into a few internals. After any upgrade, check:
+
+| What | Used for | Where |
+|---|---|---|
+| Globals set by Strudel's `evalScope`: `samples`, `initHydra`, `getAnalyzerData`, `getAudioContext`, `getSuperdoughAudioController`, `superdough` | samples, bundled Hydra, audio-reactive visuals, limiter, free play | `samples.ts`, `visuals.ts`, `limiter.ts`, `freeplay.ts` |
+| `getSuperdoughAudioController().output.destinationGain` | inserting the limiter and the recording tap | `limiter.ts`, `record.ts` |
+| `<strudel-editor>`'s `editor` (StrudelMirror: `code`, `setCode`, `evaluate`, `stop`, `repl.scheduler.started`) and its `update` event (`error`, `pending`) | the whole UI, error bar | `main.ts`, `status.ts` |
+| The `strudel.log` document event and its message texts (`load-sample`, `[getTrigger] error: …`) | loading notice, runtime errors | `status.ts` |
+| `midin(name)(cc, channel)` and `midikeys(name)()` | the MIDI presets | `presets.ts` |
+
 ## License
 
 [AGPL-3.0-or-later](LICENSE), the same as Strudel and Hydra, which it builds on.
