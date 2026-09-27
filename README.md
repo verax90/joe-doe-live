@@ -17,7 +17,7 @@ A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound 
 - **Video** (More → Video): YouTube links or a playlist behind everything (no effects: YouTube does not let pages read its picture), or your own videos / a captured tab through the webcam visuals, with every effect.
 - **Tempo**: BPM field and Tap in the bar; changes apply at once and are written into the pattern's `setcps` line.
 - **Share**: the button copies a link with the pattern and the visual inside the URL.
-- **Your samples**: drop audio files or folders (each folder a kit) on the page and use them with `s("name")` or `s("kit:3")`. They stay in the browser (IndexedDB). Kits open into their numbered sounds: ▶ to hear one, + to pick it, and Add as a track puts the picked ones in your code in that order.
+- **Your samples**: drop audio files or folders (each folder a kit) on the page and use them with `s("name")` or `s("kit:3")`. They stay in the browser (IndexedDB). The MPK's bank B pads can play one of your kits, eight sounds at a time (MIDI panel), like pad banks on an MPC. Kits open into their numbered sounds: ▶ to hear one, + to pick it, and Add as a track puts the picked ones in your code in that order.
 - **Tools**: other browser-based live coding tools, read from the [joedoe.dev/art](https://joedoe.dev/art?cat=livecoding) shelf. A few open inside the studio.
 - **Errors you can read**: syntax slips, misspelled names and missing sounds show up in plain words, not only in the console.
 - **Save** patterns in the browser (localStorage). The draft saves itself every few seconds.

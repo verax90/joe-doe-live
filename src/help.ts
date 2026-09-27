@@ -60,7 +60,7 @@ const sections: Section[] = [
         kind: 'table',
         head: [L('Pad mode (MPK buttons)', 'Modo de los pads (botones del MPK)'), L('What the pads do', 'Qué hacen los pads')],
         rows: [
-          [L('Normal, bank B', 'Normal, banco B'), L('Drums: kick, snare, hat, open hat, clap, rim, low tom, high tom', 'Batería: bombo, caja, charles, charles abierto, palmada, rim, tom grave, tom agudo')],
+          [L('Normal, bank B', 'Normal, banco B'), L('Drums: kick, snare, hat, open hat, clap, rim, low tom, high tom. Or eight sounds of one of your kits: MIDI panel → Bank B pads play', 'Batería: bombo, caja, charles, charles abierto, palmada, rim, tom grave, tom agudo. O los sonidos de uno de tus kits, de ocho en ocho: panel MIDI → Los pads del banco B tocan')],
           [L('Normal, bank A', 'Normal, banco A'), L('Same notes as the lowest keys: avoid it for drums', 'Las mismas notas que las teclas más graves: mejor no usarlo para batería')],
           ['CC', L('"Scenes" pattern: each pad switches its part on or off. "MPK Mini" pattern: hold pad 1 to cut the beat, pad 2 to crush the piano', 'Patrón "Escenas": cada pad enciende o apaga su parte. Patrón "MPK Mini": mantén el pad 1 para cortar el ritmo y el 2 para ensuciar el piano')],
           ['PROG CHANGE', L('Pick a pattern or a live set song, if chosen in the MIDI panel. Otherwise one of the first 8 visuals: pad 1 From the code, 2 Lime, 3 Pulse, 4 Tunnel, 5 Cells, 6 Echo, 7 Glitch, 8 Plasma (webcam visuals only from the list)', 'Elegir un patrón o un tema del directo, si lo eliges en el panel MIDI. Si no, uno de los 8 primeros visuales: pad 1 Del código, 2 Lima, 3 Pulso, 4 Túnel, 5 Celdas, 6 Eco, 7 Glitch, 8 Plasma (los de webcam, solo desde la lista)')],

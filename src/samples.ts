@@ -150,6 +150,9 @@ export async function kitsUsedBy(code: string) {
   );
 }
 
+// Every kit loaded now and how many sounds it has (free play's pads use them)
+export const loadedKits = () => [...objectUrls].map(([name, urls]) => ({ name, count: urls.length }));
+
 export async function useSentKit(name: string, files: ArrayBuffer[]) {
   await register(name, files.map((data) => new Blob([data])));
 }

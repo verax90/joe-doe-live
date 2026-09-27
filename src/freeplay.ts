@@ -2,10 +2,12 @@
 // pressing Play. Also while a pattern plays, as long as that pattern does not
 // read the keys itself (midikeys), so you can jam over the lofi.
 import { ensureAudio } from './audio';
-import { onLangChange, pick, type Localized } from './i18n';
+import { onLangChange, pick, t, type Localized } from './i18n';
 import { ensureLimiter } from './limiter';
 import { freePlayKnobs } from './knobs';
 import { NOTE_EVENT, currentBend, type NoteDetail } from './midi';
+import { loadedKits } from './samples';
+import { readStorage, writeStorage } from './storage';
 
 type Global = typeof globalThis & {
   superdough?: (value: Record<string, unknown>, time: number, duration: number) => Promise<void>;
@@ -30,8 +32,16 @@ export const freePlaySounds: { id: string; name: Localized }[] = [
   { id: 'supersaw', name: { en: 'Supersaw synth', es: 'Sinte supersaw' } },
 ];
 
-// Bank B pads of the MPK Mini (notes 32-39), same kit as the MPK pattern
+// Bank B pads of the MPK Mini (notes 32-39): this drum kit, same as the MPK
+// pattern, or one of your kits, eight sounds at a time (like MPC pad banks)
 const kit = ['bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'lt', 'ht'];
+const PADS_KEY = 'jdl:pads-kit';
+type PadsKit = { name: string; page: number }; // name '' = the drum kit
+
+// Which sound a pad plays: the drum kit, or sound page*8 + pad of your kit
+export function padSound(pad: number, pads: PadsKit) {
+  return pads.name ? { s: pads.name, n: pads.page * 8 + pad } : { s: kit[pad] };
+}
 
 function readSound() {
   try {
@@ -43,6 +53,39 @@ function readSound() {
 }
 
 export function setupFreePlay(patternReadsKeys: () => boolean) {
+  const padsSelect = document.querySelector<HTMLSelectElement>('#pads-kit')!;
+  const pageSelect = document.querySelector<HTMLSelectElement>('#pads-page')!;
+  let pads = readStorage<PadsKit>(PADS_KEY, { name: '', page: 0 });
+
+  // Your kits change as you load or remove them: listed when the select opens
+  const fillPads = () => {
+    const kits = loadedKits().filter((k) => k.count > 1);
+    padsSelect.replaceChildren(new Option(t('padsDrums'), ''), ...kits.map((k) => new Option(`${k.name} (${k.count})`, k.name)));
+    if (pads.name && !kits.some((k) => k.name === pads.name)) padsSelect.append(new Option(pads.name, pads.name));
+    padsSelect.value = pads.name;
+    const count = kits.find((k) => k.name === pads.name)?.count ?? 0;
+    const pages = Math.ceil(count / 8);
+    pageSelect.hidden = pages < 2;
+    pageSelect.replaceChildren(
+      ...Array.from({ length: pages }, (_, i) => new Option(t('padsPage', { from: i * 8, to: Math.min(count, i * 8 + 8) - 1 }), String(i))),
+    );
+    pageSelect.value = String(Math.min(pads.page, Math.max(pages - 1, 0)));
+  };
+  const savePads = () => writeStorage(PADS_KEY, pads);
+  padsSelect.addEventListener('focus', fillPads);
+  padsSelect.addEventListener('pointerdown', fillPads);
+  padsSelect.addEventListener('change', () => {
+    pads = { name: padsSelect.value, page: 0 };
+    savePads();
+    fillPads();
+  });
+  pageSelect.addEventListener('change', () => {
+    pads = { ...pads, page: Number(pageSelect.value) };
+    savePads();
+  });
+  fillPads();
+  onLangChange(fillPads);
+
   const select = document.querySelector<HTMLSelectElement>('#freeplay-sound')!;
   for (const sound of freePlaySounds) select.append(new Option(pick(sound.name), sound.id));
   select.value = readSound();
@@ -77,7 +120,7 @@ export function setupFreePlay(patternReadsKeys: () => boolean) {
     if (patternReadsKeys()) return;
     const { note, velocity } = (event as CustomEvent<NoteDetail>).detail;
     if (note >= 32 && note < 40) {
-      play({ s: kit[note - 32], gain: velocity * 0.8 });
+      play({ ...padSound(note - 32, pads), gain: velocity * 0.8 });
     } else {
       // never below 35%: the arpeggiator repeats soft velocities
       // Knobs 1-3: echo, filter (squared, so the low end of the knob has room) and reverb;
