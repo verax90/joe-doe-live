@@ -266,9 +266,9 @@ setupVj({ redraw: runVisual });
 room = setupRoom({
   editor,
   currentVisual: () => visualSelect.value,
-  showVisual: (id) => {
+  showVisual: (id, allowCamera) => {
     const visual = visuals.find((v) => v.id === id);
-    visualSelect.value = visual && !visual.camera ? id : 'lima';
+    visualSelect.value = visual && (!visual.camera || allowCamera) ? id : 'lima';
     runVisual();
   },
 });

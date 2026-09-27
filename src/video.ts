@@ -101,10 +101,17 @@ export async function useFiles(files: File[]) {
 
 export async function useTab(onEnded: () => void) {
   const stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false });
+  await useStream(stream, onEnded);
+}
+
+// Any video stream as the source: a captured tab, or the live room host's
+// camera arriving over WebRTC. When it ends the webcam visuals go dark
+// rather than turning this browser's own camera on
+export async function useStream(stream: MediaStream, onEnded: () => void) {
   const next = makeVideo();
   next.srcObject = stream;
   await next.play();
-  // "Stop sharing" in the browser bar
+  // "Stop sharing" in the browser bar, or the host stopped sending
   stream.getVideoTracks()[0]?.addEventListener('ended', () => {
     if (video !== next) return;
     replace('webcam', undefined, false);
@@ -262,4 +269,18 @@ export function setupVideo(options: { showSource: () => void }) {
   }
   if (saved && setYoutube(saved)) input.value = saved;
   showOff();
+}
+
+// What the webcam visuals show here right now, as a stream to send on: the
+// camera, a file or a captured tab; undefined while no webcam visual runs
+export function currentSourceStream(): MediaStream | undefined {
+  const element = (globalThis as { s0?: { src?: unknown } }).s0?.src;
+  if (!(element instanceof HTMLVideoElement)) return undefined;
+  return (element.srcObject as MediaStream | null) ?? (element as HTMLVideoElement & { captureStream?: () => MediaStream }).captureStream?.();
+}
+
+// The room's host camera stopped arriving: back to this browser's webcam
+// setting, without turning it on
+export function dropStream() {
+  replace('webcam', undefined, false);
 }

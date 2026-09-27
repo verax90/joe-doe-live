@@ -5,11 +5,17 @@
 // needs no server of ours and costs next to no bandwidth.
 // Not sent: your voice, the MPK played without Play. It is the same music,
 // not the same instant: each browser keeps its own bar line.
-import type { DataConnection, Peer } from 'peerjs';
+// With "share the webcam image" ticked, what your webcam visuals show (the
+// camera, a video or a tab) also goes as video, and listeners' own webcam
+// visuals use it, so they see it with the same effect. Their camera is never
+// touched: without your image they see Lime instead.
+import type { DataConnection, MediaConnection, Peer } from 'peerjs';
 import { t } from './i18n';
 import { kitsUsedBy, useSentKit } from './samples';
 import type { StrudelMirror } from './strudel';
 import { toast } from './toast';
+import { currentSourceStream, dropStream, useStream } from './video';
+import { visuals } from './visuals';
 
 type Message =
   | { type: 'state'; code: string; visual: string; playing: boolean }
@@ -36,9 +42,9 @@ const loadPeer = async () => (await import('peerjs')).Peer;
 type Options = {
   editor: StrudelMirror;
   currentVisual: () => string;
-  // A visual from the room; webcam ones arrive as Lime, so no one's camera
-  // turns on from a link
-  showVisual: (id: string) => void;
+  // A visual from the room. allowCamera: the host's image is arriving, so a
+  // webcam visual can show it; otherwise webcam visuals show as Lime
+  showVisual: (id: string, allowCamera: boolean) => void;
 };
 
 export function setupRoom({ editor, currentVisual, showVisual }: Options) {
@@ -48,6 +54,7 @@ export function setupRoom({ editor, currentVisual, showVisual }: Options) {
   const linkInput = document.querySelector<HTMLInputElement>('#room-link')!;
   const listeners = document.querySelector<HTMLElement>('#room-listeners')!;
   const status = document.querySelector<HTMLElement>('#room-status')!;
+  const shareCam = document.querySelector<HTMLInputElement>('#room-cam')!;
 
   let peer: Peer | undefined;
   const guests = new Set<DataConnection>();
@@ -81,7 +88,34 @@ export function setupRoom({ editor, currentVisual, showVisual }: Options) {
   const welcome = async (connection: DataConnection) => {
     await sendKits(connection);
     send(state(), [connection]);
+    void shareCamera();
   };
+
+  // The webcam image, to each listener, while ticked and a webcam visual plays
+  const calls = new Map<DataConnection, { call: MediaConnection; stream: MediaStream }>();
+  const isCameraVisual = () => Boolean(visuals.find((v) => v.id === currentVisual())?.camera);
+  const endCalls = () => {
+    for (const { call } of calls.values()) call.close();
+    calls.clear();
+  };
+  async function shareCamera() {
+    if (!peer || !shareCam.checked || !isCameraVisual()) return endCalls();
+    // The camera takes a moment to start after the visual is picked
+    let stream = currentSourceStream();
+    for (let i = 0; i < 25 && !stream; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      stream = currentSourceStream();
+    }
+    // Things may have changed while the camera started: untick, other visual
+    if (!stream || !peer || !shareCam.checked || !isCameraVisual()) return endCalls();
+    for (const connection of guests) {
+      const current = calls.get(connection);
+      if (current?.stream === stream) continue;
+      current?.call.close();
+      calls.set(connection, { call: peer.call(connection.peer, stream), stream });
+    }
+  }
+  shareCam.addEventListener('change', () => void shareCamera());
 
   openButton.addEventListener('click', async () => {
     status.textContent = t('roomOpening');
@@ -102,6 +136,8 @@ export function setupRoom({ editor, currentVisual, showVisual }: Options) {
       });
       connection.on('close', () => {
         guests.delete(connection);
+        calls.get(connection)?.call.close();
+        calls.delete(connection);
         renderHost();
       });
     });
@@ -111,6 +147,7 @@ export function setupRoom({ editor, currentVisual, showVisual }: Options) {
   });
 
   closeButton.addEventListener('click', () => {
+    endCalls();
     peer?.destroy();
     peer = undefined;
     guests.clear();
@@ -143,11 +180,17 @@ export function setupRoom({ editor, currentVisual, showVisual }: Options) {
     let started = false;
     let last: Extract<Message, { type: 'state' }> | undefined;
     let guestPeer: Peer | undefined;
+    let visual = 'lima';
+    let hostImage = false; // the host's webcam image is arriving
+    const show = (id: string) => {
+      visual = id;
+      showVisual(id, hostImage);
+    };
 
     const apply = async (message: Extract<Message, { type: 'state' }>) => {
       last = message;
       editor.setCode(message.code);
-      showVisual(message.visual);
+      show(message.visual);
       if (started && message.playing) await editor.evaluate();
       else if (started) await editor.stop();
     };
@@ -175,10 +218,26 @@ export function setupRoom({ editor, currentVisual, showVisual }: Options) {
         const message = data as Message;
         if (message.type === 'kit') await useSentKit(message.name, message.files);
         else if (message.type === 'state') await apply(message);
-        else if (message.type === 'visual') showVisual(message.visual);
+        else if (message.type === 'visual') show(message.visual);
         else if (message.type === 'stop' && started) await editor.stop();
       });
       connection.on('close', () => (text.textContent = t('roomEnded')));
+    });
+    // The host's webcam image, if they share it
+    const imageEnded = () => {
+      if (!hostImage) return;
+      hostImage = false;
+      dropStream();
+      show(visual);
+    };
+    peerOfMine.on('call', (call) => {
+      call.answer();
+      call.on('stream', async (stream) => {
+        await useStream(stream, imageEnded);
+        hostImage = true;
+        show(visual);
+      });
+      call.on('close', imageEnded);
     });
     peerOfMine.on('error', (error) => {
       text.textContent = error.type === 'peer-unavailable' ? t('roomNotFound') : t('roomError', { error: error.type ?? error.message });
@@ -198,6 +257,7 @@ export function setupRoom({ editor, currentVisual, showVisual }: Options) {
     },
     visual(visual: string) {
       send({ type: 'visual', visual });
+      void shareCamera();
     },
   };
 }
