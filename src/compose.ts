@@ -204,6 +204,58 @@ export function muteChanges(code: string, layer: Layer): Change[] {
   return found.muted ? [{ from: found.from, to: found.from + 1, insert: '' }] : [{ from: found.from, insert: '_' }];
 }
 
+// Arrangement: which layers play in which part of the song. 8 sections of 4
+// bars, 32 bars that loop. Written as a .mask("<…>") at the end of the
+// layer's line, one value per bar (1 plays, 0 rests), so a line you edited by
+// hand keeps your edits: only that ending changes
+export const SECTIONS = 8;
+export const BARS_PER_SECTION = 4;
+const MASK = /\.mask\("<([^"]*)>"\)\s*$/;
+
+export function sectionsToMask(sections: boolean[]) {
+  if (sections.every(Boolean)) return '';
+  const runs: [string, number][] = [];
+  for (const on of sections) {
+    const value = on ? '1' : '0';
+    const last = runs.at(-1);
+    if (last?.[0] === value) last[1] += BARS_PER_SECTION;
+    else runs.push([value, BARS_PER_SECTION]);
+  }
+  return `.mask("<${runs.map(([value, bars]) => `${value}!${bars}`).join(' ')}>")`;
+}
+
+// The sections a line plays in, read back from its mask; all on without one
+export function maskToSections(line: string) {
+  const inner = line.match(MASK)?.[1];
+  if (!inner) return Array<boolean>(SECTIONS).fill(true);
+  const bars = inner
+    .trim()
+    .split(/\s+/)
+    .flatMap((token) => {
+      const [value, times] = token.split('!');
+      return Array<string>(Number(times ?? 1) || 1).fill(value);
+    });
+  return Array.from({ length: SECTIONS }, (_, i) => bars[(i * BARS_PER_SECTION) % Math.max(bars.length, 1)] !== '0');
+}
+
+export function arrangeChanges(code: string, layer: Layer, sections: boolean[]): Change[] {
+  const found = findLabel(code, layer);
+  if (!found) return [];
+  const line = code.slice(found.from, found.to).replace(MASK, '');
+  return [{ from: found.from, to: found.to, insert: line + sectionsToMask(sections) }];
+}
+
+// A song shape to start from: the background opens alone, drums and hats
+// come in, then the bass, the melody from the middle, a break at section 7
+export const TYPICAL: Record<Layer, boolean[]> = {
+  pad: [true, true, true, true, true, true, true, true],
+  chords: [true, true, true, true, true, true, false, true],
+  drums: [false, true, true, true, true, true, false, true],
+  hats: [false, false, true, true, true, true, false, true],
+  bass: [false, false, true, true, true, true, true, true],
+  melody: [false, false, false, false, true, true, true, true],
+};
+
 // A fresh song: tempo, the chosen layers and all(...) so the visuals hear it
 export function newSong(song: Song, layers: Partial<Record<Layer, LayerState>>, header: string) {
   const style = STYLES.find((s) => s.id === song.style) ?? STYLES[0];
@@ -227,7 +279,7 @@ type Editor = {
   code: string;
   setCode(code: string): void;
   evaluate(): Promise<void>;
-  repl?: { scheduler?: { started?: boolean } };
+  repl?: { scheduler?: { started?: boolean; now?: () => number } };
 };
 
 // Every layer already in the code, written again for the current song
@@ -246,6 +298,8 @@ export function setupCompose(editor: Editor) {
   const progressionText = document.querySelector<HTMLElement>('#compose-progression')!;
   const status = document.querySelector<HTMLElement>('#compose-status')!;
   const panel = document.querySelector<HTMLElement>('#compose')!;
+  const grid = document.querySelector<HTMLElement>('#compose-grid')!;
+  const arrangement = document.querySelector<HTMLElement>('#compose-arrangement')!;
 
   let song: Song = { style: STYLES[0].id, key: 'A', progression: 0 };
   try {
@@ -322,10 +376,73 @@ export function setupCompose(editor: Editor) {
     return element;
   };
 
+  // Arrangement grid: a row per layer in the code, a column per 4 bars
+  const present = () => LAYERS.filter((layer) => findLabel(editor.code, layer));
+  const arrange = (sectionsFor: (layer: Layer, current: boolean[]) => boolean[]) => {
+    let next = editor.code;
+    for (const layer of present()) {
+      const found = findLabel(next, layer)!;
+      const current = maskToSections(next.slice(found.from, found.to));
+      next = applyChanges(next, arrangeChanges(next, layer, sectionsFor(layer, current)));
+    }
+    update(next);
+  };
+  const renderGrid = () => {
+    const layers = present();
+    arrangement.hidden = !layers.length;
+    const cells: HTMLElement[] = [document.createElement('span')];
+    for (let section = 0; section < SECTIONS; section++) {
+      const head = document.createElement('span');
+      head.className = 'arrange-head';
+      head.dataset.section = String(section);
+      head.textContent = String(section + 1);
+      head.title = t('arrangeBars', { from: section * BARS_PER_SECTION + 1, to: (section + 1) * BARS_PER_SECTION });
+      cells.push(head);
+    }
+    for (const layer of layers) {
+      const found = findLabel(editor.code, layer)!;
+      const sections = maskToSections(editor.code.slice(found.from, found.to));
+      const name = document.createElement('span');
+      name.className = 'arrange-name';
+      name.textContent = pick(LAYER_NAMES[layer]);
+      cells.push(name);
+      sections.forEach((on, section) => {
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.className = 'arrange-cell';
+        cell.dataset.section = String(section);
+        cell.setAttribute('aria-pressed', String(on));
+        cell.setAttribute(
+          'aria-label',
+          `${pick(LAYER_NAMES[layer])}, ${t('arrangeBars', { from: section * BARS_PER_SECTION + 1, to: (section + 1) * BARS_PER_SECTION })}`,
+        );
+        cell.addEventListener(
+          'click',
+          guarded(() => arrange((l, current) => (l === layer ? current.map((value, i) => (i === section ? !value : value)) : current))),
+        );
+        cells.push(cell);
+      });
+    }
+    grid.replaceChildren(...cells);
+  };
+  document.querySelector('#arrange-typical')!.addEventListener('click', guarded(() => arrange((layer) => TYPICAL[layer])));
+  document.querySelector('#arrange-all')!.addEventListener('click', guarded(() => arrange(() => Array<boolean>(SECTIONS).fill(true))));
+  // Your composition into the pattern list (More → Save does the same)
+  document.querySelector('#compose-save')!.addEventListener('click', () => document.querySelector<HTMLButtonElement>('#save')!.click());
+
+  // The section playing now, marked in the grid
+  setInterval(() => {
+    if (panel.hidden) return;
+    const clock = editor.repl?.scheduler;
+    const now = clock?.started && clock.now ? Math.floor(clock.now() / BARS_PER_SECTION) % SECTIONS : -1;
+    grid.querySelectorAll<HTMLElement>('[data-section]').forEach((cell) => cell.classList.toggle('is-now', Number(cell.dataset.section) === now));
+  }, 200);
+
   let rendered = '';
   function render() {
     const code = editor.code;
     rendered = code;
+    renderGrid();
     progressionText.textContent = t('composeProgression', { chords: chords(song).join(' → ').replaceAll('^7', 'maj7') });
     list.replaceChildren(
       ...LAYERS.map((layer) => {

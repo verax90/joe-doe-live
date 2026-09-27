@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { bassNotes, chords, LAYERS, layerChanges, layerCode, muteChanges, newSong, removeChanges, STYLES } from './compose';
+import { arrangeChanges, bassNotes, chords, LAYERS, layerChanges, layerCode, maskToSections, muteChanges, newSong, removeChanges, sectionsToMask, STYLES } from './compose';
 import { applyChanges, findLabel, tracksReady } from './tracks';
 
 beforeAll(() => tracksReady);
@@ -43,5 +43,26 @@ describe('layers in the code', () => {
 
   it('writes code for every layer of every style', () => {
     for (const style of STYLES) for (const layer of LAYERS) expect(layerCode(layer, { ...song, style: style.id }, state)).toMatch(/^(s|note|chord|n)\(/);
+  });
+});
+
+describe('arrangement', () => {
+  it('writes a mask per bar and reads it back', () => {
+    const sections = [true, true, false, false, true, true, true, true];
+    const mask = sectionsToMask(sections);
+    expect(mask).toBe('.mask("<1!8 0!8 1!16>")');
+    expect(maskToSections(`s("bd")${mask}`)).toEqual(sections);
+    expect(sectionsToMask(Array(8).fill(true))).toBe('');
+    expect(maskToSections('s("bd")')).toEqual(Array(8).fill(true));
+  });
+
+  it('only changes the end of the line, keeping hand edits', () => {
+    const code = 'drums: s("bd*4").gain(0.7) // mine\n';
+    const edited = 'drums: s("bd*4").gain(0.9)';
+    const once = applyChanges(`${edited}\n`, arrangeChanges(`${edited}\n`, 'drums', [false, true, true, true, true, true, true, true]));
+    expect(once).toBe('drums: s("bd*4").gain(0.9).mask("<0!4 1!28>")\n');
+    const back = applyChanges(once, arrangeChanges(once, 'drums', Array(8).fill(true)));
+    expect(back).toBe(`${edited}\n`);
+    expect(code).toContain('mine');
   });
 });
