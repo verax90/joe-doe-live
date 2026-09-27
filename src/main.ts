@@ -25,6 +25,7 @@ import { setupOffline } from './offline';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { builtInPresets, translateIfBuiltIn } from './presets';
 import { setupRecorder } from './record';
+import { setupRiff } from './riff';
 import { setupRoom } from './room';
 import { setupSamplesPanel } from './samples';
 import { setupScenes } from './scenes';
@@ -210,6 +211,7 @@ whenStrudelReady().then(() => {
   useBundledHydra(hydraUrl);
   runVisual();
   setupSamplesPanel({ addTrack });
+  setupRiff({ editor, addTrack });
 });
 
 document.querySelector('#play')!.addEventListener('click', () => editor.evaluate());

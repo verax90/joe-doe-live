@@ -330,6 +330,34 @@
         </label>
         <label class="visually-hidden" for="pads-page" data-i18n="padsPageLabel">Which eight sounds</label>
         <select id="pads-page" class="control freeplay-select" hidden></select>
+        <h3 data-i18n="riffTitle">Record a riff</h3>
+        <p class="panel-help" data-i18n="riffHelp">Play a few bars on the MPK and get them back as code.</p>
+        <div class="set-add">
+          <label class="panel-field" for="riff-bars">
+            <span data-i18n="riffBars">Bars</span>
+            <select id="riff-bars" class="control">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+          <label class="panel-field" for="riff-grid">
+            <span data-i18n="riffGrid">Grid</span>
+            <select id="riff-grid" class="control">
+              <option value="8" data-i18n="riffEighths">Eighths</option>
+              <option value="16" data-i18n="riffSixteenths" selected>Sixteenths</option>
+            </select>
+          </label>
+        </div>
+        <button id="riff-record" class="control control-accent" type="button" data-i18n="riffRecord">● Record a riff</button>
+        <p id="riff-status" class="panel-status" role="status"></p>
+        <div id="riff-result" hidden>
+          <pre class="learn-code"><code id="riff-code"></code></pre>
+          <div class="compose-buttons">
+            <button id="riff-add" class="control control-accent" type="button" data-i18n="riffAdd">Add as tracks</button>
+            <button id="riff-discard" class="control" type="button" data-i18n="riffDiscard">Discard</button>
+          </div>
+        </div>
         <h3 data-i18n="lastMessages">Last messages</h3>
         <ol id="midi-log" class="panel-list midi-log"></ol>
       </aside>

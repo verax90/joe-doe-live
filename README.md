@@ -21,6 +21,7 @@ A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound 
 - **Tools**: other browser-based live coding tools, read from the [joedoe.dev/art](https://joedoe.dev/art?cat=livecoding) shelf. A few open inside the studio.
 - **Errors you can read**: syntax slips, misspelled names and missing sounds show up in plain words, not only in the console.
 - **Save** patterns in the browser (localStorage). The draft saves itself every few seconds.
+- **Record a riff** (MIDI panel): play a few bars on the MPK (keys and bank B pads) and get them back as `$:` tracks, quantised to eighths or sixteenths, one bracket per bar. Over a playing pattern it starts on its next bar and measures against what you hear (the scheduler's `now()` minus its latency); with nothing playing, a one-bar count-in and a click at the BPM field's tempo.
 - **MIDI panel**: shows which note or `cc` each pad or knob sends, to use with `midin()` and `midikeys()`.
 - **MIDI program change picks the visual**: program 0 is the first visual in the list, 1 the second, and so on (on the MPK Mini, the pads in PROG CHANGE mode).
 - **MPK Mini Mk II preset**, mapped from the controller: keys, bank B pads, knobs, joystick, and CC-mode pads as hold-to-apply effects.
