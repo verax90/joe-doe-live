@@ -19,13 +19,19 @@ const groups: { category: Tool['category']; label: StringKey }[] = [
   { category: 'sound', label: 'groupSound' },
 ];
 
+// Links the studio already does itself: the Lines visual (FLUUUID's Lines)
+// and the mic's effects (Chris Wilson's Audio Input Effects). They stay on
+// joedoe.dev/art, not here
+const BUILT_IN = ['labs.fluuu.id/lines', 'cwilso.github.io/Audio-Input-Effects'];
+export const notBuiltIn = (tool: { url: string }) => !BUILT_IN.some((part) => tool.url.includes(part));
+
 async function loadTools(): Promise<Tool[]> {
   try {
     const response = await fetch(SOURCE, { signal: AbortSignal.timeout(5000) });
     if (!response.ok) throw new Error(String(response.status));
-    return (await response.json()) as Tool[];
+    return ((await response.json()) as Tool[]).filter(notBuiltIn);
   } catch {
-    return fallback as Tool[];
+    return (fallback as Tool[]).filter(notBuiltIn);
   }
 }
 

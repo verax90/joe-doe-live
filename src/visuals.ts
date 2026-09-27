@@ -3,6 +3,7 @@
 // - bass(), mid(), high(), level() listen to the audio (the pattern needs .analyze(1)).
 
 import { attachAscii } from './ascii';
+import { stopRidges } from './ridges';
 import { connectSource } from './video';
 import { withVj } from './vj';
 import type { Localized } from './i18n';
@@ -204,6 +205,14 @@ export const visuals: Visual[] = [
   .out()`,
   },
   {
+    id: 'lineas',
+    name: { en: 'Lines (Unknown Pleasures)', es: 'Líneas (Unknown Pleasures)' },
+    code: `ridges()
+src(s1)
+  .color(...tint(1))
+  .out()`,
+  },
+  {
     id: 'cam',
     name: { en: 'Webcam (warp)', es: 'Webcam (deformada)' },
     camera: true,
@@ -347,7 +356,10 @@ const g = globalThis as Global;
 // bare string and Hydra ignored it, so they never followed the bar. This H
 // parses the string first
 const barH = (pattern: unknown) => g.H!(typeof pattern === 'string' && g.mini ? g.mini(pattern) : pattern);
-const run = (code: string) => new Function('H', withVj(code))(barH);
+const run = (code: string) => {
+  stopRidges(); // the Lines visual starts it again if it is the one running
+  new Function('H', withVj(code))(barH);
+};
 
 // One analysis per frame: bass(), mid(), high() and level() are called several
 // times per frame by a single visual, and each read used to copy the spectrum
@@ -483,6 +495,7 @@ export async function applyVisual(id: string) {
   const visual = visuals.find((v) => v.id === id);
   if (!visual || !g.initHydra) return;
   if (id !== AUTO_VISUAL) stopAuto();
+  stopRidges();
   const hydra = await g.initHydra();
   // hush() in a pattern resets both, so they are set again on every visual
   capFrameRate();

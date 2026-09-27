@@ -100,26 +100,6 @@
     "embed": false
   },
   {
-    "title": "Lines — FLUUUID",
-    "url": "https://labs.fluuu.id/lines/",
-    "category": "sound",
-    "note": {
-      "en": "Experiment from a collective of creative technologists. Worth it for how it's built, not just what it does.",
-      "es": "Experimento de un colectivo de tecnólogos creativos. Vale la pena por cómo está hecho, no solo por lo que hace."
-    },
-    "embed": false
-  },
-  {
-    "title": "Live input effects",
-    "url": "https://cwilso.github.io/Audio-Input-Effects/",
-    "category": "sound",
-    "note": {
-      "en": "Effects on live mic input in real time, by Chris Wilson. Plug a guitar in and try it.",
-      "es": "Efectos aplicados a la entrada del micrófono en tiempo real, por Chris Wilson. Enchufa la guitarra y prueba."
-    },
-    "embed": false
-  },
-  {
     "title": "Music Box Fun",
     "url": "https://musicbox.fun/",
     "category": "livecoding",

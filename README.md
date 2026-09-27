@@ -13,7 +13,7 @@ A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound 
 - **Save as session** (More): a dated `.md` for the Sessions gallery on joedoe.dev (`/music/sessions`), with the code, the visual and room for a YouTube link.
 - **Copy, download and open** the code (More): downloads are dated `.js` files that open again from the menu or by dropping them on the page.
 - **Help** (the ? button, or the `?` key; in the menu on phones): getting started, shortcuts, every MPK Mini control in each mode, the panels and troubleshooting.
-- **Visuals apart from the sound**: 22 to pair with any pattern. Some follow the bar (`H("...")`), others listen to the audio; **Auto** changes to another every 4 bars.
+- **Visuals apart from the sound**: 22 to pair with any pattern. Some follow the bar (`H("...")`), others listen to the audio; **Auto** changes to another every 4 bars. **Lines** stacks lines with mountains in the middle, after the *Unknown Pleasures* cover and FLUUUID's [Lines](https://labs.fluuu.id/lines/): each new line is what sounds now (read off the limiter, so any pattern moves it), entering at the front and moving back, drawn on a canvas Hydra reads as `s1`.
 - **Video** (More → Video): YouTube links or a playlist behind everything (no effects: YouTube does not let pages read its picture), or your own videos / a captured tab through the webcam visuals, with every effect.
 - **Tempo**: BPM field and Tap in the bar; changes apply at once and are written into the pattern's `setcps` line.
 - **Share**: the button copies a link with the pattern and the visual inside the URL.
