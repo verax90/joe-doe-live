@@ -306,6 +306,45 @@ select.control {
   text-transform: uppercase;
 }
 
+/* Export / import: kept, but folded away */
+.menu-more {
+  display: grid;
+}
+
+.menu-more > .menu-item {
+  padding-left: 1.4rem;
+  color: var(--muted);
+}
+
+.menu-summary {
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.3rem;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.menu-summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu-summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 0.5rem;
+  transition: transform 0.15s;
+}
+
+.menu-more[open] > .menu-summary::before {
+  transform: rotate(90deg);
+}
+
+.menu-summary:hover,
+.menu-summary:focus-visible {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  outline: none;
+}
+
 .menu-field {
   display: grid;
   gap: 0.3rem;

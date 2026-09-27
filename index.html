@@ -68,11 +68,14 @@
               <button id="save" class="menu-item" type="button" title="Save in this browser" data-i18n="save" data-i18n-title="saveTitle">Save</button>
               <button id="delete" class="menu-item" type="button" data-i18n="delete" data-i18n-title="deleteTitle" hidden>Delete</button>
               <button id="share" class="menu-item" type="button" data-i18n="share">Share</button>
-              <button id="copy-code" class="menu-item" type="button" data-i18n="copyCode">Copy the code</button>
-              <button id="download-code" class="menu-item" type="button" data-i18n="downloadCode">Download the code (.js)</button>
-              <button id="open-code" class="menu-item" type="button" data-i18n="openCode">Open code (.js)</button>
-              <button id="save-session" class="menu-item" type="button" data-i18n="saveSession">Save as session (joedoe.dev)</button>
-              <input id="open-code-input" type="file" accept=".js,.mjs,.txt,.strudel,text/javascript,text/plain" hidden />
+              <details class="menu-more">
+                <summary class="menu-summary" data-i18n="menuExport">Export / import</summary>
+                <button id="copy-code" class="menu-item" type="button" data-i18n="copyCode">Copy the code</button>
+                <button id="download-code" class="menu-item" type="button" data-i18n="downloadCode">Download the code (.js)</button>
+                <button id="open-code" class="menu-item" type="button" data-i18n="openCode">Open code (.js)</button>
+                <button id="save-session" class="menu-item" type="button" data-i18n="saveSession">Save as session (joedoe.dev)</button>
+                <input id="open-code-input" type="file" accept=".js,.mjs,.txt,.strudel,text/javascript,text/plain" hidden />
+              </details>
             </div>
             <div class="menu-group">
               <h3 class="menu-group-title" data-i18n="menuCreate">Create</h3>
