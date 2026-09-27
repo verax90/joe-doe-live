@@ -18,6 +18,7 @@ import { setupKnobHud } from './knob-hud';
 import { setupKnobs } from './knobs';
 import { setupLearn } from './learn';
 import { setupLibrary } from './library';
+import { setupLiveSet } from './live-set';
 import { ensureLimiter } from './limiter';
 import { setupMenu } from './menu';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
@@ -130,14 +131,30 @@ setupVideo({
   },
 });
 
+const liveSet = setupLiveSet({
+  editor,
+  presets: library.presets,
+  visuals,
+  currentVisual: () => visualSelect.value,
+  useVisual: (id) => {
+    pickVisual(id);
+    runVisual();
+  },
+  onLoad: (song) => {
+    resetParts();
+    library.render(song.preset);
+  },
+});
+
 // A MIDI program change picks a visual or, if chosen in the MIDI panel, a
-// pattern: program 0 is the first in its list
+// pattern or a song of the live set: program 0 is the first in its list
 const programTarget = document.querySelector<HTMLSelectElement>('#program-target')!;
 programTarget.value = readStorage<string>('jdl:program-target', 'visual');
 programTarget.addEventListener('change', () => writeStorage('jdl:program-target', programTarget.value));
 window.addEventListener(PROGRAM_EVENT, (event) => {
   const program = (event as CustomEvent<number>).detail;
   if (programTarget.value === 'pattern') return library.playProgram(program);
+  if (programTarget.value === 'set') return liveSet.playProgram(program);
   pickVisual(visuals[program % visuals.length].id);
   runVisual();
 });

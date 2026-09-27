@@ -67,6 +67,7 @@ export function setupLibrary(editor: StrudelMirror, onLoad: () => void) {
 
   return {
     render,
+    presets: all,
     // A MIDI program change: program 0 is the first pattern in the list
     playProgram(program: number) {
       const list = all();

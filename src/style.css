@@ -1168,3 +1168,78 @@ select.control {
   color: var(--muted);
   font-size: 12px;
 }
+
+/* Live set panel */
+.set-add {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  align-items: end;
+  margin-bottom: 0.75rem;
+}
+
+.set-add button {
+  grid-column: 1 / -1;
+}
+
+.set-song {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.2rem 0.5rem;
+  align-items: center;
+}
+
+.set-song .cheat-actions {
+  grid-column: 1 / -1;
+}
+
+.set-song-visual {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.set-song.is-now .set-song-text {
+  color: var(--accent);
+}
+
+.set-option {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.75rem 0;
+  font-size: 13px;
+}
+
+/* Live set bar: where you are in the set, over everything but the menu */
+.set-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 3rem;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: calc(100vw - 2rem);
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--bg);
+  transform: translateX(-50%);
+}
+
+.set-bar-text {
+  margin: 0 0.25rem;
+  overflow: hidden;
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.set-bar-text strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.set-bar-text span {
+  color: var(--muted);
+}

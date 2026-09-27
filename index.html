@@ -73,6 +73,7 @@
             <button id="toggle-ascii" class="menu-item" type="button" aria-pressed="false" data-i18n="asciiFilter">ASCII filter</button>
           </div>
           <div class="menu-section">
+            <button id="toggle-set" class="menu-item" type="button" aria-pressed="false" data-panel="set" data-i18n="liveSet">Live set</button>
             <button id="toggle-learn" class="menu-item" type="button" aria-pressed="false" data-panel="learn" data-i18n="learn">Learn</button>
             <button id="toggle-compose" class="menu-item" type="button" aria-pressed="false" data-panel="compose" data-i18n="compose">Compose</button>
             <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
@@ -132,6 +133,25 @@
       <aside class="panel panel-wide" id="help" hidden>
         <h2 data-i18n="help">Help</h2>
         <div id="help-content"></div>
+      </aside>
+
+      <aside class="panel" id="set" hidden>
+        <h2 data-i18n="liveSet">Live set</h2>
+        <p class="panel-help" data-i18n="setHelp">The running order for a gig.</p>
+        <div class="set-add">
+          <label class="panel-field" for="set-pattern">
+            <span data-i18n="setSong">Song</span>
+            <select id="set-pattern" class="control"></select>
+          </label>
+          <label class="panel-field" for="set-visual">
+            <span data-i18n="setVisual">Visual</span>
+            <select id="set-visual" class="control"></select>
+          </label>
+          <button id="set-add" class="control" type="button" data-i18n="setAdd">Add to the set</button>
+        </div>
+        <ol id="set-list" class="panel-list set-list"></ol>
+        <label class="set-option"><input id="set-hide-code" type="checkbox" /> <span data-i18n="setHideCode">Hide the code when the set starts</span></label>
+        <button id="set-start" class="control control-accent" type="button" data-i18n="setStart" disabled>Start the set</button>
       </aside>
 
       <aside class="panel" id="learn" hidden>
@@ -242,6 +262,7 @@
           <select id="program-target" class="control">
             <option value="visual" data-i18n="programVisual">the visual</option>
             <option value="pattern" data-i18n="programPattern">the pattern</option>
+            <option value="set" data-i18n="programSet">the live set song</option>
           </select>
         </label>
         <h3 data-i18n="freePlayTitle">Play without Play</h3>
@@ -252,6 +273,13 @@
         <ol id="midi-log" class="panel-list midi-log"></ol>
       </aside>
     </main>
+
+    <div id="set-bar" class="set-bar" role="group" aria-label="Live set" data-i18n-label="liveSet" hidden>
+      <button id="set-prev" class="control control-icon" type="button" aria-label="Previous song" data-i18n-label="setPrev">◀</button>
+      <p class="set-bar-text"><strong id="set-now"></strong> <span id="set-upcoming"></span></p>
+      <button id="set-next" class="control control-icon" type="button" aria-label="Next song" data-i18n-label="setNextSong">▶</button>
+      <button id="set-exit" class="control control-icon" type="button" aria-label="Leave the set" data-i18n-label="setExit">✕</button>
+    </div>
 
     <div class="drop-hint" aria-hidden="true" data-i18n="dropHere">Drop your samples here</div>
 
