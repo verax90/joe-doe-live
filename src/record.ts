@@ -7,6 +7,7 @@ import { ensureAudio } from './audio';
 import { onHydraFrame } from './ascii';
 import { scopeCanvas } from './scope';
 import { ensureLimiter, getLimiter } from './limiter';
+import { micForRecording } from './mic';
 
 type Mode = 'audio' | 'video' | 'vertical' | 'vertical-code';
 
@@ -136,8 +137,12 @@ export function setupRecorder(getCode: () => string) {
     const blocks: Float32Array[][] = [];
     tap.port.onmessage = (event) => blocks.push(event.data);
     output.connect(tap);
+    // The mic, when it is not already in the studio output
+    const mic = micForRecording();
+    mic?.connect(tap);
     return async () => {
       output.disconnect(tap);
+      mic?.disconnect(tap);
       tap.port.onmessage = null;
       download(encodeWav(blocks, context.sampleRate), 'wav');
     };
@@ -147,6 +152,8 @@ export function setupRecorder(getCode: () => string) {
   const recordCanvas = (source: HTMLCanvasElement, output: AudioNode, context: AudioContext, onStop: () => void) => {
     const audio = context.createMediaStreamDestination();
     output.connect(audio);
+    const mic = micForRecording();
+    mic?.connect(audio);
     const stream = new MediaStream([...source.captureStream(30).getVideoTracks(), ...audio.stream.getAudioTracks()]);
     const { mimeType, extension } = videoFormat((type) => MediaRecorder.isTypeSupported(type));
     const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
@@ -158,6 +165,7 @@ export function setupRecorder(getCode: () => string) {
         recorder.onstop = () => {
           onStop();
           output.disconnect(audio);
+          mic?.disconnect(audio);
           stream.getTracks().forEach((track) => track.stop());
           download(new Blob(chunks, { type: mimeType.split(';')[0] }), extension);
           resolve();

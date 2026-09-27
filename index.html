@@ -84,6 +84,7 @@
             <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
             <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
             <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
+            <button id="toggle-mic" class="menu-item" type="button" aria-pressed="false" data-panel="mic" data-i18n="micTitle">Mic</button>
             <button id="toggle-vj" class="menu-item" type="button" aria-pressed="false" data-panel="vj" data-i18n="vjTitle">VJ</button>
             <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-panel="video" data-i18n="video">Video</button>
             <button id="toggle-help" class="menu-item" type="button" aria-pressed="false" data-panel="help" aria-keyshortcuts="?" data-i18n="help">Help</button>
@@ -272,6 +273,21 @@
         </div>
         <h3 data-i18n="yourSamples">Your samples</h3>
         <ul id="sample-list" class="panel-list sample-list"></ul>
+      </aside>
+
+      <aside class="panel" id="mic" hidden>
+        <h2 data-i18n="micTitle">Mic</h2>
+        <p class="panel-help" data-i18n="micHelp">Your voice, or anything on an input, with effects and into your recordings.</p>
+        <label class="panel-field" for="mic-device">
+          <span data-i18n="micDevice">Input</span>
+          <select id="mic-device" class="control"></select>
+        </label>
+        <button id="mic-on" class="control control-accent" type="button" data-i18n="micOn">Turn the mic on</button>
+        <div id="mic-meter" class="mic-meter" aria-hidden="true"><span></span></div>
+        <p id="mic-status" class="panel-status" role="status"></p>
+        <label class="set-option"><input id="mic-monitor" type="checkbox" /> <span data-i18n="micMonitor">Hear me through the studio (headphones only)</span></label>
+        <div id="mic-presets" class="cheat-actions"></div>
+        <div id="mic-sliders" class="vj-sliders"></div>
       </aside>
 
       <aside class="panel" id="vj" hidden>

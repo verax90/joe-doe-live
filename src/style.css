@@ -1451,3 +1451,28 @@ select.control {
   margin: 0;
   font-size: 13px;
 }
+
+/* Mic panel: the input level */
+.mic-meter {
+  height: 6px;
+  margin: 0.6rem 0;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.mic-meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.08s linear;
+}
+
+.mic-meter span.is-hot {
+  background: #ff5356;
+}
+
+#mic-presets {
+  margin: 0.75rem 0 0.25rem;
+}

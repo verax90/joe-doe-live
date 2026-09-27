@@ -21,6 +21,7 @@ import { setupLibrary } from './library';
 import { setupLiveSet } from './live-set';
 import { ensureLimiter } from './limiter';
 import { setupMenu } from './menu';
+import { setupMic } from './mic';
 import { setupOffline } from './offline';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { builtInPresets, translateIfBuiltIn } from './presets';
@@ -257,6 +258,7 @@ setupTempo(editor);
 setupMidiPanel();
 setupKnobs();
 setupScope();
+setupMic();
 setupKnobHud(() => ({
   code: editor.code,
   playing: Boolean(scheduler?.started),
