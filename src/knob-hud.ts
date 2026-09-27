@@ -4,8 +4,9 @@
 // dead. The label follows what is playing.
 import { pick, type Localized } from './i18n';
 import { BEND_EVENT, CC_EVENT, type CcDetail } from './midi';
+import { VJ_CONTROLS } from './vj';
 
-type Context = { code: string; playing: boolean; visual: string; ascii: boolean };
+type Context = { code: string; playing: boolean; visual: string; ascii: boolean; vjKnobs?: boolean };
 type Label = { name: Localized; hint?: Localized };
 
 const L = (en: string, es: string): Localized => ({ en, es });
@@ -17,6 +18,10 @@ const FROM_CODE = L('pick the "From the code" visual to see it', 'elige el visua
 export function knobLabel(knob: number, context: Context): Label {
   const mpkPattern = context.playing && context.code.includes("'MPK Mini'");
   const ownPattern = context.playing && !mpkPattern && context.code.includes('midin(');
+  if (context.vjKnobs && knob <= VJ_CONTROLS.length) {
+    const control = VJ_CONTROLS[knob - 1];
+    return { name: { en: `VJ · ${control.name.en}`, es: `VJ · ${control.name.es}` } };
+  }
   if (knob === 7) return { name: L('Master volume', 'Volumen general') };
   if (knob === 8) return { name: L('ASCII size', 'Tamaño del ASCII'), hint: context.ascii ? undefined : L('turn on More → ASCII filter', 'activa Más → Filtro ASCII') };
   if (ownPattern) return { name: L(`Knob ${knob} · in your pattern`, `Knob ${knob} · en tu patrón`), hint: L(`read with knob(${knob}, 1)`, `se lee con knob(${knob}, 1)`) };

@@ -41,6 +41,7 @@ import { setupToolsPanel } from './tools';
 import { withTransition } from './transition';
 import { setupUndo } from './undo';
 import { setupVideo } from './video';
+import { setupVj, vjTakesKnobs } from './vj';
 import { applyVisual, fitVisuals, setVisualClock, useBundledHydra, visuals } from './visuals';
 // A direct path: the package does not export dist/ by name
 import hydraUrl from '../node_modules/hydra-synth/dist/hydra-synth.js?url';
@@ -244,7 +245,14 @@ setupTempo(editor);
 setupMidiPanel();
 setupKnobs();
 setupScope();
-setupKnobHud(() => ({ code: editor.code, playing: Boolean(scheduler?.started), visual: visualSelect.value, ascii: isAsciiOn() }));
+setupKnobHud(() => ({
+  code: editor.code,
+  playing: Boolean(scheduler?.started),
+  visual: visualSelect.value,
+  ascii: isAsciiOn(),
+  vjKnobs: vjTakesKnobs(),
+}));
+setupVj({ redraw: runVisual });
 setupRecorder(() => editor.code);
 // Free play stays out of the way when the playing pattern reads the keys itself
 setupFreePlay(() => Boolean(scheduler?.started) && editor.code.includes('midikeys'));

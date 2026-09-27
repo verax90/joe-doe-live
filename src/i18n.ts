@@ -202,6 +202,11 @@ const strings = {
     composeProgression: 'Chords: {chords}',
     composeHeader: '// Compose: every layer is a named line. Put _ before a name to mute it (_bass:)',
     composeCantParse: 'The code has a mistake right now: fix it (or ↶) and try again.',
+    vjTitle: 'VJ',
+    vjHelp: 'Play the visuals: six effects over any built-in visual (not "From the code"). The middle of Zoom and Spin is neutral. With the MPK, pads in PROG CHANGE pick the visual and knobs 1–6 move these.',
+    vjOn: 'VJ effects on the visual',
+    vjKnobs: 'MPK knobs 1–6 move these (echo, filter and reverb step aside)',
+    vjReset: 'All neutral',
     video: 'Video',
     youtubeTitle: 'YouTube behind',
     youtubeHelp:
@@ -421,6 +426,11 @@ const strings = {
     composeProgression: 'Acordes: {chords}',
     composeHeader: '// Componer: cada capa es una línea con nombre. Pon _ delante del nombre para silenciarla (_bass:)',
     composeCantParse: 'Ahora mismo el código tiene un error: arréglalo (o ↶) y vuelve a probar.',
+    vjTitle: 'VJ',
+    vjHelp: 'Toca los visuales: seis efectos sobre cualquier visual incluido (no "Del código"). El centro de Zoom y Giro es neutro. Con el MPK, los pads en PROG CHANGE eligen el visual y los knobs 1–6 mueven esto.',
+    vjOn: 'Efectos VJ sobre el visual',
+    vjKnobs: 'Los knobs 1–6 del MPK mueven esto (el eco, filtro y reverb se apartan)',
+    vjReset: 'Todo a neutro',
     video: 'Vídeo',
     youtubeTitle: 'YouTube de fondo',
     youtubeHelp:

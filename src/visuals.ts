@@ -4,6 +4,7 @@
 
 import { attachAscii } from './ascii';
 import { connectSource } from './video';
+import { withVj } from './vj';
 import type { Localized } from './i18n';
 
 // camera: the visual uses s0 (the webcam, or the video or tab picked in the
@@ -346,7 +347,7 @@ const g = globalThis as Global;
 // bare string and Hydra ignored it, so they never followed the bar. This H
 // parses the string first
 const barH = (pattern: unknown) => g.H!(typeof pattern === 'string' && g.mini ? g.mini(pattern) : pattern);
-const run = (code: string) => new Function('H', code)(barH);
+const run = (code: string) => new Function('H', withVj(code))(barH);
 
 // One analysis per frame: bass(), mid(), high() and level() are called several
 // times per frame by a single visual, and each read used to copy the spectrum

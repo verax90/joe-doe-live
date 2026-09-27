@@ -5,6 +5,7 @@
 import { setAsciiScale } from './ascii';
 import { setMasterVolume } from './limiter';
 import { CC_EVENT, type CcDetail } from './midi';
+import { vjKnob } from './vj';
 
 // Free play starts with an open filter and no effects, as if the knobs were down
 export const freePlayKnobs = { echo: 0, filter: 1, reverb: 0 };
@@ -13,6 +14,8 @@ export function setupKnobs() {
   window.addEventListener(CC_EVENT, (event) => {
     const { cc, value, channel } = (event as CustomEvent<CcDetail>).detail;
     if (channel !== 1) return;
+    // With VJ on and "MPK knobs" ticked, 1-6 move the visuals instead
+    if (vjKnob(cc, value)) return;
     if (cc === 1) freePlayKnobs.echo = value; // also the joystick up
     else if (cc === 2) freePlayKnobs.filter = value;
     else if (cc === 3) freePlayKnobs.reverb = value;

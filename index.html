@@ -83,6 +83,7 @@
             <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
             <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
             <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
+            <button id="toggle-vj" class="menu-item" type="button" aria-pressed="false" data-panel="vj" data-i18n="vjTitle">VJ</button>
             <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-panel="video" data-i18n="video">Video</button>
             <button id="toggle-help" class="menu-item" type="button" aria-pressed="false" data-panel="help" aria-keyshortcuts="?" data-i18n="help">Help</button>
             <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
@@ -252,6 +253,15 @@
         </div>
         <h3 data-i18n="yourSamples">Your samples</h3>
         <ul id="sample-list" class="panel-list sample-list"></ul>
+      </aside>
+
+      <aside class="panel" id="vj" hidden>
+        <h2 data-i18n="vjTitle">VJ</h2>
+        <p class="panel-help" data-i18n="vjHelp">Play the visuals: six effects over any built-in visual.</p>
+        <label class="set-option"><input id="vj-on" type="checkbox" /> <span data-i18n="vjOn">VJ effects on the visual</span></label>
+        <label class="set-option"><input id="vj-knobs" type="checkbox" /> <span data-i18n="vjKnobs">MPK knobs 1–6 move these</span></label>
+        <div id="vj-sliders" class="vj-sliders"></div>
+        <button id="vj-reset" class="control" type="button" data-i18n="vjReset">All neutral</button>
       </aside>
 
       <aside class="panel" id="video" hidden>

@@ -1409,3 +1409,23 @@ select.control {
 .arrange-cell.is-now {
   box-shadow: 0 0 0 2px var(--fg);
 }
+
+/* VJ panel: a slider per effect */
+.vj-sliders {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.vj-slider {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 13px;
+}
+
+.vj-slider input {
+  width: 100%;
+  accent-color: var(--accent);
+}
