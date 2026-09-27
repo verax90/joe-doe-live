@@ -13,6 +13,44 @@ export function withHeader(code: string, header: string) {
   return `${HEADER}${header}\n${body}`;
 }
 
+// The date on your clock (toISOString would give yesterday after midnight in Spain)
+const localDay = (date: Date) => {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+// A session for the joedoe.dev gallery (src/content/sessions there): the
+// title, today's date, the visual, and the code in a fenced block. A longer
+// fence when the code itself holds one, so the file always parses
+export function sessionMarkdown(code: string, options: { title: string; visual: string; date: Date }) {
+  const day = localDay(options.date);
+  const fence = code.includes('```') ? '````' : '```';
+  return [
+    '---',
+    `title: ${JSON.stringify(options.title)}`,
+    `date: ${day}`,
+    `visual: ${JSON.stringify(options.visual)}`,
+    '# video: "https://youtu.be/…"   (optional: the recording or the stream)',
+    '# note: "…"                     (optional)',
+    '---',
+    '',
+    `${fence}js`,
+    code.replace(/\s+$/, ''),
+    fence,
+    '',
+  ].join('\n');
+}
+
+// "Beats at dawn!" -> "beats-at-dawn"
+export const slugify = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 60) || 'session';
+
 export const isCodeFile = (file: File) => /\.(js|mjs|txt|strudel)$/i.test(file.name);
 
 const stamp = (date: Date) => {
@@ -24,7 +62,7 @@ export const exportFileName = (date = new Date()) => `joe-doe-live-${stamp(date)
 
 type Editor = { code: string; setCode(code: string): void };
 
-export function setupExport(editor: Editor) {
+export function setupExport(editor: Editor, getVisual: () => string) {
   const getCode = () => editor.code;
   document.querySelector('#copy-code')!.addEventListener('click', async () => {
     try {
@@ -44,6 +82,18 @@ export function setupExport(editor: Editor) {
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast(t('codeDownloaded', { name }));
+  });
+
+  document.querySelector('#save-session')!.addEventListener('click', () => {
+    const title = prompt(t('sessionPrompt'), '')?.trim();
+    if (!title) return;
+    const now = new Date();
+    const name = `${localDay(now)}-${slugify(title)}.md`;
+    const text = sessionMarkdown(getCode(), { title, visual: getVisual(), date: now });
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown' }));
+    Object.assign(document.createElement('a'), { href: url, download: name }).click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast(t('sessionSaved', { name }));
   });
 
   // Open: replaces the code in one undoable step (↶ brings yours back)

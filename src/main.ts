@@ -213,7 +213,7 @@ setupOffline();
 setupMenu();
 setupShortcuts(editor);
 setupUndo(editor);
-setupExport(editor);
+setupExport(editor, () => visualSelect.value);
 setupCompose(editor);
 setupLearn({ editor, useCodeVisual });
 setupCheatsheet({ editor, useCodeVisual });

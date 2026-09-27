@@ -9,6 +9,7 @@ A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound 
 - **Built-in patterns**: lofi, boom bap on the E-mu SP-1200 and the Akai MPC60, trap on the 808, UK drill, G-funk, phonk, old school 808, dembow, drum and bass, house on the 909, a bare-minimum example, and templates for your own samples, the MPK Mini and any MIDI controller.
 - **Tracks**: the Cheatsheet's Insert adds a pattern as a `$:` track (and turns loose patterns into tracks), so everything you add plays together. `_$:` or `_name:` mutes one.
 - **Undo / redo** buttons next to Play; while playing, you hear each step.
+- **Save as session** (More): a dated `.md` for the Sessions gallery on joedoe.dev (`/music/sessions`), with the code, the visual and room for a YouTube link.
 - **Copy, download and open** the code (More): downloads are dated `.js` files that open again from the menu or by dropping them on the page.
 - **Help** (More → Help, or `?`): getting started, shortcuts, every MPK Mini control in each mode, the panels and troubleshooting.
 - **Visuals apart from the sound**: 22 to pair with any pattern. Some follow the bar (`H("...")`), others listen to the audio; **Auto** changes to another every 4 bars.
