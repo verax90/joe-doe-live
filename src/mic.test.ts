@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MIC_CONTROLS, MIC_NEUTRAL, MIC_PRESETS, crushCurve, driveCurve, echoTime, filterSettings, pitchSettings, softClipCurve } from './mic';
+import { MIC_CONTROLS, MIC_GROUPS, MIC_NEUTRAL, MIC_PRESETS, crushCurve, muffleFrequency, driveCurve, echoTime, filterSettings, pitchSettings, softClipCurve } from './mic';
 
 describe('mic effects', () => {
   it('leaves the signal alone with no distortion', () => {
@@ -66,5 +66,21 @@ describe('presets', () => {
       for (const value of Object.values(preset.settings)) expect(value).toBeLessThanOrEqual(1);
     }
     expect(Object.keys(MIC_NEUTRAL).length).toBe(MIC_CONTROLS.length);
+  });
+});
+
+describe('muffle', () => {
+  it('is out of hearing at 0 and a dull 350 Hz at the top', () => {
+    expect(muffleFrequency(0)).toBe(20000);
+    expect(muffleFrequency(1)).toBeCloseTo(350);
+    expect(muffleFrequency(0.5)).toBeCloseTo(Math.sqrt(20000 * 350));
+  });
+});
+
+describe('preset groups', () => {
+  it('put every preset in a group, with unique ids', () => {
+    const groups = new Set(MIC_GROUPS.map((g) => g.id));
+    for (const preset of MIC_PRESETS) expect(groups.has(preset.group)).toBe(true);
+    expect(new Set(MIC_PRESETS.map((p) => p.id)).size).toBe(MIC_PRESETS.length);
   });
 });

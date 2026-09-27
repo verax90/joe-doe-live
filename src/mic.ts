@@ -1,6 +1,7 @@
 // Microphone with effects: your voice (or a guitar, or anything on an input
 // such as the SP-404MKII's) through volume, pitch, distortion, lo-fi, a
-// filter, robot, tremolo, chorus, echo and reverb, into the recordings. While
+// filter, muffle, robot, tremolo, vibrato, flanger, chorus, echo and reverb,
+// into the recordings. While
 // the studio plays, the echo follows its tempo (a dotted eighth). "Hear me" also sends it to the studio output,
 // into the limiter; off by default, since with speakers instead of headphones
 // it feeds back. The browser's own voice-call processing (echo cancelling,
@@ -10,7 +11,20 @@ import { onLangChange, pick, t, type Localized } from './i18n';
 import { ensureLimiter, getLimiter } from './limiter';
 import { readStorage, writeStorage } from './storage';
 
-export type MicControl = 'volume' | 'pitch' | 'drive' | 'lofi' | 'filter' | 'robot' | 'tremolo' | 'chorus' | 'echo' | 'reverb';
+export type MicControl =
+  | 'volume'
+  | 'pitch'
+  | 'drive'
+  | 'lofi'
+  | 'filter'
+  | 'muffle'
+  | 'robot'
+  | 'tremolo'
+  | 'vibrato'
+  | 'flanger'
+  | 'chorus'
+  | 'echo'
+  | 'reverb';
 
 export const MIC_CONTROLS: { id: MicControl; name: Localized }[] = [
   { id: 'volume', name: { en: 'Volume', es: 'Volumen' } },
@@ -18,8 +32,11 @@ export const MIC_CONTROLS: { id: MicControl; name: Localized }[] = [
   { id: 'drive', name: { en: 'Distortion', es: 'Distorsión' } },
   { id: 'lofi', name: { en: 'Lo-fi (bits)', es: 'Lo-fi (bits)' } },
   { id: 'filter', name: { en: 'Filter (radio)', es: 'Filtro (radio)' } },
+  { id: 'muffle', name: { en: 'Muffle (underwater)', es: 'Apagado (bajo el agua)' } },
   { id: 'robot', name: { en: 'Robot', es: 'Robot' } },
   { id: 'tremolo', name: { en: 'Tremolo', es: 'Trémolo' } },
+  { id: 'vibrato', name: { en: 'Vibrato (tape)', es: 'Vibrato (cinta)' } },
+  { id: 'flanger', name: { en: 'Flanger (jet)', es: 'Flanger (avión)' } },
   { id: 'chorus', name: { en: 'Chorus', es: 'Coro' } },
   { id: 'echo', name: { en: 'Echo', es: 'Eco' } },
   { id: 'reverb', name: { en: 'Reverb', es: 'Reverb' } },
@@ -28,23 +45,63 @@ export const MIC_CONTROLS: { id: MicControl; name: Localized }[] = [
 type Settings = Record<MicControl, number>;
 
 // Every control at rest; pitch rests in the middle
-export const MIC_NEUTRAL: Settings = { volume: 0.7, pitch: 0.5, drive: 0, lofi: 0, filter: 0, robot: 0, tremolo: 0, chorus: 0, echo: 0, reverb: 0 };
+export const MIC_NEUTRAL: Settings = {
+  volume: 0.7,
+  pitch: 0.5,
+  drive: 0,
+  lofi: 0,
+  filter: 0,
+  muffle: 0,
+  robot: 0,
+  tremolo: 0,
+  vibrato: 0,
+  flanger: 0,
+  chorus: 0,
+  echo: 0,
+  reverb: 0,
+};
 const preset = (changes: Partial<Settings>): Settings => ({ ...MIC_NEUTRAL, ...changes });
+const semitones = (n: number) => 0.5 + n / 24;
 
-export const MIC_PRESETS: { id: string; name: Localized; settings: Settings }[] = [
-  { id: 'clean', name: { en: 'Clean', es: 'Limpia' }, settings: preset({ reverb: 0.1 }) },
-  { id: 'echo', name: { en: 'Echo', es: 'Eco' }, settings: preset({ echo: 0.55, reverb: 0.2 }) },
-  { id: 'cathedral', name: { en: 'Cathedral', es: 'Catedral' }, settings: preset({ volume: 0.65, echo: 0.1, reverb: 0.85 }) },
-  { id: 'dub', name: { en: 'Dub', es: 'Dub' }, settings: preset({ filter: 0.3, echo: 0.85, reverb: 0.4 }) },
-  { id: 'radio', name: { en: 'Radio', es: 'Radio' }, settings: preset({ volume: 0.8, drive: 0.25, filter: 0.85 }) },
-  { id: 'megaphone', name: { en: 'Megaphone', es: 'Megáfono' }, settings: preset({ volume: 0.75, drive: 0.7, filter: 0.6, echo: 0.1, reverb: 0.1 }) },
-  { id: 'lofi', name: { en: 'Lo-fi', es: 'Lo-fi' }, settings: preset({ lofi: 0.65, filter: 0.45, echo: 0.2, reverb: 0.15 }) },
-  { id: 'robot', name: { en: 'Robot', es: 'Robot' }, settings: preset({ volume: 0.8, drive: 0.2, filter: 0.2, robot: 1, echo: 0.2, reverb: 0.1 }) },
-  { id: 'chipmunk', name: { en: 'Chipmunk', es: 'Ardilla' }, settings: preset({ pitch: 0.5 + 8 / 24, reverb: 0.1 }) },
-  { id: 'monster', name: { en: 'Monster', es: 'Monstruo' }, settings: preset({ pitch: 0.5 - 7 / 24, drive: 0.2, reverb: 0.35 }) },
-  { id: 'choir', name: { en: 'Choir', es: 'Coro' }, settings: preset({ chorus: 0.85, echo: 0.15, reverb: 0.45 }) },
-  { id: 'tremolo', name: { en: 'Tremolo', es: 'Trémolo' }, settings: preset({ tremolo: 0.75, echo: 0.2, reverb: 0.3 }) },
+export type MicGroup = 'space' | 'radio' | 'character' | 'machine';
+export const MIC_GROUPS: { id: MicGroup; name: Localized }[] = [
+  { id: 'space', name: { en: 'Space', es: 'Espacio' } },
+  { id: 'radio', name: { en: 'Radio and tape', es: 'Radio y cinta' } },
+  { id: 'character', name: { en: 'Characters', es: 'Personajes' } },
+  { id: 'machine', name: { en: 'Machines', es: 'Máquinas' } },
 ];
+
+export const MIC_PRESETS: { id: string; group: MicGroup; name: Localized; settings: Settings }[] = [
+  { id: 'clean', group: 'space', name: { en: 'Clean', es: 'Limpia' }, settings: preset({ reverb: 0.1 }) },
+  { id: 'echo', group: 'space', name: { en: 'Echo', es: 'Eco' }, settings: preset({ echo: 0.55, reverb: 0.2 }) },
+  { id: 'adlib', group: 'space', name: { en: 'Ad-lib', es: 'Ad-lib' }, settings: preset({ volume: 0.75, drive: 0.3, filter: 0.2, echo: 0.45, reverb: 0.15 }) },
+  { id: 'dub', group: 'space', name: { en: 'Dub', es: 'Dub' }, settings: preset({ filter: 0.3, echo: 0.85, reverb: 0.4 }) },
+  { id: 'stadium', group: 'space', name: { en: 'Stadium', es: 'Estadio' }, settings: preset({ volume: 0.8, chorus: 0.2, echo: 0.35, reverb: 0.7 }) },
+  { id: 'cathedral', group: 'space', name: { en: 'Cathedral', es: 'Catedral' }, settings: preset({ volume: 0.65, echo: 0.1, reverb: 0.85 }) },
+  { id: 'underwater', group: 'space', name: { en: 'Underwater', es: 'Bajo el agua' }, settings: preset({ muffle: 0.85, vibrato: 0.4, chorus: 0.3, reverb: 0.4 }) },
+  { id: 'radio', group: 'radio', name: { en: 'Radio', es: 'Radio' }, settings: preset({ volume: 0.8, drive: 0.25, filter: 0.85 }) },
+  { id: 'phone', group: 'radio', name: { en: 'Phone', es: 'Teléfono' }, settings: preset({ volume: 0.8, drive: 0.15, lofi: 0.3, filter: 1 }) },
+  { id: 'walkie', group: 'radio', name: { en: 'Walkie-talkie', es: 'Walkie' }, settings: preset({ volume: 0.8, drive: 0.5, lofi: 0.45, filter: 0.9 }) },
+  { id: 'megaphone', group: 'radio', name: { en: 'Megaphone', es: 'Megáfono' }, settings: preset({ volume: 0.75, drive: 0.7, filter: 0.6, echo: 0.1, reverb: 0.1 }) },
+  { id: 'lofi', group: 'radio', name: { en: 'Lo-fi', es: 'Lo-fi' }, settings: preset({ lofi: 0.65, filter: 0.45, echo: 0.2, reverb: 0.15 }) },
+  { id: 'tape', group: 'radio', name: { en: 'Old tape', es: 'Cinta vieja' }, settings: preset({ drive: 0.15, lofi: 0.35, muffle: 0.45, vibrato: 0.35, reverb: 0.1 }) },
+  { id: 'chipmunk', group: 'character', name: { en: 'Chipmunk', es: 'Ardilla' }, settings: preset({ pitch: semitones(8), reverb: 0.1 }) },
+  { id: 'helium', group: 'character', name: { en: 'Helium', es: 'Helio' }, settings: preset({ pitch: semitones(12), chorus: 0.2, reverb: 0.1 }) },
+  { id: 'monster', group: 'character', name: { en: 'Monster', es: 'Monstruo' }, settings: preset({ pitch: semitones(-7), drive: 0.2, reverb: 0.35 }) },
+  { id: 'giant', group: 'character', name: { en: 'Giant', es: 'Gigante' }, settings: preset({ pitch: semitones(-12), drive: 0.15, echo: 0.15, reverb: 0.5 }) },
+  { id: 'demon', group: 'character', name: { en: 'Demon', es: 'Demonio' }, settings: preset({ pitch: semitones(-9), drive: 0.6, robot: 0.3, reverb: 0.5 }) },
+  { id: 'ghost', group: 'character', name: { en: 'Ghost', es: 'Fantasma' }, settings: preset({ volume: 0.65, pitch: semitones(-3), muffle: 0.3, tremolo: 0.4, echo: 0.3, reverb: 0.9 }) },
+  { id: 'alien', group: 'character', name: { en: 'Alien', es: 'Alien' }, settings: preset({ pitch: semitones(5), robot: 0.5, flanger: 0.7, echo: 0.3 }) },
+  { id: 'robot', group: 'machine', name: { en: 'Robot', es: 'Robot' }, settings: preset({ volume: 0.8, drive: 0.2, filter: 0.2, robot: 1, echo: 0.2, reverb: 0.1 }) },
+  { id: 'helmet', group: 'machine', name: { en: 'Helmet', es: 'Casco' }, settings: preset({ volume: 0.8, filter: 0.3, robot: 0.6, flanger: 0.3, chorus: 0.5, reverb: 0.15 }) },
+  { id: 'jet', group: 'machine', name: { en: 'Jet', es: 'Avión' }, settings: preset({ flanger: 0.9, reverb: 0.2 }) },
+  { id: 'choir', group: 'machine', name: { en: 'Choir', es: 'Coro' }, settings: preset({ chorus: 0.85, echo: 0.15, reverb: 0.45 }) },
+  { id: 'tremolo', group: 'machine', name: { en: 'Tremolo', es: 'Trémolo' }, settings: preset({ tremolo: 0.75, echo: 0.2, reverb: 0.3 }) },
+  { id: 'vibrato', group: 'machine', name: { en: 'Vibrato', es: 'Vibrato' }, settings: preset({ vibrato: 0.8, reverb: 0.25 }) },
+];
+
+// Muffle: a low-pass sliding from out of hearing (20 kHz) down to 350 Hz
+export const muffleFrequency = (amount: number) => (amount < 0.01 ? 20000 : 20000 * (350 / 20000) ** amount);
 
 // Pitch slider to a shift: the middle is none, the ends an octave down or up
 // (in whole semitones). The shifter reads the voice through a delay that
@@ -114,6 +171,9 @@ type Chain = {
   robotDepth: GainNode;
   tremolo: GainNode;
   tremoloDepth: GainNode;
+  muffle: BiquadFilterNode;
+  vibrato: { dry: GainNode; wet: GainNode; depth: GainNode };
+  flangerSend: GainNode;
   crush: WaveShaperNode;
   chorusSend: GainNode;
   pitch: ReturnType<typeof pitchShifter>;
@@ -186,6 +246,15 @@ function build(context: AudioContext, stream: MediaStream): Chain {
   const tremoloLfo = new OscillatorNode(context, { frequency: 5.5 });
   const tremoloDepth = new GainNode(context, { gain: 0 });
   tremoloLfo.connect(tremoloDepth).connect(tremolo.gain);
+  const muffle = new BiquadFilterNode(context, { type: 'lowpass', frequency: 20000, Q: 1 });
+  // Vibrato: the voice through a delay wobbling 4.5 times a second, which
+  // bends its pitch up and down like a warped tape; bypassed at 0
+  const vibratoDelay = new DelayNode(context, { delayTime: 0.012, maxDelayTime: 0.05 });
+  const vibratoLfo = new OscillatorNode(context, { frequency: 4.5 });
+  const vibrato = { dry: context.createGain(), wet: new GainNode(context, { gain: 0 }), depth: new GainNode(context, { gain: 0 }) };
+  vibratoLfo.connect(vibrato.depth).connect(vibratoDelay.delayTime);
+  // Everything after the voice effects, before the mix
+  const voice = context.createGain();
   // Dry, echo and reverb meet here, then a limiter of its own: without "Hear
   // me" the voice goes to recordings without passing the studio's limiter
   const sum = context.createGain();
@@ -204,7 +273,15 @@ function build(context: AudioContext, stream: MediaStream): Chain {
   const reverb = new ConvolverNode(context, { buffer: impulse(context) });
   // Chorus: two copies a few milliseconds late, each wobbling slowly
   const chorusSend = context.createGain();
-  const oscillators = [robotLfo, tremoloLfo];
+  const oscillators = [robotLfo, tremoloLfo, vibratoLfo];
+  // Flanger: a copy 0.5 to 5.5 ms late, sweeping slowly, fed back into itself
+  const flangerSend = new GainNode(context, { gain: 0 });
+  const flangerDelay = new DelayNode(context, { delayTime: 0.003, maxDelayTime: 0.02 });
+  const flangerLfo = new OscillatorNode(context, { frequency: 0.25 });
+  flangerLfo.connect(new GainNode(context, { gain: 0.0025 })).connect(flangerDelay.delayTime);
+  flangerSend.connect(flangerDelay).connect(sum);
+  flangerDelay.connect(new GainNode(context, { gain: 0.6 })).connect(flangerDelay);
+  oscillators.push(flangerLfo);
   for (const [base, depth, rate] of [[0.022, 0.005, 0.8], [0.031, 0.007, 1.13]]) {
     const delay = new DelayNode(context, { delayTime: base, maxDelayTime: 0.1 });
     const lfo = new OscillatorNode(context, { frequency: rate });
@@ -217,12 +294,15 @@ function build(context: AudioContext, stream: MediaStream): Chain {
   source.connect(input);
   const pitch = pitchShifter(context, input, lowCut);
   oscillators.push(...pitch.oscillators);
-  lowCut.connect(drive).connect(crush).connect(highCut).connect(robot).connect(tremolo);
-  tremolo.connect(sum);
-  tremolo.connect(echoSend).connect(echoDelay).connect(sum);
+  lowCut.connect(drive).connect(crush).connect(highCut).connect(muffle).connect(robot).connect(tremolo);
+  tremolo.connect(vibrato.dry).connect(voice);
+  tremolo.connect(vibratoDelay).connect(vibrato.wet).connect(voice);
+  voice.connect(sum);
+  voice.connect(echoSend).connect(echoDelay).connect(sum);
   echoDelay.connect(echoFeedback).connect(echoDelay);
-  tremolo.connect(reverbSend).connect(reverb).connect(sum);
-  tremolo.connect(chorusSend);
+  voice.connect(reverbSend).connect(reverb).connect(sum);
+  voice.connect(chorusSend);
+  voice.connect(flangerSend);
   out.connect(analyser);
   // all at once, so the pitch shifter's sweeps and fades stay in step
   const at = context.currentTime + 0.05;
@@ -241,6 +321,9 @@ function build(context: AudioContext, stream: MediaStream): Chain {
     robotDepth,
     tremolo,
     tremoloDepth,
+    muffle,
+    vibrato,
+    flangerSend,
     crush,
     chorusSend,
     pitch,
@@ -264,6 +347,12 @@ function applySettings(settings: Settings) {
   glide(chain.robotDepth.gain, settings.robot);
   glide(chain.tremolo.gain, 1 - settings.tremolo / 2);
   glide(chain.tremoloDepth.gain, settings.tremolo / 2);
+  glide(chain.muffle.frequency, muffleFrequency(settings.muffle));
+  const vibratoOn = settings.vibrato >= 0.01;
+  glide(chain.vibrato.dry.gain, vibratoOn ? 0 : 1);
+  glide(chain.vibrato.wet.gain, vibratoOn ? 1 : 0);
+  glide(chain.vibrato.depth.gain, settings.vibrato * 0.004);
+  glide(chain.flangerSend.gain, settings.flanger * 0.8);
   glide(chain.chorusSend.gain, settings.chorus * 0.9);
   glide(chain.echoSend.gain, settings.echo * 0.8);
   glide(chain.reverbSend.gain, settings.reverb * 0.9);
@@ -396,8 +485,7 @@ export function setupMic({ tempo }: Options) {
   }, 80);
 
   const render = () => {
-    presetsBox.replaceChildren(
-      ...MIC_PRESETS.map((preset) => {
+    const presetButton = (preset: (typeof MIC_PRESETS)[number]) => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'cheat-action';
@@ -411,6 +499,19 @@ export function setupMic({ tempo }: Options) {
           render();
         });
         return button;
+    };
+    presetsBox.replaceChildren(
+      ...MIC_GROUPS.map((group) => {
+        const box = document.createElement('div');
+        box.className = 'mic-group';
+        const title = document.createElement('span');
+        title.className = 'mic-group-name';
+        title.textContent = pick(group.name);
+        const buttons = document.createElement('div');
+        buttons.className = 'cheat-actions';
+        buttons.append(...MIC_PRESETS.filter((preset) => preset.group === group.id).map(presetButton));
+        box.append(title, buttons);
+        return box;
       }),
     );
     slidersBox.replaceChildren(
