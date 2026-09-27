@@ -142,6 +142,123 @@ stack(
     },
   },
   {
+    id: 'shaolin',
+    name: { en: 'Boom bap Shaolin', es: 'Boom bap Shaolin' },
+    code: {
+      en: `// Shaolin 92: hard 90s New York boom bap, the Wu-Tang way. Dusty SP-1200,
+// a piano a hair flat, a kung-fu film flute, tremolo strings, vinyl
+// Every $: line is a track that plays with the rest: write _$: to mute one
+setcps(92 / 60 / 4)
+
+// the kick pushes before the snare; the snare cracks on 2 and 4
+$: s("bd ~ ~ bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~").bank("EmuSP12").gain(1.2).shape(0.2)
+$: s("~ sd").bank("EmuSP12").gain(1.1).room(0.15)
+$: s("hh*8").bank("EmuSP12").gain("0.4 0.25").swing(4).lpf(6000)
+// the out-of-tune piano: speed below 1 plays the sample flat
+$: note("<[c4,eb4,g4]!2 [bb3,d4,f4] [ab3,c4,eb4]>").struct("x ~ ~ x ~ ~ x ~")
+  .s("piano").speed(0.97).lpf(2500).room(0.3).gain(0.5)
+$: note("<c2 c2 ab1 g1>").struct("x ~ ~ x ~ ~ ~ ~ ~ ~ x ~ ~ ~ ~ ~")
+  .s("gm_acoustic_bass").lpf(800).gain(0.9)
+// the kung-fu flute, every other bar
+$: note("<[g5 ~ f5 eb5] ~ [~ ~ c5 ~] ~>").s("gm_shakuhachi").gain(0.35).room(0.5)
+$: note("<c3 ~ ab2 g2>").s("gm_tremolo_strings").gain(0.2).room(0.4)
+$: s("crackle*4").gain(0.15)
+
+// .analyze(1) on every track so the visuals hear it
+all(x => x.analyze(1))`,
+      es: `// Shaolin 92: boom bap duro de Nueva York de los 90, a lo Wu-Tang. SP-1200
+// polvorienta, un piano un pelín desafinado, flauta de peli de kung-fu,
+// cuerdas en trémolo y vinilo
+// Cada línea $: es una pista que suena con el resto: escribe _$: para silenciar una
+setcps(92 / 60 / 4)
+
+// el bombo empuja antes de la caja; la caja restalla en el 2 y el 4
+$: s("bd ~ ~ bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~").bank("EmuSP12").gain(1.2).shape(0.2)
+$: s("~ sd").bank("EmuSP12").gain(1.1).room(0.15)
+$: s("hh*8").bank("EmuSP12").gain("0.4 0.25").swing(4).lpf(6000)
+// el piano desafinado: una velocidad por debajo de 1 baja un poco el sample
+$: note("<[c4,eb4,g4]!2 [bb3,d4,f4] [ab3,c4,eb4]>").struct("x ~ ~ x ~ ~ x ~")
+  .s("piano").speed(0.97).lpf(2500).room(0.3).gain(0.5)
+$: note("<c2 c2 ab1 g1>").struct("x ~ ~ x ~ ~ ~ ~ ~ ~ x ~ ~ ~ ~ ~")
+  .s("gm_acoustic_bass").lpf(800).gain(0.9)
+// la flauta de kung-fu, un compás sí y otro no
+$: note("<[g5 ~ f5 eb5] ~ [~ ~ c5 ~] ~>").s("gm_shakuhachi").gain(0.35).room(0.5)
+$: note("<c3 ~ ab2 g2>").s("gm_tremolo_strings").gain(0.2).room(0.4)
+$: s("crackle*4").gain(0.15)
+
+// .analyze(1) en todas las pistas para que los visuales lo oigan
+all(x => x.analyze(1))`,
+    },
+  },
+  {
+    id: 'queensbridge',
+    name: { en: 'Boom bap Queensbridge', es: 'Boom bap Queensbridge' },
+    code: {
+      en: `// Queensbridge 88: dark 90s boom bap. Heavy MPC60 drums, an eerie high piano
+// rubbing two notes a semitone apart, and a deep 808 under it
+// Every $: line is a track that plays with the rest: write _$: to mute one
+setcps(88 / 60 / 4)
+
+$: s("bd ~ ~ ~ ~ ~ bd ~ ~ ~ bd ~ ~ ~ ~ ~").bank("AkaiMPC60").gain(1.3).shape(0.25)
+$: s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ <~ sd>").bank("AkaiMPC60").gain(1.1)
+$: s("[~ hh]*4").bank("AkaiMPC60").gain(0.35)
+// the eerie piano: a minor second, high up, with a long reverb
+$: note("<[bb5 a5]*2 [bb5 a5 ~ e5]>").s("piano").gain(0.35).room(0.6).lpf(4000)
+$: note("<d2 d2 bb1 a1>").s("sine").decay(0.7).sustain(0).shape(0.3).lpf(300).gain(0.9)
+
+// .analyze(1) on every track so the visuals hear it
+all(x => x.analyze(1))`,
+      es: `// Queensbridge 88: boom bap oscuro de los 90. Batería MPC60 pesada, un piano
+// agudo e inquietante que roza dos notas a un semitono, y un 808 grave debajo
+// Cada línea $: es una pista que suena con el resto: escribe _$: para silenciar una
+setcps(88 / 60 / 4)
+
+$: s("bd ~ ~ ~ ~ ~ bd ~ ~ ~ bd ~ ~ ~ ~ ~").bank("AkaiMPC60").gain(1.3).shape(0.25)
+$: s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ <~ sd>").bank("AkaiMPC60").gain(1.1)
+$: s("[~ hh]*4").bank("AkaiMPC60").gain(0.35)
+// el piano inquietante: una segunda menor, agudo, con reverb larga
+$: note("<[bb5 a5]*2 [bb5 a5 ~ e5]>").s("piano").gain(0.35).room(0.6).lpf(4000)
+$: note("<d2 d2 bb1 a1>").s("sine").decay(0.7).sustain(0).shape(0.3).lpf(300).gain(0.9)
+
+// .analyze(1) en todas las pistas para que los visuales lo oigan
+all(x => x.analyze(1))`,
+    },
+  },
+  {
+    id: 'mugre',
+    name: { en: 'Boom bap raw', es: 'Boom bap mugre' },
+    code: {
+      en: `// Raw 94: saturated Akai XR10 drums, orchestra hits, a shamisen riff and a
+// finger bass. Grimy on purpose
+// Every $: line is a track that plays with the rest: write _$: to mute one
+setcps(94 / 60 / 4)
+
+$: s("bd ~ ~ bd ~ ~ bd ~ ~ ~ bd ~ ~ ~ ~ ~").bank("AkaiXR10").gain(1.3).shape(0.3).lpf(4000)
+$: s("~ sd ~ sd").bank("AkaiXR10").gain(1.1).room(0.2)
+$: s("hh*8?").bank("AkaiXR10").gain(0.35).swing(4)
+$: note("<[a2 ~ ~ ~] [c3 ~ ~ b2]>").s("gm_orchestra_hit").gain(0.3).lpf(3000)
+$: n("<[0 ~ 3 ~ 2 ~ ~ ~] [0 ~ ~ 5 3 ~ 2 ~]>").scale("A3:minor").s("gm_shamisen").gain(0.4).room(0.3)
+$: note("<a1 a1 f1 e1>").struct("x ~ ~ x ~ ~ x ~").s("gm_electric_bass_finger").lpf(700).gain(0.85)
+
+// .analyze(1) on every track so the visuals hear it
+all(x => x.analyze(1))`,
+      es: `// Mugre 94: batería Akai XR10 saturada, golpes de orquesta, un riff de shamisen
+// y bajo de dedo. Sucio a propósito
+// Cada línea $: es una pista que suena con el resto: escribe _$: para silenciar una
+setcps(94 / 60 / 4)
+
+$: s("bd ~ ~ bd ~ ~ bd ~ ~ ~ bd ~ ~ ~ ~ ~").bank("AkaiXR10").gain(1.3).shape(0.3).lpf(4000)
+$: s("~ sd ~ sd").bank("AkaiXR10").gain(1.1).room(0.2)
+$: s("hh*8?").bank("AkaiXR10").gain(0.35).swing(4)
+$: note("<[a2 ~ ~ ~] [c3 ~ ~ b2]>").s("gm_orchestra_hit").gain(0.3).lpf(3000)
+$: n("<[0 ~ 3 ~ 2 ~ ~ ~] [0 ~ ~ 5 3 ~ 2 ~]>").scale("A3:minor").s("gm_shamisen").gain(0.4).room(0.3)
+$: note("<a1 a1 f1 e1>").struct("x ~ ~ x ~ ~ x ~").s("gm_electric_bass_finger").lpf(700).gain(0.85)
+
+// .analyze(1) en todas las pistas para que los visuales lo oigan
+all(x => x.analyze(1))`,
+    },
+  },
+  {
     id: 'trap-808',
     name: { en: 'Trap 808', es: 'Trap 808' },
     code: {
