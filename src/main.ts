@@ -27,6 +27,7 @@ import { builtInPresets, translateIfBuiltIn } from './presets';
 import { setupRecorder } from './record';
 import { setupSamplesPanel } from './samples';
 import { setupScenes } from './scenes';
+import { setupScope } from './scope';
 import { buildShareUrl, readSharedPattern } from './share';
 import { setupShortcuts } from './shortcuts';
 import { setupStatus } from './status';
@@ -242,6 +243,7 @@ setupHelp();
 setupTempo(editor);
 setupMidiPanel();
 setupKnobs();
+setupScope();
 setupKnobHud(() => ({ code: editor.code, playing: Boolean(scheduler?.started), visual: visualSelect.value, ascii: isAsciiOn() }));
 setupRecorder(() => editor.code);
 // Free play stays out of the way when the playing pattern reads the keys itself

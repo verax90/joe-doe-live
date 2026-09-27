@@ -26,6 +26,7 @@ A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound 
 - **Themes** (More → Theme): fourteen pairings of an accent colour and one of Strudel's code themes. The UI, the ASCII filter and the built-in visuals follow; in your own visuals use `.color(...tint(0.4))`.
 - **Scenes**: in a pattern that uses `.mask(part(n))`, parts switch on and off with the number keys 1-8, a click on the strip at the bottom, or MPK pads in CC mode. The "Scenes" pattern is a ready example. MIDI program change can also switch patterns instead of visuals (MIDI panel).
 - **Recording**: WAV audio, a video of the screen, or a vertical 9:16 video (1080 × 1920) for socials with the code on top if you like. MP4 when the browser can record it (Chrome 126+), WebM otherwise.
+- **Audio waves** (More): an oscilloscope of the studio's output along the bottom, over any visual, tapped after the limiter; vertical videos include it.
 - **Vertical framing** (More): the visuals and the code in a 9:16 column under the bar, for vertical streams. On a 1920 × 1080 screen with Chrome full screen, that column is x 672–1248, y 56–1080 (576 × 1024): an OBS scene cropping 672 left, 672 right and 56 top, stretched to 1080 × 1920, streams exactly it. Hydra draws at the column's size, so nothing is stretched.
 - **Performance mode**: `Ctrl+Shift+H` hides the code and leaves only the visuals.
 

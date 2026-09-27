@@ -5,6 +5,7 @@
 import { onLangChange, t } from './i18n';
 import { ensureAudio } from './audio';
 import { onHydraFrame } from './ascii';
+import { scopeCanvas } from './scope';
 import { ensureLimiter, getLimiter } from './limiter';
 
 type Mode = 'audio' | 'video' | 'vertical' | 'vertical-code';
@@ -225,6 +226,9 @@ export function setupRecorder(getCode: () => string) {
       draw2d.fillStyle = '#000';
       draw2d.fillRect(0, 0, VERTICAL.width, VERTICAL.height);
       draw2d.drawImage(shownCanvas(canvas), 0, 0, VERTICAL.width, VERTICAL.height);
+      // The audio waves, if on, along the bottom as on screen
+      const scope = scopeCanvas();
+      if (scope) draw2d.drawImage(scope, 0, VERTICAL.height - 260, VERTICAL.width, 200);
       if (withCode) {
         draw2d.font = `${CODE_FONT}px 'IBM Plex Mono', monospace`;
         draw2d.textBaseline = 'top';
