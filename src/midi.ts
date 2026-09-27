@@ -4,6 +4,7 @@
 // program changes and free play.
 
 import { t } from './i18n';
+import { isEcho } from './sp';
 
 const MAX_LOG = 12;
 
@@ -98,7 +99,7 @@ export function setupMidiPanel() {
           bendValue = (((high << 7) | low) - 8192) / 8192;
           window.dispatchEvent(new CustomEvent<number>(BEND_EVENT, { detail: bendValue }));
         }
-        if ((status & 0xf0) === 0x90 && high > 0) {
+        if ((status & 0xf0) === 0x90 && high > 0 && !isEcho(data, event.timeStamp)) {
           midiStats.notes++;
           window.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: low, velocity: high / 127 } }));
         }

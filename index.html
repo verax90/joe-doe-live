@@ -85,6 +85,7 @@
             <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
             <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
             <button id="toggle-mic" class="menu-item" type="button" aria-pressed="false" data-panel="mic" data-i18n="micTitle">Mic</button>
+            <button id="toggle-sp" class="menu-item" type="button" aria-pressed="false" data-panel="sp" data-i18n="spTitle">SP-404 / MIDI out</button>
             <button id="toggle-vj" class="menu-item" type="button" aria-pressed="false" data-panel="vj" data-i18n="vjTitle">VJ</button>
             <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-panel="video" data-i18n="video">Video</button>
             <button id="toggle-help" class="menu-item" type="button" aria-pressed="false" data-panel="help" aria-keyshortcuts="?" data-i18n="help">Help</button>
@@ -273,6 +274,40 @@
         </div>
         <h3 data-i18n="yourSamples">Your samples</h3>
         <ul id="sample-list" class="panel-list sample-list"></ul>
+      </aside>
+
+      <aside class="panel" id="sp" hidden>
+        <h2 data-i18n="spTitle">SP-404 / MIDI out</h2>
+        <p class="panel-help" data-i18n-html="spHelp"></p>
+        <button id="sp-enable" class="control" type="button" data-i18n="enableMidi">Enable MIDI</button>
+        <label class="panel-field" for="sp-output">
+          <span data-i18n="spOutput">Device</span>
+          <select id="sp-output" class="control"></select>
+        </label>
+        <p id="sp-status" class="panel-status" role="status"></p>
+        <label class="panel-field" for="sp-mode">
+          <span data-i18n="spMode">SP MIDI mode</span>
+          <select id="sp-mode" class="control">
+            <option value="A" data-i18n="spModeA">A: a channel per bank (factory)</option>
+            <option value="B" data-i18n="spModeB">B: banks A–E on ch 1, F–J on ch 2</option>
+          </select>
+        </label>
+        <label class="set-option"><input id="sp-clock" type="checkbox" /> <span data-i18n="spClock">Send the tempo (MIDI clock) and Play/Stop</span></label>
+        <label class="vj-slider">
+          <span><span data-i18n="spOffset">Timing</span> (<span id="sp-offset-value">0</span> ms)</span>
+          <input id="sp-offset" type="range" min="-100" max="200" step="5" value="0" />
+        </label>
+        <p class="panel-help" data-i18n="spOffsetHelp">If the SP comes in early or late against the studio, move this until they hit together.</p>
+        <div class="cheat-actions">
+          <button id="sp-test" class="cheat-action" type="button" data-i18n="spTest">Test: pad A1</button>
+        </div>
+        <h3 data-i18n="spExamples">Add an example</h3>
+        <div class="cheat-actions">
+          <button class="cheat-action" type="button" data-sp-example="pads" data-i18n="spExamplePads">Pads</button>
+          <button class="cheat-action" type="button" data-sp-example="chromatic" data-i18n="spExampleChromatic">Chromatic</button>
+          <button class="cheat-action" type="button" data-sp-example="fx" data-i18n="spExampleFx">Effect knob</button>
+        </div>
+        <p class="panel-help" data-i18n="spSetup">On the SP: SHIFT + pad 13 → SYSTEM → MIDI tab. MIDI Mode as chosen here; Sync Mode AUTO so it follows the clock.</p>
       </aside>
 
       <aside class="panel" id="mic" hidden>

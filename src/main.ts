@@ -27,6 +27,7 @@ import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { builtInPresets, translateIfBuiltIn } from './presets';
 import { setupRecorder } from './record';
 import { setupRiff } from './riff';
+import { setupSp } from './sp';
 import { setupRoom } from './room';
 import { setupSamplesPanel } from './samples';
 import { setupScenes } from './scenes';
@@ -213,6 +214,7 @@ whenStrudelReady().then(() => {
   runVisual();
   setupSamplesPanel({ addTrack });
   setupRiff({ editor, addTrack });
+  setupSp({ editor, addTrack });
 });
 
 document.querySelector('#play')!.addEventListener('click', () => editor.evaluate());
