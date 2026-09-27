@@ -39,7 +39,7 @@ import { setupToolsPanel } from './tools';
 import { withTransition } from './transition';
 import { setupUndo } from './undo';
 import { setupVideo } from './video';
-import { applyVisual, setVisualClock, useBundledHydra, visuals } from './visuals';
+import { applyVisual, fitVisuals, setVisualClock, useBundledHydra, visuals } from './visuals';
 // A direct path: the package does not export dist/ by name
 import hydraUrl from '../node_modules/hydra-synth/dist/hydra-synth.js?url';
 
@@ -121,6 +121,18 @@ asciiToggle.addEventListener('click', async () => {
   setAscii(!isAsciiOn(), await initHydra());
   asciiToggle.setAttribute('aria-pressed', String(isAsciiOn()));
 });
+
+// Vertical framing for 9:16 streams: the visuals and the code in a column
+// under the bar, which OBS's Vertical scene crops. Remembered between visits
+const frameToggle = document.querySelector<HTMLButtonElement>('#toggle-frame')!;
+const setFrame = (on: boolean) => {
+  document.body.classList.toggle('is-vertical-frame', on);
+  frameToggle.setAttribute('aria-pressed', String(on));
+  writeStorage('jdl:vertical-frame', on);
+  fitVisuals(); // reading the box forces the new layout, no need to wait a frame
+};
+setFrame(readStorage<boolean>('jdl:vertical-frame', false));
+frameToggle.addEventListener('click', () => setFrame(!document.body.classList.contains('is-vertical-frame')));
 
 // A video or tab picked in the Video panel shows through the webcam visuals:
 // switch to one if the current visual does not use it

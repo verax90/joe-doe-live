@@ -78,7 +78,7 @@ export const visuals: Visual[] = [
     code: `voronoi(8, 0.4, 0.3)
   .modulateScale(osc(6, 0.05), 0.6)
   .color(...tint(0.42))
-  .hue(H("<0 0.05 0 -0.05>"))
+  .hue(H("<0 0.05 0 0.95>"))
   .out()`,
   },
   // Picks the others by itself; after the first eight so the PROG CHANGE pads keep theirs
@@ -288,6 +288,7 @@ export function useBundledHydra(src: string) {
   if (!original) return;
   g.initHydra = async (options: Record<string, unknown> = {}) => {
     const hydra = await original({ src, pixelRatio: 0.5, pixelated: false, ...options });
+    pixelRatio = typeof options.pixelRatio === 'number' ? options.pixelRatio : 0.5;
     capFrameRate();
     followWindowSize(hydra as { setResolution?: (width: number, height: number) => void });
     return hydra;
@@ -303,19 +304,32 @@ function capFrameRate() {
   if (!globals.fps) globals.fps = 30;
 }
 
-// Strudel resizes the canvas when the window changes, but Hydra keeps drawing
-// at the old size in a corner. Tell it the new size once the canvas has settled.
-let followed: unknown;
+// Hydra draws at its box on screen (the window, or the 9:16 column of the
+// vertical framing) times the pixel ratio. Strudel resizes the canvas to the
+// window, so after a resize, or when the framing changes, Hydra is told the
+// size of its actual box, or it would draw stretched or in a corner
+let followed: { setResolution?: (width: number, height: number) => void } | undefined;
+let pixelRatio = 0.5;
+
+export function fitVisuals() {
+  const canvas = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
+  if (!canvas || !followed?.setResolution) return;
+  const box = canvas.getBoundingClientRect();
+  const width = Math.max(1, Math.round(box.width * pixelRatio));
+  const height = Math.max(1, Math.round(box.height * pixelRatio));
+  canvas.width = width;
+  canvas.height = height;
+  followed.setResolution(width, height);
+}
+
 function followWindowSize(hydra: { setResolution?: (width: number, height: number) => void }) {
   if (followed === hydra || !hydra?.setResolution) return;
   followed = hydra;
+  fitVisuals();
   let timer: number | undefined;
   window.addEventListener('resize', () => {
     clearTimeout(timer);
-    timer = window.setTimeout(() => {
-      const canvas = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
-      if (canvas && followed === hydra) hydra.setResolution!(canvas.width, canvas.height);
-    }, 300);
+    timer = window.setTimeout(fitVisuals, 300);
   });
 }
 

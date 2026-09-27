@@ -1253,3 +1253,30 @@ select.control {
   height: 100vh !important;
   transform: translateX(-50%);
 }
+
+/* Vertical framing for 9:16 streams: the visuals and the code fill a column
+   under the bar, the width of 9:16 at that height. OBS's Vertical scene crops
+   exactly this column (see the README) */
+.is-vertical-frame {
+  --frame-h: calc(100vh - var(--bar-h));
+  --frame-w: calc(var(--frame-h) * 9 / 16);
+}
+
+.is-vertical-frame #hydra-canvas,
+.is-vertical-frame .ascii-canvas {
+  top: var(--bar-h) !important;
+  left: 50% !important;
+  width: var(--frame-w) !important;
+  height: var(--frame-h) !important;
+  transform: translateX(-50%);
+}
+
+.is-vertical-frame .stage {
+  width: var(--frame-w);
+  margin-inline: auto;
+}
+
+/* The shortcut hint would sit in the middle of the stream */
+.is-vertical-frame .foot > span {
+  visibility: hidden;
+}
