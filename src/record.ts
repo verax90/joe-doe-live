@@ -1,11 +1,41 @@
 // Recording: the studio's output as a WAV (full quality, for Reaper or
-// Audacity) or the visuals plus sound as a WebM video. It taps the signal
+// Audacity), the visuals plus sound as a video of the screen, or a vertical
+// 9:16 video for socials, with the code on top if you like. It taps the signal
 // after the limiter, so it records exactly what you hear: patterns and free play.
 import { onLangChange, t } from './i18n';
 import { ensureAudio } from './audio';
+import { onHydraFrame } from './ascii';
 import { ensureLimiter, getLimiter } from './limiter';
 
-type Mode = 'audio' | 'video';
+type Mode = 'audio' | 'video' | 'vertical' | 'vertical-code';
+
+// MP4 plays everywhere (Instagram, TikTok, phones) and Chrome records it since
+// version 126; older browsers get WebM
+export function videoFormat(isSupported: (type: string) => boolean) {
+  const candidates: [string, string][] = [
+    ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'mp4'],
+    ['video/mp4;codecs=avc1,mp4a', 'mp4'],
+    ['video/mp4', 'mp4'],
+    ['video/webm;codecs=vp9,opus', 'webm'],
+    ['video/webm;codecs=vp8,opus', 'webm'],
+  ];
+  const [mimeType, extension] = candidates.find(([type]) => isSupported(type)) ?? ['video/webm', 'webm'];
+  return { mimeType, extension };
+}
+
+// Vertical video: 1080 × 1920, what phones and socials expect
+export const VERTICAL = { width: 1080, height: 1920 };
+const CODE_FONT = 30;
+const CODE_LINE = 40;
+const CODE_MARGIN = 48;
+
+// The code as it fits on the video: long lines cut with …, and if there are
+// too many, the first ones and a … line
+export function codeLines(code: string, maxChars: number, maxLines: number) {
+  const lines = code.replace(/\s+$/, '').split('\n');
+  const cut = lines.map((line) => (line.length > maxChars ? `${line.slice(0, maxChars - 1)}…` : line));
+  return cut.length > maxLines ? [...cut.slice(0, maxLines - 1), '…'] : cut;
+}
 
 // Copies every block of audio to the main thread; kept tiny on purpose
 const TAP_PROCESSOR = `
@@ -65,7 +95,7 @@ function download(blob: Blob, extension: string) {
   setTimeout(() => URL.revokeObjectURL(link.href), 60_000);
 }
 
-export function setupRecorder() {
+export function setupRecorder(getCode: () => string) {
   const button = document.querySelector<HTMLButtonElement>('#record')!;
   const label = button.querySelector<HTMLElement>('.record-label')!;
   const modeSelect = document.querySelector<HTMLSelectElement>('#record-mode')!;
@@ -112,54 +142,117 @@ export function setupRecorder() {
     };
   };
 
-  const startVideo = async (output: AudioNode, context: AudioContext) => {
-    const canvas = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
-    if (!canvas) throw new Error(t('recordNoVisual'));
-    // With the ASCII filter on, what you see (and record) is its overlay
-    const ascii = document.getElementById('ascii-canvas') as HTMLCanvasElement | null;
-    const shown = ascii && !ascii.hidden ? ascii : canvas;
-    // Visuals normally draw at half resolution to spare CPU; a video deserves
-    // the full window, so bump it while recording and put it back afterwards
-    const hydra = (await (globalThis as { initHydra?: () => Promise<unknown> }).initHydra?.()) as
-      | { setResolution?: (width: number, height: number) => void }
-      | undefined;
-    const previous = { width: canvas.width, height: canvas.height };
-    const full = { width: Math.round(window.innerWidth), height: Math.round(window.innerHeight) };
-    canvas.width = full.width;
-    canvas.height = full.height;
-    hydra?.setResolution?.(full.width, full.height);
-    const restore = () => {
-      canvas.width = previous.width;
-      canvas.height = previous.height;
-      hydra?.setResolution?.(previous.width, previous.height);
-    };
-    // One drawn frame first, so the video does not open on black
-    // (a hidden tab draws no frames, hence the 200 ms cap)
-    await Promise.race([
-      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
-      new Promise((resolve) => setTimeout(resolve, 200)),
-    ]);
+  // Records a canvas (the visuals, or the vertical composite) with the sound
+  const recordCanvas = (source: HTMLCanvasElement, output: AudioNode, context: AudioContext, onStop: () => void) => {
     const audio = context.createMediaStreamDestination();
     output.connect(audio);
-    const stream = new MediaStream([...shown.captureStream(30).getVideoTracks(), ...audio.stream.getAudioTracks()]);
-    const type = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find((candidate) =>
-      MediaRecorder.isTypeSupported(candidate),
-    );
-    const recorder = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 6_000_000 });
+    const stream = new MediaStream([...source.captureStream(30).getVideoTracks(), ...audio.stream.getAudioTracks()]);
+    const { mimeType, extension } = videoFormat((type) => MediaRecorder.isTypeSupported(type));
+    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
     const chunks: Blob[] = [];
     recorder.ondataavailable = (event) => event.data.size && chunks.push(event.data);
     recorder.start(1000);
     return () =>
       new Promise<void>((resolve) => {
         recorder.onstop = () => {
-          restore();
+          onStop();
           output.disconnect(audio);
           stream.getTracks().forEach((track) => track.stop());
-          download(new Blob(chunks, { type: 'video/webm' }), 'webm');
+          download(new Blob(chunks, { type: mimeType.split(';')[0] }), extension);
           resolve();
         };
         recorder.stop();
       });
+  };
+
+  // Hydra at a given size while recording, then back to how it was
+  const resizeVisuals = async (canvas: HTMLCanvasElement, size: { width: number; height: number }) => {
+    const hydra = (await (globalThis as { initHydra?: () => Promise<unknown> }).initHydra?.()) as
+      | { setResolution?: (width: number, height: number) => void }
+      | undefined;
+    const previous = { width: canvas.width, height: canvas.height };
+    canvas.width = size.width;
+    canvas.height = size.height;
+    hydra?.setResolution?.(size.width, size.height);
+    // One drawn frame first, so the video does not open on black
+    // (a hidden tab draws no frames, hence the 200 ms cap)
+    await Promise.race([
+      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+      new Promise((resolve) => setTimeout(resolve, 200)),
+    ]);
+    return () => {
+      canvas.width = previous.width;
+      canvas.height = previous.height;
+      hydra?.setResolution?.(previous.width, previous.height);
+    };
+  };
+
+  // With the ASCII filter on, what you see (and record) is its overlay
+  const shownCanvas = (canvas: HTMLCanvasElement) => {
+    const ascii = document.getElementById('ascii-canvas') as HTMLCanvasElement | null;
+    return ascii && !ascii.hidden ? ascii : canvas;
+  };
+
+  const startVideo = async (output: AudioNode, context: AudioContext) => {
+    const canvas = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
+    if (!canvas) throw new Error(t('recordNoVisual'));
+    // Visuals normally draw at half resolution to spare CPU; a video deserves
+    // the full window
+    const restore = await resizeVisuals(canvas, { width: Math.round(window.innerWidth), height: Math.round(window.innerHeight) });
+    return recordCanvas(shownCanvas(canvas), output, context, restore);
+  };
+
+  // Vertical: the visuals render natively at 1080 × 1920 in a 9:16 frame in
+  // the middle of the screen (what you see is what is recorded), and each
+  // frame is copied to a composite with the code and the site's name on top
+  const startVertical = async (output: AudioNode, context: AudioContext, withCode: boolean) => {
+    const canvas = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
+    if (!canvas) throw new Error(t('recordNoVisual'));
+    document.body.classList.add('is-vertical');
+    const restore = await resizeVisuals(canvas, VERTICAL);
+    const composite = document.createElement('canvas');
+    composite.width = VERTICAL.width;
+    composite.height = VERTICAL.height;
+    const draw2d = composite.getContext('2d')!;
+    const colours = getComputedStyle(document.documentElement);
+    const accent = colours.getPropertyValue('--accent').trim() || '#d6ff4b';
+    const fg = colours.getPropertyValue('--fg').trim() || '#eceae4';
+    const muted = colours.getPropertyValue('--muted').trim() || '#9a9aa3';
+    const maxChars = Math.floor((VERTICAL.width - CODE_MARGIN * 2) / (CODE_FONT * 0.6));
+    const maxLines = Math.floor((VERTICAL.height - CODE_MARGIN * 2 - 120) / CODE_LINE);
+    // Drawn right after each Hydra frame (see onHydraFrame), at its 30 fps
+    const draw = () => {
+      draw2d.fillStyle = '#000';
+      draw2d.fillRect(0, 0, VERTICAL.width, VERTICAL.height);
+      draw2d.drawImage(shownCanvas(canvas), 0, 0, VERTICAL.width, VERTICAL.height);
+      if (withCode) {
+        draw2d.font = `${CODE_FONT}px 'IBM Plex Mono', monospace`;
+        draw2d.textBaseline = 'top';
+        codeLines(getCode(), maxChars, maxLines).forEach((line, i) => {
+          if (!line.trim()) return;
+          const y = CODE_MARGIN + i * CODE_LINE;
+          // a dark band behind each line, like the editor, so it reads on any visual
+          draw2d.fillStyle = 'rgba(0, 0, 0, 0.6)';
+          draw2d.fillRect(CODE_MARGIN - 8, y - 4, draw2d.measureText(line).width + 16, CODE_LINE);
+          draw2d.fillStyle = line.trimStart().startsWith('//') ? muted : fg;
+          draw2d.fillText(line, CODE_MARGIN, y);
+        });
+      }
+      draw2d.font = `600 28px 'IBM Plex Mono', monospace`;
+      draw2d.textBaseline = 'alphabetic';
+      draw2d.textAlign = 'right';
+      draw2d.globalAlpha = 0.85;
+      draw2d.fillStyle = accent;
+      draw2d.fillText('live.joedoe.dev', VERTICAL.width - CODE_MARGIN, VERTICAL.height - CODE_MARGIN);
+      draw2d.globalAlpha = 1;
+      draw2d.textAlign = 'left';
+    };
+    const stopDrawing = onHydraFrame(draw);
+    return recordCanvas(composite, output, context, () => {
+      stopDrawing();
+      document.body.classList.remove('is-vertical');
+      restore();
+    });
   };
 
   onLangChange(() => {
@@ -184,7 +277,12 @@ export function setupRecorder() {
       const limiter = getLimiter();
       if (!limiter) throw new Error(t('recordNoAudio'));
       const mode = modeSelect.value as Mode;
-      stop = mode === 'video' ? await startVideo(limiter.limiter, context) : await startAudio(limiter.limiter, context);
+      stop =
+        mode === 'video'
+          ? await startVideo(limiter.limiter, context)
+          : mode === 'vertical' || mode === 'vertical-code'
+            ? await startVertical(limiter.limiter, context, mode === 'vertical-code')
+            : await startAudio(limiter.limiter, context);
       status.textContent = '';
       setRecording();
     } catch (error) {

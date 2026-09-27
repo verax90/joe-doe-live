@@ -118,7 +118,7 @@ const sections: Section[] = [
           [L('Samples', 'Samples'), L('Your sounds: files, or folders that become kits (s("kicks:3"))', 'Tus sonidos: archivos, o carpetas que se convierten en kits (s("kicks:3"))')],
           ['MIDI', L('Which number each pad and knob sends, and the sound of the keys', 'Qué número manda cada pad y knob, y el sonido de las teclas')],
           [L('ASCII filter', 'Filtro ASCII'), L('Turns any visual, webcam included, into characters', 'Convierte cualquier visual, webcam incluida, en caracteres')],
-          [L('What to record', 'Qué grabar'), L('WAV audio or video with visuals; then ● Record', 'Audio WAV o vídeo con visuales; luego ● Grabar')],
+          [L('What to record', 'Qué grabar'), L('WAV audio, a video of the screen, or a vertical 9:16 video for socials (with the code on top if you like); MP4 when the browser can, else WebM. Then ● Record', 'Audio WAV, vídeo de la pantalla, o vídeo vertical 9:16 para redes (con el código encima si quieres); MP4 si el navegador puede, si no WebM. Luego ● Grabar')],
         ],
       },
     ],

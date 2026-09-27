@@ -220,7 +220,7 @@ setupTempo(editor);
 setupMidiPanel();
 setupKnobs();
 setupKnobHud(() => ({ code: editor.code, playing: Boolean(scheduler?.started), visual: visualSelect.value, ascii: isAsciiOn() }));
-setupRecorder();
+setupRecorder(() => editor.code);
 // Free play stays out of the way when the playing pattern reads the keys itself
 setupFreePlay(() => Boolean(scheduler?.started) && editor.code.includes('midikeys'));
 setupDebug(() => scheduler);

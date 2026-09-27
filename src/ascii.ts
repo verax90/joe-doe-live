@@ -35,15 +35,19 @@ function draw(source: HTMLCanvasElement) {
   const target = ensureOverlay(source);
   const context = target.getContext('2d');
   if (!context || !sampler) return;
-  const ratio = Math.min(window.devicePixelRatio || 1, 2);
-  const width = Math.round(window.innerWidth * ratio);
-  const height = Math.round(window.innerHeight * ratio);
+  // The box the visuals fill: the window, or the 9:16 frame while recording a
+  // vertical video, drawn then at the video's 1920 px height
+  const box = source.getBoundingClientRect();
+  const vertical = document.body.classList.contains('is-vertical');
+  const ratio = vertical ? 1920 / box.height : Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.round(box.width * ratio);
+  const height = Math.round(box.height * ratio);
   if (target.width !== width || target.height !== height) {
     target.width = width;
     target.height = height;
   }
-  const cols = Math.max(1, Math.floor(window.innerWidth / cellWidth));
-  const rows = Math.max(1, Math.floor(window.innerHeight / cellHeight));
+  const cols = Math.max(1, Math.floor(box.width / cellWidth));
+  const rows = Math.max(1, Math.floor(box.height / cellHeight));
   sampler.canvas.width = cols;
   sampler.canvas.height = rows;
   sampler.drawImage(source, 0, 0, cols, rows);
@@ -52,10 +56,10 @@ function draw(source: HTMLCanvasElement) {
   const styles = getComputedStyle(document.documentElement);
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
   // With a YouTube video behind, the characters float over it
-  if (document.body.classList.contains('has-youtube')) context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  if (document.body.classList.contains('has-youtube')) context.clearRect(0, 0, box.width, box.height);
   else {
     context.fillStyle = styles.getPropertyValue('--bg').trim() || '#12151c';
-    context.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    context.fillRect(0, 0, box.width, box.height);
   }
   context.fillStyle = styles.getPropertyValue('--accent').trim() || '#d6ff4b';
   // Same font and colour as the code: with the code on screen the characters
@@ -84,16 +88,27 @@ function draw(source: HTMLCanvasElement) {
       const value = (light[row * cols + col] - darkest) / range;
       line += RAMP[Math.max(0, Math.min(RAMP.length - 1, Math.floor(value * RAMP.length)))];
     }
-    context.fillText(line, 0, row * cellHeight, window.innerWidth);
+    context.fillText(line, 0, row * cellHeight, box.width);
   }
   context.globalAlpha = 1;
+}
+
+// Others that need each Hydra frame while it is still readable (a WebGL
+// canvas reads as empty at any other moment): the vertical video recorder
+const frameListeners = new Set<() => void>();
+export function onHydraFrame(listener: () => void) {
+  frameListeners.add(listener);
+  return () => frameListeners.delete(listener);
 }
 
 // Hook into Hydra right after it renders, while its frame is still readable
 export function attachAscii(_hydra?: unknown) {
   const source = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
   if (!source) return;
-  (globalThis as Globals).afterUpdate = enabled ? () => draw(source) : () => {};
+  (globalThis as Globals).afterUpdate = () => {
+    if (enabled) draw(source);
+    frameListeners.forEach((listener) => listener());
+  };
   source.style.visibility = enabled ? 'hidden' : '';
   if (overlay) overlay.hidden = !enabled;
 }
