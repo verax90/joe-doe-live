@@ -62,53 +62,66 @@
           <span data-i18n="more">More</span>
         </button>
         <div id="menu" class="menu-panel" hidden>
-          <div class="menu-section">
-            <button id="save" class="menu-item" type="button" title="Save in this browser" data-i18n="save" data-i18n-title="saveTitle">Save</button>
-            <button id="delete" class="menu-item" type="button" data-i18n="delete" data-i18n-title="deleteTitle" hidden>Delete</button>
-            <button id="share" class="menu-item" type="button" data-i18n="share">Share</button>
-            <button id="copy-code" class="menu-item" type="button" data-i18n="copyCode">Copy the code</button>
-            <button id="download-code" class="menu-item" type="button" data-i18n="downloadCode">Download the code (.js)</button>
-            <button id="open-code" class="menu-item" type="button" data-i18n="openCode">Open code (.js)</button>
-            <button id="save-session" class="menu-item" type="button" data-i18n="saveSession">Save as session (joedoe.dev)</button>
-            <input id="open-code-input" type="file" accept=".js,.mjs,.txt,.strudel,text/javascript,text/plain" hidden />
+          <div class="menu-columns">
+            <div class="menu-group">
+              <h3 class="menu-group-title" data-i18n="menuCode">Code</h3>
+              <button id="save" class="menu-item" type="button" title="Save in this browser" data-i18n="save" data-i18n-title="saveTitle">Save</button>
+              <button id="delete" class="menu-item" type="button" data-i18n="delete" data-i18n-title="deleteTitle" hidden>Delete</button>
+              <button id="share" class="menu-item" type="button" data-i18n="share">Share</button>
+              <button id="copy-code" class="menu-item" type="button" data-i18n="copyCode">Copy the code</button>
+              <button id="download-code" class="menu-item" type="button" data-i18n="downloadCode">Download the code (.js)</button>
+              <button id="open-code" class="menu-item" type="button" data-i18n="openCode">Open code (.js)</button>
+              <button id="save-session" class="menu-item" type="button" data-i18n="saveSession">Save as session (joedoe.dev)</button>
+              <input id="open-code-input" type="file" accept=".js,.mjs,.txt,.strudel,text/javascript,text/plain" hidden />
+            </div>
+            <div class="menu-group">
+              <h3 class="menu-group-title" data-i18n="menuCreate">Create</h3>
+              <button id="toggle-learn" class="menu-item" type="button" aria-pressed="false" data-panel="learn" data-i18n="learn">Learn</button>
+              <button id="toggle-compose" class="menu-item" type="button" aria-pressed="false" data-panel="compose" data-i18n="compose">Compose</button>
+              <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
+              <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
+              <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
+            </div>
+            <div class="menu-group">
+              <h3 class="menu-group-title" data-i18n="menuPlay">Play</h3>
+              <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
+              <button id="toggle-sp" class="menu-item" type="button" aria-pressed="false" data-panel="sp" data-i18n="spTitle">SP-404 / MIDI out</button>
+              <button id="toggle-mic" class="menu-item" type="button" aria-pressed="false" data-panel="mic" data-i18n="micTitle">Mic</button>
+              <button id="toggle-vj" class="menu-item" type="button" aria-pressed="false" data-panel="vj" data-i18n="vjTitle">VJ</button>
+              <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-panel="video" data-i18n="video">Video</button>
+            </div>
+            <div class="menu-group">
+              <h3 class="menu-group-title" data-i18n="menuLive">Perform</h3>
+              <button id="toggle-set" class="menu-item" type="button" aria-pressed="false" data-panel="set" data-i18n="liveSet">Live set</button>
+              <button id="toggle-room" class="menu-item" type="button" aria-pressed="false" data-panel="room" data-i18n="roomTitle">Live room</button>
+              <button id="toggle-frame" class="menu-item" type="button" aria-pressed="false" data-i18n="verticalFrame">Vertical framing (9:16 streams)</button>
+              <label class="menu-field">
+                <span data-i18n="recordMode">What to record</span>
+                <select id="record-mode" class="control">
+                  <option value="audio" data-i18n="recordAudio">Audio (WAV)</option>
+                  <option value="video" data-i18n="recordVideo">Video (screen)</option>
+                  <option value="vertical" data-i18n="recordVertical">Vertical video 9:16 (socials)</option>
+                  <option value="vertical-code" data-i18n="recordVerticalCode">Vertical video with the code</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="menu-footer">
+            <span class="menu-group-title" data-i18n="menuView">View</span>
             <button id="toggle-code" class="menu-item" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
             <button id="toggle-ascii" class="menu-item" type="button" aria-pressed="false" data-i18n="asciiFilter">ASCII filter</button>
             <button id="toggle-scope" class="menu-item" type="button" aria-pressed="false" data-i18n="audioWaves">Audio waves</button>
-            <button id="toggle-frame" class="menu-item" type="button" aria-pressed="false" data-i18n="verticalFrame">Vertical framing (9:16 streams)</button>
-          </div>
-          <div class="menu-section">
-            <button id="toggle-room" class="menu-item" type="button" aria-pressed="false" data-panel="room" data-i18n="roomTitle">Live room</button>
-            <button id="toggle-set" class="menu-item" type="button" aria-pressed="false" data-panel="set" data-i18n="liveSet">Live set</button>
-            <button id="toggle-learn" class="menu-item" type="button" aria-pressed="false" data-panel="learn" data-i18n="learn">Learn</button>
-            <button id="toggle-compose" class="menu-item" type="button" aria-pressed="false" data-panel="compose" data-i18n="compose">Compose</button>
-            <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
-            <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
-            <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
-            <button id="toggle-mic" class="menu-item" type="button" aria-pressed="false" data-panel="mic" data-i18n="micTitle">Mic</button>
-            <button id="toggle-sp" class="menu-item" type="button" aria-pressed="false" data-panel="sp" data-i18n="spTitle">SP-404 / MIDI out</button>
-            <button id="toggle-vj" class="menu-item" type="button" aria-pressed="false" data-panel="vj" data-i18n="vjTitle">VJ</button>
-            <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-panel="video" data-i18n="video">Video</button>
             <button id="toggle-help" class="menu-item" type="button" aria-pressed="false" data-panel="help" aria-keyshortcuts="?" data-i18n="help">Help</button>
-            <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
-          </div>
-          <div class="menu-section menu-row">
-            <label for="record-mode" data-i18n="recordMode">What to record</label>
-            <select id="record-mode" class="control">
-              <option value="audio" data-i18n="recordAudio">Audio (WAV)</option>
-              <option value="video" data-i18n="recordVideo">Video (screen)</option>
-              <option value="vertical" data-i18n="recordVertical">Vertical video 9:16 (socials)</option>
-              <option value="vertical-code" data-i18n="recordVerticalCode">Vertical video with the code</option>
-            </select>
-          </div>
-          <div class="menu-section menu-row">
-            <label for="theme" data-i18n="theme">Theme</label>
-            <select id="theme" class="control"></select>
-          </div>
-          <div class="menu-section menu-row">
-            <span data-i18n="language">Language</span>
-            <button id="lang" class="control control-lang" type="button" aria-label="Español" data-i18n-label="langSwitch">
-              <span class="lang-option" data-lang="en">EN</span><span class="lang-option" data-lang="es">ES</span>
-            </button>
+            <label class="menu-inline">
+              <span data-i18n="theme">Theme</span>
+              <select id="theme" class="control"></select>
+            </label>
+            <span class="menu-inline">
+              <span data-i18n="language">Language</span>
+              <button id="lang" class="control control-lang" type="button" aria-label="Español" data-i18n-label="langSwitch">
+                <span class="lang-option" data-lang="en">EN</span><span class="lang-option" data-lang="es">ES</span>
+              </button>
+            </span>
           </div>
         </div>
       </div>

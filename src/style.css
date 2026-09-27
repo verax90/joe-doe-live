@@ -148,6 +148,7 @@ body {
 /* Barra superior */
 .bar {
   /* above the stage, so the "More" menu is not painted over by the editor */
+  position: relative;
   z-index: 5;
   display: flex;
   flex-wrap: wrap;
@@ -251,9 +252,10 @@ select.control {
   cursor: text;
 }
 
-/* "More" menu */
+/* "More" menu: its panel hangs from the bar's right edge, wherever the
+   button ends up when the bar wraps */
 .menu {
-  position: relative;
+  position: static;
 }
 
 .menu-toggle {
@@ -268,32 +270,89 @@ select.control {
 .menu-panel {
   position: absolute;
   top: calc(100% + 0.4rem);
-  right: 0;
+  right: 1rem;
   z-index: 30;
   display: grid;
-  width: max-content;
-  min-width: 15rem;
-  max-width: calc(100vw - 2rem);
-  padding: 0.35rem;
+  width: min(54rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 8rem);
+  overflow-y: auto;
+  padding: 0.5rem;
   border: 1px solid var(--line);
   border-radius: 0.5rem;
   background: var(--bg-elevated);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 
-/* display: grid above would otherwise override the hidden attribute */
-.menu-panel[hidden] {
-  display: none;
-}
-
-.menu-section {
+/* Four groups side by side; two on tablets, one on phones */
+.menu-columns {
   display: grid;
-  padding: 0.3rem 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem 0.75rem;
+  padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--line);
 }
 
-.menu-section:last-child {
-  border-bottom: none;
+.menu-group {
+  display: grid;
+  align-content: start;
+}
+
+.menu-group-title {
+  margin: 0.3rem 0.6rem 0.2rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-field {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.45rem 0.6rem;
+  color: var(--muted);
+}
+
+.menu-field select.control {
+  width: 100%;
+}
+
+/* View: a row of toggles and pickers under the groups */
+.menu-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.5rem;
+  padding-top: 0.4rem;
+}
+
+.menu-footer .menu-group-title {
+  margin-block: 0;
+}
+
+.menu-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 0.6rem;
+  color: var(--muted);
+}
+
+@media (max-width: 860px) {
+  .menu-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .menu-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* display: grid above would otherwise override the hidden attribute */
+.menu-panel[hidden] {
+  display: none;
 }
 
 .menu-item {
@@ -319,15 +378,6 @@ select.control {
   margin-right: 0.5rem;
   color: var(--accent);
   font-size: 0.7em;
-}
-
-.menu-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-inline: 0.6rem;
-  color: var(--muted);
 }
 
 /* Record: a red dot that pulses while recording */
