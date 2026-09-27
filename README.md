@@ -2,6 +2,7 @@
 
 A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound with [Strudel](https://strudel.cc), visuals with [Hydra](https://hydra.ojack.xyz) and MIDI control, all in one editor. English and Spanish.
 
+- **Live room** (More → Live room): open a room and send its link (`?sala=<id>`); listeners hear your code made in their own browser, with your visual, every play and stop, and the kits of your own samples the code uses. Browsers connect directly over WebRTC (PeerJS, whose free public server only introduces them; loaded only when a room is used). Not sent: your voice or free play. Each browser keeps its own bar line.
 - **Live set** (More → Live set): the running order for a gig, each song a pattern with its visual. During the set a bar at the bottom shows where you are; ◀ ▶, ← →, a presentation clicker (PageUp / PageDown) or the MPK pads in PROG CHANGE mode move through it, and while it plays the next song comes in on the next bar with its own tempo and visual.
 - **Offline and installable**: a service worker (written at build time with the exact file list) keeps the app and every sound once played; More → Live set → Get ready to play offline downloads every sound the set's songs use. Chrome offers to install it as an app.
 - **Learn** (More → Learn): 14 short steps from one sound to a song with visuals, each playable with one click and ending in a small challenge.

@@ -80,6 +80,7 @@ const objectUrls = new Map<string, string[]>();
 
 async function register(name: string, blobs: Blob[]) {
   const g = globalThis as Global;
+  kitNames.add(name);
   objectUrls.get(name)?.forEach((url) => URL.revokeObjectURL(url));
   const urls = blobs.map((blob) => URL.createObjectURL(blob));
   objectUrls.set(name, urls);
@@ -133,6 +134,24 @@ async function preview(name: string, index: number, onEnd: () => void) {
   };
   previewing = { source, key, onEnd };
   source.start();
+}
+
+// For the live room: the kits a piece of code uses, as files to send, and the
+// kits that arrive, registered for this visit only (not saved here)
+const kitNames = new Set<string>();
+
+export async function kitsUsedBy(code: string) {
+  const used = [...kitNames].filter((name) => new RegExp(`(^|[^\\w])${name}([^\\w]|$)`).test(code));
+  return Promise.all(
+    used.map(async (name) => ({
+      name,
+      files: await Promise.all((objectUrls.get(name) ?? []).map(async (url) => (await fetch(url)).arrayBuffer())),
+    })),
+  );
+}
+
+export async function useSentKit(name: string, files: ArrayBuffer[]) {
+  await register(name, files.map((data) => new Blob([data])));
 }
 
 // A sound's name in the list: its file name, or its number for old saves

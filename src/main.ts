@@ -25,6 +25,7 @@ import { setupOffline } from './offline';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { builtInPresets, translateIfBuiltIn } from './presets';
 import { setupRecorder } from './record';
+import { setupRoom } from './room';
 import { setupSamplesPanel } from './samples';
 import { setupScenes } from './scenes';
 import { setupScope } from './scope';
@@ -101,6 +102,7 @@ const runVisual = () => applyVisual(visualSelect.value).catch((error) => console
 const pickVisual = (id: string) => {
   visualSelect.value = id;
   writeStorage(VISUAL_KEY, id);
+  room?.visual(id);
 };
 visualSelect.addEventListener('change', () => {
   pickVisual(visualSelect.value);
@@ -175,11 +177,13 @@ window.addEventListener(PROGRAM_EVENT, (event) => {
   runVisual();
 });
 
-// Every play, from any button, key or panel, goes through here
+// Every play and stop, from any button, key or panel, goes through here
+let room: ReturnType<typeof setupRoom> | undefined;
 const originalEvaluate = editor.evaluate.bind(editor);
 editor.evaluate = async (autostart?: boolean) => {
   await ensureAudio();
   await originalEvaluate(autostart);
+  void room?.played();
   ensureLimiter();
   // Always: with "From the code" it only re-attaches the ASCII filter and the
   // frame cap, which a hush() in the pattern may have reset
@@ -194,6 +198,12 @@ const addTrack = (pattern: string) => {
   const { changes, anchor } = trackChanges(editor.code, pattern);
   editor.editor?.dispatch({ changes, selection: { anchor }, scrollIntoView: true });
   if (scheduler?.started) void editor.evaluate();
+};
+
+const originalStop = editor.stop.bind(editor);
+editor.stop = async () => {
+  await originalStop();
+  room?.stopped();
 };
 
 whenStrudelReady().then(() => {
@@ -253,6 +263,15 @@ setupKnobHud(() => ({
   vjKnobs: vjTakesKnobs(),
 }));
 setupVj({ redraw: runVisual });
+room = setupRoom({
+  editor,
+  currentVisual: () => visualSelect.value,
+  showVisual: (id) => {
+    const visual = visuals.find((v) => v.id === id);
+    visualSelect.value = visual && !visual.camera ? id : 'lima';
+    runVisual();
+  },
+});
 setupRecorder(() => editor.code);
 // Free play stays out of the way when the playing pattern reads the keys itself
 setupFreePlay(() => Boolean(scheduler?.started) && editor.code.includes('midikeys'));
