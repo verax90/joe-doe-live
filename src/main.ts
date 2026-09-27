@@ -258,7 +258,7 @@ setupTempo(editor);
 setupMidiPanel();
 setupKnobs();
 setupScope();
-setupMic();
+setupMic({ tempo: () => (scheduler?.started && scheduler.cps ? scheduler.cps : undefined) });
 setupKnobHud(() => ({
   code: editor.code,
   playing: Boolean(scheduler?.started),
