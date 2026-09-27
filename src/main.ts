@@ -21,6 +21,7 @@ import { setupLibrary } from './library';
 import { setupLiveSet } from './live-set';
 import { ensureLimiter } from './limiter';
 import { setupMenu } from './menu';
+import { setupOffline } from './offline';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { builtInPresets, translateIfBuiltIn } from './presets';
 import { setupRecorder } from './record';
@@ -208,6 +209,7 @@ onLangChange(() => {
 // Hydra examples need their own visual to show
 const useCodeVisual = () => pickVisual('code');
 
+setupOffline();
 setupMenu();
 setupShortcuts(editor);
 setupUndo(editor);

@@ -4,6 +4,7 @@
 // pads in PROG CHANGE mode) move through it, and while it plays the next song
 // comes in on the bar line, with its own tempo and visual.
 import { onLangChange, pick, t, type Localized } from './i18n';
+import { prepareSounds } from './offline';
 import type { Preset } from './presets';
 import { readStorage, writeStorage } from './storage';
 import type { StrudelMirror } from './strudel';
@@ -52,6 +53,7 @@ export function setupLiveSet({ editor, presets, visuals, currentVisual, useVisua
   const list = document.querySelector<HTMLOListElement>('#set-list')!;
   const hideCode = document.querySelector<HTMLInputElement>('#set-hide-code')!;
   const start = document.querySelector<HTMLButtonElement>('#set-start')!;
+  const offline = document.querySelector<HTMLButtonElement>('#set-offline')!;
   const bar = document.querySelector<HTMLElement>('#set-bar')!;
   const now = document.querySelector<HTMLElement>('#set-now')!;
   const upcoming = document.querySelector<HTMLElement>('#set-upcoming')!;
@@ -110,6 +112,7 @@ export function setupLiveSet({ editor, presets, visuals, currentVisual, useVisua
       }),
     );
     start.disabled = songs.length === 0;
+    offline.disabled = songs.length === 0;
   };
 
   const renderBar = () => {
@@ -170,6 +173,28 @@ export function setupLiveSet({ editor, presets, visuals, currentVisual, useVisua
     document.querySelectorAll('[data-panel]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
     load(0);
     toast(t('setStarted'));
+  });
+
+  // Before a gig with no wifi: every sound the songs use, downloaded now
+  offline.addEventListener('click', async () => {
+    if (scheduler()?.started) return toast(t('setOfflineStop'));
+    const label = offline.textContent;
+    offline.disabled = true;
+    try {
+      const { sounds, failed } = await prepareSounds(
+        editor,
+        songs.map((song) => song.code),
+        (done, total) => (offline.textContent = t('setOfflineBusy', { n: done + 1, total })),
+      );
+      toast(t('setOfflineDone', { sounds }) + (failed ? ` ${t('setOfflineFailed', { failed })}` : ''));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : String(error));
+    } finally {
+      offline.textContent = label;
+      offline.disabled = songs.length === 0;
+      // A song's Hydra code may have drawn over the visual
+      useVisual(currentVisual());
+    }
   });
 
   const exit = () => {

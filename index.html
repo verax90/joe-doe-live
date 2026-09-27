@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#12151c" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <title>joe doe · live</title>
     <script>
       // Keep the UI out of sight until it is translated and the editor holds its
@@ -154,6 +155,8 @@
         <ol id="set-list" class="panel-list set-list"></ol>
         <label class="set-option"><input id="set-hide-code" type="checkbox" /> <span data-i18n="setHideCode">Hide the code when the set starts</span></label>
         <button id="set-start" class="control control-accent" type="button" data-i18n="setStart" disabled>Start the set</button>
+        <button id="set-offline" class="control" type="button" data-i18n="setOffline" disabled>Get ready to play offline</button>
+        <p class="panel-help" data-i18n="setOfflineHelp">Downloads every sound the songs use, so the set plays with no internet. The studio itself is already saved once opened.</p>
       </aside>
 
       <aside class="panel" id="learn" hidden>
