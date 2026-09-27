@@ -57,6 +57,8 @@
         <span id="record-status" class="record-status" role="status"></span>
       </div>
 
+      <button id="help-button" class="control control-icon" type="button" aria-haspopup="dialog" aria-keyshortcuts="?" aria-label="Help" data-i18n-label="help" title="?">?</button>
+
       <div class="menu">
         <button id="menu-toggle" class="control menu-toggle" type="button" aria-expanded="false" aria-controls="menu">
           <span data-i18n="more">More</span>
@@ -111,10 +113,10 @@
           </div>
           <div class="menu-footer">
             <span class="menu-group-title" data-i18n="menuView">View</span>
+            <button id="help-menu" class="menu-item help-in-menu" type="button" data-i18n="help">Help</button>
             <button id="toggle-code" class="menu-item" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
             <button id="toggle-ascii" class="menu-item" type="button" aria-pressed="false" data-i18n="asciiFilter">ASCII filter</button>
             <button id="toggle-scope" class="menu-item" type="button" aria-pressed="false" data-i18n="audioWaves">Audio waves</button>
-            <button id="toggle-help" class="menu-item" type="button" aria-pressed="false" data-panel="help" aria-keyshortcuts="?" data-i18n="help">Help</button>
             <label class="menu-inline">
               <span data-i18n="theme">Theme</span>
               <select id="theme" class="control"></select>
@@ -156,10 +158,13 @@
         ></iframe>
       </section>
 
-      <aside class="panel panel-wide" id="help" hidden>
-        <h2 data-i18n="help">Help</h2>
+      <dialog id="help" class="help-dialog" aria-labelledby="help-title">
+        <div class="help-head">
+          <h2 id="help-title" data-i18n="help">Help</h2>
+          <button id="help-close" class="control control-icon" type="button" aria-label="Close" data-i18n-label="close">✕</button>
+        </div>
         <div id="help-content"></div>
-      </aside>
+      </dialog>
 
       <aside class="panel" id="room" hidden>
         <h2 data-i18n="roomTitle">Live room</h2>

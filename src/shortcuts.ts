@@ -1,5 +1,6 @@
 // Keyboard shortcuts that work anywhere on the page (inside the editor,
 // Strudel's own Ctrl+Enter and Ctrl+. apply) and the code on/off toggle
+import { openHelp } from './help';
 import type { StrudelMirror } from './strudel';
 
 export function setupShortcuts(editor: StrudelMirror) {
@@ -16,7 +17,7 @@ export function setupShortcuts(editor: StrudelMirror) {
     // "?" opens the help, unless you are typing in the editor or a field
     if (event.key === '?' && !target.closest('.cm-editor, input, select, textarea')) {
       event.preventDefault();
-      document.querySelector<HTMLButtonElement>('#toggle-help')!.click();
+      openHelp();
       return;
     }
     if (!(event.ctrlKey || event.metaKey)) return;

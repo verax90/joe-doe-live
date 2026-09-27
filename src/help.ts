@@ -1,4 +1,4 @@
-// Help panel: getting started, shortcuts, every control of the MPK Mini Mk II
+// Help: getting started, shortcuts, every control of the MPK Mini Mk II
 // in each of its modes, the panels, and what to do when something goes wrong.
 import { onLangChange, pick, type Localized } from './i18n';
 
@@ -148,8 +148,24 @@ const sections: Section[] = [
   },
 ];
 
+// The help opens in its own window over the studio: the ? button, the ? key
+export function openHelp() {
+  const dialog = document.querySelector<HTMLDialogElement>('#help')!;
+  if (dialog.open) dialog.close();
+  else dialog.showModal();
+}
+
 export function setupHelp() {
   const container = document.querySelector<HTMLElement>('#help-content')!;
+  const dialog = document.querySelector<HTMLDialogElement>('#help')!;
+  document.querySelector('#help-button')!.addEventListener('click', openHelp);
+  // On phones the ? button leaves the bar (no room) and lives in the menu
+  document.querySelector('#help-menu')!.addEventListener('click', openHelp);
+  document.querySelector('#help-close')!.addEventListener('click', () => dialog.close());
+  // A click on the dimmed backdrop (outside the box) closes it too
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
   const text = (value: string | Localized) => (typeof value === 'string' ? value : pick(value));
 
   const render = () => {

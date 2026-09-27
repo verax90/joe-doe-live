@@ -12,7 +12,7 @@ A live coding studio in the browser for [joedoe.dev](https://joedoe.dev): sound 
 - **Undo / redo** buttons next to Play; while playing, you hear each step.
 - **Save as session** (More): a dated `.md` for the Sessions gallery on joedoe.dev (`/music/sessions`), with the code, the visual and room for a YouTube link.
 - **Copy, download and open** the code (More): downloads are dated `.js` files that open again from the menu or by dropping them on the page.
-- **Help** (More → Help, or `?`): getting started, shortcuts, every MPK Mini control in each mode, the panels and troubleshooting.
+- **Help** (the ? button, or the `?` key; in the menu on phones): getting started, shortcuts, every MPK Mini control in each mode, the panels and troubleshooting.
 - **Visuals apart from the sound**: 22 to pair with any pattern. Some follow the bar (`H("...")`), others listen to the audio; **Auto** changes to another every 4 bars.
 - **Video** (More → Video): YouTube links or a playlist behind everything (no effects: YouTube does not let pages read its picture), or your own videos / a captured tab through the webcam visuals, with every effect.
 - **Tempo**: BPM field and Tap in the bar; changes apply at once and are written into the pattern's `setcps` line.

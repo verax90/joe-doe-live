@@ -859,9 +859,74 @@ select.control {
   color: var(--fg);
 }
 
-/* Help */
-.panel-wide {
-  width: min(30rem, 92vw);
+/* Help: a window over the studio */
+.help-dialog {
+  width: min(52rem, calc(100vw - 2rem));
+  max-height: min(85dvh, 60rem);
+  padding: 0 1.25rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  background: var(--panel);
+  color: var(--fg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  overflow-y: auto;
+}
+
+.help-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+/* The title and ✕ stay at the top while the help scrolls */
+.help-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 -1.25rem;
+  padding: 1rem 1.25rem 0.5rem;
+  background: var(--panel);
+}
+
+.help-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.help-dialog h3 {
+  margin: 1.25rem 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Help sits in the bar, or in the menu on phones where the bar is full */
+.help-in-menu {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  #help-button {
+    display: none;
+  }
+
+  .help-in-menu {
+    display: block;
+  }
+}
+
+/* Square buttons with one symbol: ? in the bar, ✕ in the help */
+.control-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.1rem;
+  padding: 0;
+  font-weight: 600;
 }
 
 .help-steps {
