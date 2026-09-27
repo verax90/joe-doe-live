@@ -32,6 +32,7 @@ import { setupShortcuts } from './shortcuts';
 import { setupStatus } from './status';
 import { readStorage, writeStorage } from './storage';
 import { whenEditorReady, whenStrudelReady, type StrudelMirror } from './strudel';
+import { trackChanges } from './tracks';
 import { setupTempo } from './tempo';
 import { applyTheme, readTheme, themes } from './themes';
 import { toast } from './toast';
@@ -185,10 +186,18 @@ editor.evaluate = async (autostart?: boolean) => {
   connectMidiIfAllowed();
 };
 
+// A pattern into the code as a new track, in one undoable step; while it
+// plays it joins in at once (the Samples panel's picked sounds)
+const addTrack = (pattern: string) => {
+  const { changes, anchor } = trackChanges(editor.code, pattern);
+  editor.editor?.dispatch({ changes, selection: { anchor }, scrollIntoView: true });
+  if (scheduler?.started) void editor.evaluate();
+};
+
 whenStrudelReady().then(() => {
   useBundledHydra(hydraUrl);
   runVisual();
-  setupSamplesPanel();
+  setupSamplesPanel({ addTrack });
 });
 
 document.querySelector('#play')!.addEventListener('click', () => editor.evaluate());

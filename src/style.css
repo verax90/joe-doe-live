@@ -1280,3 +1280,58 @@ select.control {
 .is-vertical-frame .foot > span {
   visibility: hidden;
 }
+
+/* Samples panel: kits open into their numbered sounds, with ▶ and + each */
+.sample-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sample-toggle {
+  padding: 0 0.2rem;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sample-toggle:hover,
+.sample-toggle:focus-visible {
+  color: var(--accent);
+}
+
+.sample-sounds {
+  margin: 0.35rem 0 0.5rem 1.4rem;
+  padding: 0;
+  list-style: none;
+}
+
+.sample-sounds li {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0;
+}
+
+.sample-sound-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sample-picked {
+  margin: 0.5rem 0 1rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+}
+
+.sample-picked h3 {
+  margin-top: 0;
+}

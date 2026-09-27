@@ -3,6 +3,7 @@
 // still there after a reload (in this browser only).
 
 import { isCodeFile } from './export';
+import { ensureAudio } from './audio';
 import { onLangChange, t } from './i18n';
 
 type Global = typeof globalThis & {
@@ -85,6 +86,58 @@ async function register(name: string, blobs: Blob[]) {
   await g.samples?.({ [name]: urls });
 }
 
+// Preview: the file itself through Web Audio, not through Strudel, so it can
+// be stopped (chops run up to 30 s) and a new one cuts the last. Decoded
+// sounds are kept for the last few, as a kit is usually browsed back and forth
+const decoded = new Map<string, AudioBuffer>();
+let previewing: { source: AudioBufferSourceNode; key: string; onEnd: () => void } | undefined;
+
+function stopPreview() {
+  if (!previewing) return;
+  const { source, onEnd } = previewing;
+  previewing = undefined;
+  source.onended = null;
+  try {
+    source.stop();
+  } catch {
+    // already over
+  }
+  onEnd();
+}
+
+async function preview(name: string, index: number, onEnd: () => void) {
+  const key = `${name}:${index}`;
+  const again = previewing?.key === key;
+  stopPreview();
+  if (again) return; // the same ▶ twice stops it
+  const url = objectUrls.get(name)?.[index];
+  const context = (globalThis as { getAudioContext?: () => AudioContext }).getAudioContext?.();
+  if (!url || !context) return;
+  await ensureAudio();
+  let buffer = decoded.get(url);
+  if (!buffer) {
+    buffer = await context.decodeAudioData(await (await fetch(url)).arrayBuffer());
+    decoded.set(url, buffer);
+    if (decoded.size > 24) decoded.delete(decoded.keys().next().value!);
+  }
+  const source = context.createBufferSource();
+  source.buffer = buffer;
+  const gain = context.createGain();
+  gain.gain.value = 0.8;
+  source.connect(gain).connect(context.destination);
+  source.onended = () => {
+    if (previewing?.source === source) {
+      previewing = undefined;
+      onEnd();
+    }
+  };
+  previewing = { source, key, onEnd };
+  source.start();
+}
+
+// A sound's name in the list: its file name, or its number for old saves
+const label = (blob: Blob, index: number) => ((blob as File).name ? (blob as File).name.replace(/\.[^.]+$/, '') : String(index));
+
 // A dropped folder only exposes its contents through the entries API
 async function readDropped(items: DataTransferItemList): Promise<Picked[]> {
   const roots = [...items]
@@ -109,14 +162,74 @@ async function readDropped(items: DataTransferItemList): Promise<Picked[]> {
   return picked;
 }
 
-export function setupSamplesPanel() {
+// addTrack: puts a pattern into the code as a new track (see tracks.ts)
+export function setupSamplesPanel({ addTrack }: { addTrack: (pattern: string) => void }) {
   const list = document.querySelector<HTMLUListElement>('#sample-list')!;
   const input = document.querySelector<HTMLInputElement>('#sample-input')!;
   const folderInput = document.querySelector<HTMLInputElement>('#sample-folder')!;
   const status = document.querySelector<HTMLElement>('#sample-status')!;
+  const tray = document.querySelector<HTMLElement>('#sample-picked')!;
+  const trayList = document.querySelector<HTMLElement>('#sample-picked-list')!;
 
-  // name -> how many sounds (1 for a loose file, more for a kit)
-  const names = new Map<string, number>();
+  // name -> the names of its sounds (one for a loose file, more for a kit)
+  const names = new Map<string, string[]>();
+  // Kits shown open, and the sounds picked for a new track ("kit:3")
+  const open = new Set<string>();
+  let picked: string[] = [];
+
+  const renderTray = () => {
+    tray.hidden = !picked.length;
+    trayList.replaceChildren(
+      ...picked.map((token, i) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'cheat-action';
+        chip.textContent = `${token} ✕`;
+        chip.title = t('pickedRemove');
+        chip.addEventListener('click', () => {
+          picked = picked.filter((_, j) => j !== i);
+          renderTray();
+        });
+        return chip;
+      }),
+    );
+  };
+
+  document.querySelector('#sample-add-track')!.addEventListener('click', () => {
+    if (!picked.length) return;
+    const pattern = `s("${picked.join(' ')}")`;
+    addTrack(pattern);
+    status.textContent = t('pickedAdded', { code: pattern });
+    picked = [];
+    renderTray();
+  });
+  document.querySelector('#sample-clear')!.addEventListener('click', () => {
+    picked = [];
+    renderTray();
+  });
+
+  const smallButton = (text: string, title: string, onClick: (button: HTMLButtonElement) => void) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'cheat-action';
+    button.textContent = text;
+    button.title = title;
+    button.setAttribute('aria-label', title);
+    button.addEventListener('click', () => onClick(button));
+    return button;
+  };
+
+  // ▶ to hear it (again to stop), + to pick it
+  const soundActions = (name: string, index: number, token: string) => [
+    smallButton('▶', t('samplePreview', { token }), (button) => {
+      button.textContent = '■';
+      void preview(name, index, () => (button.textContent = '▶')).catch(() => (button.textContent = '▶'));
+    }),
+    smallButton('+', t('samplePick', { token }), () => {
+      picked.push(token);
+      renderTray();
+    }),
+  ];
 
   const render = () => {
     list.replaceChildren();
@@ -124,8 +237,12 @@ export function setupSamplesPanel() {
       list.innerHTML = `<li class="muted">${t('noSamples')}</li>`;
       return;
     }
-    for (const [name, count] of [...names].sort(([a], [b]) => a.localeCompare(b))) {
+    for (const [name, sounds] of [...names].sort(([a], [b]) => a.localeCompare(b))) {
+      const count = sounds.length;
       const item = document.createElement('li');
+      item.className = 'sample-kit';
+      const row = document.createElement('div');
+      row.className = 'sample-row';
       const copy = document.createElement('button');
       copy.type = 'button';
       copy.className = 'sample-name';
@@ -156,12 +273,41 @@ export function setupSamplesPanel() {
         }
       });
       if (count > 1) {
+        // A kit opens (▸) into its numbered sounds
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'sample-toggle';
+        toggle.textContent = open.has(name) ? '▾' : '▸';
+        toggle.setAttribute('aria-expanded', String(open.has(name)));
+        toggle.setAttribute('aria-label', t('kitOpen', { name }));
+        toggle.addEventListener('click', () => {
+          if (open.has(name)) open.delete(name);
+          else open.add(name);
+          render();
+        });
         const size = document.createElement('span');
         size.className = 'sample-count';
         size.textContent = t('kitCount', { count });
-        item.append(copy, size, remove);
+        row.append(toggle, copy, size, remove);
+        item.append(row);
+        if (open.has(name)) {
+          const soundList = document.createElement('ol');
+          soundList.className = 'sample-sounds';
+          soundList.start = 0;
+          sounds.forEach((sound, index) => {
+            const li = document.createElement('li');
+            const text = document.createElement('span');
+            text.className = 'sample-sound-name';
+            text.textContent = `${index} · ${sound}`;
+            text.title = sound;
+            li.append(text, ...soundActions(name, index, `${name}:${index}`));
+            soundList.append(li);
+          });
+          item.append(soundList);
+        }
       } else {
-        item.append(copy, remove);
+        row.append(copy, ...soundActions(name, 0, name), remove);
+        item.append(row);
       }
       list.append(item);
     }
@@ -177,7 +323,7 @@ export function setupSamplesPanel() {
     let done = 0;
     for (const [name, files] of kits) {
       await register(name, files);
-      names.set(name, files.length);
+      names.set(name, files.map(label));
       done += files.length;
       status.textContent = t('samplesLoading', { done, total });
       try {
@@ -193,7 +339,10 @@ export function setupSamplesPanel() {
   const fromInput = (files: FileList) =>
     [...files].map((file) => ({ path: file.webkitRelativePath || file.name, file }));
 
-  onLangChange(render);
+  onLangChange(() => {
+    render();
+    renderTray();
+  });
 
   input.addEventListener('change', () => {
     if (input.files) addPicked(fromInput(input.files));
@@ -239,7 +388,7 @@ export function setupSamplesPanel() {
         const blobs = Array.isArray(saved) ? saved : saved ? [saved] : [];
         if (blobs.length) {
           await register(name, blobs);
-          names.set(name, blobs.length);
+          names.set(name, blobs.map(label));
         }
       }
     } catch {
