@@ -152,6 +152,57 @@ export const visuals: Visual[] = [
   .out()`,
   },
   {
+    id: 'matrix',
+    name: { en: 'Matrix (rain)', es: 'Matrix (lluvia)' },
+    // Green on purpose, whatever the theme: that is the look
+    code: `noise(80, 0.05)
+  .pixelate(64, 64)
+  .thresh(0.62, 0.02)
+  .scale(1, 1, 6)
+  .scrollY(0, -0.12)
+  .color(0.2, 1, 0.35)
+  .blend(src(o0).scrollY(-0.004), 0.85)
+  .out()`,
+  },
+  {
+    id: 'vhs',
+    name: { en: 'VHS (bar)', es: 'VHS (compás)' },
+    code: `osc(8, 0.05, 1.2)
+  .color(...tint(0.6))
+  .modulate(noise(2, 0.1), 0.05)
+  .add(osc(300, 0, 0).rotate(Math.PI / 2).thresh(0.5).color(0.1, 0.1, 0.1), -1)
+  .scrollY(H("<0 0 0 0.02>"))
+  .out()`,
+  },
+  {
+    id: 'hipnosis',
+    name: { en: 'Hypnosis (volume)', es: 'Hipnosis (volumen)' },
+    code: `osc(30, 0.1, 0)
+  .kaleid(64)
+  .modulateRotate(osc(1, 0.1), () => 1 + level() * 2)
+  .color(...tint(0.5))
+  .out()`,
+  },
+  {
+    id: 'ondas',
+    name: { en: 'Waves (mids)', es: 'Ondas (medios)' },
+    code: `osc(40, 0.02, 0)
+  .thresh(0.5, 0.02)
+  .modulate(osc(3, 0.1).rotate(Math.PI / 2), () => 0.1 + mid() * 0.4)
+  .color(...tint(0.5))
+  .out()`,
+  },
+  {
+    id: 'terremoto',
+    name: { en: 'Quake (kick)', es: 'Terremoto (bombo)' },
+    code: `voronoi(12, 0.2, 0.1)
+  .color(...tint(0.55))
+  .scrollX(() => (Math.random() - 0.5) * bass() * 0.08)
+  .scrollY(() => (Math.random() - 0.5) * bass() * 0.08)
+  .scale(() => 1 + bass() * 0.15)
+  .out()`,
+  },
+  {
     id: 'cam',
     name: { en: 'Webcam (warp)', es: 'Webcam (deformada)' },
     camera: true,
@@ -217,6 +268,60 @@ export const visuals: Visual[] = [
     code: `src(s0)
   .thresh(() => 0.45 + mid() * 0.2, 0.04)
   .color(...tint(1))
+  .out()`,
+  },
+  {
+    id: 'cam-matrix',
+    name: { en: 'Webcam (Matrix)', es: 'Webcam (Matrix)' },
+    camera: true,
+    code: `src(s0)
+  .saturate(0)
+  .contrast(1.6)
+  .color(0.1, 1, 0.3)
+  .add(noise(80, 0.05).pixelate(64, 64).thresh(0.8, 0.02).scale(1, 1, 6).scrollY(0, -0.1).color(0, 0.6, 0.1))
+  .out()`,
+  },
+  {
+    id: 'cam-mirror',
+    name: { en: 'Webcam (mirror)', es: 'Webcam (espejo)' },
+    camera: true,
+    code: `src(s0)
+  .kaleid(2)
+  .rotate(Math.PI / 2)
+  .color(...tint(0.9))
+  .modulate(noise(2), () => bass() * 0.1)
+  .out()`,
+  },
+  {
+    id: 'cam-vhs',
+    name: { en: 'Webcam (VHS)', es: 'Webcam (VHS)' },
+    camera: true,
+    code: `src(s0)
+  .modulate(noise(3, 0.2), 0.015)
+  .add(src(s0).scrollX(0.006).color(1, 0, 0.2), 0.35)
+  .add(osc(300, 0, 0).rotate(Math.PI / 2).thresh(0.5).color(0.1, 0.1, 0.1), -1)
+  .scrollY(() => high() * 0.02)
+  .out()`,
+  },
+  {
+    id: 'cam-pop',
+    name: { en: 'Webcam (pop art)', es: 'Webcam (pop art)' },
+    camera: true,
+    code: `src(s0)
+  .saturate(3)
+  .posterize(3, 0.5)
+  .repeat(2, 2)
+  .colorama(H("<0.1 0.3 0.5 0.7>"))
+  .out()`,
+  },
+  {
+    id: 'cam-ghost',
+    name: { en: 'Webcam (ghost)', es: 'Webcam (fantasma)' },
+    camera: true,
+    code: `src(s0)
+  .color(...tint(0.9))
+  .diff(src(o0).scale(1.02).rotate(0.005))
+  .blend(src(o0), 0.5)
   .out()`,
   },
   { id: 'ninguno', name: { en: 'No visuals', es: 'Sin visuales' }, code: `solid(0, 0, 0, 0).out()` },
