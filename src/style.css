@@ -465,20 +465,52 @@ select.control {
 }
 
 /* EN / ES: the active language stands out */
+/* Language: a two-way switch, a lime thumb sliding under the one in use */
 .control-lang {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  padding: 0.2rem;
+  border-radius: 999px;
+}
+
+.control-lang::before {
+  content: '';
+  position: absolute;
+  top: 0.2rem;
+  bottom: 0.2rem;
+  left: 0.2rem;
+  width: calc(50% - 0.2rem);
+  border-radius: 999px;
+  background: var(--accent);
+  transition: transform 0.2s var(--ease);
+}
+
+.control-lang[data-current='es']::before {
+  transform: translateX(100%);
 }
 
 .lang-option {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0 0.6rem;
   color: var(--muted);
+  font-size: 0.8rem;
+  transition: color 0.2s var(--ease);
 }
 
 .control-lang[data-current='en'] .lang-option[data-lang='en'],
 .control-lang[data-current='es'] .lang-option[data-lang='es'] {
-  color: var(--accent);
+  color: var(--accent-ink);
   font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control-lang::before {
+    transition: none;
+  }
 }
 
 .dot {
