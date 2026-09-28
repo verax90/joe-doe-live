@@ -1,7 +1,8 @@
 // Microphone with effects: your voice (or a guitar, or anything on an input
 // such as the SP-404MKII's) through volume, pitch, distortion, lo-fi, a
-// filter, muffle, robot, tremolo, vibrato, flanger, chorus, echo and reverb,
-// into the recordings. While
+// filter, muffle, auto-wah, robot, tremolo, vibrato, flanger, chorus, echo,
+// ping-pong and reverb, into the recordings. A noise gate first silences the
+// input between phrases. While
 // the studio plays, the echo follows its tempo (a dotted eighth). "Hear me" also sends it to the studio output,
 // into the limiter; off by default, since with speakers instead of headphones
 // it feeds back. The browser's own voice-call processing (echo cancelling,
@@ -13,32 +14,38 @@ import { readStorage, writeStorage } from './storage';
 
 export type MicControl =
   | 'volume'
+  | 'gate'
   | 'pitch'
   | 'drive'
   | 'lofi'
   | 'filter'
   | 'muffle'
+  | 'wah'
   | 'robot'
   | 'tremolo'
   | 'vibrato'
   | 'flanger'
   | 'chorus'
   | 'echo'
+  | 'pingpong'
   | 'reverb';
 
 export const MIC_CONTROLS: { id: MicControl; name: Localized }[] = [
   { id: 'volume', name: { en: 'Volume', es: 'Volumen' } },
+  { id: 'gate', name: { en: 'Noise gate (quiet between words)', es: 'Puerta de ruido (silencio entre frases)' } },
   { id: 'pitch', name: { en: 'Pitch (low ↔ high)', es: 'Tono (grave ↔ agudo)' } },
   { id: 'drive', name: { en: 'Distortion', es: 'Distorsión' } },
   { id: 'lofi', name: { en: 'Lo-fi (bits)', es: 'Lo-fi (bits)' } },
   { id: 'filter', name: { en: 'Filter (radio)', es: 'Filtro (radio)' } },
   { id: 'muffle', name: { en: 'Muffle (underwater)', es: 'Apagado (bajo el agua)' } },
+  { id: 'wah', name: { en: 'Auto-wah (opens as you sing louder)', es: 'Auto-wah (se abre al cantar más fuerte)' } },
   { id: 'robot', name: { en: 'Robot', es: 'Robot' } },
   { id: 'tremolo', name: { en: 'Tremolo', es: 'Trémolo' } },
   { id: 'vibrato', name: { en: 'Vibrato (tape)', es: 'Vibrato (cinta)' } },
   { id: 'flanger', name: { en: 'Flanger (jet)', es: 'Flanger (avión)' } },
   { id: 'chorus', name: { en: 'Chorus', es: 'Coro' } },
   { id: 'echo', name: { en: 'Echo', es: 'Eco' } },
+  { id: 'pingpong', name: { en: 'Ping-pong (left ↔ right)', es: 'Ping-pong (izquierda ↔ derecha)' } },
   { id: 'reverb', name: { en: 'Reverb', es: 'Reverb' } },
 ];
 
@@ -47,17 +54,20 @@ type Settings = Record<MicControl, number>;
 // Every control at rest; pitch rests in the middle
 export const MIC_NEUTRAL: Settings = {
   volume: 0.7,
+  gate: 0,
   pitch: 0.5,
   drive: 0,
   lofi: 0,
   filter: 0,
   muffle: 0,
+  wah: 0,
   robot: 0,
   tremolo: 0,
   vibrato: 0,
   flanger: 0,
   chorus: 0,
   echo: 0,
+  pingpong: 0,
   reverb: 0,
 };
 const preset = (changes: Partial<Settings>): Settings => ({ ...MIC_NEUTRAL, ...changes });
@@ -78,6 +88,7 @@ export const MIC_PRESETS: { id: string; group: MicGroup; name: Localized; settin
   { id: 'dub', group: 'space', name: { en: 'Dub', es: 'Dub' }, settings: preset({ filter: 0.3, echo: 0.85, reverb: 0.4 }) },
   { id: 'stadium', group: 'space', name: { en: 'Stadium', es: 'Estadio' }, settings: preset({ volume: 0.8, chorus: 0.2, echo: 0.35, reverb: 0.7 }) },
   { id: 'cathedral', group: 'space', name: { en: 'Cathedral', es: 'Catedral' }, settings: preset({ volume: 0.65, echo: 0.1, reverb: 0.85 }) },
+  { id: 'pingpong', group: 'space', name: { en: 'Ping-pong', es: 'Ping-pong' }, settings: preset({ pingpong: 0.7, reverb: 0.2 }) },
   { id: 'underwater', group: 'space', name: { en: 'Underwater', es: 'Bajo el agua' }, settings: preset({ muffle: 0.85, vibrato: 0.4, chorus: 0.3, reverb: 0.4 }) },
   { id: 'radio', group: 'radio', name: { en: 'Radio', es: 'Radio' }, settings: preset({ volume: 0.8, drive: 0.25, filter: 0.85 }) },
   { id: 'phone', group: 'radio', name: { en: 'Phone', es: 'Teléfono' }, settings: preset({ volume: 0.8, drive: 0.15, lofi: 0.3, filter: 1 }) },
@@ -97,8 +108,17 @@ export const MIC_PRESETS: { id: string; group: MicGroup; name: Localized; settin
   { id: 'jet', group: 'machine', name: { en: 'Jet', es: 'Avión' }, settings: preset({ flanger: 0.9, reverb: 0.2 }) },
   { id: 'choir', group: 'machine', name: { en: 'Choir', es: 'Coro' }, settings: preset({ chorus: 0.85, echo: 0.15, reverb: 0.45 }) },
   { id: 'tremolo', group: 'machine', name: { en: 'Tremolo', es: 'Trémolo' }, settings: preset({ tremolo: 0.75, echo: 0.2, reverb: 0.3 }) },
+  { id: 'wah', group: 'machine', name: { en: 'Wah', es: 'Wah' }, settings: preset({ volume: 0.75, drive: 0.15, wah: 0.8, echo: 0.15, reverb: 0.15 }) },
   { id: 'vibrato', group: 'machine', name: { en: 'Vibrato', es: 'Vibrato' }, settings: preset({ vibrato: 0.8, reverb: 0.25 }) },
 ];
+
+// Noise gate: 0 is off; up the slider, the level the voice must pass to be
+// let through rises from -54 dB (a hiss) to -18 dB (only loud singing)
+export const gateThreshold = (amount: number) => (amount < 0.01 ? 0 : 10 ** ((-54 + amount * 36) / 20));
+
+// Auto-wah: the filter rests low and rises with the voice's level
+export const WAH_REST = 300;
+export const wahDepth = (amount: number) => amount * 12000;
 
 // Muffle: a low-pass sliding from out of hearing (20 kHz) down to 350 Hz
 export const muffleFrequency = (amount: number) => (amount < 0.01 ? 20000 : 20000 * (350 / 20000) ** amount);
@@ -174,6 +194,9 @@ type Chain = {
   muffle: BiquadFilterNode;
   vibrato: { dry: GainNode; wet: GainNode; depth: GainNode };
   flangerSend: GainNode;
+  gate: AudioWorkletNode;
+  wah: { dry: GainNode; wet: GainNode; depth: GainNode };
+  pingpong: { send: GainNode; left: DelayNode; right: DelayNode };
   crush: WaveShaperNode;
   chorusSend: GainNode;
   pitch: ReturnType<typeof pitchShifter>;
@@ -189,6 +212,62 @@ let monitoredInto: AudioNode | undefined;
 // For record.ts: the voice when it is not already going through the studio
 // output (which recordings tap); undefined when off or when heard
 export const micForRecording = () => (chain && !monitoring ? chain.out : undefined);
+
+// The gate, in an AudioWorklet so it acts sample by sample: it follows the
+// input's level quickly (1 ms up, 25 ms down), opens above the threshold,
+// closes a little below it after 80 ms, and fades in 3 ms and out 60 ms. Its
+// second output is a smoother level (5 ms up, 120 ms down) for the auto-wah
+const GATE_PROCESSOR = `
+class Gate extends AudioWorkletProcessor {
+  static get parameterDescriptors() {
+    return [{ name: 'threshold', defaultValue: 0, minValue: 0, maxValue: 1, automationRate: 'k-rate' }];
+  }
+  constructor() {
+    super();
+    this.level = 0;
+    this.smooth = 0;
+    this.gain = 1;
+    this.open = true;
+    this.hold = 0;
+    const rate = (seconds) => 1 - Math.exp(-1 / (sampleRate * seconds));
+    this.rates = { up: rate(0.001), down: rate(0.025), smoothUp: rate(0.005), smoothDown: rate(0.12), fadeIn: rate(0.003), fadeOut: rate(0.06) };
+  }
+  process(inputs, outputs, parameters) {
+    const input = inputs[0];
+    const out = outputs[0];
+    const level = outputs[1][0];
+    const threshold = parameters.threshold[0];
+    const { up, down, smoothUp, smoothDown, fadeIn, fadeOut } = this.rates;
+    for (let i = 0; i < level.length; i++) {
+      let x = 0;
+      for (const channel of input) x = Math.max(x, Math.abs(channel[i]));
+      this.level += (x - this.level) * (x > this.level ? up : down);
+      this.smooth += (x - this.smooth) * (x > this.smooth ? smoothUp : smoothDown);
+      level[i] = this.smooth;
+      if (threshold <= 0 || this.level > threshold) {
+        this.open = true;
+        this.hold = sampleRate * 0.08;
+      } else if (this.level < threshold * 0.6) {
+        if (this.hold > 0) this.hold--;
+        else this.open = false;
+      }
+      const target = this.open ? 1 : 0;
+      this.gain += (target - this.gain) * (target > this.gain ? fadeIn : fadeOut);
+      for (let c = 0; c < out.length; c++) out[c][i] = (input[c] ?? input[0] ?? [])[i] * this.gain || 0;
+    }
+    return true;
+  }
+}
+registerProcessor('jdl-gate', Gate);
+`;
+const gateLoaded = new WeakSet<BaseAudioContext>();
+async function loadGate(context: AudioContext) {
+  if (gateLoaded.has(context)) return;
+  const url = URL.createObjectURL(new Blob([GATE_PROCESSOR], { type: 'text/javascript' }));
+  await context.audioWorklet.addModule(url);
+  URL.revokeObjectURL(url);
+  gateLoaded.add(context);
+}
 
 // A band-limited wave from Fourier terms, as numbers not normalised
 const wave = (context: BaseAudioContext, real: number[], imag: number[]) =>
@@ -247,6 +326,15 @@ function build(context: AudioContext, stream: MediaStream): Chain {
   const tremoloDepth = new GainNode(context, { gain: 0 });
   tremoloLfo.connect(tremoloDepth).connect(tremolo.gain);
   const muffle = new BiquadFilterNode(context, { type: 'lowpass', frequency: 20000, Q: 1 });
+  // Gate on the way in; its level output sweeps the wah's resonant low-pass
+  const gate = new AudioWorkletNode(context, 'jdl-gate', {
+    numberOfInputs: 1,
+    numberOfOutputs: 2,
+    outputChannelCount: [2, 1],
+  });
+  const wahFilter = new BiquadFilterNode(context, { type: 'lowpass', frequency: WAH_REST, Q: 6 });
+  const wah = { dry: context.createGain(), wet: new GainNode(context, { gain: 0 }), depth: new GainNode(context, { gain: 0 }) };
+  gate.connect(wah.depth, 1).connect(wahFilter.frequency);
   // Vibrato: the voice through a delay wobbling 4.5 times a second, which
   // bends its pitch up and down like a warped tape; bypassed at 0
   const vibratoDelay = new DelayNode(context, { delayTime: 0.012, maxDelayTime: 0.05 });
@@ -274,6 +362,19 @@ function build(context: AudioContext, stream: MediaStream): Chain {
   // Chorus: two copies a few milliseconds late, each wobbling slowly
   const chorusSend = context.createGain();
   const oscillators = [robotLfo, tremoloLfo, vibratoLfo];
+  // Ping-pong: the voice (in mono) echoes left, then right, then left…
+  const pingpong = {
+    send: new GainNode(context, { gain: 0, channelCount: 1, channelCountMode: 'explicit' }),
+    left: new DelayNode(context, { delayTime: echoTime(), maxDelayTime: 1 }),
+    right: new DelayNode(context, { delayTime: echoTime(), maxDelayTime: 1 }),
+  };
+  const sides = new ChannelMergerNode(context, { numberOfInputs: 2 });
+  pingpong.send.connect(pingpong.left);
+  pingpong.left.connect(sides, 0, 0);
+  pingpong.left.connect(pingpong.right);
+  pingpong.right.connect(sides, 0, 1);
+  pingpong.right.connect(new GainNode(context, { gain: 0.5 })).connect(pingpong.left);
+  sides.connect(sum);
   // Flanger: a copy 0.5 to 5.5 ms late, sweeping slowly, fed back into itself
   const flangerSend = new GainNode(context, { gain: 0 });
   const flangerDelay = new DelayNode(context, { delayTime: 0.003, maxDelayTime: 0.02 });
@@ -291,10 +392,13 @@ function build(context: AudioContext, stream: MediaStream): Chain {
   }
   const analyser = new AnalyserNode(context, { fftSize: 1024 });
 
-  source.connect(input);
-  const pitch = pitchShifter(context, input, lowCut);
+  source.connect(input).connect(gate);
+  const pitch = pitchShifter(context, gate, lowCut);
   oscillators.push(...pitch.oscillators);
-  lowCut.connect(drive).connect(crush).connect(highCut).connect(muffle).connect(robot).connect(tremolo);
+  lowCut.connect(drive).connect(crush).connect(highCut).connect(muffle);
+  muffle.connect(wah.dry).connect(robot);
+  muffle.connect(wahFilter).connect(wah.wet).connect(robot);
+  robot.connect(tremolo);
   tremolo.connect(vibrato.dry).connect(voice);
   tremolo.connect(vibratoDelay).connect(vibrato.wet).connect(voice);
   voice.connect(sum);
@@ -303,6 +407,7 @@ function build(context: AudioContext, stream: MediaStream): Chain {
   voice.connect(reverbSend).connect(reverb).connect(sum);
   voice.connect(chorusSend);
   voice.connect(flangerSend);
+  voice.connect(pingpong.send);
   out.connect(analyser);
   // all at once, so the pitch shifter's sweeps and fades stay in step
   const at = context.currentTime + 0.05;
@@ -324,6 +429,9 @@ function build(context: AudioContext, stream: MediaStream): Chain {
     muffle,
     vibrato,
     flangerSend,
+    gate,
+    wah,
+    pingpong,
     crush,
     chorusSend,
     pitch,
@@ -353,6 +461,12 @@ function applySettings(settings: Settings) {
   glide(chain.vibrato.wet.gain, vibratoOn ? 1 : 0);
   glide(chain.vibrato.depth.gain, settings.vibrato * 0.004);
   glide(chain.flangerSend.gain, settings.flanger * 0.8);
+  chain.gate.parameters.get('threshold')!.setValueAtTime(gateThreshold(settings.gate), now);
+  const wahOn = settings.wah >= 0.01;
+  glide(chain.wah.dry.gain, wahOn ? 0 : 1);
+  glide(chain.wah.wet.gain, wahOn ? 1.4 : 0); // the filter takes some level away
+  glide(chain.wah.depth.gain, wahDepth(settings.wah));
+  glide(chain.pingpong.send.gain, settings.pingpong * 0.8);
   glide(chain.chorusSend.gain, settings.chorus * 0.9);
   glide(chain.echoSend.gain, settings.echo * 0.8);
   glide(chain.reverbSend.gain, settings.reverb * 0.9);
@@ -366,13 +480,15 @@ function applySettings(settings: Settings) {
   glide(pitch.wet.gain, pitch.on ? 1 : 0);
 }
 
-// While the studio plays, the echo lands on a dotted eighth of its tempo
+// While the studio plays, the echo and the ping-pong land on a dotted eighth
+// of its tempo
 let echoSeconds = echoTime();
 function syncEcho(cps?: number) {
   const seconds = echoTime(cps);
   if (!chain || Math.abs(seconds - echoSeconds) < 0.001) return;
   echoSeconds = seconds;
-  chain.echoDelay.delayTime.setTargetAtTime(seconds, chain.context.currentTime, 0.1);
+  const now = chain.context.currentTime;
+  for (const delay of [chain.echoDelay, chain.pingpong.left, chain.pingpong.right]) delay.delayTime.setTargetAtTime(seconds, now, 0.1);
 }
 
 // Into the studio output while "Hear me" is on. Strudel rebuilds its output
@@ -437,6 +553,7 @@ export function setupMic({ tempo }: Options) {
         autoGainControl: false,
       },
     });
+    await loadGate(context);
     chain = build(context, stream);
     echoSeconds = echoTime();
     applySettings(settings);

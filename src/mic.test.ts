@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MIC_CONTROLS, MIC_GROUPS, MIC_NEUTRAL, MIC_PRESETS, crushCurve, muffleFrequency, driveCurve, echoTime, filterSettings, pitchSettings, softClipCurve } from './mic';
+import { MIC_CONTROLS, MIC_GROUPS, MIC_NEUTRAL, MIC_PRESETS, crushCurve, gateThreshold, muffleFrequency, wahDepth, driveCurve, echoTime, filterSettings, pitchSettings, softClipCurve } from './mic';
 
 describe('mic effects', () => {
   it('leaves the signal alone with no distortion', () => {
@@ -82,5 +82,17 @@ describe('preset groups', () => {
     const groups = new Set(MIC_GROUPS.map((g) => g.id));
     for (const preset of MIC_PRESETS) expect(groups.has(preset.group)).toBe(true);
     expect(new Set(MIC_PRESETS.map((p) => p.id)).size).toBe(MIC_PRESETS.length);
+  });
+});
+
+describe('noise gate and auto-wah', () => {
+  it('gate: off at 0, from -54 dB to -18 dB along the slider', () => {
+    expect(gateThreshold(0)).toBe(0);
+    expect(20 * Math.log10(gateThreshold(0.02))).toBeCloseTo(-53.3, 1);
+    expect(20 * Math.log10(gateThreshold(1))).toBeCloseTo(-18);
+  });
+  it('wah: sweeps further the higher the slider', () => {
+    expect(wahDepth(0)).toBe(0);
+    expect(wahDepth(1)).toBeGreaterThan(wahDepth(0.5));
   });
 });
