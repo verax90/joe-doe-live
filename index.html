@@ -85,6 +85,7 @@
               <button id="toggle-compose" class="menu-item" type="button" aria-pressed="false" data-panel="compose" data-i18n="compose">Compose</button>
               <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
               <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
+              <button id="toggle-sampler" class="menu-item" type="button" aria-pressed="false" data-panel="sampler" data-i18n="samplerTitle">Sampler</button>
               <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
             </div>
             <div class="menu-group">
@@ -330,6 +331,49 @@
           <button class="cheat-action" type="button" data-sp-example="fx" data-i18n="spExampleFx">Effect knob</button>
         </div>
         <p class="panel-help" data-i18n="spSetup">On the SP: SHIFT + pad 13 → SYSTEM → MIDI tab. MIDI Mode as chosen here; MIDI Sync on USB (or Auto) so it follows the clock, not Internal.</p>
+      </aside>
+
+      <aside class="panel" id="sampler" hidden>
+        <h2 data-i18n="samplerTitle">Sampler</h2>
+        <p class="panel-help" data-i18n="samplerHelp">Take a few bars of what sounds and keep them as your own sounds.</p>
+        <label class="panel-field" for="sampler-source">
+          <span data-i18n="samplerSource">From</span>
+          <select id="sampler-source" class="control">
+            <option value="backing" data-i18n="samplerFromBacking">the backing track</option>
+            <option value="mic" data-i18n="samplerFromMic">the mic</option>
+            <option value="all" data-i18n="samplerFromAll">everything that sounds</option>
+          </select>
+        </label>
+        <label class="panel-field" for="sampler-bars">
+          <span data-i18n="riffBars">Bars</span>
+          <select id="sampler-bars" class="control">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+          </select>
+        </label>
+        <button id="sampler-record" class="control control-accent" type="button" data-i18n="samplerRecord">● Sample</button>
+        <p id="sampler-status" class="panel-status" role="status"></p>
+        <div id="sampler-result" hidden>
+          <canvas id="sampler-wave" class="sampler-wave" width="600" height="90" aria-hidden="true"></canvas>
+          <label class="panel-field" for="sampler-name">
+            <span data-i18n="samplerName">Name</span>
+            <input id="sampler-name" class="control" type="text" spellcheck="false" />
+          </label>
+          <div class="compose-buttons">
+            <button id="sampler-listen" class="control" type="button" data-i18n="samplerListen">▶ Listen</button>
+            <button id="sampler-save" class="control control-accent" type="button" data-i18n="samplerSave">Save</button>
+            <button id="sampler-discard" class="control" type="button" data-i18n="riffDiscard">Discard</button>
+          </div>
+        </div>
+        <div id="sampler-saved" hidden>
+          <div class="compose-buttons">
+            <button id="sampler-add-loop" class="control" type="button" data-i18n="samplerAddLoop">Add as a loop</button>
+            <button id="sampler-add-chops" class="control" type="button" data-i18n="samplerAddChops">Add chopped</button>
+          </div>
+        </div>
+        <p class="panel-help" data-i18n="samplerTip">While it plays, it starts on the next bar and takes whole bars, so the loop is in time.</p>
       </aside>
 
       <aside class="panel" id="backing" hidden>

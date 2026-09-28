@@ -213,6 +213,9 @@ let monitoredInto: AudioNode | undefined;
 // output (which recordings tap); undefined when off or when heard
 export const micForRecording = () => (chain && !monitoring ? chain.out : undefined);
 
+// For the sampler: the voice with its effects, whenever the mic is on
+export const micOutput = () => chain?.out;
+
 // The gate, in an AudioWorklet so it acts sample by sample: it follows the
 // input's level quickly (1 ms up, 25 ms down), opens above the threshold,
 // closes a little below it after 80 ms, and fades in 3 ms and out 60 ms. Its

@@ -4,10 +4,11 @@
 // eighths or sixteenths, one bracket per bar inside <…>, and you decide to
 // add them as tracks or not.
 // Timing: over a playing pattern it starts on its next bar and follows what
-// you hear (Strudel schedules latency seconds ahead, so the heard cycle is
-// now() minus that); with nothing playing, a one-bar count-in and a click
+// you hear (the heard cycle comes from cycle-clock.ts, which reads when
+// Strudel schedules each beat); with nothing playing, a one-bar count-in and a click
 // keep time at the BPM field's tempo.
 import { ensureAudio } from './audio';
+import { heardCycle, whenCycleKnown } from './cycle-clock';
 import { padSound } from './freeplay';
 import { t } from './i18n';
 import { NOTE_EVENT, type NoteDetail } from './midi';
@@ -82,7 +83,12 @@ export function setupRiff({ editor, addTrack }: Options) {
     // heard(): the cycle of what you hear right now, relative to the take's start
     let heard: () => number;
     if (playing) {
-      const heardNow = () => clock!.now!() - (clock!.latency ?? 0.1) * cps;
+      // measured from Strudel's own schedule; the estimate only as a fallback
+      await whenCycleKnown();
+      // you hear it a little after it is made: the output's latency (capped,
+      // as some systems report far more than they have)
+      const outputLag = Math.min(0.1, context.outputLatency || 0);
+      const heardNow = () => heardCycle(context.currentTime - outputLag) ?? clock!.now!() - (clock!.latency ?? 0.1) * cps;
       let start = Math.ceil(heardNow());
       if (start - heardNow() < 0.25) start += 1; // too close: the bar after
       heard = () => heardNow() - start;

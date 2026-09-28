@@ -45,6 +45,11 @@ export function sampleName(fileName: string, { isFolder = false } = {}) {
 
 export type Picked = { path: string; file: File };
 
+// For the sampler: add files as if they had been dropped (a path with a
+// folder makes a kit), saved and listed like any other
+let addPickedHere: ((picked: Picked[]) => Promise<void>) | undefined;
+export const addSamples = (picked: Picked[]) => addPickedHere?.(picked) ?? Promise.resolve();
+
 const isAudio = (file: File) => file.type.startsWith('audio/') || /\.(wav|mp3|ogg|flac|aif+)$/i.test(file.name);
 
 // Loose files keep their own name; files inside a folder become a kit named
@@ -357,6 +362,8 @@ export function setupSamplesPanel({ addTrack }: { addTrack: (pattern: string) =>
     status.textContent = t('samplesReady', { count: total });
     render();
   };
+
+  addPickedHere = addPicked;
 
   const fromInput = (files: FileList) =>
     [...files].map((file) => ({ path: file.webkitRelativePath || file.name, file }));

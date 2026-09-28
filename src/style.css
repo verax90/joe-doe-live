@@ -1689,3 +1689,15 @@ select.control {
 #sp .cheat-actions + h3 {
   margin-top: 0.75rem;
 }
+
+/* Sampler: the take's waveform, the 8 chops marked */
+.sampler-wave {
+  display: block;
+  width: 100%;
+  height: 4.5rem;
+  margin: 0.5rem 0;
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+  color: var(--accent);
+  background: var(--bg-elevated);
+}

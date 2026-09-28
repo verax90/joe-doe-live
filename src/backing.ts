@@ -18,6 +18,11 @@ export const clockTime = (seconds: number) => {
 
 type Settings = { volume: number; withPlay: boolean; loop: boolean };
 
+// For the sampler: the track before its volume, so it can be sampled even
+// with the volume down
+let playing: AudioNode | undefined;
+export const backingInput = () => playing;
+
 export function setupBacking(scheduler: Scheduler | undefined) {
   const fileInput = document.querySelector<HTMLInputElement>('#backing-file')!;
   const tabButton = document.querySelector<HTMLButtonElement>('#backing-tab')!;
@@ -76,6 +81,7 @@ export function setupBacking(scheduler: Scheduler | undefined) {
     element = undefined;
     tab = undefined;
     source = undefined;
+    playing = undefined;
     render();
   };
 
@@ -90,6 +96,7 @@ export function setupBacking(scheduler: Scheduler | undefined) {
     element.addEventListener('ended', render);
     source = context.createMediaElementSource(element);
     source.connect(gain!);
+    playing = source;
     name = file.name.replace(/\.[^.]+$/, '');
     render();
   });
@@ -120,6 +127,7 @@ export function setupBacking(scheduler: Scheduler | undefined) {
     name = audio.label || t('backingTabName');
     source = context.createMediaStreamSource(stream);
     source.connect(gain!);
+    playing = source;
     audio.addEventListener('ended', clear);
     render();
   });

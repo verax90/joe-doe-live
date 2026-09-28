@@ -28,6 +28,8 @@ import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { builtInPresets, translateIfBuiltIn } from './presets';
 import { setupRecorder } from './record';
 import { setupRiff } from './riff';
+import { setupCycleClock } from './cycle-clock';
+import { setupSampler } from './sampler';
 import { setupSp } from './sp';
 import { setupRoom } from './room';
 import { setupSamplesPanel } from './samples';
@@ -216,6 +218,8 @@ whenStrudelReady().then(() => {
   setupSamplesPanel({ addTrack });
   setupRiff({ editor, addTrack });
   setupSp({ editor, addTrack });
+  setupSampler({ editor, addTrack });
+  setupCycleClock(scheduler as Parameters<typeof setupCycleClock>[0]);
 });
 
 document.querySelector('#play')!.addEventListener('click', () => editor.evaluate());

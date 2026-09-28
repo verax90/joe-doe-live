@@ -39,17 +39,41 @@ export function codeLines(code: string, maxChars: number, maxLines: number) {
   return cut.length > maxLines ? [...cut.slice(0, maxLines - 1), '…'] : cut;
 }
 
-// Copies every block of audio to the main thread; kept tiny on purpose
+// Copies every block of audio to the main thread, with the audio clock time
+// of its first sample; kept tiny on purpose
 const TAP_PROCESSOR = `
 class Tap extends AudioWorkletProcessor {
   process(inputs) {
     const input = inputs[0];
-    if (input.length) this.port.postMessage(input.map((channel) => channel.slice()));
+    if (input.length) this.port.postMessage({ time: currentTime, channels: input.map((channel) => channel.slice()) });
     return true;
   }
 }
 registerProcessor('jdl-tap', Tap);
 `;
+const tapLoaded = new WeakSet<BaseAudioContext>();
+
+export type TapBlock = { time: number; channels: Float32Array[] };
+
+// Listens to some nodes (stereo) until the returned stop() is called, which
+// gives back every block heard. Recording and the sampler both use it
+export async function startTap(context: BaseAudioContext, sources: AudioNode[]) {
+  if (!tapLoaded.has(context)) {
+    const url = URL.createObjectURL(new Blob([TAP_PROCESSOR], { type: 'text/javascript' }));
+    await context.audioWorklet.addModule(url);
+    URL.revokeObjectURL(url);
+    tapLoaded.add(context);
+  }
+  const tap = new AudioWorkletNode(context, 'jdl-tap', { numberOfInputs: 1, numberOfOutputs: 0, channelCount: 2, channelCountMode: 'explicit' });
+  const blocks: TapBlock[] = [];
+  tap.port.onmessage = (event) => blocks.push(event.data);
+  for (const source of sources) source.connect(tap);
+  return () => {
+    for (const source of sources) source.disconnect(tap);
+    tap.port.onmessage = null;
+    return blocks;
+  };
+}
 
 export function encodeWav(channels: Float32Array[][], sampleRate: number) {
   const channelCount = 2;
@@ -131,20 +155,17 @@ export function setupRecorder(getCode: () => string) {
   };
 
   const startAudio = async (output: AudioNode, context: BaseAudioContext) => {
-    const url = URL.createObjectURL(new Blob([TAP_PROCESSOR], { type: 'text/javascript' }));
-    await context.audioWorklet.addModule(url);
-    const tap = new AudioWorkletNode(context, 'jdl-tap', { numberOfInputs: 1, numberOfOutputs: 0, channelCount: 2, channelCountMode: 'explicit' });
-    const blocks: Float32Array[][] = [];
-    tap.port.onmessage = (event) => blocks.push(event.data);
-    output.connect(tap);
     // The mic, when it is not already in the studio output
     const mic = micForRecording();
-    mic?.connect(tap);
+    const stop = await startTap(context, mic ? [output, mic] : [output]);
     return async () => {
-      output.disconnect(tap);
-      mic?.disconnect(tap);
-      tap.port.onmessage = null;
-      download(encodeWav(blocks, context.sampleRate), 'wav');
+      download(
+        encodeWav(
+          stop().map((block) => block.channels),
+          context.sampleRate,
+        ),
+        'wav',
+      );
     };
   };
 
