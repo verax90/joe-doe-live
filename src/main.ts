@@ -21,6 +21,7 @@ import { setupLibrary } from './library';
 import { setupLiveSet } from './live-set';
 import { ensureLimiter } from './limiter';
 import { setupMenu } from './menu';
+import { setupBacking } from './backing';
 import { setupMic } from './mic';
 import { setupOffline } from './offline';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
@@ -261,6 +262,7 @@ setupMidiPanel();
 setupKnobs();
 setupScope();
 setupMic({ tempo: () => (scheduler?.started && scheduler.cps ? scheduler.cps : undefined) });
+setupBacking(scheduler);
 setupKnobHud(() => ({
   code: editor.code,
   playing: Boolean(scheduler?.started),
