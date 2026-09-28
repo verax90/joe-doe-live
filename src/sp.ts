@@ -120,14 +120,15 @@ export function setupSp({ editor, addTrack }: { editor: StrudelMirror; addTrack:
   // Scheduler time (the audio clock, seconds) to a Web MIDI timestamp. The
   // audio clock moves in steps (a block of samples at a time) while
   // performance.now() runs smoothly, so their gap wobbles by a block: the
-  // smallest gap is the steady one. It may only creep up slowly (the two
-  // clocks drift apart a little), unless it jumps by a lot (audio paused)
+  // smallest gap is the steady one. It may only creep up slowly, 0.2 % (the
+  // two clocks drift apart a little: 0.08 % measured on the studio's laptop),
+  // unless it jumps by a lot (audio paused)
   let steadyGap: number | undefined;
   let lastStamp = 0;
   const stamp = (target: number) => {
     const now = performance.now();
     const gap = now - g.getAudioContext().currentTime * 1000;
-    const allowed = (steadyGap ?? gap) + (now - lastStamp) * 0.0005;
+    const allowed = (steadyGap ?? gap) + (now - lastStamp) * 0.002;
     steadyGap = steadyGap === undefined || gap - steadyGap > 50 ? gap : Math.min(gap, allowed);
     lastStamp = now;
     return Math.max(now, steadyGap + target * 1000 + settings.offset);
