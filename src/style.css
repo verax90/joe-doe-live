@@ -1016,6 +1016,19 @@ select.control {
   outline: none;
 }
 
+/* A picked option (the mic's preset in use): filled; changed since, outlined */
+.cheat-action[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.cheat-action[aria-pressed='true'][data-modified] {
+  background: none;
+  color: var(--accent);
+}
+
 .cheat-try {
   border-color: var(--accent);
   color: var(--accent);

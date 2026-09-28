@@ -601,6 +601,14 @@ export function setupMic({ tempo }: Options) {
     meter.classList.toggle('is-hot', peak > 0.9);
   }, 80);
 
+  // The preset in use shows filled; once a slider moves away from it, only
+  // outlined (you started from it, but it is yours now)
+  const markModified = () => {
+    const preset = MIC_PRESETS.find((p) => p.id === presetId);
+    const changed = Boolean(preset) && MIC_CONTROLS.some((c) => Math.abs(settings[c.id] - preset!.settings[c.id]) > 0.005);
+    presetsBox.querySelector('[aria-pressed="true"]')?.toggleAttribute('data-modified', changed);
+  };
+
   const render = () => {
     const presetButton = (preset: (typeof MIC_PRESETS)[number]) => {
         const button = document.createElement('button');
@@ -647,11 +655,13 @@ export function setupMic({ tempo }: Options) {
           settings = { ...settings, [control.id]: Number(input.value) };
           applySettings(settings);
           save();
+          markModified();
         });
         label.append(name, input);
         return label;
       }),
     );
+    markModified();
   };
 
   document.querySelector('#toggle-mic')!.addEventListener('click', () => void listDevices().catch(() => undefined));
