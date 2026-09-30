@@ -1630,6 +1630,12 @@ select.control {
   margin: 0.75rem 0;
 }
 
+/* the mic has sixteen: a little tighter */
+#mic-sliders {
+  gap: 0.35rem;
+  margin: 0.5rem 0;
+}
+
 .vj-slider {
   display: grid;
   grid-template-columns: 7.5rem 1fr;
@@ -1937,7 +1943,18 @@ select.control {
 
 /* Compose: layer rows a little tighter, so all six fit */
 .compose-layers li {
-  padding-block: 0.3rem;
+  padding-block: 0.2rem;
+}
+
+/* Compose's three song buttons share one row */
+#compose-tab-song .compose-buttons {
+  flex-wrap: nowrap;
+}
+
+#compose-tab-song .compose-buttons .control {
+  flex: 1 1 auto;
+  padding-inline: 0.5rem;
+  white-space: nowrap;
 }
 
 /* Phone as controller: the QR code, on white so any camera reads it */
@@ -2054,13 +2071,14 @@ select.control {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin: 0.4rem 0;
+  margin: 0.2rem 0 0;
 }
 
 .voice-note {
   min-width: 4.5ch;
   font-family: 'Syne Variable', sans-serif;
-  font-size: 2rem;
+  font-size: 1.75rem;
+  line-height: 1.1;
   font-weight: 700;
   color: var(--fg);
   transition: opacity 0.2s;

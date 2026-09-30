@@ -49,7 +49,6 @@ export function vjValues(p: Record<VjControl, number>) {
 
 let enabled = false;
 let knobs = false;
-export const isVjOn = () => enabled;
 export const vjTakesKnobs = () => enabled && knobs;
 
 // Moves one control; the panel's slider follows through onMove

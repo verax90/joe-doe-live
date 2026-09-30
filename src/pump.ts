@@ -46,7 +46,6 @@ type Controller = { nodes?: Record<string, unknown> };
 
 let settings = { ...PUMP_DEFAULTS, ...readStorage<Partial<PumpSettings>>('jdl:pump', {}) };
 let lastKick = 0;
-export const pumpSettings = () => settings;
 export function setPump(next: Partial<PumpSettings>) {
   settings = { ...settings, ...next };
   writeStorage('jdl:pump', settings);
