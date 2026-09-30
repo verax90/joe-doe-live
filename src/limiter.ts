@@ -9,7 +9,9 @@ type Global = typeof globalThis & {
 
 // Strudel rebuilds its output node now and then; each new one gets its own limiter
 const limited = new WeakSet<GainNode>();
-let current: { master: GainNode; limiter: DynamicsCompressorNode } | undefined;
+// sweep and gate: a high-pass and a gain the build-up (drop.ts) moves; at rest
+// the filter sits at 10 Hz and the gate at 1, so nothing is heard of them
+let current: { master: GainNode; limiter: DynamicsCompressorNode; sweep: BiquadFilterNode; gate: GainNode } | undefined;
 
 // For the ?debug panel: the signal before the limiter and how much it cuts
 export const getLimiter = () => current;
@@ -36,8 +38,10 @@ export function ensureLimiter() {
   });
   // A little headroom before the limiter so it works less
   master.gain.value = volume;
+  const sweep = new BiquadFilterNode(context, { type: 'highpass', frequency: 10, Q: 0.9 });
+  const gate = new GainNode(context, { gain: 1 });
   master.disconnect();
-  master.connect(limiter).connect(context.destination);
+  master.connect(sweep).connect(gate).connect(limiter).connect(context.destination);
   limited.add(master);
-  current = { master, limiter };
+  current = { master, limiter, sweep, gate };
 }

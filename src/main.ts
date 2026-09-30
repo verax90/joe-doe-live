@@ -29,6 +29,7 @@ import { recordPlayed, setupHistory } from './history';
 import { sessionPlayed, sessionStopped } from './session';
 import { setupVoice } from './voice';
 import { setupFinder } from './finder';
+import { setupDrop } from './drop';
 import { setupOverlay } from './overlay';
 import { setupScalePicker } from './scale';
 import { setupOffline } from './offline';
@@ -90,6 +91,7 @@ applyTheme(startTheme, editor);
 // long no longer makes notes late (clicks, gaps). Keys played on a controller
 // are triggered on their own path and stay immediate
 if (scheduler) scheduler.latency = 0.2;
+const drop = setupDrop(scheduler);
 // The Auto visual changes on the bar line while it plays
 setVisualClock(() => (scheduler?.started && scheduler.now ? scheduler.now() : null));
 
@@ -233,6 +235,7 @@ editor.stop = async () => {
   await originalStop();
   room?.stopped();
   sessionStopped();
+  drop.stopped();
 };
 
 whenStrudelReady().then(() => {

@@ -213,6 +213,7 @@ const sections: Section[] = [
           [L('Live set', 'Directo'), L('The running order for a gig: songs with their visual; during the set ◀ ▶, ← → or a clicker move through it, on the next bar while it plays', 'El orden de los temas para un concierto, cada uno con su visual; durante el directo ◀ ▶, ← → o un pasador lo recorren, en el próximo compás si está sonando')],
           [L('Live room', 'Sala en directo'), L('Open a room and send the link: friends hear your code made in their own browser, with your visual and your samples; every play and stop reaches them', 'Abre una sala y pasa el enlace: tus amigos oyen tu código generado en su navegador, con tu visual y tus samples; cada Play y Stop les llega')],
           [L('Caption', 'Rótulo'), L('Your name and the song over the visuals, bottom right, for streams; the title can follow the live set song or the pattern. In the vertical recording too', 'Tu nombre y el tema sobre los visuales, abajo a la derecha, para los directos; el título puede seguir la canción del set o el patrón. También en la grabación vertical')],
+          [L('Build-up', 'Subidón'), L('From the next bar, 2, 4 or 8 bars that build up (snare roll, noise riser, bass going away, silence before) and the drop on the one. Stop calls it off', 'Desde el siguiente compás, 2, 4 u 8 compases que suben (redoble, ruido, graves que se van, hueco) y el drop en el uno. Stop lo cancela')],
         ],
       },
     ],

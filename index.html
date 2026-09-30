@@ -110,6 +110,7 @@
               <button id="toggle-set" class="menu-item" type="button" aria-pressed="false" data-panel="set" data-i18n="liveSet">Live set</button>
               <button id="toggle-room" class="menu-item" type="button" aria-pressed="false" data-panel="room" data-i18n="roomTitle">Live room</button>
               <button id="toggle-overlay" class="menu-item" type="button" aria-pressed="false" data-panel="overlay-panel" data-i18n="overlayTitle">Caption</button>
+              <button id="toggle-drop" class="menu-item" type="button" aria-pressed="false" data-panel="drop" data-i18n="dropTitle">Build-up</button>
               <button id="toggle-frame" class="menu-item" type="button" aria-pressed="false" data-i18n="verticalFrame">Vertical framing (9:16 streams)</button>
               <label class="menu-field">
                 <span data-i18n="recordMode">What to record</span>
@@ -509,6 +510,30 @@
         <label class="set-option"><input id="backing-with-play" type="checkbox" /> <span data-i18n="backingWithPlay">Starts and stops with the studio's Play</span></label>
         <label class="set-option"><input id="backing-loop" type="checkbox" /> <span data-i18n="backingLoop">Repeat</span></label>
         <p class="panel-help" data-i18n="backingTempo">To play over it, match the tempo: tap Tap to the song's beat.</p>
+      </aside>
+
+      <aside class="panel" id="drop" hidden>
+        <h2 data-i18n="dropTitle">Build-up</h2>
+        <p class="panel-help" data-i18n="dropHelp">A few bars that build up, and the drop on the one.</p>
+        <div class="set-add">
+          <label class="panel-field" for="drop-bars">
+            <span data-i18n="dropBars">Bars</span>
+            <select id="drop-bars" class="control">
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="8">8</option>
+            </select>
+          </label>
+        </div>
+        <div class="drop-options">
+          <label class="set-option"><input id="drop-roll" type="checkbox" /> <span data-i18n="dropRoll">Snare roll</span></label>
+          <label class="set-option"><input id="drop-riser" type="checkbox" /> <span data-i18n="dropRiser">Noise riser</span></label>
+          <label class="set-option"><input id="drop-filter" type="checkbox" /> <span data-i18n="dropFilter">Bass away</span></label>
+          <label class="set-option"><input id="drop-gap" type="checkbox" /> <span data-i18n="dropGap">Silence before</span></label>
+          <label class="set-option"><input id="drop-impact" type="checkbox" /> <span data-i18n="dropImpact">Impact</span></label>
+        </div>
+        <button id="drop-go" class="control control-accent drop-go" type="button" data-i18n="dropGo">▲ Build-up</button>
+        <p id="drop-status" class="panel-status" role="status"></p>
       </aside>
 
       <aside class="panel" id="pump" hidden>
