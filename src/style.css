@@ -1005,26 +1005,62 @@ select.control {
   min-width: 0;
 }
 
-/* Room for several links, one per line: .control fixes one line's height */
-#youtube-form {
-  flex-direction: column;
-  align-items: stretch;
+/* YouTube queue (youtube.ts): the link field and Add, then the videos */
+.youtube-add {
+  display: flex;
+  gap: 0.5rem;
 }
 
-#youtube-form button {
-  align-self: flex-end;
+.youtube-add input {
+  flex: 1;
+  min-width: 0;
 }
 
-.youtube-links {
-  height: auto;
-  min-height: 8rem;
-  padding: 0.5rem 0.8rem;
-  line-height: 1.5;
-  white-space: pre;
-  overflow-x: auto;
-  cursor: text;
-  resize: vertical;
-  font-size: 12px;
+.youtube-queue {
+  display: grid;
+  margin: 0.5rem 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: video;
+}
+
+.youtube-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--line);
+  counter-increment: video;
+}
+
+.youtube-item::before {
+  content: counter(video);
+  flex: none;
+  width: 1.2rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.youtube-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--fg);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* the one on now */
+.youtube-item.is-now::before {
+  content: '▶';
+  color: var(--accent);
+}
+
+.youtube-item.is-now .youtube-name {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .sample-pickers {

@@ -6,6 +6,7 @@
 //   visuals; several links or a YouTube playlist play one after another. YouTube does not let a page read its pixels, so no effect touches
 //   it and recordings leave it out; capture its tab for that.
 import { t } from './i18n';
+import { setupYoutube } from './youtube';
 
 type Source = {
   initCam?: (index?: number) => void;
@@ -178,58 +179,16 @@ export function youtubeEmbedUrl(source: YoutubeSource) {
   return `https://www.youtube-nocookie.com/embed/${source.ids[0]}?${params}`;
 }
 
-// The text you pasted is remembered, so the same list comes back next time
-const YOUTUBE_KEY = 'jdl:youtube';
-
-function setYoutube(text: string | null) {
-  document.getElementById('youtube-bg')?.remove();
-  const source = text ? youtubeSource(text) : null;
-  document.body.classList.toggle('has-youtube', Boolean(source));
-  try {
-    if (source) localStorage.setItem(YOUTUBE_KEY, text!);
-    else localStorage.removeItem(YOUTUBE_KEY);
-  } catch {
-    // not remembered, still shown
-  }
-  if (!source) return null;
-  const frame = document.createElement('iframe');
-  frame.id = 'youtube-bg';
-  frame.className = 'youtube-bg';
-  frame.title = 'YouTube';
-  frame.tabIndex = -1;
-  frame.setAttribute('aria-hidden', 'true');
-  frame.allow = 'autoplay; encrypted-media';
-  frame.referrerPolicy = 'strict-origin-when-cross-origin';
-  frame.src = youtubeEmbedUrl(source);
-  document.body.prepend(frame);
-  return source;
-}
-
 export function setupVideo(options: { showSource: () => void }) {
   const status = document.querySelector<HTMLElement>('#video-status')!;
-  const form = document.querySelector<HTMLFormElement>('#youtube-form')!;
-  const input = document.querySelector<HTMLTextAreaElement>('#youtube-url')!;
-  const off = document.querySelector<HTMLButtonElement>('#youtube-off')!;
   const fileInput = document.querySelector<HTMLInputElement>('#video-file')!;
   const tab = document.querySelector<HTMLButtonElement>('#video-tab')!;
   const webcam = document.querySelector<HTMLButtonElement>('#video-webcam')!;
 
   const say = (text: string) => (status.textContent = text);
-  const showOff = () => (off.hidden = !document.getElementById('youtube-bg'));
-
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const source = setYoutube(input.value);
-    showOff();
-    if (!source) return say(t('youtubeBad'));
-    say('list' in source ? t('youtubeList') : source.ids.length > 1 ? t('youtubeMany', { count: source.ids.length }) : t('youtubeOn'));
-  });
-  off.addEventListener('click', () => {
-    setYoutube(null);
-    input.value = '';
-    showOff();
-    say('');
-  });
+  // YouTube behind, as a queue (youtube.ts), with its own status line
+  const youtubeStatus = document.querySelector<HTMLElement>('#youtube-status')!;
+  setupYoutube((text) => (youtubeStatus.textContent = text));
 
   fileInput.addEventListener('change', async () => {
     const files = [...(fileInput.files ?? [])];
@@ -260,15 +219,6 @@ export function setupVideo(options: { showSource: () => void }) {
     say(t('videoUsingWebcam'));
   });
 
-  // The YouTube video or list you left on comes back
-  let saved: string | null = null;
-  try {
-    saved = localStorage.getItem(YOUTUBE_KEY);
-  } catch {
-    // nothing saved
-  }
-  if (saved && setYoutube(saved)) input.value = saved;
-  showOff();
 }
 
 // What the webcam visuals show here right now, as a stream to send on: the

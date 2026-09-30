@@ -12,6 +12,12 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-09-30-youtube',
+    title: L('YouTube queue', 'Cola de YouTube'),
+    text: L('Paste and Add: it waits its turn, the video on is never cut', 'Pega y Añadir: espera su turno, sin cortar el que suena'),
+    go: [{ click: '#toggle-video' }, { click: '[aria-controls="video-tab-youtube"]' }],
+  },
+  {
     id: '2026-09-30-sequencer',
     title: L('Sequencer view', 'Vista de secuenciador'),
     text: L('Each track drawn under its line as it plays, in its colour', 'Cada pista dibujada bajo su línea mientras suena, con su color'),
