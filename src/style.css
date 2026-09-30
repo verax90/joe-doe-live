@@ -694,10 +694,23 @@ select.control {
   line-height: 1.4;
 }
 
+/* One line per message: device · what it sent */
+.midi-log li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding-block: 0.2rem;
+  font-size: 0.8rem;
+}
+
 .midi-device {
-  display: block;
+  flex: 0 0 auto;
+  max-width: 40%;
+  overflow: hidden;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .midi-text {
@@ -1700,4 +1713,39 @@ select.control {
   border-radius: 0.3rem;
   color: var(--accent);
   background: var(--bg-elevated);
+}
+
+/* Tabs inside a panel */
+.panel-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.2rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.panel-tab {
+  flex: 1 1 0;
+  padding: 0.3rem 0.5rem;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.panel-tab:hover,
+.panel-tab:focus-visible {
+  color: var(--fg);
+  outline: none;
+}
+
+.panel-tab[aria-selected='true'] {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
 }

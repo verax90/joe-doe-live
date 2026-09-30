@@ -108,22 +108,27 @@ export function setupMidiPanel() {
     flashTimer = window.setTimeout(() => dot.classList.remove('is-active'), 120);
   };
 
+  // Short, so each message fits on one line; the channel only when it is
+  // not the usual 1 (the MPK's pads in CC mode send on 10)
   const describe = ([status, a, b]: Uint8Array) => {
     const type = status & 0xf0;
     const channel = (status & 0x0f) + 1;
-    if (type === 0x90 && b > 0) return t('midiNote', { note: a, velocity: b, channel });
+    const on = channel === 1 ? '' : ` · ${t('midiChannel', { channel })}`;
+    if (type === 0x90 && b > 0) return t('midiNote', { note: a, velocity: b }) + on;
     if (type === 0x80 || type === 0x90) return null; // note off: noise for the monitor
-    if (type === 0xb0) return t('midiCc', { cc: a, value: b, channel });
-    if (type === 0xe0) return t('midiBend', { value: (b << 7) | a, channel });
-    if (type === 0xd0 || type === 0xa0) return t('midiTouch', { value: a, channel });
-    if (type === 0xc0) return t('midiProgram', { program: a, channel });
+    if (type === 0xb0) return t('midiCc', { cc: a, value: b }) + on;
+    if (type === 0xe0) return t('midiBend', { value: (b << 7) | a }) + on;
+    if (type === 0xd0 || type === 0xa0) return t('midiTouch', { value: a }) + on;
+    if (type === 0xc0) return t('midiProgram', { program: a }) + on;
     return null;
   };
 
   const addLog = (device: string, text: string) => {
     const item = document.createElement('li');
     item.innerHTML = `<span class="midi-device"></span> <span class="midi-text"></span>`;
-    item.querySelector('.midi-device')!.textContent = device;
+    // "TouchMe MIDI 1" → "TouchMe": the port suffix only takes room
+    item.querySelector('.midi-device')!.textContent = device.replace(/\s*(MIDI\s*\d*|Port-\d+)\s*$/i, '');
+    item.title = device;
     item.querySelector('.midi-text')!.textContent = text;
     log.prepend(item);
     while (log.children.length > MAX_LOG) log.lastElementChild!.remove();

@@ -451,58 +451,68 @@
 
       <aside class="panel" id="midi" hidden>
         <h2>MIDI</h2>
-        <p class="panel-help" data-i18n-html="midiHelp"></p>
-        <h3 data-i18n="devices">Devices</h3>
-        <ul id="midi-devices" class="panel-list"><li class="muted" data-i18n="noPermission">No permission yet</li></ul>
-        <button id="midi-enable" class="control" type="button" data-i18n="enableMidi">Enable MIDI</button>
-        <label class="panel-field" for="program-target">
-          <span data-i18n="programTarget">PROG CHANGE pads change</span>
-          <select id="program-target" class="control">
-            <option value="visual" data-i18n="programVisual">the visual</option>
-            <option value="pattern" data-i18n="programPattern">the pattern</option>
-            <option value="set" data-i18n="programSet">the live set song</option>
-          </select>
-        </label>
-        <h3 data-i18n="freePlayTitle">Play without Play</h3>
-        <p class="panel-help" data-i18n="freePlayHelp">Keys and bank B pads sound straight away while the studio is stopped, or over a pattern that does not use midikeys.</p>
-        <label class="visually-hidden" for="freeplay-sound" data-i18n="freePlaySound">Sound for the keys</label>
-        <select id="freeplay-sound" class="control freeplay-select"></select>
-        <label class="panel-field" for="pads-kit">
-          <span data-i18n="padsKit">Bank B pads play</span>
-          <select id="pads-kit" class="control freeplay-select"></select>
-        </label>
-        <label class="visually-hidden" for="pads-page" data-i18n="padsPageLabel">Which eight sounds</label>
-        <select id="pads-page" class="control freeplay-select" hidden></select>
-        <h3 data-i18n="riffTitle">Record a riff</h3>
-        <p class="panel-help" data-i18n="riffHelp">Play a few bars on the MPK and get them back as code.</p>
-        <div class="set-add">
-          <label class="panel-field" for="riff-bars">
-            <span data-i18n="riffBars">Bars</span>
-            <select id="riff-bars" class="control">
-              <option value="1">1</option>
-              <option value="2" selected>2</option>
-              <option value="4">4</option>
-            </select>
-          </label>
-          <label class="panel-field" for="riff-grid">
-            <span data-i18n="riffGrid">Grid</span>
-            <select id="riff-grid" class="control">
-              <option value="8" data-i18n="riffEighths">Eighths</option>
-              <option value="16" data-i18n="riffSixteenths" selected>Sixteenths</option>
-            </select>
-          </label>
+        <div class="panel-tabs" role="tablist" aria-label="MIDI">
+          <button class="panel-tab" type="button" role="tab" aria-selected="true" aria-controls="midi-tab-devices" data-i18n="devices">Devices</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="midi-tab-free" data-i18n="freePlayTitle">Play without Play</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="midi-tab-riff" data-i18n="riffTab">Riff</button>
         </div>
-        <button id="riff-record" class="control control-accent" type="button" data-i18n="riffRecord">● Record a riff</button>
-        <p id="riff-status" class="panel-status" role="status"></p>
-        <div id="riff-result" hidden>
-          <pre class="learn-code"><code id="riff-code"></code></pre>
-          <div class="compose-buttons">
-            <button id="riff-add" class="control control-accent" type="button" data-i18n="riffAdd">Add as tracks</button>
-            <button id="riff-discard" class="control" type="button" data-i18n="riffDiscard">Discard</button>
+        <section id="midi-tab-devices" class="panel-tabpanel" role="tabpanel">
+          <p class="panel-help" data-i18n-html="midiHelp"></p>
+          <ul id="midi-devices" class="panel-list"><li class="muted" data-i18n="noPermission">No permission yet</li></ul>
+          <button id="midi-enable" class="control" type="button" data-i18n="enableMidi">Enable MIDI</button>
+          <h3 data-i18n="lastMessages">Last messages</h3>
+          <ol id="midi-log" class="panel-list midi-log"></ol>
+        </section>
+        <section id="midi-tab-free" class="panel-tabpanel" role="tabpanel" hidden>
+          <p class="panel-help" data-i18n="freePlayHelp">Keys and bank B pads sound straight away while the studio is stopped, or over a pattern that does not use midikeys.</p>
+          <label class="panel-field" for="freeplay-sound">
+            <span data-i18n="freePlaySound">Sound for the keys</span>
+            <select id="freeplay-sound" class="control freeplay-select"></select>
+          </label>
+          <label class="panel-field" for="pads-kit">
+            <span data-i18n="padsKit">Bank B pads play</span>
+            <select id="pads-kit" class="control freeplay-select"></select>
+          </label>
+          <label class="visually-hidden" for="pads-page" data-i18n="padsPageLabel">Which eight sounds</label>
+          <select id="pads-page" class="control freeplay-select" hidden></select>
+          <label class="panel-field" for="program-target">
+            <span data-i18n="programTarget">PROG CHANGE pads change</span>
+            <select id="program-target" class="control">
+              <option value="visual" data-i18n="programVisual">the visual</option>
+              <option value="pattern" data-i18n="programPattern">the pattern</option>
+              <option value="set" data-i18n="programSet">the live set song</option>
+            </select>
+          </label>
+        </section>
+        <section id="midi-tab-riff" class="panel-tabpanel" role="tabpanel" hidden>
+          <p class="panel-help" data-i18n="riffHelp">Play a few bars on the MPK and get them back as code.</p>
+          <div class="set-add">
+            <label class="panel-field" for="riff-bars">
+              <span data-i18n="riffBars">Bars</span>
+              <select id="riff-bars" class="control">
+                <option value="1">1</option>
+                <option value="2" selected>2</option>
+                <option value="4">4</option>
+              </select>
+            </label>
+            <label class="panel-field" for="riff-grid">
+              <span data-i18n="riffGrid">Grid</span>
+              <select id="riff-grid" class="control">
+                <option value="8" data-i18n="riffEighths">Eighths</option>
+                <option value="16" data-i18n="riffSixteenths" selected>Sixteenths</option>
+              </select>
+            </label>
           </div>
-        </div>
-        <h3 data-i18n="lastMessages">Last messages</h3>
-        <ol id="midi-log" class="panel-list midi-log"></ol>
+          <button id="riff-record" class="control control-accent" type="button" data-i18n="riffRecord">● Record a riff</button>
+          <p id="riff-status" class="panel-status" role="status"></p>
+          <div id="riff-result" hidden>
+            <pre class="learn-code"><code id="riff-code"></code></pre>
+            <div class="compose-buttons">
+              <button id="riff-add" class="control control-accent" type="button" data-i18n="riffAdd">Add as tracks</button>
+              <button id="riff-discard" class="control" type="button" data-i18n="riffDiscard">Discard</button>
+            </div>
+          </div>
+        </section>
       </aside>
     </main>
 
