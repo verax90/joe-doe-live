@@ -743,6 +743,11 @@ select.control {
   line-height: 1.4;
 }
 
+.status-go {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
 .status[data-kind='error'] .status-text {
   color: var(--danger);
 }
