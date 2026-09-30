@@ -2329,15 +2329,20 @@ select.control {
   padding-block: 0.2rem;
 }
 
-/* Compose's three song buttons share one row */
+/* Compose's three song buttons: three equal columns in one row; a label
+   too long for its column (in any language) takes two lines, never the
+   panel wider */
 #compose-tab-song .compose-buttons {
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 #compose-tab-song .compose-buttons .control {
-  flex: 1 1 auto;
-  padding-inline: 0.5rem;
-  white-space: nowrap;
+  height: auto;
+  min-height: 2.1rem;
+  padding: 0.3rem 0.4rem;
+  line-height: 1.15;
+  white-space: normal;
 }
 
 /* Phone as controller: the QR code, on white so any camera reads it */
@@ -2429,6 +2434,14 @@ select.control {
 
 .overlay[hidden] {
   display: none;
+}
+
+/* with a side panel open, the caption moves left of it (on phones the
+   panel covers the screen: it stays where it is) */
+@media (min-width: 701px) {
+  body:has(.stage > .panel:not([hidden])) .overlay {
+    right: calc(min(22rem, 90vw) + 1rem);
+  }
 }
 
 /* with the audio waves on, the caption sits above them */
