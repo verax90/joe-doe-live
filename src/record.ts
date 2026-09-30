@@ -123,6 +123,53 @@ export function download(blob: Blob, extension: string) {
   setTimeout(() => URL.revokeObjectURL(link.href), 60_000);
 }
 
+// The stream caption (overlay.ts) into a frame, bottom right: name, title
+// in the display font, the site's name under them. size scales everything
+function drawCaption(g: CanvasRenderingContext2D, width: number, height: number, size: number, colours: { fg: string; muted: string; accent: string }) {
+  const caption = overlayText();
+  const margin = size * 1.6;
+  g.save();
+  g.textAlign = 'right';
+  g.textBaseline = 'alphabetic';
+  // a dark fade behind it, as on screen, so it reads on any visual
+  if (caption) {
+    g.font = `700 ${Math.round(size * 1.5)}px 'Syne Variable', sans-serif`;
+    const wide = Math.max(g.measureText(caption.title).width, size * 10) + margin * 2.5;
+    const tall = size * (caption.title ? 5.2 : 3.4);
+    const fade = g.createLinearGradient(width - wide, 0, width, 0);
+    fade.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    fade.addColorStop(0.3, 'rgba(0, 0, 0, 0.65)');
+    fade.addColorStop(1, 'rgba(0, 0, 0, 0.65)');
+    g.fillStyle = fade;
+    g.fillRect(width - wide, height - margin - tall, wide, tall + margin * 0.6);
+    g.fillStyle = colours.accent;
+    g.fillRect(width - margin * 0.55, height - margin - tall, size * 0.18, tall + margin * 0.6);
+  }
+  g.font = `600 ${Math.round(size * 0.9)}px 'IBM Plex Mono', monospace`;
+  g.globalAlpha = 0.85;
+  g.fillStyle = colours.accent;
+  g.fillText('live.joedoe.dev', width - margin, height - margin);
+  g.globalAlpha = 1;
+  if (caption) {
+    g.fillStyle = colours.fg;
+    g.font = `700 ${Math.round(size * 1.5)}px 'Syne Variable', sans-serif`;
+    if (caption.title) g.fillText(caption.title, width - margin, height - margin - size * 1.6);
+    g.font = `500 ${size}px 'IBM Plex Mono', monospace`;
+    g.fillStyle = colours.muted;
+    g.fillText(caption.artist, width - margin, height - margin - size * (caption.title ? 3.5 : 1.6));
+  }
+  g.restore();
+}
+
+const themeColours = () => {
+  const style = getComputedStyle(document.documentElement);
+  return {
+    accent: style.getPropertyValue('--accent').trim() || '#d6ff4b',
+    fg: style.getPropertyValue('--fg').trim() || '#eceae4',
+    muted: style.getPropertyValue('--muted').trim() || '#9a9aa3',
+  };
+};
+
 export function setupRecorder(getCode: () => string, playCode?: (code: string) => Promise<unknown>) {
   const button = document.querySelector<HTMLButtonElement>('#record')!;
   const label = button.querySelector<HTMLElement>('.record-label')!;
@@ -230,8 +277,30 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
     if (!canvas) throw new Error(t('recordNoVisual'));
     // Visuals normally draw at half resolution to spare CPU; a video deserves
     // the full window
-    const restore = await resizeVisuals(canvas, { width: Math.round(window.innerWidth), height: Math.round(window.innerHeight) });
-    return recordCanvas(shownCanvas(canvas), output, context, restore);
+    const size = { width: Math.round(window.innerWidth), height: Math.round(window.innerHeight) };
+    const restore = await resizeVisuals(canvas, size);
+    // Each frame: the visuals, the audio waves where they sit on screen, and
+    // the site's name and the stream caption, bottom right
+    const composite = document.createElement('canvas');
+    composite.width = size.width;
+    composite.height = size.height;
+    const draw2d = composite.getContext('2d')!;
+    const colours = themeColours();
+    const stopDrawing = onHydraFrame(() => {
+      draw2d.fillStyle = '#000';
+      draw2d.fillRect(0, 0, size.width, size.height);
+      draw2d.drawImage(shownCanvas(canvas), 0, 0, size.width, size.height);
+      const scope = scopeCanvas();
+      if (scope) {
+        const box = scope.getBoundingClientRect();
+        draw2d.drawImage(scope, box.left, box.top, box.width, box.height);
+      }
+      drawCaption(draw2d, size.width, size.height, Math.max(14, Math.round(size.height / 48)), colours);
+    });
+    return recordCanvas(composite, output, context, () => {
+      stopDrawing();
+      restore();
+    });
   };
 
   // Vertical: the visuals render natively at 1080 × 1920 in a 9:16 frame in
@@ -273,26 +342,7 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
           draw2d.fillText(line, CODE_MARGIN, y);
         });
       }
-      // The stream caption, if on: name and title above the site's name
-      const caption = overlayText();
-      if (caption) {
-        draw2d.textAlign = 'right';
-        draw2d.textBaseline = 'alphabetic';
-        draw2d.fillStyle = fg;
-        draw2d.font = `700 44px 'Syne Variable', sans-serif`;
-        if (caption.title) draw2d.fillText(caption.title, VERTICAL.width - CODE_MARGIN, VERTICAL.height - CODE_MARGIN - 48);
-        draw2d.font = `500 30px 'IBM Plex Mono', monospace`;
-        draw2d.fillStyle = muted;
-        draw2d.fillText(caption.artist, VERTICAL.width - CODE_MARGIN, VERTICAL.height - CODE_MARGIN - (caption.title ? 104 : 48));
-      }
-      draw2d.font = `600 28px 'IBM Plex Mono', monospace`;
-      draw2d.textBaseline = 'alphabetic';
-      draw2d.textAlign = 'right';
-      draw2d.globalAlpha = 0.85;
-      draw2d.fillStyle = accent;
-      draw2d.fillText('live.joedoe.dev', VERTICAL.width - CODE_MARGIN, VERTICAL.height - CODE_MARGIN);
-      draw2d.globalAlpha = 1;
-      draw2d.textAlign = 'left';
+      drawCaption(draw2d, VERTICAL.width, VERTICAL.height, 30, { fg, muted, accent });
     };
     const stopDrawing = onHydraFrame(draw);
     return recordCanvas(composite, output, context, () => {

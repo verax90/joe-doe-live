@@ -464,7 +464,8 @@ function followWindowSize(hydra: { setResolution?: (width: number, height: numbe
 
 // Auto: another built-in visual every few bars while it plays (every few
 // seconds while stopped), on the bar line, never the same twice in a row and
-// never a webcam one, so the camera only turns on when you ask for it
+// never a webcam one, so the camera only turns on when you ask for it, nor
+// one that stays dark without its controller
 const AUTO_BARS = 4;
 const AUTO_SECONDS = 8;
 let clock: () => number | null = () => null;
@@ -482,7 +483,8 @@ function stopAuto() {
 }
 
 function startAuto() {
-  const pool = visuals.filter((v) => v.code && !v.camera && v.id !== 'ninguno');
+  // not the webcam ones, nor those that wait for a controller (Touch: the TouchMe)
+  const pool = visuals.filter((v) => v.code && !v.camera && !['ninguno', 'tacto'].includes(v.id));
   const step = () => {
     const cycles = clock();
     return cycles === null ? Math.floor(performance.now() / 1000 / AUTO_SECONDS) : Math.floor(cycles / AUTO_BARS);
