@@ -217,6 +217,10 @@ export const micForRecording = () => (chain && !monitoring ? chain.out : undefin
 // For the sampler: the voice with its effects, whenever the mic is on
 export const micOutput = () => chain?.out;
 
+// For humming a riff: the voice before any effect (a pitch shift or the robot
+// would fool the pitch reading)
+export const micInput = () => chain?.input;
+
 // The gate, in an AudioWorklet so it acts sample by sample: it follows the
 // input's level quickly (1 ms up, 25 ms down), opens above the threshold,
 // closes a little below it after 80 ms, and fades in 3 ms and out 60 ms. Its

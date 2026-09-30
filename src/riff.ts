@@ -2,15 +2,20 @@
 // become note("…") with the free play sound, bank B pads become s("…") with
 // what the pads play (the drum kit or your kit). Notes land on a grid of
 // eighths or sixteenths, one bracket per bar inside <…>, and you decide to
-// add them as tracks or not.
+// add them as tracks or not. Or hum it: with the voice as source, the mic's
+// take becomes note("…") (hum.ts reads its pitch).
 // Timing: over a playing pattern it starts on its next bar and follows what
 // you hear (the heard cycle comes from cycle-clock.ts, which reads when
 // Strudel schedules each beat); with nothing playing, a one-bar count-in and a click
 // keep time at the BPM field's tempo.
 import { ensureAudio } from './audio';
-import { heardCycle, whenCycleKnown } from './cycle-clock';
+import { audioTimeOfCycle, heardCycle, whenCycleKnown } from './cycle-clock';
 import { padSound } from './freeplay';
-import { playedNotes } from './scale';
+import { humGrid, humSteps, pitchTrack } from './hum';
+import { micInput } from './mic';
+import { startTap } from './record';
+import { takeWindow } from './sampler';
+import { playedNotes, SCALES, scaleSetting, snap } from './scale';
 import { t } from './i18n';
 import { NOTE_EVENT, type NoteDetail } from './midi';
 import { readStorage } from './storage';
@@ -57,6 +62,7 @@ export function setupRiff({ editor, addTrack }: Options) {
   const record = document.querySelector<HTMLButtonElement>('#riff-record')!;
   const barsSelect = document.querySelector<HTMLSelectElement>('#riff-bars')!;
   const gridSelect = document.querySelector<HTMLSelectElement>('#riff-grid')!;
+  const sourceSelect = document.querySelector<HTMLSelectElement>('#riff-source')!;
   const status = document.querySelector<HTMLElement>('#riff-status')!;
   const result = document.querySelector<HTMLElement>('#riff-result')!;
   const codeView = document.querySelector<HTMLElement>('#riff-code')!;
@@ -70,6 +76,12 @@ export function setupRiff({ editor, addTrack }: Options) {
 
   record.addEventListener('click', async () => {
     if (busy) return;
+    const voice = sourceSelect.value === 'voice';
+    const mic = micInput();
+    if (voice && !mic) {
+      status.textContent = t('samplerNoMic');
+      return;
+    }
     busy = true;
     result.hidden = true;
     record.disabled = true;
@@ -83,6 +95,9 @@ export function setupRiff({ editor, addTrack }: Options) {
 
     // heard(): the cycle of what you hear right now, relative to the take's start
     let heard: () => number;
+    // the take's first bar and length on the audio clock, for the voice
+    let from = 0;
+    let seconds = bars / cps;
     if (playing) {
       // measured from Strudel's own schedule; the estimate only as a fallback
       await whenCycleKnown();
@@ -93,6 +108,8 @@ export function setupRiff({ editor, addTrack }: Options) {
       let start = Math.ceil(heardNow());
       if (start - heardNow() < 0.25) start += 1; // too close: the bar after
       heard = () => heardNow() - start;
+      from = audioTimeOfCycle(start) ?? context.currentTime;
+      seconds = (audioTimeOfCycle(start + bars) ?? from + bars / cps) - from;
     } else {
       // Count-in: one bar of clicks, then the take, clicks going on
       const begin = context.currentTime + 0.1;
@@ -102,6 +119,7 @@ export function setupRiff({ editor, addTrack }: Options) {
         void g.superdough?.({ s: 'rim', bank: 'RolandTR808', gain: i % 4 === 0 ? 0.8 : 0.45 }, begin + i * beat, 0.1).catch(() => undefined);
       }
       heard = () => (context.currentTime - start) * cps;
+      from = start;
     }
 
     const hits: Hit[] = [];
@@ -119,13 +137,17 @@ export function setupRiff({ editor, addTrack }: Options) {
         for (const played of playedNotes(note)) hits.push({ cycle, pad: false, token: noteName(played) });
       }
     };
-    window.addEventListener(NOTE_EVENT, onNote);
+    // singing to what you hear lands late in the take: the looper's lag
+    const lag = Math.min(0.15, context.outputLatency || 0) + 0.01 + readStorage<number>('jdl:looper-offset', 0) / 1000;
+    const stopTap = voice ? await startTap(context, [mic!]) : undefined;
+    if (!voice) window.addEventListener(NOTE_EVENT, onNote);
 
     await new Promise<void>((resolve) => {
       const tick = setInterval(() => {
         const cycle = heard();
         if (cycle < 0) status.textContent = t('riffCountIn', { beats: Math.ceil(-cycle * 4) });
-        else if (cycle < bars) status.textContent = t('riffRecording', { bar: Math.floor(cycle) + 1, bars });
+        else if (cycle < bars || (voice && context.currentTime < from + seconds + lag + 0.05))
+          status.textContent = t(voice ? 'humRecording' : 'riffRecording', { bar: Math.min(bars, Math.floor(cycle) + 1), bars });
         else {
           clearInterval(tick);
           resolve();
@@ -135,14 +157,31 @@ export function setupRiff({ editor, addTrack }: Options) {
     window.removeEventListener(NOTE_EVENT, onNote);
 
     const keysSound = document.querySelector<HTMLSelectElement>('#freeplay-sound')!.value || 'piano';
-    lines = riffCode(hits, bars, steps, keysSound);
+    let notes = hits.length;
+    if (voice) {
+      const take = takeWindow(stopTap!(), from + lag, from + lag + seconds, context.sampleRate)[0];
+      // in a key (scale.ts), each sung note goes to the scale's nearest
+      const key = scaleSetting();
+      const scale = SCALES[key.scale];
+      const sung = humSteps(pitchTrack(take, context.sampleRate), {
+        bars,
+        steps,
+        seconds,
+        snap: scale ? (note) => snap(note, key.root, scale) : undefined,
+      });
+      const grid = humGrid(sung, steps, noteName);
+      lines = grid ? [`note("${toMini(grid)}").s("${keysSound}")`] : [];
+      notes = sung.filter((note) => note > 0).length;
+    } else {
+      lines = riffCode(hits, bars, steps, keysSound);
+    }
     busy = false;
     record.disabled = false;
     if (!lines.length) {
-      status.textContent = t('riffEmpty');
+      status.textContent = t(voice ? 'humEmpty' : 'riffEmpty');
       return;
     }
-    status.textContent = t('riffDone', { notes: hits.length });
+    status.textContent = t('riffDone', { notes });
     codeView.textContent = lines.map((line) => `$: ${line}`).join('\n');
     result.hidden = false;
   });

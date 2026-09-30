@@ -647,6 +647,13 @@
         <section id="midi-tab-riff" class="panel-tabpanel" role="tabpanel" hidden>
           <p class="panel-help" data-i18n="riffHelp">Play a few bars on the MPK and get them back as code.</p>
           <div class="set-add">
+            <label class="panel-field" for="riff-source">
+              <span data-i18n="riffSource">From</span>
+              <select id="riff-source" class="control">
+                <option value="keys" data-i18n="riffSourceKeys">MPK</option>
+                <option value="voice" data-i18n="riffSourceVoice">Voice (hum)</option>
+              </select>
+            </label>
             <label class="panel-field" for="riff-bars">
               <span data-i18n="riffBars">Bars</span>
               <select id="riff-bars" class="control">
@@ -663,7 +670,7 @@
               </select>
             </label>
           </div>
-          <button id="riff-record" class="control control-accent" type="button" data-i18n="riffRecord">● Record a riff</button>
+          <button id="riff-record" class="control control-accent" type="button" data-i18n="riffRecord" data-i18n-title="riffHint">● Record a riff</button>
           <p id="riff-status" class="panel-status" role="status"></p>
           <div id="riff-result" hidden>
             <pre class="learn-code"><code id="riff-code"></code></pre>
