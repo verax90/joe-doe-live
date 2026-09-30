@@ -3,9 +3,11 @@
 // MPC. While the studio plays it starts on the next bar you hear and takes
 // whole bars, so the loop is in time; stopped, it starts at once and takes the
 // bars at the BPM field's tempo. It is saved twice, as your samples: the whole
-// take (s("muestra1").loopAt(2)) and the take cut in 8 equal chops
+// take (s("muestra1").loopAt(2)) and the take cut in chops, equal or where
+// each hit starts
 // (s("muestra1_trozos"), ready for the pads or n("0 3 1 …")).
 import { ensureAudio } from './audio';
+import { onsetCurve } from './bpm';
 import { backingInput } from './backing';
 import { t } from './i18n';
 import { ensureLimiter, getLimiter } from './limiter';
@@ -43,14 +45,53 @@ export function normalize([left, right]: Stereo, peak = 0.9): Stereo {
   return [left.map((v) => v * gain), right.map((v) => v * gain)];
 }
 
-// Equal chops, the last one taking any leftover samples
-export function chops([left, right]: Stereo, parts: number): Stereo[] {
-  const size = Math.floor(left.length / parts);
-  return Array.from({ length: parts }, (_, i) => {
-    const end = i === parts - 1 ? left.length : (i + 1) * size;
-    return [left.slice(i * size, end), right.slice(i * size, end)] as Stereo;
+// Where equal chops start (sample positions, the first at 0)
+export const equalCuts = (length: number, parts: number) => Array.from({ length: parts }, (_, i) => Math.floor((i * length) / parts));
+
+// Where the hits start: the strongest rises in energy (bpm.ts's onset
+// curve), at least a sixth of an even chop apart, each placed 2 ms before
+// its attack; the first chop always starts at 0. Fewer hits than parts
+// gives fewer chops
+export function hitCuts([left, right]: Stereo, sampleRate: number, parts: number) {
+  const mono = left.map((v, i) => (v + right[i]) / 2);
+  const curve = onsetCurve(mono, sampleRate);
+  const hop = Math.round(sampleRate * 0.01);
+  const peaks: { frame: number; value: number }[] = [];
+  for (let f = 1; f < curve.length - 1; f++) {
+    if (curve[f] > 0 && curve[f] >= curve[f - 1] && curve[f] > curve[f + 1]) peaks.push({ frame: f, value: curve[f] });
+  }
+  const spacing = Math.max(5, Math.floor(curve.length / parts / 6));
+  const chosen: number[] = [];
+  for (const peak of peaks.sort((a, b) => b.value - a.value)) {
+    if (chosen.length >= parts - 1) break;
+    if (peak.frame * hop < sampleRate * 0.05) continue; // the start is a cut already
+    if (chosen.every((frame) => Math.abs(frame - peak.frame) >= spacing)) chosen.push(peak.frame);
+  }
+  // Finer: from the frame before the rise, the first sample that reaches a
+  // tenth of the hit's peak, 2 ms earlier, so the chop starts on the attack
+  const margin = Math.round(sampleRate * 0.002);
+  const exact = (frame: number) => {
+    const from = Math.max(0, (frame - 1) * hop);
+    const to = Math.min(mono.length, from + hop * 3);
+    let peak = 0;
+    for (let i = from; i < to; i++) peak = Math.max(peak, Math.abs(mono[i]));
+    let at = from;
+    while (at < to && Math.abs(mono[at]) < peak * 0.1) at++;
+    return Math.max(0, at - margin);
+  };
+  return [0, ...chosen.sort((a, b) => a - b).map(exact)];
+}
+
+// The take cut at those positions, each chop to the next cut
+export function chopAt([left, right]: Stereo, cuts: number[]): Stereo[] {
+  return cuts.map((from, i) => {
+    const to = cuts[i + 1] ?? left.length;
+    return [left.slice(from, to), right.slice(from, to)] as Stereo;
   });
 }
+
+// Equal chops, the last one taking any leftover samples
+export const chops = (audio: Stereo, parts: number) => chopAt(audio, equalCuts(audio[0].length, parts));
 
 // muestra1, muestra2… the first one not taken
 export function nextName(taken: string[]) {
@@ -59,8 +100,8 @@ export function nextName(taken: string[]) {
 
 // The code that plays a take back in time: whole, or as its chops in order
 export const loopCode = (name: string, bars: number) => `s("${name}").loopAt(${bars})`;
-export const chopsCode = (name: string, bars: number) =>
-  `s("${name}_trozos").n("0 1 2 3 4 5 6 7")${bars === 1 ? '' : `.slow(${bars})`}`;
+export const chopsCode = (name: string, bars: number, parts = 8) =>
+  `s("${name}_trozos").n("${Array.from({ length: parts }, (_, i) => i).join(' ')}")${bars === 1 ? '' : `.slow(${bars})`}`;
 
 // What to listen to for a take (backing, mic or everything), or why it
 // cannot; the looper uses it too
@@ -90,9 +131,15 @@ export function setupSampler({ editor, addTrack }: Options) {
   const save = document.querySelector<HTMLButtonElement>('#sampler-save')!;
   const discard = document.querySelector<HTMLButtonElement>('#sampler-discard')!;
   const saved = document.querySelector<HTMLElement>('#sampler-saved')!;
+  const chopSelect = document.querySelector<HTMLSelectElement>('#sampler-chops')!;
 
   let take: { audio: Stereo; sampleRate: number; bars: number } | undefined;
-  let lastSaved: { name: string; bars: number } | undefined;
+  let lastSaved: { name: string; bars: number; parts: number } | undefined;
+  // "equal-8", "hits-16"…: how the take is cut
+  const cutsFor = (audio: Stereo, sampleRate: number) => {
+    const [kind, count] = chopSelect.value.split('-');
+    return kind === 'hits' ? hitCuts(audio, sampleRate, Number(count)) : equalCuts(audio[0].length, Number(count));
+  };
   let busy = false;
   let listening: AudioBufferSourceNode | undefined;
 
@@ -100,7 +147,7 @@ export function setupSampler({ editor, addTrack }: Options) {
 
   const sources = () => takeSources(sourceSelect.value);
 
-  const draw = ([left]: Stereo) => {
+  const draw = ([left]: Stereo, cuts: number[]) => {
     const g = canvas.getContext('2d')!;
     const { width, height } = canvas;
     g.clearRect(0, 0, width, height);
@@ -115,9 +162,9 @@ export function setupSampler({ editor, addTrack }: Options) {
       }
       g.fillRect(x, ((1 - max) / 2) * height, 1, Math.max(1, ((max - min) / 2) * height));
     }
-    // where the 8 chops fall
-    g.globalAlpha = 0.35;
-    for (let k = 1; k < 8; k++) g.fillRect(Math.round((k * width) / 8), 0, 1, height);
+    // where the chops fall
+    g.globalAlpha = 0.5;
+    for (const cut of cuts.slice(1)) g.fillRect(Math.round((cut / left.length) * width), 0, 2, height);
     g.globalAlpha = 1;
   };
 
@@ -175,8 +222,12 @@ export function setupSampler({ editor, addTrack }: Options) {
     }
     status.textContent = bars === 1 ? t('samplerDoneOne') : t('samplerDone', { bars });
     nameInput.value = nextName(loadedKits().map((kit) => kit.name));
-    draw(take.audio);
+    draw(take.audio, cutsFor(take.audio, take.sampleRate));
     result.hidden = false;
+  });
+
+  chopSelect.addEventListener('change', () => {
+    if (take) draw(take.audio, cutsFor(take.audio, take.sampleRate));
   });
 
   listen.addEventListener('click', () => {
@@ -195,11 +246,12 @@ export function setupSampler({ editor, addTrack }: Options) {
     if (!take) return;
     const name = nameInput.value.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '') || nextName([]);
     const { audio, sampleRate, bars } = take;
+    const pieces = chopAt(audio, cutsFor(audio, sampleRate));
     await addSamples([
       { path: `${name}.wav`, file: toWav(audio, sampleRate, name) },
-      ...chops(audio, 8).map((chop, i) => ({ path: `${name}_trozos/${i + 1}.wav`, file: toWav(chop, sampleRate, `${i + 1}`) })),
+      ...pieces.map((chop, i) => ({ path: `${name}_trozos/${String(i + 1).padStart(2, '0')}.wav`, file: toWav(chop, sampleRate, `${i + 1}`) })),
     ]);
-    lastSaved = { name, bars };
+    lastSaved = { name, bars, parts: pieces.length };
     take = undefined;
     result.hidden = true;
     saved.hidden = false;
@@ -216,6 +268,6 @@ export function setupSampler({ editor, addTrack }: Options) {
     if (lastSaved) addTrack(loopCode(lastSaved.name, lastSaved.bars));
   });
   document.querySelector('#sampler-add-chops')!.addEventListener('click', () => {
-    if (lastSaved) addTrack(chopsCode(lastSaved.name, lastSaved.bars));
+    if (lastSaved) addTrack(chopsCode(lastSaved.name, lastSaved.bars, lastSaved.parts));
   });
 }

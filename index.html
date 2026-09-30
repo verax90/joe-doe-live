@@ -416,10 +416,22 @@
         <p id="sampler-status" class="panel-status" role="status"></p>
         <div id="sampler-result" hidden>
           <canvas id="sampler-wave" class="sampler-wave" width="600" height="90" aria-hidden="true"></canvas>
-          <label class="panel-field" for="sampler-name">
-            <span data-i18n="samplerName">Name</span>
-            <input id="sampler-name" class="control" type="text" spellcheck="false" />
-          </label>
+          <div class="set-add">
+            <label class="panel-field" for="sampler-name">
+              <span data-i18n="samplerName">Name</span>
+              <input id="sampler-name" class="control" type="text" spellcheck="false" />
+            </label>
+            <label class="panel-field" for="sampler-chops">
+              <span data-i18n="samplerChops">Chops</span>
+              <select id="sampler-chops" class="control">
+                <option value="equal-4" data-i18n="samplerEqual4">4 equal</option>
+                <option value="equal-8" data-i18n="samplerEqual8" selected>8 equal</option>
+                <option value="equal-16" data-i18n="samplerEqual16">16 equal</option>
+                <option value="hits-8" data-i18n="samplerHits8">8 by hits</option>
+                <option value="hits-16" data-i18n="samplerHits16">16 by hits</option>
+              </select>
+            </label>
+          </div>
           <div class="compose-buttons">
             <button id="sampler-listen" class="control" type="button" data-i18n="samplerListen">▶ Listen</button>
             <button id="sampler-save" class="control control-accent" type="button" data-i18n="samplerSave">Save</button>
