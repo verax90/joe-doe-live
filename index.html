@@ -549,6 +549,7 @@
           <button class="panel-tab" type="button" role="tab" aria-selected="true" aria-controls="mic-tab-input" data-i18n="micDevice">Input</button>
           <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="mic-tab-presets" data-i18n="micTabPresets">Presets</button>
           <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="mic-tab-effects" data-i18n="micTabEffects">Effects</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="mic-tab-tuner" data-i18n="voiceTab">Tuner</button>
         </div>
         <section id="mic-tab-input" class="panel-tabpanel" role="tabpanel">
           <p class="panel-help" data-i18n="micHelp">Your voice, or anything on an input, with effects and into your recordings.</p>
@@ -566,6 +567,47 @@
         </section>
         <section id="mic-tab-effects" class="panel-tabpanel" role="tabpanel" hidden>
           <div id="mic-sliders" class="vj-sliders"></div>
+        </section>
+        <section id="mic-tab-tuner" class="panel-tabpanel" role="tabpanel" hidden>
+          <div class="voice-tuner">
+            <span id="voice-note" class="voice-note" aria-live="off">–</span>
+            <div id="voice-cents" class="voice-cents" aria-hidden="true"><span></span></div>
+          </div>
+          <p id="voice-status" class="panel-status" role="status"></p>
+          <label class="set-option" data-i18n-title="voiceOnHint"><input id="voice-on" type="checkbox" /> <span data-i18n="voiceOn">Your voice plays a synth</span></label>
+          <div class="set-add">
+            <label class="panel-field" for="voice-wave">
+              <span data-i18n="voiceWave">Sound</span>
+              <select id="voice-wave" class="control">
+                <option value="sawtooth" data-i18n="voiceSaw">Saw</option>
+                <option value="square" data-i18n="voiceSquare">Square</option>
+                <option value="triangle" data-i18n="voiceTriangle">Triangle</option>
+                <option value="sine" data-i18n="voiceSine">Sine</option>
+              </select>
+            </label>
+            <label class="panel-field" for="voice-octave">
+              <span data-i18n="voiceOctave">Octave</span>
+              <select id="voice-octave" class="control">
+                <option value="-2">−2</option>
+                <option value="-1">−1</option>
+                <option value="0">0</option>
+                <option value="1">+1</option>
+              </select>
+            </label>
+            <label class="panel-field" for="voice-tuning" data-i18n-title="voiceTuningHint">
+              <span data-i18n="voiceTuning">Tuning</span>
+              <select id="voice-tuning" class="control">
+                <option value="free" data-i18n="voiceFree">Free</option>
+                <option value="semitone" data-i18n="voiceSemitone">Semitones</option>
+                <option value="key" data-i18n="voiceKey">In key</option>
+              </select>
+            </label>
+          </div>
+          <label class="vj-slider">
+            <span data-i18n="voiceVolume">Volume</span>
+            <input id="voice-volume" type="range" min="0" max="1" step="0.01" />
+          </label>
+          <p class="panel-help" data-i18n-html="voiceHelp"></p>
         </section>
       </aside>
 

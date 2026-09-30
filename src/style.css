@@ -2048,3 +2048,57 @@ select.control {
   color: var(--accent);
   font-size: 0.75rem;
 }
+
+/* Tuner (voice.ts): the sung note, and a needle for how far off it is */
+.voice-tuner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.4rem 0;
+}
+
+.voice-note {
+  min-width: 4.5ch;
+  font-family: 'Syne Variable', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--fg);
+  transition: opacity 0.2s;
+}
+
+.voice-note[data-silent='true'] {
+  opacity: 0.35;
+}
+
+.voice-cents {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.voice-cents::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  width: 1px;
+  height: 12px;
+  background: var(--muted);
+}
+
+.voice-cents span {
+  position: absolute;
+  left: calc(50% - 3px);
+  top: -2px;
+  width: 6px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--warn, #ff9f43);
+  transition: left 0.08s linear;
+}
+
+.voice-cents span[data-in-tune='true'] {
+  background: var(--accent);
+}
