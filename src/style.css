@@ -1962,3 +1962,46 @@ select.control {
   max-height: 11rem;
   overflow: hidden;
 }
+
+/* History: the list scrolls under the title, the panel does not */
+#history:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.history-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.history-head {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.history-time {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.history-size {
+  flex: 1;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.history-line {
+  display: block;
+  overflow: hidden;
+  color: var(--accent);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#history-clear {
+  margin-top: 0.5rem;
+}

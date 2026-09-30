@@ -25,6 +25,7 @@ import { setupBacking } from './backing';
 import { setupMic } from './mic';
 import { setupRemote } from './remote';
 import { setupTyping } from './typing';
+import { recordPlayed, setupHistory } from './history';
 import { setupScalePicker } from './scale';
 import { setupOffline } from './offline';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
@@ -97,8 +98,12 @@ editor.setCode(shared.code ?? draft ?? builtInPresets()[0].code);
 library.render(shared.code || draft ? undefined : builtInPresets()[0].id);
 // Translated and holding its code: show it (see the inline script in index.html)
 document.documentElement.classList.remove('booting');
-// A draft every few seconds, so a reload loses nothing
-setInterval(() => writeStorage(DRAFT_KEY, editor.code), 3000);
+// A draft every few seconds, and when the page goes away (reload, closing
+// the tab, the phone switching apps), so a reload loses nothing
+const saveDraft = () => writeStorage(DRAFT_KEY, editor.code);
+setInterval(saveDraft, 3000);
+window.addEventListener('pagehide', saveDraft);
+document.addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && saveDraft());
 
 // Visuals are picked apart from the pattern and applied again after every
 // play, except "From the code", which leaves them to the pattern
@@ -194,6 +199,7 @@ const originalEvaluate = editor.evaluate.bind(editor);
 editor.evaluate = async (autostart?: boolean) => {
   await ensureAudio();
   await originalEvaluate(autostart);
+  recordPlayed(editor.code);
   void room?.played();
   ensureLimiter();
   // Always: with "From the code" it only re-attaches the ASCII filter and the
@@ -275,6 +281,7 @@ setupScope();
 setupMic({ tempo: () => (scheduler?.started && scheduler.cps ? scheduler.cps : undefined) });
 setupBacking(scheduler);
 setupTyping(() => editor.code);
+onLangChange(setupHistory(editor));
 onLangChange(setupScalePicker(() => lang));
 setupKnobHud(() => ({
   code: editor.code,

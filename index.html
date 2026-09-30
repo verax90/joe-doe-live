@@ -70,6 +70,7 @@
               <button id="save" class="menu-item" type="button" title="Save in this browser" data-i18n="save" data-i18n-title="saveTitle">Save</button>
               <button id="delete" class="menu-item" type="button" data-i18n="delete" data-i18n-title="deleteTitle" hidden>Delete</button>
               <button id="share" class="menu-item" type="button" data-i18n="share">Share</button>
+              <button id="toggle-history" class="menu-item" type="button" aria-pressed="false" data-panel="history" data-i18n="historyTitle">History</button>
               <details class="menu-more">
                 <summary class="menu-summary" data-i18n="menuExport">Export / import</summary>
                 <button id="copy-code" class="menu-item" type="button" data-i18n="copyCode">Copy the code</button>
@@ -264,6 +265,14 @@
         </section>
 
         <p id="compose-status" class="panel-status" role="status"></p>
+      </aside>
+
+      <aside class="panel" id="history" hidden>
+        <h2 data-i18n="historyTitle">History</h2>
+        <p class="panel-help" data-i18n="historyHelp">Every version that played, newest first.</p>
+        <p id="history-status" class="panel-status" role="status"></p>
+        <ol id="history-list" class="panel-list history-list"></ol>
+        <button id="history-clear" class="control" type="button" data-i18n="historyClear">Clear the history</button>
       </aside>
 
       <aside class="panel" id="cheats" hidden>
