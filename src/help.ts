@@ -74,8 +74,8 @@ const sections: Section[] = [
     ],
   },
   {
-    title: L('MPK Mini Mk II: knobs, joystick and buttons', 'MPK Mini Mk II: knobs, joystick y botones'),
-    short: L('MPK: knobs and buttons', 'MPK: knobs y botones'),
+    title: L('MPK Mini Mk II: knobs and joystick', 'MPK Mini Mk II: knobs y joystick'),
+    short: L('MPK: knobs', 'MPK: knobs'),
     blocks: [
       {
         kind: 'table',
@@ -92,6 +92,12 @@ const sections: Section[] = [
           [L('Joystick sideways', 'Joystick a los lados'), L('Bends up to two semitones, in the "MPK Mini" pattern and when playing without Play, and shifts that pattern\'s visual. It applies to each new note, so it shows most with the arpeggiator or fast playing; a held note does not bend', 'Desafina hasta dos semitonos, en el patrón "MPK Mini" y al tocar sin Play, y desplaza el visual de ese patrón. Se aplica a cada nota nueva, así que se nota más con el arpegiador o tocando rápido; una nota mantenida no se desafina')],
         ],
       },
+    ],
+  },
+  {
+    title: L('MPK Mini Mk II: buttons', 'MPK Mini Mk II: botones'),
+    short: L('MPK: buttons', 'MPK: botones'),
+    blocks: [
       {
         kind: 'table',
         head: [L('MPK button', 'Botón del MPK'), L('What it does', 'Qué hace')],
@@ -102,7 +108,7 @@ const sections: Section[] = [
           ['TAP TEMPO', L('Sets the MPK tempo (120 by default). Match setcps in the pattern', 'Marca el tempo del MPK (120 de fábrica). Pon el mismo en setcps del patrón')],
           ['OCTAVE − / +', L('Moves the keys down or up an octave', 'Baja o sube las teclas una octava')],
           ['BANK A/B', L('Switches pad bank: use B for drums', 'Cambia el banco de pads: usa el B para batería')],
-          ['CC / PROG CHANGE', L('Pad modes, see the table above', 'Modos de los pads, mira la tabla de arriba')],
+          ['CC / PROG CHANGE', L('Pad modes, see MPK: keys and pads', 'Modos de los pads, mira MPK: teclas y pads')],
         ],
       },
     ],
@@ -125,41 +131,101 @@ const sections: Section[] = [
     ],
   },
   {
-    title: L('Panels', 'Paneles'),
-    short: L('Panels', 'Paneles'),
+    title: L('Panels: code', 'Paneles: código'),
+    short: L('Code', 'Código'),
     blocks: [
       {
         kind: 'table',
         head: [L('In More', 'En Más'), L('What it is for', 'Para qué sirve')],
         rows: [
-          [L('Live room', 'Sala en directo'), L('Open a room and send the link: friends hear your code made in their own browser, with your visual and your samples; every play and stop reaches them', 'Abre una sala y pasa el enlace: tus amigos oyen tu código generado en su navegador, con tu visual y tus samples; cada Play y Stop les llega')],
-          [L('Live set', 'Directo'), L('The running order for a gig: songs with their visual; during the set ◀ ▶, ← → or a clicker move through it, on the next bar while it plays', 'El orden de los temas para un concierto, cada uno con su visual; durante el directo ◀ ▶, ← → o un pasador lo recorren, en el próximo compás si está sonando')],
+          [L('History', 'Historial'), L('Every version that played, the last 50: ↩ loads one (Ctrl+Z undoes), ▶ loads and plays it. For going back to what sounded five minutes ago', 'Cada versión que sonó, las 50 últimas: ↩ carga una (Ctrl+Z la deshace), ▶ la carga y la toca. Para volver a lo que sonaba hace cinco minutos')],
+          [L('Copy / Download the code', 'Copiar / Descargar el código'), L('Your code to the clipboard, or as a .js file that opens in any Strudel', 'Tu código al portapapeles, o como archivo .js que se abre en cualquier Strudel')],
           [L('Offline', 'Sin internet'), L('Once opened, the studio works with no connection and keeps every sound it played. Before a gig: More → Live set → Get ready to play offline. Chrome can install it as an app (the icon in the address bar)', 'Una vez abierto, el estudio funciona sin conexión y guarda cada sonido que ha tocado. Antes de un concierto: Más → Directo → Preparar para tocar sin internet. Chrome puede instalarlo como app (el icono de la barra de direcciones)')],
+          [L('What to record', 'Qué grabar'), L('WAV audio, a video of the screen, or a vertical 9:16 video for socials (with the code on top if you like); MP4 when the browser can, else WebM. Then ● Record', 'Audio WAV, vídeo de la pantalla, o vídeo vertical 9:16 para redes (con el código encima si quieres); MP4 si el navegador puede, si no WebM. Luego ● Grabar')],
+          [L('Separate tracks', 'Pistas por separado'), L('In What to record: a .zip with a WAV per track (named after it), the mix, the mic and the backing track, all aligned, to mix in a DAW. A stack(...) is split into its parts', 'En Qué grabar: un .zip con un WAV por pista (con su nombre), la mezcla, el micro y la pista de fondo, todos alineados, para mezclar en un DAW. Un stack(...) se separa en sus partes')],
+        ],
+      },
+    ],
+  },
+  {
+    title: L('Panels: create', 'Paneles: crear'),
+    short: L('Create', 'Crear'),
+    blocks: [
+      {
+        kind: 'table',
+        head: [L('In More', 'En Más'), L('What it is for', 'Para qué sirve')],
+        rows: [
           [L('Learn', 'Aprender'), L('14 short steps from one sound to a song with visuals; each one plays with a click and ends with a small challenge', '14 pasos cortos de un sonido a una canción con visuales; cada uno suena con un clic y acaba con un pequeño reto')],
           [L('Compose', 'Componer'), L('A song layer by layer without writing code: drums, hi-hats, bass, chords, melody and background, all in one key and tempo. Each layer is a named line (bass:) you can read and change. Arrangement: when each layer plays, in 8 parts of 4 bars', 'Una canción capa a capa sin escribir código: batería, charles, bajo, acordes, melodía y ambiente, todo en el mismo tono y tempo. Cada capa es una línea con nombre (bass:) que puedes leer y cambiar. Arreglo: cuándo suena cada capa, en 8 partes de 4 compases')],
           [L('Cheatsheet', 'Chuleta'), L('Examples to try, insert or copy. Insert adds a pattern as a new $: track, so every track plays together', 'Ejemplos para probar, insertar o copiar. Insertar añade un patrón como pista $: nueva, así suenan todas las pistas juntas')],
-          [L('Copy / Download the code', 'Copiar / Descargar el código'), L('Your code to the clipboard, or as a .js file that opens in any Strudel', 'Tu código al portapapeles, o como archivo .js que se abre en cualquier Strudel')],
-          [L('Video', 'Vídeo'), L('YouTube behind everything, or your video or a tab through the webcam visuals', 'YouTube de fondo, o tu vídeo o una pestaña a través de los visuales de webcam')],
-          [L('Tools', 'Herramientas'), L('Other browser live coding tools; some open inside', 'Otras herramientas de live coding; algunas se abren dentro')],
           [L('Samples', 'Samples'), L('Your sounds: files, or folders that become kits (s("kicks:3"))', 'Tus sonidos: archivos, o carpetas que se convierten en kits (s("kicks:3"))')],
-          ['MIDI', L('Which number each pad and knob sends, the sound of the keys, what bank B pads play, and Record a riff: play (or hum into the mic) a few bars and get them back as code', 'Qué número manda cada pad y knob, el sonido de las teclas, qué tocan los pads del banco B, y Grabar un riff: tocas (o tarareas al micro) unos compases y te los devuelve como código')],
-          [L('SP-404 / MIDI out', 'SP-404 / MIDI'), L('End a pattern in .sp() and it plays the SP-404MKII (or any MIDI device): s("a1 a5").sp() pads, n("1 5").sp("b") one bank, note("c3").sp() chromatic, ccn/ccv for its effects; optional MIDI clock with Play/Stop', 'Acaba un patrón en .sp() y toca la SP-404MKII (o cualquier aparato MIDI): s("a1 a5").sp() pads, n("1 5").sp("b") un banco, note("c3").sp() cromático, ccn/ccv para sus efectos; reloj MIDI con Play/Stop si quieres')],
-          [L('Caption', 'Rótulo'), L('Your name and the song over the visuals, bottom right, for streams; the title can follow the live set song or the pattern. In the vertical recording too', 'Tu nombre y el tema sobre los visuales, abajo a la derecha, para los directos; el título puede seguir la canción del set o el patrón. También en la grabación vertical')],
-          [L('History', 'Historial'), L('Every version that played, the last 50: ↩ loads one (Ctrl+Z undoes), ▶ loads and plays it. For going back to what sounded five minutes ago', 'Cada versión que sonó, las 50 últimas: ↩ carga una (Ctrl+Z la deshace), ▶ la carga y la toca. Para volver a lo que sonaba hace cinco minutos')],
-          [L('Separate tracks', 'Pistas por separado'), L('In What to record: a .zip with a WAV per track (named after it), the mix, the mic and the backing track, all aligned, to mix in a DAW. A stack(...) is split into its parts', 'En Qué grabar: un .zip con un WAV por pista (con su nombre), la mezcla, el micro y la pista de fondo, todos alineados, para mezclar en un DAW. Un stack(...) se separa en sus partes')],
-          [L('Looper', 'Looper'), L('Record 1, 2 or 4 bars of your voice (or the backing track, or everything) over the playing pattern and they repeat in time at once; each layer is a line s("capa1").loopAt(2) in the code. Undo the last, remove all, and a Timing nudge', 'Graba 1, 2 o 4 compases de tu voz (o de la pista de fondo, o de todo) encima del patrón y se repiten a tempo al momento; cada capa es una línea s("capa1").loopAt(2) en el código. Deshacer la última, borrar todas y un ajuste de tiempo')],
           [L('Sampler', 'Samplear'), L('Take 1-8 bars of the backing track, the mic or everything, in time with the song, and keep them as s("muestra1") (whole, .loopAt(bars)) and s("muestra1_trozos") (8 chops for the pads)', 'Coge 1-8 compases de la pista de fondo, del micro o de todo, a tempo con la canción, y guárdalos como s("muestra1") (entero, .loopAt(compases)) y s("muestra1_trozos") (8 trozos para los pads)')],
+          [L('Tools', 'Herramientas'), L('Other browser live coding tools; some open inside', 'Otras herramientas de live coding; algunas se abren dentro')],
+        ],
+      },
+    ],
+  },
+  {
+    title: L('Panels: controllers', 'Paneles: mandos'),
+    short: L('Controllers', 'Mandos'),
+    blocks: [
+      {
+        kind: 'table',
+        head: [L('In More', 'En Más'), L('What it is for', 'Para qué sirve')],
+        rows: [
+          ['MIDI', L('Which number each pad and knob sends, the sound of the keys, what bank B pads play, and Record a riff: play (or hum into the mic) a few bars and get them back as code', 'Qué número manda cada pad y knob, el sonido de las teclas, qué tocan los pads del banco B, y Grabar un riff: tocas (o tarareas al micro) unos compases y te los devuelve como código')],
+          [L('Play in a key', 'Tocar en escala'), L('MIDI → Play without Play: pick a key and a scale and every note you play moves to the nearest one of it, so nothing sounds wrong; with chords on, one key plays the scale\'s chord', 'MIDI → Tocar sin Play: elige tono y escala y cada nota que toques pasa a la más cercana de la escala, así nada desafina; con acordes, una tecla toca el acorde de la escala')],
+          [L('Computer keyboard', 'Teclado del ordenador'), L('MIDI → Play without Play: tick it and A S D F G H J K L Ñ play white keys, W E T Y U O P black ones, Z/X change octave and 1–8 hit the pads (not in a pattern with parts). Not while typing in the editor', 'MIDI → Tocar sin Play: márcalo y A S D F G H J K L Ñ tocan las teclas blancas, W E T Y U O P las negras, Z/X cambian de octava y 1–8 tocan los pads (salvo en un patrón con partes). No mientras escribes en el editor')],
+          [L('SP-404 / MIDI out', 'SP-404 / MIDI'), L('End a pattern in .sp() and it plays the SP-404MKII (or any MIDI device): s("a1 a5").sp() pads, n("1 5").sp("b") one bank, note("c3").sp() chromatic, ccn/ccv for its effects; optional MIDI clock with Play/Stop', 'Acaba un patrón en .sp() y toca la SP-404MKII (o cualquier aparato MIDI): s("a1 a5").sp() pads, n("1 5").sp("b") un banco, note("c3").sp() cromático, ccn/ccv para sus efectos; reloj MIDI con Play/Stop si quieres')],
+          [L('Phone as controller', 'Móvil como mando'), L('Scan the QR code with your phone: an XY pad, 8 pads (the MPK bank B pads) and 8 knobs (its knobs; 7 is the volume), over WebRTC. The XY is phoneX() and phoneY() for patterns and visuals.', 'Escanea el QR con el móvil: un XY, 8 pads (los del banco B del MPK) y 8 mandos (sus knobs; el 7 es el volumen), por WebRTC. El XY es phoneX() y phoneY() para patrones y visuales.')],
+        ],
+      },
+    ],
+  },
+  {
+    title: L('Panels: sound', 'Paneles: sonido'),
+    short: L('Sound', 'Sonido'),
+    blocks: [
+      {
+        kind: 'table',
+        head: [L('In More', 'En Más'), L('What it is for', 'Para qué sirve')],
+        rows: [
+          [L('Mic', 'Micro'), L('Your voice or any input (the SP-404MKII) with a noise gate, pitch, distortion, lo-fi, filter, muffle, auto-wah, robot, tremolo, vibrato, flanger, chorus, echo and ping-pong (in time while playing) and reverb, 28 presets in four groups; into recordings; Hear me also plays it (headphones only)', 'Tu voz o cualquier entrada (la SP-404MKII) con puerta de ruido, tono, distorsión, lo-fi, filtro, apagado, auto-wah, robot, trémolo, vibrato, flanger, coro, eco y ping-pong (a tempo mientras suena) y reverb, 28 preajustes en cuatro grupos; sale en las grabaciones; Oírme también la reproduce (solo con auriculares)')],
+          [L('Looper', 'Looper'), L('Record 1, 2 or 4 bars of your voice (or the backing track, or everything) over the playing pattern and they repeat in time at once; each layer is a line s("capa1").loopAt(2) in the code. Undo the last, remove all, and a Timing nudge', 'Graba 1, 2 o 4 compases de tu voz (o de la pista de fondo, o de todo) encima del patrón y se repiten a tempo al momento; cada capa es una línea s("capa1").loopAt(2) en el código. Deshacer la última, borrar todas y un ajuste de tiempo')],
           [L('Backing track', 'Pista de fondo'), L('A song under your patterns: your own file or another tab\'s sound (YouTube). It can start and stop with Play; into recordings and visuals, not to a live room', 'Una canción debajo de tus patrones: un archivo tuyo o el sonido de otra pestaña (YouTube). Puede empezar y parar con el Play; sale en grabaciones y visuales, no en la sala')],
           [L('Pump', 'Bombeo'), L('Every kick (bd) pushes the rest down and lets it swell back, the breathing of house. Amount and how long it takes to come back; any pattern, the code stays as it is', 'Cada bombo (bd) agacha el resto y lo deja volver, la respiración del house. Cantidad y cuánto tarda en volver; con cualquier patrón, el código no cambia')],
-          [L('Play in a key', 'Tocar en escala'), L('MIDI → Play without Play: pick a key and a scale and every note you play moves to the nearest one of it, so nothing sounds wrong; with chords on, one key plays the scale\'s chord (A in A minor: A C E). The riff recorder writes what sounded', 'MIDI → Tocar sin Play: elige tono y escala y cada nota que toques pasa a la más cercana de la escala, así nada desafina; con acordes, una tecla toca el acorde de la escala (La en La menor: La Do Mi). El riff graba lo que sonó')],
-          [L('Computer keyboard', 'Teclado del ordenador'), L('MIDI → Play without Play: tick it and A S D F G H J K L Ñ play white keys, W E T Y U O P black ones, Z/X change octave and 1–8 hit the pads (not in a pattern with parts). Not while typing in the editor; the riff recorder takes it too', 'MIDI → Tocar sin Play: márcalo y A S D F G H J K L Ñ tocan las teclas blancas, W E T Y U O P las negras, Z/X cambian de octava y 1–8 tocan los pads (salvo en un patrón con partes). No mientras escribes en el editor; el riff también lo graba')],
-          [L('Phone as controller', 'Móvil como mando'), L('Scan the QR code with your phone: an XY pad, 8 pads (the MPK bank B pads) and 8 knobs (its knobs; 7 is the volume), over WebRTC. The XY is phoneX() and phoneY() for patterns and visuals. The link stays the same, so you can keep it on the phone', 'Escanea el QR con el móvil: un XY, 8 pads (los del banco B del MPK) y 8 mandos (sus knobs; el 7 es el volumen), por WebRTC. El XY es phoneX() y phoneY() para patrones y visuales. El enlace no cambia, así que puedes guardarlo en el móvil')],
-          [L('Mic', 'Micro'), L('Your voice or any input (the SP-404MKII) with a noise gate, pitch, distortion, lo-fi, filter, muffle, auto-wah, robot, tremolo, vibrato, flanger, chorus, echo and ping-pong (in time while playing) and reverb, 28 presets in four groups; into recordings; Hear me also plays it (headphones only)', 'Tu voz o cualquier entrada (la SP-404MKII) con puerta de ruido, tono, distorsión, lo-fi, filtro, apagado, auto-wah, robot, trémolo, vibrato, flanger, coro, eco y ping-pong (a tempo mientras suena) y reverb, 28 preajustes en cuatro grupos; sale en las grabaciones; Oírme también la reproduce (solo con auriculares)')],
+        ],
+      },
+    ],
+  },
+  {
+    title: L('Panels: live', 'Paneles: directo'),
+    short: L('Live', 'Directo'),
+    blocks: [
+      {
+        kind: 'table',
+        head: [L('In More', 'En Más'), L('What it is for', 'Para qué sirve')],
+        rows: [
+          [L('Live set', 'Directo'), L('The running order for a gig: songs with their visual; during the set ◀ ▶, ← → or a clicker move through it, on the next bar while it plays', 'El orden de los temas para un concierto, cada uno con su visual; durante el directo ◀ ▶, ← → o un pasador lo recorren, en el próximo compás si está sonando')],
+          [L('Live room', 'Sala en directo'), L('Open a room and send the link: friends hear your code made in their own browser, with your visual and your samples; every play and stop reaches them', 'Abre una sala y pasa el enlace: tus amigos oyen tu código generado en su navegador, con tu visual y tus samples; cada Play y Stop les llega')],
+          [L('Caption', 'Rótulo'), L('Your name and the song over the visuals, bottom right, for streams; the title can follow the live set song or the pattern. In the vertical recording too', 'Tu nombre y el tema sobre los visuales, abajo a la derecha, para los directos; el título puede seguir la canción del set o el patrón. También en la grabación vertical')],
+        ],
+      },
+    ],
+  },
+  {
+    title: L('Panels: visuals', 'Paneles: visuales'),
+    short: L('Visuals', 'Visuales'),
+    blocks: [
+      {
+        kind: 'table',
+        head: [L('In More', 'En Más'), L('What it is for', 'Para qué sirve')],
+        rows: [
           ['VJ', L('Six effects over any built-in visual (zoom, colour, warp, pixels, trails, spin), with sliders or, if ticked, MPK knobs 1–6', 'Seis efectos sobre cualquier visual incluido (zoom, color, distorsión, píxeles, estela, giro), con deslizadores o, si lo marcas, con los knobs 1–6 del MPK')],
+          [L('Video', 'Vídeo'), L('YouTube behind everything, or your video or a tab through the webcam visuals', 'YouTube de fondo, o tu vídeo o una pestaña a través de los visuales de webcam')],
           [L('Audio waves', 'Ondas del audio'), L('An oscilloscope of what is playing along the bottom, over any visual; also in vertical videos', 'Un osciloscopio de lo que suena abajo, encima de cualquier visual; también sale en los vídeos verticales')],
           [L('Vertical framing', 'Encuadre vertical'), L('The visuals and the code in a 9:16 column under the bar, for vertical streams: in OBS, profile "joe doe live vertical" and scene "Vertical" crop exactly that column (Chrome full screen, F11)', 'Los visuales y el código en una columna 9:16 bajo la barra, para directos verticales: en OBS, el perfil "joe doe live vertical" y la escena "Vertical" recortan justo esa columna (Chrome a pantalla completa, F11)')],
           [L('ASCII filter', 'Filtro ASCII'), L('Turns any visual, webcam included, into characters', 'Convierte cualquier visual, webcam incluida, en caracteres')],
-          [L('What to record', 'Qué grabar'), L('WAV audio, a video of the screen, or a vertical 9:16 video for socials (with the code on top if you like); MP4 when the browser can, else WebM. Then ● Record', 'Audio WAV, vídeo de la pantalla, o vídeo vertical 9:16 para redes (con el código encima si quieres); MP4 si el navegador puede, si no WebM. Luego ● Grabar')],
         ],
       },
     ],

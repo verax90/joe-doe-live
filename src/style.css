@@ -978,7 +978,7 @@ select.control {
 }
 
 .help-table tbody th {
-  width: 36%;
+  width: 28%;
   color: var(--accent);
   font-weight: 600;
 }
@@ -1860,7 +1860,11 @@ select.control {
 }
 
 .help-section > h3:first-child {
-  margin-top: 0.25rem;
+  margin-top: 0;
+}
+
+.help-section > .help-table:last-child {
+  margin-bottom: 0;
 }
 
 /* Phones: the index becomes a row of buttons on top */
