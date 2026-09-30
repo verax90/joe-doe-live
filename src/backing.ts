@@ -5,7 +5,9 @@
 // all get it; it is not sent to a live room. A file can start and stop with
 // the studio's Play, landing on the first bar you hear.
 import { ensureAudio } from './audio';
+import { detectTempo } from './bpm';
 import { audioTimeOfCycle, whenCycleKnown } from './cycle-clock';
+import { startTap } from './record';
 import { onLangChange, t } from './i18n';
 import { ensureLimiter, getLimiter } from './limiter';
 import { readStorage, writeStorage } from './storage';
@@ -29,6 +31,7 @@ export const backingOutput = () => (playing ? heard : undefined);
 
 // A loaded song, whichever way it plays
 type Track = {
+  buffer?: AudioBuffer; // decoded songs: their audio, for the tempo
   paused(): boolean;
   position(): number;
   duration(): number;
@@ -60,6 +63,7 @@ export function bufferTrack(context: BaseAudioContext, buffer: AudioBuffer, outp
     return loop ? elapsed % buffer.duration : Math.min(elapsed, buffer.duration);
   };
   return {
+    buffer,
     paused: () => !node,
     position,
     duration: () => buffer.duration,
@@ -249,6 +253,59 @@ export function setupBacking(scheduler: Scheduler | undefined) {
     audio.addEventListener('ended', clear);
     render();
   });
+
+  // Tempo: a decoded song is read at once (its first minute); a tab or a very
+  // long song is listened to for 10 seconds while it plays. The result goes
+  // into the BPM field, as if typed; ×2 and ÷2 fix a half or double reading
+  const tempoText = document.querySelector<HTMLElement>('#backing-tempo')!;
+  const tempoFix = document.querySelector<HTMLElement>('#backing-tempo-fix')!;
+  const bpmField = document.querySelector<HTMLInputElement>('#bpm')!;
+  const apply = (bpm: number) => {
+    bpmField.value = String(Math.round(bpm));
+    bpmField.dispatchEvent(new Event('change'));
+    tempoText.textContent = t('backingTempoSet', { bpm: bpmField.value });
+    tempoFix.hidden = false;
+  };
+  const mono = (channels: Float32Array[], length: number) => {
+    const out = new Float32Array(length);
+    for (const data of channels) for (let i = 0; i < length; i++) out[i] += data[i] / channels.length;
+    return out;
+  };
+  document.querySelector('#backing-detect')!.addEventListener('click', async () => {
+    tempoFix.hidden = true;
+    let samples: Float32Array;
+    let sampleRate: number;
+    if (track?.buffer) {
+      const buffer = track.buffer;
+      const length = Math.min(buffer.length, buffer.sampleRate * 60);
+      samples = mono([...Array(buffer.numberOfChannels).keys()].map((c) => buffer.getChannelData(c)), length);
+      sampleRate = buffer.sampleRate;
+    } else if (bus && (tab || track)) {
+      const context = bus.context as AudioContext;
+      tempoText.textContent = t('backingTempoListening');
+      const stop = await startTap(context, [bus]);
+      await new Promise((resolve) => setTimeout(resolve, 10_000));
+      const blocks = stop();
+      const length = blocks.reduce((sum, block) => sum + block.channels[0].length, 0);
+      const joined = [new Float32Array(length), new Float32Array(length)];
+      let at = 0;
+      for (const { channels } of blocks) {
+        joined[0].set(channels[0], at);
+        joined[1].set(channels[1] ?? channels[0], at);
+        at += channels[0].length;
+      }
+      samples = mono(joined, length);
+      sampleRate = context.sampleRate;
+    } else return;
+    const { bpm, confidence } = detectTempo(samples, sampleRate);
+    if (confidence < 1.3 || !bpm) {
+      tempoText.textContent = t('backingTempoUnclear');
+      return;
+    }
+    apply(bpm);
+  });
+  document.querySelector('#backing-double')!.addEventListener('click', () => apply(Number(bpmField.value) * 2));
+  document.querySelector('#backing-half')!.addEventListener('click', () => apply(Number(bpmField.value) / 2));
 
   playButton.addEventListener('click', () => {
     if (!track) return;

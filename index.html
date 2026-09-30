@@ -450,6 +450,14 @@
             <button id="backing-play" class="control" type="button">▶</button>
             <button id="backing-clear" class="control" type="button" data-i18n="backingClear">Remove</button>
           </div>
+          <div class="compose-buttons">
+            <button id="backing-detect" class="control" type="button" data-i18n="backingDetect">Detect the tempo</button>
+            <span id="backing-tempo-fix" hidden>
+              <button id="backing-half" class="cheat-icon" type="button" title="÷2" aria-label="÷2">÷2</button>
+              <button id="backing-double" class="cheat-icon" type="button" title="×2" aria-label="×2">×2</button>
+            </span>
+          </div>
+          <p id="backing-tempo" class="panel-status" role="status"></p>
           <label class="vj-slider">
             <span data-i18n="backingVolume">Volume</span>
             <input id="backing-volume" type="range" min="0" max="1" step="0.01" />
