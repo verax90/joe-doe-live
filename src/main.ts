@@ -32,6 +32,7 @@ import { setupFinder } from './finder';
 import { setupProject } from './project';
 import { markApplied, setupPlayState } from './play-state';
 import { setupDrop } from './drop';
+import { setupSequencer } from './sequencer';
 import { setupOverlay } from './overlay';
 import { setupScalePicker } from './scale';
 import { setupOffline } from './offline';
@@ -82,6 +83,7 @@ const editor = await whenEditorReady(repl);
 const scheduler = editor.repl?.scheduler;
 setupStatus(repl);
 setupPlayState(() => editor.code, () => Boolean(scheduler?.started), repl);
+setupSequencer(editor, () => Boolean(scheduler?.started));
 const resetParts = setupScenes(() => editor.code);
 const library = setupLibrary(editor, resetParts);
 

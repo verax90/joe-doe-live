@@ -156,6 +156,51 @@ export function stemVoices(code: string): Voice[] | null {
   return voices;
 }
 
+// Every voice that plays (not muted with _): where it ends and its text, a
+// stack(...) counted part by part
+export function playingParts(code: string): { end: number; text: string }[] | null {
+  const body = statements(code);
+  if (!body) return null;
+  const parts: { end: number; text: string }[] = [];
+  for (const statement of body) {
+    let expression: Expression | undefined;
+    if (statement.type === 'LabeledStatement') {
+      const inner = (statement as Statement & { body?: Statement }).body;
+      if (statement.label!.name.startsWith('_') || !inner || !isPattern(inner)) continue;
+      expression = inner.expression;
+    } else if (isPattern(statement)) expression = statement.expression;
+    else continue;
+    const stack = stackCall(expression);
+    for (const part of stack ? stack.arguments : [expression!]) parts.push({ end: part.end, text: code.slice(part.start, part.end) });
+  }
+  return parts;
+}
+
+// Sequencer view: each voice drawn under its line as it plays, in its own
+// colour: a piano roll for notes, a punchcard (one row per sound) for the
+// rest. The colours are these, so turning it off takes out only what it put
+export const SEQUENCER_COLOURS = ['#d6ff4b', '#4bd6ff', '#ff5fd2', '#ffb84b', '#9d8cff', '#4bffa5'];
+const WIDGET = /\._(?:punchcard|pianoroll)\(\)/;
+const ADDED = new RegExp(`(?:\\.color\\("(?:${SEQUENCER_COLOURS.join('|')})"\\))?\\._(?:punchcard|pianoroll)\\(\\)`, 'g');
+
+export const hasSequencer = (code: string) => WIDGET.test(code);
+
+export function withSequencer(code: string) {
+  const parts = playingParts(code);
+  if (!parts) return null;
+  let colour = 0;
+  const changes = parts
+    .filter((part) => !WIDGET.test(part.text))
+    .map((part) => {
+      const melodic = /\b(note|n|chord|freq)\(/.test(part.text) && !/\bs\(\s*["'`](bd|sd|hh|oh|cp|rim|lt|ht|mt|perc)/.test(part.text);
+      const tint = /\.color\(/.test(part.text) ? '' : `.color("${SEQUENCER_COLOURS[colour++ % SEQUENCER_COLOURS.length]}")`;
+      return { from: part.end, insert: `${tint}._${melodic ? 'pianoroll' : 'punchcard'}()` };
+    });
+  return applyChanges(code, changes);
+}
+
+export const withoutSequencer = (code: string) => code.replace(ADDED, '');
+
 // The code with .orbit(n) after each voice, and which name each orbit has
 export function stemCode(code: string) {
   const voices = stemVoices(code) ?? [];

@@ -857,6 +857,14 @@ select.control {
   border: none !important;
 }
 
+/* Strudel's inline views (._punchcard(), ._pianoroll(), ._scope()…): on a
+   dark band like the code, so they read over any visual */
+.editor .cm-content > canvas {
+  margin: 2px 0 4px;
+  border-radius: 4px;
+  background: rgba(18, 21, 28, 0.82);
+}
+
 /* The selection (Ctrl+A, the mouse, Shift+arrows): CodeMirror draws it
    behind the text, where the lines' dark bands hid it; here it sits on top,
    lime and see-through, and lets clicks pass */

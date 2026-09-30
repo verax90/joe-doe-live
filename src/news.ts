@@ -12,6 +12,12 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-09-30-sequencer',
+    title: L('Sequencer view', 'Vista de secuenciador'),
+    text: L('Each track drawn under its line as it plays, in its colour', 'Cada pista dibujada bajo su línea mientras suena, con su color'),
+    go: [{ click: '#toggle-sequencer' }],
+  },
+  {
     id: '2026-09-30-keyboard',
     title: L('Better with the keyboard', 'Mejor con teclado'),
     text: L('Tab and Enter keep their place, arrows in the help, and a ring shows where you are', 'Tab e Intro no pierden el sitio, flechas en la ayuda y un anillo marca dónde estás'),
