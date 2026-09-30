@@ -331,12 +331,15 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
       draw2d.fillRect(0, 0, size.width, size.height);
       draw2d.drawImage(shownCanvas(canvas), 0, 0, size.width, size.height);
       const scope = scopeCanvas();
+      // the caption sits above the waves when they are on, as on screen
+      let captionBottom = size.height;
       if (scope) {
         const box = scope.getBoundingClientRect();
         draw2d.drawImage(scope, box.left, box.top, box.width, box.height);
+        captionBottom = Math.min(size.height, box.top + box.height * 0.1);
       }
       if (withCode) drawCode(draw2d, getCode(), size.width, size.height, Math.max(13, Math.round(size.height / 40)), colours, 0.62);
-      drawCaption(draw2d, size.width, size.height, Math.max(14, Math.round(size.height / 48)), colours);
+      drawCaption(draw2d, size.width, captionBottom, Math.max(14, Math.round(size.height / 48)), colours);
     });
     return recordCanvas(composite, output, context, () => {
       stopDrawing();
@@ -369,7 +372,8 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
       const scope = scopeCanvas();
       if (scope) draw2d.drawImage(scope, 0, VERTICAL.height - 260, VERTICAL.width, 200);
       if (withCode) drawCode(draw2d, getCode(), VERTICAL.width, VERTICAL.height, 30, { fg, muted });
-      drawCaption(draw2d, VERTICAL.width, VERTICAL.height, 30, { fg, muted, accent });
+      // above the waves when they are on
+      drawCaption(draw2d, VERTICAL.width, scope ? VERTICAL.height - 250 : VERTICAL.height, 30, { fg, muted, accent });
     };
     const stopDrawing = onHydraFrame(draw);
     return recordCanvas(composite, output, context, () => {

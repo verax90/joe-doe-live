@@ -1468,6 +1468,48 @@ select.control {
   color: var(--accent);
 }
 
+/* Laptops (701–1279 px): the bar stays on one row, tightening step by step:
+   smaller gaps and pickers, then Stop and Record as icons, then the brand
+   and the BPM label as short as they go */
+@media (min-width: 701px) and (max-width: 1279px) {
+  .bar {
+    gap: 0.5rem 0.6rem;
+    padding-inline: 0.75rem;
+  }
+
+  .bar-pickers select.control {
+    max-width: 9rem;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1150px) {
+  #stop .btn-text,
+  #record .record-label,
+  .tempo-label {
+    display: none;
+  }
+
+  /* the recording timer still shows */
+  .control-record.is-recording .record-label {
+    display: inline;
+  }
+
+  #play {
+    min-width: 6.6rem;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1000px) {
+  .brand-name,
+  .brand-dot {
+    display: none;
+  }
+
+  .bar-pickers select.control {
+    max-width: 7.5rem;
+  }
+}
+
 @media (max-width: 700px) {
   .bar {
     gap: 0.5rem;
@@ -2387,6 +2429,11 @@ select.control {
 
 .overlay[hidden] {
   display: none;
+}
+
+/* with the audio waves on, the caption sits above them */
+body:has(canvas.scope:not([hidden])) .overlay {
+  bottom: calc(2.25rem + 90px + 0.5rem);
 }
 
 .overlay-artist {
