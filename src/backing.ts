@@ -5,6 +5,7 @@
 // all get it; it is not sent to a live room. A file can start and stop with
 // the studio's Play, landing on the first bar you hear.
 import { ensureAudio } from './audio';
+import { audioTimeOfCycle, whenCycleKnown } from './cycle-clock';
 import { onLangChange, t } from './i18n';
 import { ensureLimiter, getLimiter } from './limiter';
 import { readStorage, writeStorage } from './storage';
@@ -23,6 +24,108 @@ type Settings = { volume: number; withPlay: boolean; loop: boolean };
 let playing: AudioNode | undefined;
 export const backingInput = () => playing;
 
+// A loaded song, whichever way it plays
+type Track = {
+  paused(): boolean;
+  position(): number;
+  duration(): number;
+  play(at?: number): void; // from where it is, at an audio clock time
+  pause(): void;
+  rewind(): void;
+  setLoop(on: boolean): void;
+  dispose(): void;
+};
+
+// Decoded into memory and played by the audio clock: it starts on the exact
+// sample asked for, so it lands on the bar. If that moment has just passed,
+// it starts at once from where the song should already be
+export function bufferTrack(context: BaseAudioContext, buffer: AudioBuffer, output: AudioNode, onEnd: () => void, loop = false): Track {
+  let node: AudioBufferSourceNode | undefined;
+  let startedAt = 0;
+  let offset = 0;
+  const stopNode = () => {
+    const current = node;
+    node = undefined;
+    if (!current) return;
+    current.onended = null;
+    current.stop();
+    current.disconnect();
+  };
+  const position = () => {
+    if (!node) return offset;
+    const elapsed = Math.max(0, context.currentTime - startedAt);
+    return loop ? elapsed % buffer.duration : Math.min(elapsed, buffer.duration);
+  };
+  return {
+    paused: () => !node,
+    position,
+    duration: () => buffer.duration,
+    play(at = context.currentTime) {
+      if (node) return;
+      const late = Math.max(0, context.currentTime - at);
+      const from = (offset + late) % buffer.duration;
+      node = new AudioBufferSourceNode(context, { buffer, loop });
+      node.connect(output);
+      node.start(Math.max(at, context.currentTime), from);
+      startedAt = Math.max(at, context.currentTime) - from;
+      const started = node;
+      node.onended = () => {
+        if (started !== node) return;
+        node = undefined;
+        offset = 0;
+        onEnd();
+      };
+    },
+    pause() {
+      offset = position();
+      stopNode();
+    },
+    rewind() {
+      stopNode();
+      offset = 0;
+    },
+    setLoop(on) {
+      loop = on;
+      if (node) node.loop = on;
+    },
+    dispose: stopNode,
+  };
+}
+
+// A very long song stays a media element (decoding it would take too much
+// memory); it starts a little late, as media elements do
+function elementTrack(context: AudioContext, url: string, output: AudioNode, onEnd: () => void, loop: boolean): Track {
+  const element = new Audio(url);
+  element.loop = loop;
+  element.addEventListener('ended', onEnd);
+  const source = context.createMediaElementSource(element);
+  source.connect(output);
+  return {
+    paused: () => element.paused,
+    position: () => element.currentTime,
+    duration: () => element.duration,
+    play(at = context.currentTime) {
+      window.setTimeout(() => void element.play(), Math.max(0, (at - context.currentTime) * 1000));
+    },
+    pause: () => element.pause(),
+    rewind() {
+      element.pause();
+      element.currentTime = 0;
+    },
+    setLoop(on) {
+      element.loop = on;
+    },
+    dispose() {
+      element.pause();
+      source.disconnect();
+      URL.revokeObjectURL(url);
+    },
+  };
+}
+
+// Files up to this size are decoded (about 12 minutes of mp3, 4 of wav)
+const DECODE_LIMIT = 40 * 1024 * 1024;
+
 export function setupBacking(scheduler: Scheduler | undefined) {
   const fileInput = document.querySelector<HTMLInputElement>('#backing-file')!;
   const tabButton = document.querySelector<HTMLButtonElement>('#backing-tab')!;
@@ -37,11 +140,12 @@ export function setupBacking(scheduler: Scheduler | undefined) {
   let settings = readStorage<Settings>('jdl:backing', { volume: 0.7, withPlay: true, loop: false });
   const save = () => writeStorage('jdl:backing', settings);
 
+  let bus: GainNode | undefined; // the track before its volume
   let gain: GainNode | undefined;
   let into: AudioNode | undefined;
-  let element: HTMLAudioElement | undefined;
+  let track: Track | undefined;
   let tab: MediaStream | undefined;
-  let source: AudioNode | undefined;
+  let tabSource: AudioNode | undefined;
   let name = '';
 
   // Into the master (before the limiter). Strudel rebuilds its output now and
@@ -59,28 +163,31 @@ export function setupBacking(scheduler: Scheduler | undefined) {
     ensureLimiter();
     const context = (globalThis as { getAudioContext?: () => AudioContext }).getAudioContext!();
     gain ??= new GainNode(context, { gain: settings.volume });
+    if (!bus) {
+      bus = context.createGain();
+      bus.connect(gain);
+    }
     route();
     return context;
   };
 
   const render = () => {
-    const loaded = Boolean(element || tab);
+    const loaded = Boolean(track || tab);
     controls.hidden = !loaded;
-    playButton.hidden = !element;
-    playButton.textContent = element && !element.paused ? t('backingPause') : t('backingPlayTrack');
+    playButton.hidden = !track;
+    playButton.textContent = track && !track.paused() ? t('backingPause') : t('backingPlayTrack');
     if (!loaded) status.textContent = t('backingNone');
     else if (tab) status.textContent = t('backingTab', { name });
-    else status.textContent = `${name} · ${clockTime(element!.currentTime)} / ${clockTime(element!.duration)}`;
+    else status.textContent = `${name} · ${clockTime(track!.position())} / ${clockTime(track!.duration())}`;
   };
 
   const clear = () => {
-    element?.pause();
-    if (element) URL.revokeObjectURL(element.src);
-    tab?.getTracks().forEach((track) => track.stop());
-    source?.disconnect();
-    element = undefined;
+    track?.dispose();
+    tab?.getTracks().forEach((media) => media.stop());
+    tabSource?.disconnect();
+    track = undefined;
     tab = undefined;
-    source = undefined;
+    tabSource = undefined;
     playing = undefined;
     render();
   };
@@ -91,13 +198,20 @@ export function setupBacking(scheduler: Scheduler | undefined) {
     if (!file) return;
     const context = await ready();
     clear();
-    element = new Audio(URL.createObjectURL(file));
-    element.loop = settings.loop;
-    element.addEventListener('ended', render);
-    source = context.createMediaElementSource(element);
-    source.connect(gain!);
-    playing = source;
     name = file.name.replace(/\.[^.]+$/, '');
+    if (file.size <= DECODE_LIMIT) {
+      status.textContent = t('backingLoading');
+      try {
+        const buffer = await context.decodeAudioData(await file.arrayBuffer());
+        track = bufferTrack(context, buffer, bus!, render, settings.loop);
+      } catch {
+        status.textContent = t('backingUnreadable');
+        return;
+      }
+    } else {
+      track = elementTrack(context, URL.createObjectURL(file), bus!, render, settings.loop);
+    }
+    playing = bus;
     render();
   });
 
@@ -125,17 +239,17 @@ export function setupBacking(scheduler: Scheduler | undefined) {
     clear();
     tab = stream;
     name = audio.label || t('backingTabName');
-    source = context.createMediaStreamSource(stream);
-    source.connect(gain!);
-    playing = source;
+    tabSource = context.createMediaStreamSource(stream);
+    tabSource.connect(bus!);
+    playing = bus;
     audio.addEventListener('ended', clear);
     render();
   });
 
   playButton.addEventListener('click', () => {
-    if (!element) return;
-    if (element.paused) void element.play();
-    else element.pause();
+    if (!track) return;
+    if (track.paused()) track.play();
+    else track.pause();
     render();
   });
   clearButton.addEventListener('click', clear);
@@ -154,30 +268,33 @@ export function setupBacking(scheduler: Scheduler | undefined) {
   });
   loopBox.addEventListener('change', () => {
     settings = { ...settings, loop: loopBox.checked };
-    if (element) element.loop = settings.loop;
+    track?.setLoop(settings.loop);
     save();
   });
 
-  // With the studio's Play: from the top, when the first bar is heard (the
-  // scheduler plays a little ahead); Stop pauses and goes back to the top
+  // With the studio's Play: from the top, when the first bar sounds (read
+  // from Strudel's own schedule, cycle-clock.ts); Stop pauses and goes back
+  // to the top
+  const startOnFirstBar = async () => {
+    const song = track;
+    if (!song) return;
+    const at = (await whenCycleKnown()) ? audioTimeOfCycle(0) : undefined;
+    if (song === track && scheduler?.started) song.play(at);
+    render();
+  };
   let wasPlaying = false;
   window.setInterval(() => {
-    const playing = Boolean(scheduler?.started);
-    if (playing !== wasPlaying && element && settings.withPlay) {
-      if (playing) {
-        element.currentTime = 0;
-        const lead = (scheduler?.latency ?? 0.1) * 1000;
-        window.setTimeout(() => void element?.play().then(render), lead);
-      } else {
-        element.pause();
-        element.currentTime = 0;
-      }
+    const running = Boolean(scheduler?.started);
+    if (running !== wasPlaying && track && settings.withPlay) {
+      track.rewind();
+      if (running) void startOnFirstBar();
+      render();
     }
-    wasPlaying = playing;
+    wasPlaying = running;
   }, 20);
   window.setInterval(() => {
     route();
-    if (element) render();
+    if (track) render();
   }, 500);
 
   render();
