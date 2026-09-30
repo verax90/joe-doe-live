@@ -62,7 +62,18 @@ export const loopCode = (name: string, bars: number) => `s("${name}").loopAt(${b
 export const chopsCode = (name: string, bars: number) =>
   `s("${name}_trozos").n("0 1 2 3 4 5 6 7")${bars === 1 ? '' : `.slow(${bars})`}`;
 
-const toWav = ([left, right]: Stereo, sampleRate: number, name: string) =>
+// What to listen to for a take (backing, mic or everything), or why it
+// cannot; the looper uses it too
+export function takeSources(which: string): AudioNode[] | string {
+  if (which === 'backing') return backingInput() ? [backingInput()!] : t('samplerNoBacking');
+  if (which === 'mic') return micOutput() ? [micOutput()!] : t('samplerNoMic');
+  const limiter = getLimiter()?.limiter;
+  if (!limiter) return t('samplerNoSound');
+  const mic = micOutput();
+  return mic ? [limiter, mic] : [limiter];
+}
+
+export const toWav = ([left, right]: Stereo, sampleRate: number, name: string) =>
   new File([encodeWav([[left, right]], sampleRate)], `${name}.wav`, { type: 'audio/wav' });
 
 type Options = { editor: StrudelMirror; addTrack: (pattern: string) => void };
@@ -87,16 +98,7 @@ export function setupSampler({ editor, addTrack }: Options) {
 
   const context = () => (globalThis as { getAudioContext?: () => AudioContext }).getAudioContext!();
 
-  // What to listen to, or why it cannot
-  const sources = (): AudioNode[] | string => {
-    const which = sourceSelect.value;
-    if (which === 'backing') return backingInput() ? [backingInput()!] : t('samplerNoBacking');
-    if (which === 'mic') return micOutput() ? [micOutput()!] : t('samplerNoMic');
-    const limiter = getLimiter()?.limiter;
-    if (!limiter) return t('samplerNoSound');
-    const mic = micOutput();
-    return mic ? [limiter, mic] : [limiter];
-  };
+  const sources = () => takeSources(sourceSelect.value);
 
   const draw = ([left]: Stereo) => {
     const g = canvas.getContext('2d')!;

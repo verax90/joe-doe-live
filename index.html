@@ -93,6 +93,7 @@
               <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
               <button id="toggle-sp" class="menu-item" type="button" aria-pressed="false" data-panel="sp" data-i18n="spTitle">SP-404 / MIDI out</button>
               <button id="toggle-mic" class="menu-item" type="button" aria-pressed="false" data-panel="mic" data-i18n="micTitle">Mic</button>
+              <button id="toggle-looper" class="menu-item" type="button" aria-pressed="false" data-panel="looper" data-i18n="looperTitle">Looper</button>
               <button id="toggle-backing" class="menu-item" type="button" aria-pressed="false" data-panel="backing" data-i18n="backingTitle">Backing track</button>
               <button id="toggle-vj" class="menu-item" type="button" aria-pressed="false" data-panel="vj" data-i18n="vjTitle">VJ</button>
               <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-panel="video" data-i18n="video">Video</button>
@@ -331,6 +332,39 @@
           <button class="cheat-action" type="button" data-sp-example="fx" data-i18n="spExampleFx">Effect knob</button>
         </div>
         <p class="panel-help" data-i18n="spSetup">On the SP: SHIFT + pad 13 → SYSTEM → MIDI tab. MIDI Mode as chosen here; MIDI Sync on USB (or Auto) so it follows the clock, not Internal.</p>
+      </aside>
+
+      <aside class="panel" id="looper" hidden>
+        <h2 data-i18n="looperTitle">Looper</h2>
+        <p class="panel-help" data-i18n="looperHelp">Record a few bars of your voice over the pattern and they repeat in time, layer on layer.</p>
+        <label class="panel-field" for="looper-source">
+          <span data-i18n="samplerSource">From</span>
+          <select id="looper-source" class="control">
+            <option value="mic" data-i18n="samplerFromMic">the mic</option>
+            <option value="backing" data-i18n="samplerFromBacking">the backing track</option>
+            <option value="all" data-i18n="samplerFromAll">everything that sounds</option>
+          </select>
+        </label>
+        <label class="panel-field" for="looper-bars">
+          <span data-i18n="riffBars">Bars</span>
+          <select id="looper-bars" class="control">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+        <button id="looper-record" class="control control-accent" type="button" data-i18n="looperRecord">● Record a layer</button>
+        <p id="looper-status" class="panel-status" role="status"></p>
+        <ol id="looper-layers" class="panel-list"></ol>
+        <div class="compose-buttons">
+          <button id="looper-undo" class="control" type="button" data-i18n="looperUndo">Undo the last layer</button>
+          <button id="looper-clear" class="control" type="button" data-i18n="looperClear">Remove all</button>
+        </div>
+        <label class="vj-slider">
+          <span><span data-i18n="looperOffset">Timing</span> (<span id="looper-offset-value">0</span> ms)</span>
+          <input id="looper-offset" type="range" min="-100" max="100" step="5" value="0" />
+        </label>
+        <p class="panel-help" data-i18n="looperTip">If your layers come back a little late or early, move Timing.</p>
       </aside>
 
       <aside class="panel" id="sampler" hidden>

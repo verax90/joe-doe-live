@@ -29,6 +29,7 @@ import { builtInPresets, translateIfBuiltIn } from './presets';
 import { setupRecorder } from './record';
 import { setupRiff } from './riff';
 import { setupCycleClock } from './cycle-clock';
+import { setupLooper } from './looper';
 import { setupSampler } from './sampler';
 import { setupSp } from './sp';
 import { setupRoom } from './room';
@@ -219,6 +220,7 @@ whenStrudelReady().then(() => {
   setupRiff({ editor, addTrack });
   setupSp({ editor, addTrack });
   setupSampler({ editor, addTrack });
+  setupLooper({ editor, addTrack });
   setupCycleClock(scheduler as Parameters<typeof setupCycleClock>[0]);
 });
 
