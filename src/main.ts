@@ -35,6 +35,7 @@ import { stemsActive, stemsVersion } from './stems';
 import { setupRecorder } from './record';
 import { setupRiff } from './riff';
 import { setupCycleClock } from './cycle-clock';
+import { setupPump, setupPumpPanel } from './pump';
 import { setupLooper } from './looper';
 import { setupSampler } from './sampler';
 import { setupSp } from './sp';
@@ -230,10 +231,12 @@ whenStrudelReady().then(() => {
   setupSamplesPanel({ addTrack });
   setupRiff({ editor, addTrack });
   setupSp({ editor, addTrack });
+  setupPumpPanel({ addTrack });
   setupSampler({ editor, addTrack });
   setupLooper({ editor, addTrack });
   setupRemote({ addTrack });
   setupCycleClock(scheduler as Parameters<typeof setupCycleClock>[0]);
+  setupPump(scheduler as Parameters<typeof setupPump>[0]);
 });
 
 document.querySelector('#play')!.addEventListener('click', () => editor.evaluate());
