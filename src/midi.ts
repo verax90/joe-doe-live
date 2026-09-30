@@ -35,6 +35,18 @@ const held = new Map<string, { name: string; notes: Set<number> }>();
 const isTouch = (id: string) => id === touchInput || TOUCH_NAME.test(held.get(id)?.name ?? '');
 const touchHeld = () => [...held].some(([id, device]) => isTouch(id) && device.notes.size > 0);
 
+// Many TouchMe units send no CC 90 (it is a setting): then the note tells
+// the touch, as more contact plays higher. The range is learnt from the notes
+// seen (at least 6 semitones wide), so the lowest is 0 and the highest 1
+let touchCc = false;
+const noteRange = { low: 127, high: 0 };
+export function touchFromNote(note: number, range: { low: number; high: number }) {
+  range.low = Math.min(range.low, note);
+  range.high = Math.max(range.high, note);
+  const span = Math.max(6, range.high - range.low);
+  return Math.min(1, Math.max(0, (note - range.low) / span));
+}
+
 // A value easing towards its target: a little smoothing, so it glides
 export const easeTowards = (value: number, target: number, elapsedMs: number, tauMs = 60) =>
   value + (target - value) * (1 - Math.exp(-Math.max(0, elapsedMs) / tauMs));
@@ -133,10 +145,17 @@ export function setupMidiPanel() {
         // The TouchMe, by its name or as the device sending CC 90
         if ((status & 0xf0) === 0xb0 && low === TOUCH_CC) {
           touchInput = id;
+          touchCc = true;
           currentTouch();
           touchTarget = high / 127;
         }
-        if ((status & 0xf0) === 0x90 && high > 0) device.notes.add(low);
+        if ((status & 0xf0) === 0x90 && high > 0) {
+          device.notes.add(low);
+          if (isTouch(id) && !touchCc) {
+            currentTouch();
+            touchTarget = touchFromNote(low, noteRange);
+          }
+        }
         if ((status & 0xf0) === 0x80 || ((status & 0xf0) === 0x90 && high === 0)) {
           device.notes.delete(low);
           if (isTouch(id) && !device.notes.size) {
