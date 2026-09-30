@@ -102,7 +102,7 @@ export function trackInsertPoint(code: string) {
 // their orbit keep it. The first free orbit is 11, away from the usual ones
 export const STEM_ORBIT = 11;
 
-type Voice = { at: number; name: string };
+type Voice = { at: number; name: string; orbit?: number }; // orbit: one it chose itself
 
 // The stack(...) call a chain grows from, if any: stack(a, b).analyze(1)
 function stackCall(node: Expression | undefined): (Expression & { arguments: Expression[] }) | null {
@@ -147,8 +147,10 @@ export function stemVoices(code: string): Voice[] | null {
     for (const part of stack ? stack.arguments : [expression!]) {
       index++;
       const text = code.slice(part.start, part.end);
-      if (/\borbit\s*\(/.test(text)) continue; // it chose its own
-      voices.push({ at: part.end, name: voiceName(label, text, index) });
+      // it chose its own orbit: kept, and named if it is a plain number
+      const own = /\borbit\s*\(\s*["'`]?(\d+)["'`]?\s*\)/.exec(text);
+      if (own) voices.push({ at: part.end, name: voiceName(label, text, index), orbit: Number(own[1]) });
+      else if (!/\borbit\s*\(/.test(text)) voices.push({ at: part.end, name: voiceName(label, text, index) });
     }
   }
   return voices;
@@ -158,9 +160,14 @@ export function stemVoices(code: string): Voice[] | null {
 export function stemCode(code: string) {
   const voices = stemVoices(code) ?? [];
   const names = new Map<number, string>();
-  const changes = voices.map((voice, i) => {
-    names.set(STEM_ORBIT + i, voice.name);
-    return { from: voice.at, insert: `.orbit(${STEM_ORBIT + i})` };
-  });
+  const changes = voices
+    .filter((voice) => {
+      if (voice.orbit !== undefined) names.set(voice.orbit, voice.name);
+      return voice.orbit === undefined;
+    })
+    .map((voice, i) => {
+      names.set(STEM_ORBIT + i, voice.name);
+      return { from: voice.at, insert: `.orbit(${STEM_ORBIT + i})` };
+    });
   return { code: applyChanges(code, changes), names };
 }

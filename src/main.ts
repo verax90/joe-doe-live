@@ -197,12 +197,17 @@ window.addEventListener(PROGRAM_EVENT, (event) => {
   runVisual();
 });
 
-// Every play and stop, from any button, key or panel, goes through here
+// Every play and stop, from any button, key or panel, goes through here.
+// While stems record, the code plays with a voice per orbit (the editor
+// keeps it as you wrote it); everything else after a play happens either way
 let room: ReturnType<typeof setupRoom> | undefined;
+const strudelRepl = editor.repl as { evaluate?: (code: string, autostart?: boolean) => Promise<unknown> } | undefined;
+const playCode = (code: string) => strudelRepl?.evaluate?.(code, true) ?? Promise.resolve();
 const originalEvaluate = editor.evaluate.bind(editor);
 editor.evaluate = async (autostart?: boolean) => {
   await ensureAudio();
-  await originalEvaluate(autostart);
+  if (stemsActive()) await playCode(stemsVersion(editor.code));
+  else await originalEvaluate(autostart);
   recordPlayed(editor.code);
   sessionPlayed(editor.code);
   void room?.played();
@@ -310,15 +315,6 @@ room = setupRoom({
     runVisual();
   },
 });
-// Stems: while they record, the code plays with a voice per orbit, also after
-// Ctrl+Enter or a change; the editor keeps the code as you wrote it
-const strudelRepl = editor.repl as { evaluate?: (code: string, autostart?: boolean) => Promise<unknown> } | undefined;
-const playCode = (code: string) => strudelRepl?.evaluate?.(code, true) ?? Promise.resolve();
-const evaluateInEditor = editor.evaluate.bind(editor);
-editor.evaluate = async (autostart?: boolean) => {
-  if (stemsActive()) await playCode(stemsVersion(editor.code));
-  else await evaluateInEditor(autostart);
-};
 setupRecorder(() => editor.code, playCode, () => Boolean(scheduler?.started));
 // Free play stays out of the way when the playing pattern reads the keys itself
 setupFreePlay(() => Boolean(scheduler?.started) && editor.code.includes('midikeys'));

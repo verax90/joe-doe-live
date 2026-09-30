@@ -20,9 +20,13 @@ describe('stems: one orbit per voice', () => {
     expect(code).toContain('bass: note("a1").s("sawtooth").orbit(13)');
     expect([...names.values()]).toEqual(['1_bd', '2_gm_epiano1', 'bass']);
   });
-  it('leaves a voice that picks its own orbit alone', () => {
-    const { code } = stemCode('$: s("bd*4").orbit(2)\n$: s("hh*8")\n');
-    expect(code).toBe('$: s("bd*4").orbit(2)\n$: s("hh*8").orbit(11)\n');
+  it('leaves a voice that picks its own orbit alone, but names it', () => {
+    const { code, names } = stemCode('$: s("bd*4").orbit(2)\n$: s("hh*8")\nlead: note("c4").orbit(ref(() => 3))\n');
+    expect(code).toBe('$: s("bd*4").orbit(2)\n$: s("hh*8").orbit(11)\nlead: note("c4").orbit(ref(() => 3))\n');
+    expect([...names]).toEqual([
+      [2, '1_bd'],
+      [11, '2_hh'],
+    ]);
   });
   it('names voices without a sound by what they play', () => {
     expect(voiceName(undefined, 'note("c3 e3")', 4)).toBe('4_notes');

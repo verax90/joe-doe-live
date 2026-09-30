@@ -55,9 +55,12 @@ export async function startStems(context: AudioContext, mix: AudioNode, code: st
     const files: { name: string; data: Uint8Array }[] = [];
     for (const [key, stop] of taps) {
       const audio = takeWindow(stop(), from, to, context.sampleRate);
-      const silent = audio[0].every((v) => v === 0) && audio[1].every((v) => v === 0);
-      if (silent && key !== '0_mezcla') continue;
       const orbit = key.startsWith('orbit:') ? Number(key.slice(6)) : undefined;
+      // An orbit no voice was given only carries, for a moment, what Strudel
+      // had already scheduled before the take: dropped if silent after 1 s
+      const skip = orbit !== undefined && !names.has(orbit) ? context.sampleRate : 0;
+      const silent = audio.every((channel) => channel.subarray(skip).every((v) => v === 0));
+      if (silent && key !== '0_mezcla') continue;
       const name = orbit === undefined ? key : (names.get(orbit) ?? `orbit_${orbit}`);
       files.push({ name: `${name}.wav`, data: new Uint8Array(await encodeWav([audio], context.sampleRate).arrayBuffer()) });
     }
