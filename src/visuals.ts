@@ -213,6 +213,17 @@ src(s1)
   .out()`,
   },
   {
+    id: 'tacto',
+    name: { en: 'Touch (TouchMe)', es: 'Tacto (TouchMe)' },
+    code: `osc(8, 0.04, () => 0.2 + touch() * 0.25)
+  .kaleid(() => 3 + Math.round(touch() * 5))
+  .color(...tint(1))
+  .modulate(noise(3), () => 0.05 + touch() * 0.5)
+  .scale(() => 1.2 - touch() * 0.5)
+  .brightness(() => touch() * 0.35 - 0.2)
+  .out()`,
+  },
+  {
     id: 'cam',
     name: { en: 'Webcam (warp)', es: 'Webcam (deformada)' },
     camera: true,

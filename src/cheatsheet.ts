@@ -114,6 +114,8 @@ const sections: Section[] = [
       { code: "const pads = await midikeys('MPK')", note: { en: 'Keys and pads as notes', es: 'Teclas y pads como notas' } },
       { code: 'pads().s("piano")', note: { en: 'Play them with an instrument', es: 'Tocarlas con un instrumento' } },
       { code: '.speed(ref(() => 2 ** (bend() * 2 / 12)))', note: { en: 'Pitch bend (joystick sideways), -1 to 1', es: 'Pitch bend (joystick a los lados), de -1 a 1' } },
+      { code: '.lpf(ref(() => 300 + touch() * 5000))', note: { en: 'TouchMe: the touch opens the filter (touch() 0 to 1)', es: 'TouchMe: el contacto abre el filtro (touch() de 0 a 1)' } },
+      { code: '.gain(ref(() => (touching() ? 0.8 : 0)))', note: { en: 'TouchMe: sounds only while someone touches', es: 'TouchMe: suena solo mientras alguien toca' } },
     ],
   },
 ];

@@ -18,6 +18,37 @@ export const midiStats = { notes: 0 };
 export const currentBend = () => bendValue;
 (globalThis as { bend?: () => number }).bend = currentBend;
 
+// TouchMe (Playtronica): skin contact as MIDI. It plays notes (more contact,
+// higher in its scale) and sends CC 90, how strong the touch is, with each
+// new note. touch() is that strength from 0 to 1 while someone touches,
+// easing back to 0 when they let go; touching() says whether anyone does.
+// For patterns and Hydra: .lpf(ref(() => 300 + touch() * 5000))
+const TOUCH_CC = 90;
+const TOUCH_NAME = /touch\s*me|playtronica/i;
+let touchTarget = 0;
+let touchValue = 0;
+let touchAt = 0;
+let touchInput: string | undefined; // the device that sends CC 90
+// Notes held on each device: the TouchMe's note comes just before its CC 90,
+// so which device it is may only be known a moment later
+const held = new Map<string, { name: string; notes: Set<number> }>();
+const isTouch = (id: string) => id === touchInput || TOUCH_NAME.test(held.get(id)?.name ?? '');
+const touchHeld = () => [...held].some(([id, device]) => isTouch(id) && device.notes.size > 0);
+
+// A value easing towards its target: a little smoothing, so it glides
+export const easeTowards = (value: number, target: number, elapsedMs: number, tauMs = 60) =>
+  value + (target - value) * (1 - Math.exp(-Math.max(0, elapsedMs) / tauMs));
+
+export function currentTouch() {
+  const now = performance.now();
+  touchValue = easeTowards(touchValue, touchTarget, now - touchAt);
+  touchAt = now;
+  return touchValue;
+}
+const g = globalThis as { touch?: () => number; touching?: () => boolean };
+g.touch = currentTouch;
+g.touching = touchHeld;
+
 let connectMidi: (() => Promise<void>) | undefined;
 
 // Program change from any controller (the MPK pads in PROG CHANGE mode):
@@ -95,6 +126,24 @@ export function setupMidiPanel() {
         const { data, target } = event as MIDIMessageEvent;
         if (!data) return;
         const [status, low, high] = data;
+        const input = target as MIDIInput | null;
+        const id = input?.id ?? '';
+        if (!held.has(id)) held.set(id, { name: input?.name ?? '', notes: new Set() });
+        const device = held.get(id)!;
+        // The TouchMe, by its name or as the device sending CC 90
+        if ((status & 0xf0) === 0xb0 && low === TOUCH_CC) {
+          touchInput = id;
+          currentTouch();
+          touchTarget = high / 127;
+        }
+        if ((status & 0xf0) === 0x90 && high > 0) device.notes.add(low);
+        if ((status & 0xf0) === 0x80 || ((status & 0xf0) === 0x90 && high === 0)) {
+          device.notes.delete(low);
+          if (isTouch(id) && !device.notes.size) {
+            currentTouch();
+            touchTarget = 0;
+          }
+        }
         if ((status & 0xf0) === 0xe0) {
           bendValue = (((high << 7) | low) - 8192) / 8192;
           window.dispatchEvent(new CustomEvent<number>(BEND_EVENT, { detail: bendValue }));

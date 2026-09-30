@@ -756,6 +756,38 @@ stack(
 ).analyze(1)`,
     },
   },
+  {
+    id: 'touchme',
+    name: { en: 'TouchMe', es: 'TouchMe' },
+    code: {
+      en: `// TouchMe (Playtronica): hold its metal and touch someone.
+// Its notes play on their own (MIDI panel, "Play without Play");
+// here the touch also opens the bass and wakes up the hi-hats.
+// touch() goes from 0 to 1 with how much you touch; touching() is true while you do
+setcps(84 / 60 / 4)
+
+stack(
+  s("bd ~ ~ bd ~ ~ sd ~, ~ ~ ~ ~ ~ ~ ~ bd").bank("RolandTR808").gain(0.9),
+  note("<c2 ab1 f1 g1>").s("sawtooth")
+    .lpf(ref(() => 150 + touch() * 3000)).lpq(8).gain(0.4),
+  s("hh*16").bank("RolandTR808")
+    .gain(ref(() => (touching() ? 0.45 : 0.08)))
+).analyze(1)`,
+      es: `// TouchMe (Playtronica): coge su metal y toca a alguien.
+// Sus notas suenan solas (panel MIDI, "Tocar sin Play");
+// aquí además el contacto abre el bajo y despierta los charles.
+// touch() va de 0 a 1 según cuánto os tocáis; touching() es true mientras os tocáis
+setcps(84 / 60 / 4)
+
+stack(
+  s("bd ~ ~ bd ~ ~ sd ~, ~ ~ ~ ~ ~ ~ ~ bd").bank("RolandTR808").gain(0.9),
+  note("<c2 ab1 f1 g1>").s("sawtooth")
+    .lpf(ref(() => 150 + touch() * 3000)).lpq(8).gain(0.4),
+  s("hh*16").bank("RolandTR808")
+    .gain(ref(() => (touching() ? 0.45 : 0.08)))
+).analyze(1)`,
+    },
+  },
 ];
 
 // A function, not a constant: names and comments follow the current language
