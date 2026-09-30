@@ -30,19 +30,27 @@ export function explainError(error: unknown) {
   return { text: sentence(raw), raw, where };
 }
 
-// Where in the code a line:column is, as a range from that column to the
-// line's end (the whole line when the column is past it); null if the line
-// does not exist. At the very start of a line the fault is usually at the
-// end of the one before (a bracket never closed): both are taken
-export function lineRange(code: string, line: number, column = 0) {
+// The line where the fault most likely is. An error at the very start of a
+// line is usually at the end of the last line with code before it (a
+// bracket never closed, blank lines between): that one
+export function likelyLine(code: string, line: number, column = 0) {
+  if (column !== 0) return line;
+  const lines = code.split('\n');
+  for (let n = line - 1; n >= 1; n--) if (lines[n - 1]?.trim()) return n;
+  return line;
+}
+
+// Where the cursor goes for an error at line:column: at that column, or,
+// when the fault is likely on a line before, at the end of that line, ready
+// to type the missing bracket. Nothing is selected, so typing replaces
+// nothing. null if the line does not exist
+export function errorPosition(code: string, line: number, column = 0) {
   const lines = code.split('\n');
   if (line < 1 || line > lines.length) return null;
   const startOf = (n: number) => lines.slice(0, n - 1).reduce((sum, l) => sum + l.length + 1, 0);
-  const from = startOf(line);
-  const length = lines[line - 1].length;
-  if (column === 0 && line > 1) return { from: startOf(line - 1), to: from + length };
-  const start = column < length ? from + column : from;
-  return { from: start, to: from + length };
+  const likely = likelyLine(code, line, column);
+  if (likely !== line) return startOf(likely) + lines[likely - 1].length;
+  return startOf(line) + Math.min(column, lines[line - 1].length);
 }
 
 type Where = { line: number; column: number };
@@ -52,15 +60,15 @@ export function setupStatus(repl: HTMLElement & { editor?: { editor?: View } | n
   const bar = document.querySelector<HTMLElement>('#status')!;
   const text = bar.querySelector<HTMLElement>('.status-text')!;
   const detail = bar.querySelector<HTMLElement>('.status-detail')!;
-  // "Go to line 3": the cursor there, the line selected, the editor focused
+  // "Go to line 3": the cursor there, the editor focused
   const goButton = bar.querySelector<HTMLButtonElement>('.status-go')!;
   let where: Where | undefined;
   goButton.addEventListener('click', () => {
     const view = repl.editor?.editor;
     if (!view || !where) return;
-    const range = lineRange(view.state.doc.toString(), where.line, where.column);
-    if (!range) return;
-    view.dispatch({ selection: { anchor: range.from, head: range.to }, scrollIntoView: true });
+    const position = errorPosition(view.state.doc.toString(), where.line, where.column);
+    if (position === null) return;
+    view.dispatch({ selection: { anchor: position }, scrollIntoView: true });
     view.focus();
   });
 
@@ -76,11 +84,17 @@ export function setupStatus(repl: HTMLElement & { editor?: { editor?: View } | n
     const error = evalError ?? runtimeError;
     if (error) {
       bar.dataset.kind = 'error';
-      text.textContent = error.text;
-      detail.textContent = error.raw === error.text ? '' : error.raw;
       where = error.where;
+      // at a line's start, point at the line before where the fault likely is
+      const code = repl.editor?.editor?.state.doc.toString() ?? '';
+      const likely = where ? likelyLine(code, where.line, where.column) : undefined;
+      text.textContent =
+        where && likely !== where.line
+          ? error.text.replace(t('line', { line: where.line }), t('lineBefore', { line: likely ?? where.line, next: where.line }))
+          : error.text;
+      detail.textContent = error.raw === error.text ? '' : error.raw;
       goButton.hidden = !where;
-      if (where) goButton.textContent = t('goToLine', { line: where.line });
+      if (where) goButton.textContent = t('goToLine', { line: likely ?? where.line });
       bar.hidden = false;
     } else if (loading) {
       goButton.hidden = true;

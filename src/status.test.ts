@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { explainError, lineRange } from './status';
+import { errorPosition, explainError, likelyLine } from './status';
 
 describe('errors in plain words', () => {
   it('points at the line of a syntax slip', () => {
@@ -25,16 +25,26 @@ describe('where an error is', () => {
     expect(explainError('sound tambor not found!').where).toBeUndefined();
   });
 
-  it('turns into a range from the column to the end of the line', () => {
+  it('puts the cursor at the column, or at the end of the likely line before', () => {
     const code = 'setcps(0.5)\n$: s("bd")\n$: s("hh*8"';
-    const range = lineRange(code, 3, 5)!;
-    expect(code.slice(range.from, range.to)).toBe('"hh*8"');
-    // a column past the end selects the whole line; a line that is not there, nothing
-    expect(lineRange(code, 2, 99)).toEqual({ from: 12, to: 22 });
-    expect(lineRange(code, 9)).toBeNull();
-    // at the start of a line: the one before comes too
-    const both = lineRange(code, 3, 0)!;
-    expect(code.slice(both.from, both.to)).toBe('$: s("bd")\n$: s("hh*8"');
-    expect(lineRange(code, 1, 0)).toEqual({ from: 0, to: 11 });
+    expect(code.slice(0, errorPosition(code, 3, 5)!)).toBe('setcps(0.5)\n$: s("bd")\n$: s(');
+    // a column past the end: the line's end; a line that is not there: nothing
+    expect(errorPosition(code, 2, 99)).toBe(22);
+    expect(errorPosition(code, 9)).toBeNull();
+    // at the start of line 3: the end of line 2
+    expect(code.slice(0, errorPosition(code, 3, 0)!)).toBe('setcps(0.5)\n$: s("bd")');
+  });
+});
+
+describe('the likely line', () => {
+  const code = '// Lofi\nsetcps(78 / 60 / 4\n\nstack(\n  s("bd")\n)';
+  it('goes back over blank lines to the last line with code', () => {
+    expect(likelyLine(code, 4, 0)).toBe(2);
+    // the cursor lands right after "/ 4", where the ) is missing
+    expect(code.slice(0, errorPosition(code, 4, 0)!)).toBe('// Lofi\nsetcps(78 / 60 / 4');
+  });
+  it('stays on the line when the column is inside it', () => {
+    expect(likelyLine(code, 4, 3)).toBe(4);
+    expect(likelyLine(code, 1, 0)).toBe(1);
   });
 });

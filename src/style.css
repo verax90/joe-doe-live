@@ -1696,8 +1696,20 @@ select.control {
 /* Samples panel: kits open into their numbered sounds, with ▶ and + each */
 .sample-row {
   display: flex;
+  flex: 1;
   align-items: center;
   gap: 0.35rem;
+  min-width: 0;
+}
+
+/* a kit: its row, and its sounds under it when open */
+.sample-list li.sample-kit {
+  display: block;
+}
+
+/* the name takes what is left and never pushes the panel wider */
+.sample-row .sample-name {
+  flex: 1 1 auto;
 }
 
 .sample-toggle {
@@ -2178,14 +2190,16 @@ select.control {
 
 /* Long lists (cheatsheet, tools): the title, tabs and search stay, the list scrolls */
 #cheats:not([hidden]),
-#tools:not([hidden]) {
+#tools:not([hidden]),
+#samples:not([hidden]) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
 #cheat-list,
-#tool-list {
+#tool-list,
+#sample-list {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;

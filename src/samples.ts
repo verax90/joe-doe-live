@@ -190,6 +190,14 @@ async function readDropped(items: DataTransferItemList): Promise<Picked[]> {
 }
 
 // addTrack: puts a pattern into the code as a new track (see tracks.ts)
+// A long name cut in the middle, so its start and its end (often the number
+// that tells a series apart: …quA1, …quA12) both stay in sight
+export function shortName(name: string, max = 30) {
+  if (name.length <= max) return name;
+  const tail = Math.floor((max - 1) / 2);
+  return `${name.slice(0, max - 1 - tail)}…${name.slice(-tail)}`;
+}
+
 export function setupSamplesPanel({ addTrack }: { addTrack: (pattern: string) => void }) {
   const list = document.querySelector<HTMLUListElement>('#sample-list')!;
   const input = document.querySelector<HTMLInputElement>('#sample-input')!;
@@ -264,7 +272,8 @@ export function setupSamplesPanel({ addTrack }: { addTrack: (pattern: string) =>
       list.innerHTML = `<li class="muted">${t('noSamples')}</li>`;
       return;
     }
-    for (const [name, sounds] of [...names].sort(([a], [b]) => a.localeCompare(b))) {
+    // numbers in order: …A2 before …A10
+    for (const [name, sounds] of [...names].sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))) {
       const count = sounds.length;
       const item = document.createElement('li');
       item.className = 'sample-kit';
@@ -275,8 +284,9 @@ export function setupSamplesPanel({ addTrack }: { addTrack: (pattern: string) =>
       copy.className = 'sample-name';
       // A kit copies a line that walks through its first sounds
       const snippet = count > 1 ? `s("${name}").n("${[...Array(Math.min(count, 4)).keys()].join(' ')}")` : `s("${name}")`;
-      copy.textContent = `s("${name}")`;
-      copy.title = t('copy');
+      // just the name, cut in the middle to fit: the button copies s("…")
+      copy.textContent = shortName(name, 24);
+      copy.title = `${t('copy')}: s("${name}")`;
       copy.addEventListener('click', async () => {
         try {
           await navigator.clipboard.writeText(snippet);
@@ -325,7 +335,7 @@ export function setupSamplesPanel({ addTrack }: { addTrack: (pattern: string) =>
             const li = document.createElement('li');
             const text = document.createElement('span');
             text.className = 'sample-sound-name';
-            text.textContent = `${index} · ${sound}`;
+            text.textContent = `${index} · ${shortName(sound, 24)}`;
             text.title = sound;
             li.append(text, ...soundActions(name, index, `${name}:${index}`));
             soundList.append(li);
