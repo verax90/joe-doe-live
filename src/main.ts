@@ -24,6 +24,7 @@ import { setupMenu } from './menu';
 import { setupBacking } from './backing';
 import { setupMic } from './mic';
 import { setupRemote } from './remote';
+import { setupTyping } from './typing';
 import { setupOffline } from './offline';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { builtInPresets, translateIfBuiltIn } from './presets';
@@ -272,6 +273,7 @@ setupKnobs();
 setupScope();
 setupMic({ tempo: () => (scheduler?.started && scheduler.cps ? scheduler.cps : undefined) });
 setupBacking(scheduler);
+setupTyping(() => editor.code);
 setupKnobHud(() => ({
   code: editor.code,
   playing: Boolean(scheduler?.started),
