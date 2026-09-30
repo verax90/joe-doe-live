@@ -12,6 +12,12 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-09-30-blank',
+    title: L('Start from blank', 'Empezar en blanco'),
+    text: L('More → Code: a tempo and a kick to start; Ctrl+Z brings back what you had', 'Más → Código: tempo y un bombo para empezar; Ctrl+Z recupera lo que tenías'),
+    go: [{ click: '#menu-toggle' }],
+  },
+  {
     id: '2026-09-30-youtube',
     title: L('YouTube queue', 'Cola de YouTube'),
     text: L('Paste and Add: it waits its turn, the video on is never cut', 'Pega y Añadir: espera su turno, sin cortar el que suena'),

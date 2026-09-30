@@ -265,6 +265,16 @@ whenStrudelReady().then(() => {
 document.querySelector('#play')!.addEventListener('click', () => editor.evaluate());
 document.querySelector('#stop')!.addEventListener('click', () => editor.stop());
 
+// Start from blank: one edit (Ctrl+Z undoes it), a tempo and a kick to go on
+document.querySelector('#new-code')!.addEventListener('click', () => {
+  const bpm = Number(document.querySelector<HTMLInputElement>('#bpm')!.value) || 120;
+  const blank = `${t('newCodeStart')}\nsetcps(${bpm} / 60 / 4)\n\n$: s("bd*4")\n`;
+  editor.editor?.dispatch({ changes: { from: 0, to: editor.code.length, insert: blank }, selection: { anchor: blank.length } });
+  document.querySelector<HTMLSelectElement>('#preset')!.value = '';
+  toast(t('newCodeDone'));
+  editor.editor?.focus();
+});
+
 document.querySelector('#share')!.addEventListener('click', async () => {
   const url = buildShareUrl(editor.code, visualSelect.value);
   history.replaceState(null, '', url);
