@@ -61,15 +61,37 @@ export function setupMenu() {
     show(tabs.find((tab) => tab.getAttribute('aria-controls') === saved) ?? tabs[0]);
   });
 
+  // ↑ ↓ move through the menu, as in any menu
+  menu.addEventListener('keydown', (event) => {
+    const step = event.key === 'ArrowDown' ? 1 : event.key === 'ArrowUp' ? -1 : 0;
+    if (!step || (event.target as HTMLElement).closest('select')) return;
+    const items = [...menu.querySelectorAll<HTMLElement>('.menu-item, .menu-summary')].filter((item) => item.offsetParent !== null);
+    const at = items.indexOf(event.target as HTMLElement);
+    if (at < 0) return;
+    event.preventDefault();
+    items[(at + step + items.length) % items.length].focus();
+  });
+
+  const editorFocus = () => document.querySelector<HTMLElement>('.cm-content')?.focus();
   const panelButtons = document.querySelectorAll<HTMLButtonElement>('[data-panel]');
   panelButtons.forEach((button) => {
     button.addEventListener('click', () => {
+      let opened: HTMLElement | undefined;
       panelButtons.forEach((other) => {
         const panel = document.getElementById(other.dataset.panel!)!;
         const open = other === button ? panel.hidden : false;
         panel.hidden = !open;
         other.setAttribute('aria-pressed', String(open));
+        if (open) opened = panel;
       });
+      // the focus goes into the panel just opened (its first control after
+      // the ✕), so the keyboard can use it at once; closed, back to the code
+      if (opened) {
+        const controls = [...opened.querySelectorAll<HTMLElement>('button, input, select, textarea, [tabindex]:not([tabindex="-1"])')].filter(
+          (element) => !element.closest('[hidden]') && !(element as HTMLButtonElement).disabled,
+        );
+        (controls.find((element) => !element.classList.contains('panel-close')) ?? controls[0])?.focus({ preventScroll: true });
+      } else if (!document.activeElement || document.activeElement === document.body) editorFocus();
     });
   });
 
@@ -82,7 +104,10 @@ export function setupMenu() {
     close.type = 'button';
     close.className = 'control control-icon panel-close';
     close.textContent = '✕';
-    close.addEventListener('click', () => button.click());
+    close.addEventListener('click', () => {
+      button.click();
+      editorFocus();
+    });
     panel.prepend(close);
     closeButtons.push(close);
   });
@@ -90,11 +115,14 @@ export function setupMenu() {
   label();
   onLangChange(label);
   // Escape closes the open panel, unless it already closed something else
-  // (a dialog, the menu, the editor's suggestions) or a field is being typed in
+  // (a dialog, the menu, the editor's suggestions) or text is being typed
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || event.defaultPrevented || !menu.hidden || document.querySelector('dialog[open]')) return;
     const target = event.target as HTMLElement;
-    if (target.closest('input, select, textarea')) return;
+    // not while typing (text fields keep their own Escape); a checkbox or a
+    // slider does not type, so Escape still closes from there
+    const typing = target.closest('textarea, select, input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="file"])');
+    if (typing) return;
     if (document.querySelector('.cm-tooltip-autocomplete')) return;
     const button = openButton();
     if (!button) return;
