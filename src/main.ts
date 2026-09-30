@@ -26,6 +26,7 @@ import { setupMic } from './mic';
 import { setupRemote } from './remote';
 import { setupTyping } from './typing';
 import { recordPlayed, setupHistory } from './history';
+import { setupOverlay } from './overlay';
 import { setupScalePicker } from './scale';
 import { setupOffline } from './offline';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
@@ -282,6 +283,7 @@ setupMic({ tempo: () => (scheduler?.started && scheduler.cps ? scheduler.cps : u
 setupBacking(scheduler);
 setupTyping(() => editor.code);
 onLangChange(setupHistory(editor));
+setupOverlay();
 onLangChange(setupScalePicker(() => lang));
 setupKnobHud(() => ({
   code: editor.code,

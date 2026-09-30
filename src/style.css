@@ -2005,3 +2005,42 @@ select.control {
 #history-clear {
   margin-top: 0.5rem;
 }
+
+/* Stream caption, bottom right over the visuals (the code sits on the left) */
+.overlay {
+  position: fixed;
+  right: 1.5rem;
+  bottom: calc(var(--foot-h, 2.2rem) + 1.25rem);
+  z-index: 4;
+  display: grid;
+  justify-items: end;
+  gap: 0.1rem;
+  padding: 0.7rem 1rem 0.6rem;
+  border-right: 3px solid var(--accent);
+  border-radius: 0.4rem 0 0 0.4rem;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.7) 25%);
+  pointer-events: none;
+  text-align: right;
+}
+
+.overlay[hidden] {
+  display: none;
+}
+
+.overlay-artist {
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+.overlay-title {
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1.1;
+}
+
+.overlay-site {
+  color: var(--accent);
+  font-size: 0.75rem;
+}

@@ -104,6 +104,7 @@
               <h3 class="menu-group-title" data-i18n="menuLive">Perform</h3>
               <button id="toggle-set" class="menu-item" type="button" aria-pressed="false" data-panel="set" data-i18n="liveSet">Live set</button>
               <button id="toggle-room" class="menu-item" type="button" aria-pressed="false" data-panel="room" data-i18n="roomTitle">Live room</button>
+              <button id="toggle-overlay" class="menu-item" type="button" aria-pressed="false" data-panel="overlay-panel" data-i18n="overlayTitle">Caption</button>
               <button id="toggle-frame" class="menu-item" type="button" aria-pressed="false" data-i18n="verticalFrame">Vertical framing (9:16 streams)</button>
               <label class="menu-field">
                 <span data-i18n="recordMode">What to record</span>
@@ -265,6 +266,21 @@
         </section>
 
         <p id="compose-status" class="panel-status" role="status"></p>
+      </aside>
+
+      <aside class="panel" id="overlay-panel" hidden>
+        <h2 data-i18n="overlayTitle">Caption</h2>
+        <p class="panel-help" data-i18n="overlayHelp">Your name and the song over the visuals, for streams.</p>
+        <label class="set-option"><input id="overlay-on" type="checkbox" /> <span data-i18n="overlayOn">Show the caption</span></label>
+        <label class="panel-field" for="overlay-artist">
+          <span data-i18n="overlayArtist">Name</span>
+          <input id="overlay-artist" class="control" type="text" spellcheck="false" />
+        </label>
+        <label class="set-option"><input id="overlay-auto" type="checkbox" /> <span data-i18n="overlayAuto">Title: what plays (the live set song or the pattern)</span></label>
+        <label class="panel-field" for="overlay-title">
+          <span data-i18n="overlaySong">Title</span>
+          <input id="overlay-title" class="control" type="text" spellcheck="false" />
+        </label>
       </aside>
 
       <aside class="panel" id="history" hidden>
@@ -663,6 +679,12 @@
       <p class="room-bar-text"></p>
       <button id="room-listen" class="control control-accent" type="button" data-i18n="roomListen">▶ Listen</button>
       <button id="room-leave" class="control" type="button" data-i18n="roomLeave">Leave</button>
+    </div>
+
+    <div id="overlay" class="overlay" hidden aria-hidden="true">
+      <span class="overlay-artist"></span>
+      <strong class="overlay-title"></strong>
+      <span class="overlay-site">live.joedoe.dev</span>
     </div>
 
     <div id="set-bar" class="set-bar" role="group" aria-label="Live set" data-i18n-label="liveSet" hidden>

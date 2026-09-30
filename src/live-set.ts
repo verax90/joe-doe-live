@@ -48,6 +48,10 @@ type Options = {
   onLoad: (song: Song) => void;
 };
 
+// For the stream overlay: the song playing now in a set, if one is on
+let songNow: () => string | undefined = () => undefined;
+export const liveSetSong = () => songNow();
+
 export function setupLiveSet({ editor, presets, visuals, currentVisual, useVisual, onLoad }: Options) {
   const patternSelect = document.querySelector<HTMLSelectElement>('#set-pattern')!;
   const visualSelect = document.querySelector<HTMLSelectElement>('#set-visual')!;
@@ -65,6 +69,7 @@ export function setupLiveSet({ editor, presets, visuals, currentVisual, useVisua
   let index = 0;
   let pending: number | undefined; // the song waiting for the bar line
   let timer: number | undefined;
+  songNow = () => (active ? songs[index]?.name : undefined);
 
   const save = () => writeStorage(STORAGE_KEY, songs);
   const visualName = (id: string) => pick(visuals.find((v) => v.id === id)?.name ?? { en: id, es: id });

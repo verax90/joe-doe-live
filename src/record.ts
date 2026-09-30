@@ -8,6 +8,7 @@ import { onHydraFrame } from './ascii';
 import { scopeCanvas } from './scope';
 import { ensureLimiter, getLimiter } from './limiter';
 import { startStems } from './stems';
+import { overlayText } from './overlay';
 import { micForRecording } from './mic';
 
 type Mode = 'audio' | 'stems' | 'video' | 'vertical' | 'vertical-code';
@@ -271,6 +272,18 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
           draw2d.fillStyle = line.trimStart().startsWith('//') ? muted : fg;
           draw2d.fillText(line, CODE_MARGIN, y);
         });
+      }
+      // The stream caption, if on: name and title above the site's name
+      const caption = overlayText();
+      if (caption) {
+        draw2d.textAlign = 'right';
+        draw2d.textBaseline = 'alphabetic';
+        draw2d.fillStyle = fg;
+        draw2d.font = `700 44px 'Syne Variable', sans-serif`;
+        if (caption.title) draw2d.fillText(caption.title, VERTICAL.width - CODE_MARGIN, VERTICAL.height - CODE_MARGIN - 48);
+        draw2d.font = `500 30px 'IBM Plex Mono', monospace`;
+        draw2d.fillStyle = muted;
+        draw2d.fillText(caption.artist, VERTICAL.width - CODE_MARGIN, VERTICAL.height - CODE_MARGIN - (caption.title ? 104 : 48));
       }
       draw2d.font = `600 28px 'IBM Plex Mono', monospace`;
       draw2d.textBaseline = 'alphabetic';
