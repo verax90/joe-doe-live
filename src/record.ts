@@ -11,7 +11,7 @@ import { startStems } from './stems';
 import { overlayText } from './overlay';
 import { micForRecording } from './mic';
 
-type Mode = 'audio' | 'stems' | 'video' | 'vertical' | 'vertical-code';
+type Mode = 'audio' | 'stems' | 'video' | 'video-code' | 'vertical' | 'vertical-code';
 
 // MP4 plays everywhere (Instagram, TikTok, phones) and Chrome records it since
 // version 126; older browsers get WebM
@@ -29,9 +29,6 @@ export function videoFormat(isSupported: (type: string) => boolean) {
 
 // Vertical video: 1080 × 1920, what phones and socials expect
 export const VERTICAL = { width: 1080, height: 1920 };
-const CODE_FONT = 30;
-const CODE_LINE = 40;
-const CODE_MARGIN = 48;
 
 // The code as it fits on the video: long lines cut with …, and if there are
 // too many, the first ones and a … line
@@ -121,6 +118,27 @@ export function download(blob: Blob, extension: string) {
   link.download = `joe-doe-live-${stamp}.${extension}`;
   link.click();
   setTimeout(() => URL.revokeObjectURL(link.href), 60_000);
+}
+
+// The code into a frame, top left, each line on a dark band like the editor
+// so it reads on any visual; share is how much of the width it may take
+function drawCode(g: CanvasRenderingContext2D, code: string, width: number, height: number, font: number, colours: { fg: string; muted: string }, share = 1) {
+  const lineHeight = Math.round(font * 1.33);
+  const margin = Math.round(font * 1.6);
+  const maxChars = Math.floor((width * share - margin * 2) / (font * 0.6));
+  const maxLines = Math.floor((height - margin * 2 - font * 4) / lineHeight);
+  g.save();
+  g.font = `${font}px 'IBM Plex Mono', monospace`;
+  g.textBaseline = 'top';
+  codeLines(code, maxChars, maxLines).forEach((line, i) => {
+    if (!line.trim()) return;
+    const y = margin + i * lineHeight;
+    g.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    g.fillRect(margin - 8, y - 4, g.measureText(line).width + 16, lineHeight);
+    g.fillStyle = line.trimStart().startsWith('//') ? colours.muted : colours.fg;
+    g.fillText(line, margin, y);
+  });
+  g.restore();
 }
 
 // The stream caption (overlay.ts) into a frame, bottom right: name, title
@@ -272,7 +290,7 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
     return ascii && !ascii.hidden ? ascii : canvas;
   };
 
-  const startVideo = async (output: AudioNode, context: AudioContext) => {
+  const startVideo = async (output: AudioNode, context: AudioContext, withCode = false) => {
     const canvas = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
     if (!canvas) throw new Error(t('recordNoVisual'));
     // Visuals normally draw at half resolution to spare CPU; a video deserves
@@ -295,6 +313,7 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
         const box = scope.getBoundingClientRect();
         draw2d.drawImage(scope, box.left, box.top, box.width, box.height);
       }
+      if (withCode) drawCode(draw2d, getCode(), size.width, size.height, Math.max(13, Math.round(size.height / 40)), colours, 0.62);
       drawCaption(draw2d, size.width, size.height, Math.max(14, Math.round(size.height / 48)), colours);
     });
     return recordCanvas(composite, output, context, () => {
@@ -319,8 +338,6 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
     const accent = colours.getPropertyValue('--accent').trim() || '#d6ff4b';
     const fg = colours.getPropertyValue('--fg').trim() || '#eceae4';
     const muted = colours.getPropertyValue('--muted').trim() || '#9a9aa3';
-    const maxChars = Math.floor((VERTICAL.width - CODE_MARGIN * 2) / (CODE_FONT * 0.6));
-    const maxLines = Math.floor((VERTICAL.height - CODE_MARGIN * 2 - 120) / CODE_LINE);
     // Drawn right after each Hydra frame (see onHydraFrame), at its 30 fps
     const draw = () => {
       draw2d.fillStyle = '#000';
@@ -329,19 +346,7 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
       // The audio waves, if on, along the bottom as on screen
       const scope = scopeCanvas();
       if (scope) draw2d.drawImage(scope, 0, VERTICAL.height - 260, VERTICAL.width, 200);
-      if (withCode) {
-        draw2d.font = `${CODE_FONT}px 'IBM Plex Mono', monospace`;
-        draw2d.textBaseline = 'top';
-        codeLines(getCode(), maxChars, maxLines).forEach((line, i) => {
-          if (!line.trim()) return;
-          const y = CODE_MARGIN + i * CODE_LINE;
-          // a dark band behind each line, like the editor, so it reads on any visual
-          draw2d.fillStyle = 'rgba(0, 0, 0, 0.6)';
-          draw2d.fillRect(CODE_MARGIN - 8, y - 4, draw2d.measureText(line).width + 16, CODE_LINE);
-          draw2d.fillStyle = line.trimStart().startsWith('//') ? muted : fg;
-          draw2d.fillText(line, CODE_MARGIN, y);
-        });
-      }
+      if (withCode) drawCode(draw2d, getCode(), VERTICAL.width, VERTICAL.height, 30, { fg, muted });
       drawCaption(draw2d, VERTICAL.width, VERTICAL.height, 30, { fg, muted, accent });
     };
     const stopDrawing = onHydraFrame(draw);
@@ -377,8 +382,8 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
       stop =
         mode === 'stems' && playCode
           ? await startStems(context, limiter.limiter, getCode(), playCode)
-          : mode === 'video'
-          ? await startVideo(limiter.limiter, context)
+          : mode === 'video' || mode === 'video-code'
+          ? await startVideo(limiter.limiter, context, mode === 'video-code')
           : mode === 'vertical' || mode === 'vertical-code'
             ? await startVertical(limiter.limiter, context, mode === 'vertical-code')
             : await startAudio(limiter.limiter, context);
