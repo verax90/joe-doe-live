@@ -223,6 +223,7 @@ whenStrudelReady().then(() => {
   setupSp({ editor, addTrack });
   setupSampler({ editor, addTrack });
   setupLooper({ editor, addTrack });
+  setupRemote({ addTrack });
   setupCycleClock(scheduler as Parameters<typeof setupCycleClock>[0]);
 });
 
@@ -271,7 +272,6 @@ setupKnobs();
 setupScope();
 setupMic({ tempo: () => (scheduler?.started && scheduler.cps ? scheduler.cps : undefined) });
 setupBacking(scheduler);
-setupRemote();
 setupKnobHud(() => ({
   code: editor.code,
   playing: Boolean(scheduler?.started),

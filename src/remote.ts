@@ -42,7 +42,11 @@ export function applyRemote(message: RemoteMessage, target: EventTarget = window
 // a phone that has it bookmarked finds it again
 export const remoteLink = (origin: string, id: string) => `${origin}/mando.html?id=${id}`;
 
-export function setupRemote() {
+// A bass whose filter follows the finger: left to right opens it, bottom to
+// top makes it ring
+export const XY_EXAMPLE = 'note("<c2 eb2 g1 bb1>*2").s("sawtooth").lpf(ref(() => 150 + phoneX() * 5000)).lpq(ref(() => phoneY() * 15)).gain(0.5)';
+
+export function setupRemote({ addTrack }: { addTrack: (pattern: string) => void }) {
   const onButton = document.querySelector<HTMLButtonElement>('#remote-on')!;
   const box = document.querySelector<HTMLElement>('#remote-box')!;
   const qr = document.querySelector<HTMLElement>('#remote-qr')!;
@@ -108,6 +112,7 @@ export function setupRemote() {
   };
 
   onButton.addEventListener('click', () => (peer ? stop() : void start()));
+  document.querySelector('#remote-example')!.addEventListener('click', () => addTrack(XY_EXAMPLE));
   document.querySelector('#remote-copy')!.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(link);
