@@ -12,6 +12,11 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-09-30-keyboard',
+    title: L('Better with the keyboard', 'Mejor con teclado'),
+    text: L('Tab and Enter keep their place, arrows in the help, and a ring shows where you are', 'Tab e Intro no pierden el sitio, flechas en la ayuda y un anillo marca dónde estás'),
+  },
+  {
     id: '2026-09-30-goline',
     title: L('Go to the error', 'Ir al error'),
     text: L('When the code has an error, a button takes the cursor to its line', 'Si el código tiene un error, un botón lleva el cursor a su línea'),
