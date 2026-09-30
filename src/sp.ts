@@ -82,7 +82,7 @@ const rememberNote = (data: number[], at: number) => {
 // 24 ticks a beat, 4 beats a cycle (the studio counts a cycle as a bar)
 export const TICKS_PER_CYCLE = 96;
 
-type Settings = { port: string; mode: SpMode; clock: boolean; offset: number };
+type Settings = { port: string; mode: SpMode; clock: boolean; offset: number; picked?: boolean };
 type Hap = { value: unknown; duration: { valueOf(): number }; whole?: { begin: { valueOf(): number } } };
 type PatternLike = {
   onTrigger(fn: (hap: Hap, now: number, cps: number, target: number) => void, dominant?: boolean): PatternLike;
@@ -196,15 +196,16 @@ export function setupSp({ editor, addTrack }: { editor: StrudelMirror; addTrack:
   const render = () => {
     const outputs = access ? [...access.outputs.values()] : [];
     enable.hidden = Boolean(access);
-    outputSelect.replaceChildren(...outputs.map((port) => new Option(port.name ?? port.id, port.id)));
-    // The SP-404 first, or what was chosen last time
-    const kept = outputs.find((port) => port.id === settings.port);
-    const preferred = outputs.find((port) => /sp-?404/i.test(port.name ?? ''));
-    const chosen = kept ?? preferred ?? outputs.find((port) => !/through/i.test(port.name ?? '')) ?? outputs[0];
+    outputSelect.replaceChildren(new Option(t('spNone'), ''), ...outputs.map((port) => new Option(port.name ?? port.id, port.id)));
+    // What you picked yourself, or else the SP-404 when it is plugged in;
+    // never some other device on its own (a controller such as the TouchMe
+    // has an output too, and it should not get notes and clock)
+    const kept = settings.picked ? outputs.find((port) => port.id === settings.port) : undefined;
+    const chosen = kept ?? outputs.find((port) => /sp-?404/i.test(port.name ?? ''));
     settings.port = chosen?.id ?? '';
     outputSelect.value = settings.port;
     outputSelect.disabled = !outputs.length;
-    status.textContent = !access ? '' : chosen ? t('spReady', { name: chosen.name ?? '' }) : t('spNoDevice');
+    status.textContent = !access ? '' : chosen ? t('spReady', { name: chosen.name ?? '' }) : outputs.length ? t('spPick') : t('spNoDevice');
   };
 
   const connect = async () => {
@@ -224,7 +225,7 @@ export function setupSp({ editor, addTrack }: { editor: StrudelMirror; addTrack:
 
   enable.addEventListener('click', () => void connect());
   outputSelect.addEventListener('change', () => {
-    settings = { ...settings, port: outputSelect.value };
+    settings = { ...settings, port: outputSelect.value, picked: Boolean(outputSelect.value) };
     save();
     render();
     reclock();
