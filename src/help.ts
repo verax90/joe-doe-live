@@ -42,6 +42,7 @@ const sections: Section[] = [
           ['Ctrl+.', L('Stop', 'Stop')],
           ['Ctrl+Z · ↶ / Ctrl+Shift+Z · ↷', L('Undo / redo; with the buttons, while it plays you hear each step', 'Deshacer / rehacer; con los botones, mientras suena oyes cada paso')],
           ['Ctrl+Shift+H', L('Hide the code (performance mode)', 'Ocultar el código (modo concierto)')],
+          ['Ctrl+S', L('Save the pattern in this browser', 'Guardar el patrón en este navegador')],
           ['Ctrl+K', L('Search: a panel, a pattern, a visual, by a few letters', 'Buscar: un panel, un patrón, un visual, con unas letras')],
           ['Alt+M', L('While recording the whole session: mark this moment', 'Grabando la sesión entera: marcar este momento')],
           ['?', L('This help', 'Esta ayuda')],
@@ -141,7 +142,7 @@ const sections: Section[] = [
         head: [L('In More', 'En Más'), L('What it is for', 'Para qué sirve')],
         rows: [
           [L('History', 'Historial'), L('Every version that played, the last 50: ↩ loads one (Ctrl+Z undoes), ▶ loads and plays it. For going back to what sounded five minutes ago', 'Cada versión que sonó, las 50 últimas: ↩ carga una (Ctrl+Z la deshace), ▶ la carga y la toca. Para volver a lo que sonaba hace cinco minutos')],
-          [L('Copy / Download the code', 'Copiar / Descargar el código'), L('Your code to the clipboard, or as a .js file that opens in any Strudel', 'Tu código al portapapeles, o como archivo .js que se abre en cualquier Strudel')],
+          [L('Save and share', 'Guardar y compartir'), L('More → Save and share…: save in this browser (Ctrl+S), copy a link, copy or download the code, a session for joedoe.dev, open a .js', 'Más → Guardar y compartir…: guardar en el navegador (Ctrl+S), copiar un enlace, copiar o descargar el código, una sesión para joedoe.dev, abrir un .js')],
           [L('Offline', 'Sin internet'), L('Once opened, the studio works with no connection and keeps every sound it played. Before a gig: More → Live set → Get ready to play offline.', 'Una vez abierto, el estudio funciona sin conexión y guarda cada sonido que ha tocado. Antes de un concierto: Más → Directo → Preparar para tocar sin internet.')],
           [L('What to record', 'Qué grabar'), L('WAV audio, a video of the screen, or a vertical 9:16 video for socials (with the code on top if you like); MP4 when the browser can, else WebM. Then ● Record', 'Audio WAV, vídeo de la pantalla, o vídeo vertical 9:16 para redes (con el código encima si quieres); MP4 si el navegador puede, si no WebM. Luego ● Grabar')],
           [L('Whole session', 'Sesión entera'), L('In What to record: a long take of the jam, light enough for hours, with a marker at every change of code and every ★ (Alt+M). A .zip with the audio, the markers for Audacity and the code of every moment', 'En Qué grabar: horas de jam en poco espacio, con marcas en cada cambio de código y cada ★ (Alt+M). Un .zip: audio, marcas para Audacity y el código de cada momento')],

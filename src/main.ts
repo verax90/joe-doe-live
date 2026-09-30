@@ -29,6 +29,7 @@ import { recordPlayed, setupHistory } from './history';
 import { sessionPlayed, sessionStopped } from './session';
 import { setupVoice } from './voice';
 import { setupFinder } from './finder';
+import { setupProject } from './project';
 import { setupDrop } from './drop';
 import { setupOverlay } from './overlay';
 import { setupScalePicker } from './scale';
@@ -288,6 +289,7 @@ const useCodeVisual = () => pickVisual('code');
 
 setupOffline();
 setupMenu();
+setupProject();
 setupFinder();
 setupShortcuts(editor);
 setupUndo(editor);

@@ -71,18 +71,8 @@
           <div class="menu-columns">
             <div class="menu-group">
               <h3 class="menu-group-title" data-i18n="menuCode">Code</h3>
-              <button id="save" class="menu-item" type="button" title="Save in this browser" data-i18n="save" data-i18n-title="saveTitle">Save</button>
-              <button id="delete" class="menu-item" type="button" data-i18n="delete" data-i18n-title="deleteTitle" hidden>Delete</button>
-              <button id="share" class="menu-item" type="button" data-i18n="share">Share</button>
+              <button id="project-open" class="menu-item" type="button" aria-haspopup="dialog" aria-keyshortcuts="Control+S" data-i18n="projectOpen">Save and share…</button>
               <button id="toggle-history" class="menu-item" type="button" aria-pressed="false" data-panel="history" data-i18n="historyTitle">History</button>
-              <details class="menu-more">
-                <summary class="menu-summary" data-i18n="menuExport">Export / import</summary>
-                <button id="copy-code" class="menu-item" type="button" data-i18n="copyCode">Copy the code</button>
-                <button id="download-code" class="menu-item" type="button" data-i18n="downloadCode">Download the code (.js)</button>
-                <button id="open-code" class="menu-item" type="button" data-i18n="openCode">Open code (.js)</button>
-                <button id="save-session" class="menu-item" type="button" data-i18n="saveSession">Save as session (joedoe.dev)</button>
-                <input id="open-code-input" type="file" accept=".js,.mjs,.txt,.strudel,text/javascript,text/plain" hidden />
-              </details>
             </div>
             <div class="menu-group">
               <h3 class="menu-group-title" data-i18n="menuCreate">Create</h3>
@@ -172,6 +162,48 @@
           allow="autoplay; midi; microphone; clipboard-read; clipboard-write; fullscreen"
         ></iframe>
       </section>
+
+      <dialog id="project" class="help-dialog project-dialog" aria-labelledby="project-title">
+        <div class="help-head">
+          <h2 id="project-title" data-i18n="projectTitle">Save and share</h2>
+          <button id="project-close" class="control control-icon" type="button" aria-label="Close" data-i18n-label="close">✕</button>
+        </div>
+        <div class="project-cards">
+          <section class="project-card">
+            <h3 data-i18n="projectSaveTitle">In this browser</h3>
+            <p id="project-now" class="project-now"></p>
+            <div class="compose-buttons">
+              <button id="save" class="control control-accent" type="button" aria-keyshortcuts="Control+S" data-i18n="save">Save</button>
+              <button id="delete" class="control" type="button" data-i18n="delete" data-i18n-title="deleteTitle" hidden>Delete</button>
+            </div>
+            <p class="panel-help" data-i18n="projectSaveHint">It goes to the pattern list, under Saved. Ctrl+S saves from anywhere.</p>
+          </section>
+          <section class="project-card">
+            <h3 data-i18n="projectShareTitle">Share</h3>
+            <div class="compose-buttons">
+              <button id="share" class="control control-accent" type="button" data-i18n="share">Copy the link</button>
+            </div>
+            <p class="panel-help" data-i18n="projectShareHint">A link with your code and your visual: whoever opens it hears it.</p>
+          </section>
+          <section class="project-card">
+            <h3 data-i18n="projectExportTitle">Export</h3>
+            <div class="project-list">
+              <button id="copy-code" class="control" type="button" data-i18n="copyCode">Copy the code</button>
+              <button id="download-code" class="control" type="button" data-i18n="downloadCode">Download the code (.js)</button>
+              <button id="save-session" class="control" type="button" data-i18n="saveSession">Save as session (joedoe.dev)</button>
+            </div>
+            <p class="panel-help" data-i18n="projectExportHint">To keep it outside the browser or open it in any Strudel.</p>
+          </section>
+          <section class="project-card">
+            <h3 data-i18n="projectOpenTitle">Open</h3>
+            <div class="compose-buttons">
+              <button id="open-code" class="control" type="button" data-i18n="openCode">Open code (.js)</button>
+            </div>
+            <input id="open-code-input" type="file" accept=".js,.mjs,.txt,.strudel,text/javascript,text/plain" hidden />
+            <p class="panel-help" data-i18n="projectOpenHint">A .js you downloaded before: it replaces the code (Ctrl+Z brings it back).</p>
+          </section>
+        </div>
+      </dialog>
 
       <dialog id="help" class="help-dialog" aria-labelledby="help-title">
         <div class="help-head">

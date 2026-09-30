@@ -52,6 +52,11 @@ function collect(): Entry[] {
     const group = button.closest('.menu-group, .menu-footer')?.querySelector('.menu-group-title')?.textContent?.trim() ?? '';
     entries.push({ label: text(button), kind: group, run: () => button.click() });
   }
+  // what the Save and share dialog holds, found by name too
+  const project = document.querySelector('#project-title')?.textContent?.trim() ?? '';
+  for (const button of document.querySelectorAll<HTMLButtonElement>('#project .project-card button')) {
+    if (!button.hidden) entries.push({ label: text(button), kind: project, run: () => button.click() });
+  }
   const options = (id: string, kind: string) => {
     const select = document.getElementById(id) as HTMLSelectElement | null;
     for (const option of select?.options ?? []) {

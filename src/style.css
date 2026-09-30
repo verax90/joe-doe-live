@@ -420,6 +420,60 @@ select.control {
   font-weight: 700;
 }
 
+/* Save and share (project.ts): four cards, two a row */
+/* fit-content: a modal dialog is pinned top and bottom, auto would stretch it */
+#project[open] {
+  display: block;
+  height: fit-content;
+  width: min(44rem, calc(100vw - 2rem));
+}
+
+.project-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.project-card {
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}
+
+#project .project-card h3 {
+  margin: 0;
+}
+
+.project-card .panel-help,
+.project-card .compose-buttons {
+  margin: 0;
+}
+
+.project-now {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+.project-list {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.project-list .control {
+  text-align: left;
+}
+
+@media (max-width: 560px) {
+  .project-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Search, at the top of More */
 .menu-search {
   display: flex;
