@@ -30,22 +30,23 @@ export type MicControl =
   | 'pingpong'
   | 'reverb';
 
-export const MIC_CONTROLS: { id: MicControl; name: Localized }[] = [
+// Short names on one line; what each one does, on hover
+export const MIC_CONTROLS: { id: MicControl; name: Localized; hint?: Localized }[] = [
   { id: 'volume', name: { en: 'Volume', es: 'Volumen' } },
-  { id: 'gate', name: { en: 'Noise gate (quiet between words)', es: 'Puerta de ruido (silencio entre frases)' } },
-  { id: 'pitch', name: { en: 'Pitch (low ↔ high)', es: 'Tono (grave ↔ agudo)' } },
+  { id: 'gate', name: { en: 'Noise gate', es: 'Puerta de ruido' }, hint: { en: 'Silence between words', es: 'Silencio entre frases' } },
+  { id: 'pitch', name: { en: 'Pitch', es: 'Tono' }, hint: { en: 'Low ↔ high, up to an octave', es: 'Grave ↔ agudo, hasta una octava' } },
   { id: 'drive', name: { en: 'Distortion', es: 'Distorsión' } },
-  { id: 'lofi', name: { en: 'Lo-fi (bits)', es: 'Lo-fi (bits)' } },
-  { id: 'filter', name: { en: 'Filter (radio)', es: 'Filtro (radio)' } },
-  { id: 'muffle', name: { en: 'Muffle (underwater)', es: 'Apagado (bajo el agua)' } },
-  { id: 'wah', name: { en: 'Auto-wah (opens as you sing louder)', es: 'Auto-wah (se abre al cantar más fuerte)' } },
+  { id: 'lofi', name: { en: 'Lo-fi', es: 'Lo-fi' }, hint: { en: 'Fewer bits', es: 'Menos bits' } },
+  { id: 'filter', name: { en: 'Radio', es: 'Radio' }, hint: { en: 'A thin, telephone-like band', es: 'Una banda estrecha, como un teléfono' } },
+  { id: 'muffle', name: { en: 'Muffle', es: 'Apagado' }, hint: { en: 'Underwater', es: 'Bajo el agua' } },
+  { id: 'wah', name: { en: 'Auto-wah', es: 'Auto-wah' }, hint: { en: 'Opens as you sing louder', es: 'Se abre al cantar más fuerte' } },
   { id: 'robot', name: { en: 'Robot', es: 'Robot' } },
   { id: 'tremolo', name: { en: 'Tremolo', es: 'Trémolo' } },
-  { id: 'vibrato', name: { en: 'Vibrato (tape)', es: 'Vibrato (cinta)' } },
-  { id: 'flanger', name: { en: 'Flanger (jet)', es: 'Flanger (avión)' } },
+  { id: 'vibrato', name: { en: 'Vibrato', es: 'Vibrato' }, hint: { en: 'A warped tape', es: 'Una cinta deformada' } },
+  { id: 'flanger', name: { en: 'Flanger', es: 'Flanger' }, hint: { en: 'A jet', es: 'Un avión' } },
   { id: 'chorus', name: { en: 'Chorus', es: 'Coro' } },
   { id: 'echo', name: { en: 'Echo', es: 'Eco' } },
-  { id: 'pingpong', name: { en: 'Ping-pong (left ↔ right)', es: 'Ping-pong (izquierda ↔ derecha)' } },
+  { id: 'pingpong', name: { en: 'Ping-pong', es: 'Ping-pong' }, hint: { en: 'Echo left ↔ right', es: 'Eco izquierda ↔ derecha' } },
   { id: 'reverb', name: { en: 'Reverb', es: 'Reverb' } },
 ];
 
@@ -648,6 +649,7 @@ export function setupMic({ tempo }: Options) {
         label.className = 'vj-slider';
         const name = document.createElement('span');
         name.textContent = pick(control.name);
+        if (control.hint) label.title = pick(control.hint);
         const input = document.createElement('input');
         input.type = 'range';
         input.min = '0';
