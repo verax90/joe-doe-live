@@ -1803,3 +1803,79 @@ select.control {
 .cheat-entries .cheat-note {
   margin: 0.1rem 0 0;
 }
+
+/* Help: a fixed-size window, the index on the left always in view, only the
+   section scrolls when it is long */
+.help-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  height: min(85dvh, 44rem);
+  overflow: hidden;
+}
+
+#help-content {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: 12rem 1fr;
+  gap: 1.25rem;
+  min-height: 0;
+}
+
+.help-index {
+  display: grid;
+  align-content: start;
+  gap: 0.2rem;
+  overflow-y: auto;
+}
+
+.help-index-item {
+  padding: 0.45rem 0.6rem;
+  border: none;
+  border-radius: 0.3rem;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.help-index-item:hover,
+.help-index-item:focus-visible {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--fg);
+  outline: none;
+}
+
+.help-index-item[aria-current='true'] {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.help-section {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.help-section > h3:first-child {
+  margin-top: 0.25rem;
+}
+
+/* Phones: the index becomes a row of buttons on top */
+@media (max-width: 640px) {
+  #help-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 0.5rem;
+  }
+
+  .help-index {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .help-index-item {
+    flex: 0 0 auto;
+  }
+}

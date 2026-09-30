@@ -1,18 +1,21 @@
 // Help: getting started, shortcuts, every control of the MPK Mini Mk II
 // in each of its modes, the panels, and what to do when something goes wrong.
 import { onLangChange, pick, type Localized } from './i18n';
+import { readStorage, writeStorage } from './storage';
 
 type Block =
   | { kind: 'text'; body: Localized }
   | { kind: 'steps'; items: Localized[] }
   | { kind: 'table'; head: [Localized, Localized]; rows: [string | Localized, Localized][] };
-type Section = { title: Localized; blocks: Block[] };
+// short: its name in the help's index
+type Section = { title: Localized; short: Localized; blocks: Block[] };
 
 const L = (en: string, es: string): Localized => ({ en, es });
 
 const sections: Section[] = [
   {
     title: L('Getting started', 'Para empezar'),
+    short: L('Getting started', 'Para empezar'),
     blocks: [
       {
         kind: 'steps',
@@ -29,6 +32,7 @@ const sections: Section[] = [
   },
   {
     title: L('Shortcuts', 'Atajos'),
+    short: L('Shortcuts', 'Atajos'),
     blocks: [
       {
         kind: 'table',
@@ -48,6 +52,7 @@ const sections: Section[] = [
   },
   {
     title: L('MPK Mini Mk II: keys and pads', 'MPK Mini Mk II: teclas y pads'),
+    short: L('MPK: keys and pads', 'MPK: teclas y pads'),
     blocks: [
       {
         kind: 'text',
@@ -70,6 +75,7 @@ const sections: Section[] = [
   },
   {
     title: L('MPK Mini Mk II: knobs, joystick and buttons', 'MPK Mini Mk II: knobs, joystick y botones'),
+    short: L('MPK: knobs and buttons', 'MPK: knobs y botones'),
     blocks: [
       {
         kind: 'table',
@@ -103,6 +109,7 @@ const sections: Section[] = [
   },
   {
     title: L('TouchMe (Playtronica)', 'TouchMe (Playtronica)'),
+    short: L('TouchMe', 'TouchMe'),
     blocks: [
       {
         kind: 'table',
@@ -119,6 +126,7 @@ const sections: Section[] = [
   },
   {
     title: L('Panels', 'Paneles'),
+    short: L('Panels', 'Paneles'),
     blocks: [
       {
         kind: 'table',
@@ -152,6 +160,7 @@ const sections: Section[] = [
   },
   {
     title: L('If something goes wrong', 'Si algo falla'),
+    short: L('If something goes wrong', 'Si algo falla'),
     blocks: [
       {
         kind: 'table',
@@ -188,50 +197,71 @@ export function setupHelp() {
   });
   const text = (value: string | Localized) => (typeof value === 'string' ? value : pick(value));
 
-  const render = () => {
-    container.replaceChildren();
-    for (const section of sections) {
-      const heading = document.createElement('h3');
-      heading.textContent = pick(section.title);
-      container.append(heading);
-      for (const block of section.blocks) {
-        if (block.kind === 'text') {
-          const p = document.createElement('p');
-          p.className = 'panel-help';
-          p.textContent = pick(block.body);
-          container.append(p);
-        } else if (block.kind === 'steps') {
-          const ol = document.createElement('ol');
-          ol.className = 'help-steps';
-          for (const item of block.items) {
-            const li = document.createElement('li');
-            li.textContent = pick(item);
-            ol.append(li);
-          }
-          container.append(ol);
-        } else {
-          const table = document.createElement('table');
-          table.className = 'help-table';
-          const head = table.createTHead().insertRow();
-          for (const cell of block.head) {
-            const th = document.createElement('th');
-            th.scope = 'col';
-            th.textContent = pick(cell);
-            head.append(th);
-          }
-          const body = table.createTBody();
-          for (const [key, value] of block.rows) {
-            const row = body.insertRow();
-            const th = document.createElement('th');
-            th.scope = 'row';
-            th.textContent = text(key);
-            row.append(th);
-            row.insertCell().textContent = text(value);
-          }
-          container.append(table);
-        }
-      }
+  // One section at a time: an index on the left, the section on the right
+  let current = readStorage<number>('jdl:help-section', 0);
+  const block = (item: Block) => {
+    if (item.kind === 'text') {
+      const p = document.createElement('p');
+      p.className = 'panel-help';
+      p.textContent = pick(item.body);
+      return p;
     }
+    if (item.kind === 'steps') {
+      const ol = document.createElement('ol');
+      ol.className = 'help-steps';
+      for (const step of item.items) {
+        const li = document.createElement('li');
+        li.textContent = pick(step);
+        ol.append(li);
+      }
+      return ol;
+    }
+    const table = document.createElement('table');
+    table.className = 'help-table';
+    const head = table.createTHead().insertRow();
+    for (const cell of item.head) {
+      const th = document.createElement('th');
+      th.scope = 'col';
+      th.textContent = pick(cell);
+      head.append(th);
+    }
+    const body = table.createTBody();
+    for (const [key, value] of item.rows) {
+      const row = body.insertRow();
+      const th = document.createElement('th');
+      th.scope = 'row';
+      th.textContent = text(key);
+      row.append(th);
+      row.insertCell().textContent = text(value);
+    }
+    return table;
+  };
+
+  const render = () => {
+    if (!sections[current]) current = 0;
+    const nav = document.createElement('nav');
+    nav.className = 'help-index';
+    nav.setAttribute('aria-label', pick(L('Help sections', 'Apartados de la ayuda')));
+    sections.forEach((section, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'help-index-item';
+      button.textContent = pick(section.short);
+      button.setAttribute('aria-current', String(index === current));
+      button.addEventListener('click', () => {
+        current = index;
+        writeStorage('jdl:help-section', current);
+        render();
+        container.querySelector<HTMLElement>('.help-section')?.scrollTo(0, 0);
+      });
+      nav.append(button);
+    });
+    const pane = document.createElement('section');
+    pane.className = 'help-section';
+    const heading = document.createElement('h3');
+    heading.textContent = pick(sections[current].title);
+    pane.append(heading, ...sections[current].blocks.map(block));
+    container.replaceChildren(nav, pane);
   };
 
   render();
