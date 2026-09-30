@@ -85,6 +85,7 @@ export function setupFinder() {
   document.body.append(dialog);
   const input = dialog.querySelector<HTMLInputElement>('.finder-input')!;
   const list = dialog.querySelector<HTMLUListElement>('.finder-list')!;
+  input.setAttribute('aria-label', t('finderTitle'));
   let entries: Entry[] = [];
   let shown: Entry[] = [];
   let active = 0;
@@ -135,6 +136,7 @@ export function setupFinder() {
     if (menu && !menu.hidden) document.getElementById('menu-toggle')?.click();
     entries = collect();
     input.placeholder = t('finderPlaceholder');
+    input.setAttribute('aria-label', t('finderTitle'));
     input.value = '';
     active = 0;
     render();
