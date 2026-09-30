@@ -389,7 +389,12 @@ export function setupCompose(editor: Editor) {
   };
   const renderGrid = () => {
     const layers = present();
-    arrangement.hidden = !layers.length;
+    // The Arrangement tab waits until there are layers to arrange
+    const tab = document.querySelector<HTMLButtonElement>('[aria-controls="compose-arrangement"]');
+    if (tab) {
+      tab.disabled = !layers.length;
+      if (!layers.length && tab.getAttribute('aria-selected') === 'true') document.querySelector<HTMLButtonElement>('[aria-controls="compose-tab-song"]')?.click();
+    }
     const cells: HTMLElement[] = [document.createElement('span')];
     for (let section = 0; section < SECTIONS; section++) {
       const head = document.createElement('span');
@@ -458,19 +463,28 @@ export function setupCompose(editor: Editor) {
         label.textContent = `${found?.muted ? '_' : ''}${layer}:`;
         const actions = document.createElement('div');
         actions.className = 'cheat-actions';
-        actions.append(
-          button(t(found ? 'composeAnother' : 'composeAdd'), () => {
-            if (found) {
-              const current = state(layer);
-              states[layer] = { variant: current.variant + 1, motif: layer === 'melody' ? randomMotif() : current.motif };
-            }
-            setLayer(layer);
-          }),
-        );
-        if (found) {
+        // Add is a word; once the layer is in, small icons (named on hover)
+        // keep it on one line: another variation, mute, remove
+        const icon = (glyph: string, text: string, onClick: () => void) => {
+          const element = button(glyph, onClick);
+          element.className = 'cheat-icon';
+          element.title = text;
+          element.setAttribute('aria-label', text);
+          return element;
+        };
+        const another = () => {
+          if (found) {
+            const current = state(layer);
+            states[layer] = { variant: current.variant + 1, motif: layer === 'melody' ? randomMotif() : current.motif };
+          }
+          setLayer(layer);
+        };
+        if (!found) actions.append(button(t('composeAdd'), another));
+        else {
           actions.append(
-            button(t(found.muted ? 'composeUnmute' : 'composeMute'), () => update(applyChanges(editor.code, muteChanges(editor.code, layer)))),
-            button(t('composeRemove'), () => update(applyChanges(editor.code, removeChanges(editor.code, layer)))),
+            icon('↻', t('composeAnother'), another),
+            icon(found.muted ? '🔈' : '🔇', t(found.muted ? 'composeUnmute' : 'composeMute'), () => update(applyChanges(editor.code, muteChanges(editor.code, layer)))),
+            icon('✕', t('composeRemove'), () => update(applyChanges(editor.code, removeChanges(editor.code, layer)))),
           );
         }
         item.append(name, label, actions);

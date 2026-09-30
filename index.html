@@ -228,26 +228,31 @@
 
       <aside class="panel" id="compose" hidden>
         <h2 data-i18n="compose">Compose</h2>
-        <p class="panel-help" data-i18n="composeHelp">Build a song layer by layer without writing code.</p>
-        <div class="compose-song">
-          <label class="panel-field" for="compose-style">
-            <span data-i18n="composeStyle">Style</span>
-            <select id="compose-style" class="control"></select>
-          </label>
-          <label class="panel-field" for="compose-key">
-            <span data-i18n="composeKey">Key</span>
-            <select id="compose-key" class="control"></select>
-          </label>
+        <div class="panel-tabs" role="tablist" aria-label="Compose">
+          <button class="panel-tab" type="button" role="tab" aria-selected="true" aria-controls="compose-tab-song" data-i18n="composeTabSong">Song</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="compose-arrangement" data-i18n="arrangement">Arrangement</button>
         </div>
-        <p id="compose-progression" class="compose-progression"></p>
-        <div class="compose-buttons">
-          <button id="compose-new" class="control control-accent" type="button" data-i18n="composeNew">Start from scratch</button>
-          <button id="compose-surprise" class="control" type="button" data-i18n="composeSurprise">Surprise me</button>
-          <button id="compose-chords" class="control" type="button" data-i18n="composeChords">Other chords</button>
-        </div>
-        <ul id="compose-layers" class="panel-list compose-layers"></ul>
-        <section id="compose-arrangement" class="compose-arrangement" aria-labelledby="arrangement-title" hidden>
-          <h3 id="arrangement-title" data-i18n="arrangement">Arrangement</h3>
+        <section id="compose-tab-song" class="panel-tabpanel" role="tabpanel">
+          <p class="panel-help" data-i18n="composeHelp">Build a song layer by layer without writing code.</p>
+          <div class="compose-song">
+            <label class="panel-field" for="compose-style">
+              <span data-i18n="composeStyle">Style</span>
+              <select id="compose-style" class="control"></select>
+            </label>
+            <label class="panel-field" for="compose-key">
+              <span data-i18n="composeKey">Key</span>
+              <select id="compose-key" class="control"></select>
+            </label>
+          </div>
+          <p id="compose-progression" class="compose-progression"></p>
+          <div class="compose-buttons">
+            <button id="compose-new" class="control control-accent" type="button" data-i18n="composeNew">Start from scratch</button>
+            <button id="compose-surprise" class="control" type="button" data-i18n="composeSurprise">Surprise me</button>
+            <button id="compose-chords" class="control" type="button" data-i18n="composeChords">Other chords</button>
+          </div>
+          <ul id="compose-layers" class="panel-list compose-layers"></ul>
+        </section>
+        <section id="compose-arrangement" class="panel-tabpanel compose-arrangement" role="tabpanel" hidden>
           <p class="panel-help" data-i18n="arrangementHelp">When each layer plays, in parts of 4 bars.</p>
           <div id="compose-grid" class="arrange-grid"></div>
           <div class="compose-buttons">
@@ -256,6 +261,7 @@
             <button id="compose-save" class="control" type="button" data-i18n="composeSave">Save as pattern</button>
           </div>
         </section>
+
         <p id="compose-status" class="panel-status" role="status"></p>
       </aside>
 
@@ -312,36 +318,43 @@
 
       <aside class="panel" id="sp" hidden>
         <h2 data-i18n="spTitle">SP-404 / MIDI out</h2>
-        <p class="panel-help" data-i18n-html="spHelp"></p>
-        <button id="sp-enable" class="control" type="button" data-i18n="enableMidi">Enable MIDI</button>
-        <label class="panel-field" for="sp-output">
-          <span data-i18n="spOutput">Device</span>
-          <select id="sp-output" class="control"></select>
-        </label>
-        <p id="sp-status" class="panel-status" role="status"></p>
-        <label class="panel-field" for="sp-mode">
-          <span data-i18n="spMode">SP MIDI mode</span>
-          <select id="sp-mode" class="control">
-            <option value="A" data-i18n="spModeA">A: a channel per bank (factory)</option>
-            <option value="B" data-i18n="spModeB">B: banks A–E on ch 1, F–J on ch 2</option>
-          </select>
-        </label>
-        <label class="set-option"><input id="sp-clock" type="checkbox" /> <span data-i18n="spClock">Send the tempo (MIDI clock) and Play/Stop</span></label>
-        <label class="vj-slider">
-          <span><span data-i18n="spOffset">Timing</span> (<span id="sp-offset-value">0</span> ms)</span>
-          <input id="sp-offset" type="range" min="-100" max="200" step="5" value="0" />
-        </label>
-        <p class="panel-help" data-i18n="spOffsetHelp">If the SP comes in early or late against the studio, move this until they hit together.</p>
-        <div class="cheat-actions">
-          <button id="sp-test" class="cheat-action" type="button" data-i18n="spTest">Test: pad A1</button>
+        <div class="panel-tabs" role="tablist" aria-label="SP-404">
+          <button class="panel-tab" type="button" role="tab" aria-selected="true" aria-controls="sp-tab-device" data-i18n="spOutput">Device</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="sp-tab-examples" data-i18n="spTabExamples">Examples</button>
         </div>
-        <h3 data-i18n="spExamples">Add an example</h3>
-        <div class="cheat-actions">
-          <button class="cheat-action" type="button" data-sp-example="pads" data-i18n="spExamplePads">Pads</button>
-          <button class="cheat-action" type="button" data-sp-example="chromatic" data-i18n="spExampleChromatic">Chromatic</button>
-          <button class="cheat-action" type="button" data-sp-example="fx" data-i18n="spExampleFx">Effect knob</button>
-        </div>
-        <p class="panel-help" data-i18n="spSetup">On the SP: SHIFT + pad 13 → SYSTEM → MIDI tab. MIDI Mode as chosen here; MIDI Sync on USB (or Auto) so it follows the clock, not Internal.</p>
+        <section id="sp-tab-device" class="panel-tabpanel" role="tabpanel">
+          <button id="sp-enable" class="control" type="button" data-i18n="enableMidi">Enable MIDI</button>
+          <label class="panel-field" for="sp-output">
+            <span data-i18n="spOutput">Device</span>
+            <select id="sp-output" class="control"></select>
+          </label>
+          <p id="sp-status" class="panel-status" role="status"></p>
+          <label class="panel-field" for="sp-mode">
+            <span data-i18n="spMode">SP MIDI mode</span>
+            <select id="sp-mode" class="control">
+              <option value="A" data-i18n="spModeA">A: a channel per bank (factory)</option>
+              <option value="B" data-i18n="spModeB">B: banks A–E on ch 1, F–J on ch 2</option>
+            </select>
+          </label>
+          <label class="set-option"><input id="sp-clock" type="checkbox" /> <span data-i18n="spClock">Send the tempo (MIDI clock) and Play/Stop</span></label>
+          <label class="vj-slider">
+            <span><span data-i18n="spOffset">Timing</span> (<span id="sp-offset-value">0</span> ms)</span>
+            <input id="sp-offset" type="range" min="-100" max="200" step="5" value="0" />
+          </label>
+          <p class="panel-help" data-i18n="spOffsetHelp">If the SP comes in early or late against the studio, move this until they hit together.</p>
+          <div class="cheat-actions">
+            <button id="sp-test" class="cheat-action" type="button" data-i18n="spTest">Test: pad A1</button>
+          </div>
+        </section>
+        <section id="sp-tab-examples" class="panel-tabpanel" role="tabpanel" hidden>
+          <p class="panel-help" data-i18n-html="spHelp"></p>
+          <div class="cheat-actions">
+            <button class="cheat-action" type="button" data-sp-example="pads" data-i18n="spExamplePads">Pads</button>
+            <button class="cheat-action" type="button" data-sp-example="chromatic" data-i18n="spExampleChromatic">Chromatic</button>
+            <button class="cheat-action" type="button" data-sp-example="fx" data-i18n="spExampleFx">Effect knob</button>
+          </div>
+          <p class="panel-help" data-i18n="spSetup">On the SP: SHIFT + pad 13 → SYSTEM → MIDI tab. MIDI Mode as chosen here; MIDI Sync on USB (or Auto) so it follows the clock, not Internal.</p>
+        </section>
       </aside>
 
       <aside class="panel" id="looper" hidden>
@@ -370,34 +383,35 @@
           <button id="looper-undo" class="control" type="button" data-i18n="looperUndo">Undo the last layer</button>
           <button id="looper-clear" class="control" type="button" data-i18n="looperClear">Remove all</button>
         </div>
-        <label class="vj-slider">
+        <label class="vj-slider" data-i18n-title="looperTip">
           <span><span data-i18n="looperOffset">Timing</span> (<span id="looper-offset-value">0</span> ms)</span>
           <input id="looper-offset" type="range" min="-100" max="100" step="5" value="0" />
         </label>
-        <p class="panel-help" data-i18n="looperTip">If your layers come back a little late or early, move Timing.</p>
       </aside>
 
       <aside class="panel" id="sampler" hidden>
         <h2 data-i18n="samplerTitle">Sampler</h2>
         <p class="panel-help" data-i18n="samplerHelp">Take a few bars of what sounds and keep them as your own sounds.</p>
-        <label class="panel-field" for="sampler-source">
-          <span data-i18n="samplerSource">From</span>
-          <select id="sampler-source" class="control">
-            <option value="backing" data-i18n="samplerFromBacking">the backing track</option>
-            <option value="mic" data-i18n="samplerFromMic">the mic</option>
-            <option value="all" data-i18n="samplerFromAll">everything that sounds</option>
-          </select>
-        </label>
-        <label class="panel-field" for="sampler-bars">
-          <span data-i18n="riffBars">Bars</span>
-          <select id="sampler-bars" class="control">
-            <option value="1">1</option>
-            <option value="2" selected>2</option>
-            <option value="4">4</option>
-            <option value="8">8</option>
-          </select>
-        </label>
-        <button id="sampler-record" class="control control-accent" type="button" data-i18n="samplerRecord">● Sample</button>
+        <div class="set-add">
+          <label class="panel-field" for="sampler-source">
+            <span data-i18n="samplerSource">From</span>
+            <select id="sampler-source" class="control">
+              <option value="backing" data-i18n="samplerFromBacking">the backing track</option>
+              <option value="mic" data-i18n="samplerFromMic">the mic</option>
+              <option value="all" data-i18n="samplerFromAll">everything that sounds</option>
+            </select>
+          </label>
+          <label class="panel-field" for="sampler-bars">
+            <span data-i18n="riffBars">Bars</span>
+            <select id="sampler-bars" class="control">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="4">4</option>
+              <option value="8">8</option>
+            </select>
+          </label>
+        </div>
+        <button id="sampler-record" class="control control-accent" type="button" data-i18n="samplerRecord" data-i18n-title="samplerTip">● Sample</button>
         <p id="sampler-status" class="panel-status" role="status"></p>
         <div id="sampler-result" hidden>
           <canvas id="sampler-wave" class="sampler-wave" width="600" height="90" aria-hidden="true"></canvas>
@@ -417,7 +431,6 @@
             <button id="sampler-add-chops" class="control" type="button" data-i18n="samplerAddChops">Add chopped</button>
           </div>
         </div>
-        <p class="panel-help" data-i18n="samplerTip">While it plays, it starts on the next bar and takes whole bars, so the loop is in time.</p>
       </aside>
 
       <aside class="panel" id="backing" hidden>
@@ -483,25 +496,31 @@
 
       <aside class="panel" id="video" hidden>
         <h2 data-i18n="video">Video</h2>
-        <h3 data-i18n="youtubeTitle">YouTube behind</h3>
-        <p class="panel-help" data-i18n="youtubeHelp">A YouTube video plays muted and looped behind the code and the visuals.</p>
-        <form id="youtube-form" class="video-row">
-          <label class="visually-hidden" for="youtube-url" data-i18n="youtubeLink">YouTube link</label>
-          <textarea id="youtube-url" class="control youtube-links" rows="6" autocomplete="off" spellcheck="false" placeholder="https://youtu.be/…" data-i18n-placeholder="youtubePlaceholder"></textarea>
-          <button class="control" type="submit" data-i18n="youtubePut">Put</button>
-        </form>
-        <button id="youtube-off" class="control" type="button" data-i18n="youtubeOff" hidden>Remove the video</button>
-        <h3 data-i18n="videoSourceTitle">With effects</h3>
-        <p class="panel-help" data-i18n="videoSourceHelp">The webcam visuals can use a video of yours or a tab instead of the camera.</p>
-        <div class="sample-pickers">
-          <label class="control file-button">
-            <span data-i18n="videoFile">Your videos</span>
-            <input id="video-file" type="file" accept="video/*" multiple />
-          </label>
-          <button id="video-tab" class="control" type="button" data-i18n="videoTab">Capture a tab</button>
-          <button id="video-webcam" class="control" type="button" data-i18n="videoWebcam">Back to the webcam</button>
+        <div class="panel-tabs" role="tablist" aria-label="Video">
+          <button class="panel-tab" type="button" role="tab" aria-selected="true" aria-controls="video-tab-youtube" data-i18n="youtubeTitle">YouTube</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="video-tab-source" data-i18n="videoSourceTitle">Webcam visuals</button>
         </div>
-        <p id="video-status" class="panel-status" role="status"></p>
+        <section id="video-tab-youtube" class="panel-tabpanel" role="tabpanel">
+          <p class="panel-help" data-i18n="youtubeHelp">A YouTube video plays muted and looped behind the code and the visuals.</p>
+          <form id="youtube-form" class="video-row">
+            <label class="visually-hidden" for="youtube-url" data-i18n="youtubeLink">YouTube link</label>
+            <textarea id="youtube-url" class="control youtube-links" rows="6" autocomplete="off" spellcheck="false" placeholder="https://youtu.be/…" data-i18n-placeholder="youtubePlaceholder"></textarea>
+            <button class="control" type="submit" data-i18n="youtubePut">Put</button>
+          </form>
+          <button id="youtube-off" class="control" type="button" data-i18n="youtubeOff" hidden>Remove the video</button>
+        </section>
+        <section id="video-tab-source" class="panel-tabpanel" role="tabpanel" hidden>
+          <p class="panel-help" data-i18n="videoSourceHelp">The webcam visuals can use a video of yours or a tab instead of the camera.</p>
+          <div class="sample-pickers">
+            <label class="control file-button">
+              <span data-i18n="videoFile">Your videos</span>
+              <input id="video-file" type="file" accept="video/*" multiple />
+            </label>
+            <button id="video-tab" class="control" type="button" data-i18n="videoTab">Capture a tab</button>
+            <button id="video-webcam" class="control" type="button" data-i18n="videoWebcam">Back to the webcam</button>
+          </div>
+          <p id="video-status" class="panel-status" role="status"></p>
+        </section>
       </aside>
 
       <aside class="panel" id="midi" hidden>

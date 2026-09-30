@@ -1287,14 +1287,15 @@ select.control {
 }
 
 .compose-layer {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem 0.5rem;
 }
 
+/* one line per layer: its name and code label on the left, buttons right */
 .compose-layer .cheat-actions {
-  grid-column: 1 / -1;
+  margin: 0 0 0 auto;
 }
 
 .compose-label {
@@ -1908,4 +1909,29 @@ select.control {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.panel-tab:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Long lists (cheatsheet, tools): the title, tabs and search stay, the list scrolls */
+#cheats:not([hidden]),
+#tools:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#cheat-list,
+#tool-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Compose: layer rows a little tighter, so all six fit */
+.compose-layers li {
+  padding-block: 0.3rem;
 }
