@@ -7,12 +7,11 @@
 type Globals = { afterUpdate?: (dt: number) => void };
 
 const RAMP = ' .:-=+*#%@';
-// Character size, from fine (8 px) to chunky (28 px); MPK knob 8
+// Character size, from fine (8 px) to chunky (28 px); MPK knob 8. The
+// width is the font's own, measured, so the rows reach the right edge
 let cellHeight = 16;
-let cellWidth = 9;
 export function setAsciiScale(value: number) {
   cellHeight = Math.round(8 + value * 20);
-  cellWidth = Math.max(5, Math.round(cellHeight * 0.56));
 }
 const STORAGE_KEY = 'jdl:ascii';
 
@@ -46,15 +45,17 @@ function draw(source: HTMLCanvasElement) {
     target.width = width;
     target.height = height;
   }
-  const cols = Math.max(1, Math.floor(box.width / cellWidth));
-  const rows = Math.max(1, Math.floor(box.height / cellHeight));
+  context.font = `${cellHeight - 2}px 'IBM Plex Mono', monospace`;
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  const cellWidth = Math.max(4, context.measureText(RAMP.repeat(4)).width / (RAMP.length * 4));
+  const cols = Math.max(1, Math.ceil(box.width / cellWidth));
+  const rows = Math.max(1, Math.ceil(box.height / cellHeight));
   sampler.canvas.width = cols;
   sampler.canvas.height = rows;
   sampler.drawImage(source, 0, 0, cols, rows);
   const pixels = sampler.getImageData(0, 0, cols, rows).data;
 
   const styles = getComputedStyle(document.documentElement);
-  context.setTransform(ratio, 0, 0, ratio, 0, 0);
   // With a YouTube video behind, the characters float over it
   if (document.body.classList.contains('has-youtube')) context.clearRect(0, 0, box.width, box.height);
   else {
@@ -65,7 +66,6 @@ function draw(source: HTMLCanvasElement) {
   // Same font and colour as the code: with the code on screen the characters
   // step back so the code stays readable; full strength in performance mode
   context.globalAlpha = document.body.classList.contains('hide-code') ? 1 : 0.4;
-  context.font = `${cellHeight - 2}px 'IBM Plex Mono', monospace`;
   context.textBaseline = 'top';
   // Auto contrast: the darkest cell becomes a space and the brightest an @, so
   // dark visuals (and dim webcams) still use the whole ramp
@@ -88,7 +88,7 @@ function draw(source: HTMLCanvasElement) {
       const value = (light[row * cols + col] - darkest) / range;
       line += RAMP[Math.max(0, Math.min(RAMP.length - 1, Math.floor(value * RAMP.length)))];
     }
-    context.fillText(line, 0, row * cellHeight, box.width);
+    context.fillText(line, 0, row * cellHeight);
   }
   context.globalAlpha = 1;
 }

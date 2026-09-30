@@ -99,15 +99,19 @@ setVisualClock(() => (scheduler?.started && scheduler.now ? scheduler.now() : nu
 const shared = readSharedPattern();
 // The shared link leaves the URL: a reload brings your draft, not the original
 if (shared.code) history.replaceState(null, '', location.pathname);
+// Strudel's own placeholder ("// LOADING") or nothing is not a draft
+const isDraft = (code: string | null): code is string => Boolean(code?.trim()) && code!.trim() !== '// LOADING';
 const storedDraft = readStorage<string | null>(DRAFT_KEY, null);
-const draft = storedDraft === null ? null : translateIfBuiltIn(storedDraft);
+const draft = isDraft(storedDraft) ? translateIfBuiltIn(storedDraft) : null;
 editor.setCode(shared.code ?? draft ?? builtInPresets()[0].code);
 library.render(shared.code || draft ? undefined : builtInPresets()[0].id);
 // Translated and holding its code: show it (see the inline script in index.html)
 document.documentElement.classList.remove('booting');
 // A draft every few seconds, and when the page goes away (reload, closing
 // the tab, the phone switching apps), so a reload loses nothing
-const saveDraft = () => writeStorage(DRAFT_KEY, editor.code);
+const saveDraft = () => {
+  if (isDraft(editor.code)) writeStorage(DRAFT_KEY, editor.code);
+};
 setInterval(saveDraft, 3000);
 window.addEventListener('pagehide', saveDraft);
 document.addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && saveDraft());
