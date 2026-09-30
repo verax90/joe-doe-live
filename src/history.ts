@@ -3,6 +3,7 @@
 // you can go back to what sounded five minutes ago. Undo walks back letter
 // by letter; this walks back version by version. Loading one is a single
 // edit, so Ctrl+Z brings back what you had.
+import { keepingFocus } from './a11y';
 import { t } from './i18n';
 import { readStorage, writeStorage } from './storage';
 import type { StrudelMirror } from './strudel';
@@ -62,7 +63,9 @@ export function setupHistory(editor: StrudelMirror) {
     editor.editor?.dispatch({ changes: { from: 0, to: editor.code.length, insert: code } });
   };
 
-  const render = () => {
+  // drawn again, the keyboard focus stays where it was (a11y.ts)
+  const render = () => keepingFocus(view, renderNow);
+  const renderNow = () => {
     if (!list.length) {
       view.innerHTML = `<li class="muted">${t('historyEmpty')}</li>`;
       return;

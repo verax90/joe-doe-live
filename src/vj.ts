@@ -3,6 +3,7 @@
 // Hydra's o1 and this chain draws o1 into o0 (what shows), reading the values
 // live, so nothing has to be run again while you move them. Neutral values
 // leave the picture as it was. With "MPK knobs" on, knobs 1-6 move them.
+import { keepingFocus } from './a11y';
 import type { Localized } from './i18n';
 import { onLangChange, pick } from './i18n';
 import { readStorage, writeStorage } from './storage';
@@ -91,7 +92,9 @@ export function setupVj({ redraw }: Options) {
   const sliders = document.querySelector<HTMLElement>('#vj-sliders')!;
   const inputs = new Map<VjControl, HTMLInputElement>();
 
-  const render = () => {
+  // drawn again, the keyboard focus stays where it was (a11y.ts)
+  const render = () => keepingFocus(sliders, renderNow);
+  const renderNow = () => {
     sliders.replaceChildren(
       ...VJ_CONTROLS.map((control, i) => {
         const label = document.createElement('label');

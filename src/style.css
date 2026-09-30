@@ -370,7 +370,6 @@ select.control {
 .menu-summary:hover,
 .menu-summary:focus-visible {
   background: color-mix(in srgb, var(--accent) 10%, transparent);
-  outline: none;
 }
 
 .menu-field {
@@ -448,58 +447,98 @@ select.control {
   font-weight: 700;
 }
 
-/* Save and share (project.ts): four cards, two a row */
+/* Save and share (project.ts): the name and Save on top, then a list */
 /* fit-content: a modal dialog is pinned top and bottom, auto would stretch it */
 #project[open] {
   display: block;
   height: fit-content;
-  width: min(44rem, calc(100vw - 2rem));
+  width: min(30rem, calc(100vw - 2rem));
 }
 
-.project-cards {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-  padding-top: 0.5rem;
-}
-
-.project-card {
-  display: grid;
-  align-content: start;
+.project-save {
+  display: flex;
   gap: 0.5rem;
-  padding: 0.8rem;
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
+  margin-top: 0.4rem;
 }
 
-#project .project-card h3 {
-  margin: 0;
+.project-save input {
+  flex: 1;
+  min-width: 0;
 }
 
-.project-card .panel-help,
-.project-card .compose-buttons {
-  margin: 0;
+.project-note {
+  margin: 0.45rem 0 0.9rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
 }
 
-.project-now {
-  margin: 0;
-  color: var(--accent);
-  font-size: 0.8rem;
+.project-delete {
+  display: inline;
+  margin-left: 0.4rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
-.project-list {
+.project-delete:hover,
+.project-delete:focus-visible {
+  color: var(--danger);
+}
+
+.project-actions {
   display: grid;
-  gap: 0.4rem;
+  margin: 0;
+  padding: 0.6rem 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
 }
 
-.project-list .control {
+.project-action {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: none;
+  color: var(--fg);
+  font: inherit;
   text-align: left;
+  cursor: pointer;
 }
 
-@media (max-width: 560px) {
-  .project-cards {
-    grid-template-columns: 1fr;
-  }
+.project-action:hover,
+.project-action:focus-visible {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.project-icon {
+  flex: none;
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.project-action strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.project-action small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
 }
 
 /* Search, at the top of More */
@@ -585,7 +624,6 @@ select.control {
 .menu-item:hover,
 .menu-item:focus-visible {
   background: color-mix(in srgb, var(--accent) 10%, transparent);
-  outline: none;
 }
 
 /* Open panel or visible code: a lime mark in front */
@@ -1138,14 +1176,36 @@ select.control {
 }
 
 .help-steps {
+  display: grid;
+  gap: 0.55rem;
   margin: 0 0 0.5rem;
-  padding-left: 1.2rem;
+  padding: 0;
   color: var(--fg);
-  line-height: 1.55;
+  line-height: 1.5;
+  list-style: none;
+  counter-reset: step;
 }
 
-.help-steps li + li {
-  margin-top: 0.3rem;
+/* each step with its number in a small lime circle */
+.help-steps li {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr;
+  gap: 0.6rem;
+  align-items: start;
+  counter-increment: step;
+}
+
+.help-steps li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .help-table {
@@ -1221,7 +1281,6 @@ select.control {
 .cheat-action:focus-visible {
   border-color: var(--accent);
   color: var(--fg);
-  outline: none;
 }
 
 /* A picked option (the mic's preset in use): filled; changed since, outlined */
@@ -1959,7 +2018,6 @@ select.control {
 .panel-tab:hover,
 .panel-tab:focus-visible {
   color: var(--fg);
-  outline: none;
 }
 
 .panel-tab[aria-selected='true'] {
@@ -2010,7 +2068,6 @@ select.control {
 .cheat-icon:focus-visible {
   border-color: var(--accent);
   color: var(--fg);
-  outline: none;
 }
 
 .cheat-icon.cheat-try {
@@ -2112,7 +2169,6 @@ select.control {
 .help-index-item:focus-visible {
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   color: var(--fg);
-  outline: none;
 }
 
 .help-index-item[aria-current='true'] {
@@ -2383,4 +2439,15 @@ select.control {
 
 .voice-cents span[data-in-tune='true'] {
   background: var(--accent);
+}
+
+/* Keyboard focus always shows, the same everywhere: a lime ring (inside the
+   row for list items, so it is never clipped) */
+:where(button, a[href], input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+:where(.menu-item, .menu-summary, .help-index-item, .project-action, .panel-tab, .cheat-action, .cheat-icon, .sample-toggle, .sample-name, .arrange-cell, .help-news .control, .finder-item):focus-visible {
+  outline-offset: -2px;
 }

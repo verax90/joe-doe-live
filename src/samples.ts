@@ -2,6 +2,7 @@
 // page and play them with s("name"). They are kept in IndexedDB so they are
 // still there after a reload (in this browser only).
 
+import { keepingFocus } from './a11y';
 import { isCodeFile } from './export';
 import { ensureAudio } from './audio';
 import { onLangChange, t } from './i18n';
@@ -212,7 +213,9 @@ export function setupSamplesPanel({ addTrack }: { addTrack: (pattern: string) =>
   const open = new Set<string>();
   let picked: string[] = [];
 
-  const renderTray = () => {
+  // drawn again, the keyboard focus stays where it was (a11y.ts)
+  const renderTray = () => keepingFocus(trayList, renderTrayNow);
+  const renderTrayNow = () => {
     tray.hidden = !picked.length;
     trayList.replaceChildren(
       ...picked.map((token, i) => {
@@ -266,7 +269,9 @@ export function setupSamplesPanel({ addTrack }: { addTrack: (pattern: string) =>
     }),
   ];
 
-  const render = () => {
+  // drawn again, the keyboard focus stays where it was (a11y.ts)
+  const render = () => keepingFocus(list, renderNow);
+  const renderNow = () => {
     list.replaceChildren();
     if (!names.size) {
       list.innerHTML = `<li class="muted">${t('noSamples')}</li>`;

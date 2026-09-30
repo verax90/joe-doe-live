@@ -3,6 +3,7 @@
 // the bottom shows where you are; ← → (or a presentation clicker, or the MPK
 // pads in PROG CHANGE mode) move through it, and while it plays the next song
 // comes in on the bar line, with its own tempo and visual.
+import { keepingFocus } from './a11y';
 import { askText } from './ask';
 import { onLangChange, pick, t, type Localized } from './i18n';
 import { prepareSounds } from './offline';
@@ -84,7 +85,9 @@ export function setupLiveSet({ editor, presets, visuals, currentVisual, useVisua
     visualSelect.value = keepVisual;
   };
 
-  const renderList = () => {
+  // drawn again, the keyboard focus stays where it was (a11y.ts)
+  const renderList = () => keepingFocus(list, renderListNow);
+  const renderListNow = () => {
     list.replaceChildren(
       ...songs.map((song, i) => {
         const item = document.createElement('li');

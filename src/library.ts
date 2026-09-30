@@ -2,6 +2,8 @@
 // browser, with Save and Delete in the More menu
 import { askConfirm, askText } from './ask';
 import { onLangChange, t } from './i18n';
+import { suggestedName } from './project';
+import { toast } from './toast';
 import { builtInPresets, type Preset } from './presets';
 import { readStorage, writeStorage } from './storage';
 import type { StrudelMirror } from './strudel';
@@ -47,13 +49,18 @@ export function setupLibrary(editor: StrudelMirror, onLoad: () => void) {
 
   saveButton.addEventListener('click', async () => {
     const current = saved.find((p) => p.id === select.value);
-    const name = await askText(t('savePrompt'), current?.name ?? '');
+    // from the Save and share dialog, its name field; else (Ctrl+S) a question
+    const field = document.querySelector<HTMLInputElement>('#save-name');
+    const inDialog = Boolean(field?.closest('dialog[open]'));
+    const offered = current?.name ?? suggestedName(select.value ? (select.selectedOptions[0]?.textContent?.trim() ?? '') : '', false);
+    const name = inDialog ? field!.value.trim() : await askText(t('savePrompt'), offered);
     if (!name) return;
     const existing = saved.find((p) => p.name === name);
     if (existing) existing.code = editor.code;
     else saved.push({ id: `saved-${Date.now()}`, name, code: editor.code });
     writeStorage(SAVED_KEY, saved);
     render((existing ?? saved.at(-1))!.id);
+    toast(t('projectSaved', { name }));
   });
 
   deleteButton.addEventListener('click', async () => {

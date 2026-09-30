@@ -7,6 +7,7 @@
 // into the limiter; off by default, since with speakers instead of headphones
 // it feeds back. The browser's own voice-call processing (echo cancelling,
 // noise suppression, auto gain) is off: it ruins a voice for music.
+import { keepingFocus } from './a11y';
 import { ensureAudio } from './audio';
 import { onLangChange, pick, t, type Localized } from './i18n';
 import { ensureLimiter, getLimiter } from './limiter';
@@ -617,7 +618,9 @@ export function setupMic({ tempo }: Options) {
     presetsBox.querySelector('[aria-pressed="true"]')?.toggleAttribute('data-modified', changed);
   };
 
-  const render = () => {
+  // drawn again, the keyboard focus stays where it was (a11y.ts)
+  const render = () => keepingFocus(document.querySelector<HTMLElement>('#mic')!, renderNow);
+  const renderNow = () => {
     const presetButton = (preset: (typeof MIC_PRESETS)[number]) => {
         const button = document.createElement('button');
         button.type = 'button';

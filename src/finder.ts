@@ -54,7 +54,7 @@ function collect(): Entry[] {
   }
   // what the Save and share dialog holds, found by name too
   const project = document.querySelector('#project-title')?.textContent?.trim() ?? '';
-  for (const button of document.querySelectorAll<HTMLButtonElement>('#project .project-card button')) {
+  for (const button of document.querySelectorAll<HTMLButtonElement>('#project .project-action, #project #save, #project #delete')) {
     if (!button.hidden) entries.push({ label: text(button), kind: project, run: () => button.click() });
   }
   const options = (id: string, kind: string) => {

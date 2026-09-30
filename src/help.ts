@@ -1,5 +1,6 @@
 // Help: getting started, shortcuts, every control of the MPK Mini Mk II
 // in each of its modes, the panels, and what to do when something goes wrong.
+import { keepingFocus } from './a11y';
 import { onLangChange, pick, type Localized } from './i18n';
 import { goTo, hasUnseen, markSeen, NEWS } from './news';
 import { readStorage, writeStorage } from './storage';
@@ -353,7 +354,7 @@ export function setupHelp() {
     return table;
   };
 
-  const render = () => {
+  const renderNow = () => {
     if (!sections[current]) current = 0;
     const nav = document.createElement('nav');
     nav.className = 'help-index';
@@ -370,6 +371,14 @@ export function setupHelp() {
         render();
         container.querySelector<HTMLElement>('.help-section')?.scrollTo(0, 0);
       });
+      // ↑ ↓ move between sections, Enter opens one (and the focus stays)
+      button.addEventListener('keydown', (event) => {
+        const step = event.key === 'ArrowDown' ? 1 : event.key === 'ArrowUp' ? -1 : 0;
+        if (!step) return;
+        event.preventDefault();
+        const items = [...nav.querySelectorAll<HTMLButtonElement>('.help-index-item')];
+        items[(index + step + items.length) % items.length].focus();
+      });
       nav.append(button);
     });
     const pane = document.createElement('section');
@@ -384,6 +393,7 @@ export function setupHelp() {
       dot();
     }
   };
+  const render = () => keepingFocus(container, renderNow);
 
   // A dot on ? (and on Help in the phone menu) while there is news
   const dot = () => {

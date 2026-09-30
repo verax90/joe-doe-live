@@ -3,6 +3,7 @@
 // all of them share the style's tempo, the key and the chord progression, so
 // whatever you add fits. "Another" swaps a layer for a variant, "Mute" puts _
 // in front of its name, "Remove" deletes it.
+import { keepingFocus } from './a11y';
 import { onLangChange, pick, t, type Localized } from './i18n';
 import { withTempo } from './tempo';
 import { applyChanges, bareTracks, findLabel, trackInsertPoint, type Change } from './tracks';
@@ -387,7 +388,9 @@ export function setupCompose(editor: Editor) {
     }
     update(next);
   };
-  const renderGrid = () => {
+  // drawn again, the keyboard focus stays where it was (a11y.ts)
+  const renderGrid = () => keepingFocus(grid, renderGridNow);
+  const renderGridNow = () => {
     const layers = present();
     // The Arrangement tab waits until there are layers to arrange
     const tab = document.querySelector<HTMLButtonElement>('[aria-controls="compose-arrangement"]');
@@ -444,7 +447,9 @@ export function setupCompose(editor: Editor) {
   }, 200);
 
   let rendered = '';
-  function render() {
+  // drawn again, the keyboard focus stays where it was (a11y.ts)
+  const render = () => keepingFocus(panel, renderNow);
+  function renderNow() {
     const code = editor.code;
     rendered = code;
     renderGrid();
