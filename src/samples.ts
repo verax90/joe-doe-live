@@ -199,7 +199,15 @@ export function shortName(name: string, max = 30) {
   return `${name.slice(0, max - 1 - tail)}…${name.slice(-tail)}`;
 }
 
-export function setupSamplesPanel({ addTrack }: { addTrack: (pattern: string) => void }) {
+// A cut group no track of the code uses yet: .cut(n) makes each hit stop the
+// one before, so a sample longer than its step (a phrase, a loop) never
+// piles up on itself, and one track does not cut another
+export function freeCutGroup(code: string) {
+  const used = [...code.matchAll(/\.cut\(\s*["'`]?(\d+)/g)].map((m) => Number(m[1]));
+  return used.length ? Math.max(...used) + 1 : 1;
+}
+
+export function setupSamplesPanel({ addTrack, getCode }: { addTrack: (pattern: string) => void; getCode: () => string }) {
   const list = document.querySelector<HTMLUListElement>('#sample-list')!;
   const input = document.querySelector<HTMLInputElement>('#sample-input')!;
   const folderInput = document.querySelector<HTMLInputElement>('#sample-folder')!;
@@ -235,7 +243,7 @@ export function setupSamplesPanel({ addTrack }: { addTrack: (pattern: string) =>
 
   document.querySelector('#sample-add-track')!.addEventListener('click', () => {
     if (!picked.length) return;
-    const pattern = `s("${picked.join(' ')}")`;
+    const pattern = `s("${picked.join(' ')}").cut(${freeCutGroup(getCode())})`;
     addTrack(pattern);
     status.textContent = t('pickedAdded', { code: pattern });
     picked = [];

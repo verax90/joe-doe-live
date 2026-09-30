@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sampleName, shortName } from './samples';
+import { freeCutGroup, sampleName, shortName } from './samples';
 
 describe('sample names usable inside s("…")', () => {
   it.each([
@@ -20,5 +20,12 @@ describe('short names', () => {
     expect(short.endsWith('ge4qua12')).toBe(true);
     expect(short.startsWith('selda_bagcan')).toBe(true);
     expect(shortName('kicks', 24)).toBe('kicks');
+  });
+});
+
+describe('cut groups', () => {
+  it('takes the first number no track uses', () => {
+    expect(freeCutGroup('$: s("bd*4")')).toBe(1);
+    expect(freeCutGroup('$: s("a").cut(1)\n$: s("b").cut("3")')).toBe(4);
   });
 });

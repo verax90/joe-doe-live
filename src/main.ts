@@ -251,7 +251,7 @@ editor.stop = async () => {
 whenStrudelReady().then(() => {
   useBundledHydra(hydraUrl);
   runVisual();
-  setupSamplesPanel({ addTrack });
+  setupSamplesPanel({ addTrack, getCode: () => editor.code });
   setupRiff({ editor, addTrack });
   setupSp({ editor, addTrack });
   setupPumpPanel({ addTrack });
