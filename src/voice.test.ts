@@ -1,5 +1,5 @@
 import { describe as group, expect, it } from 'vitest';
-import { describe, isEcho, steady, synthNote } from './voice';
+import { describe, isEcho, noteColour, steady, synthNote } from './voice';
 
 group('voice', () => {
   it('names the sung note and how far off it is', () => {
@@ -26,5 +26,14 @@ group('voice', () => {
   it('keeps the middle reading, and silence when most are silent', () => {
     expect(steady([60, 72, 60.1, 59.9, 60])).toBe(60);
     expect(steady([0, 0, 0, 60, 0])).toBe(0);
+  });
+
+  it('gives each note its colour, C red, round the wheel', () => {
+    expect(noteColour(60)).toEqual([1, 0, 0]); // C
+    expect(noteColour(64)).toEqual([0, 1, 0]); // E: a third of the way
+    expect(noteColour(68)).toEqual([0, 0, 1]); // G#: two thirds
+    expect(noteColour(72)).toEqual(noteColour(48)); // octaves alike
+    expect(noteColour(67)).toEqual([0, 0.5, 1]); // G: azure
+    expect(noteColour(69)).toEqual([0.5, 0, 1]); // A: violet
   });
 });

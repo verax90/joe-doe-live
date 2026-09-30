@@ -4,7 +4,10 @@
 // plays a synth" makes an oscillator follow it, free, to the nearest semitone
 // or to the key (Play in a key), an octave or two away if you like, and only
 // while you sing. Patterns and visuals get it too: voiceNote() is the MIDI
-// note (0 when silent) and voiceLevel() the loudness, 0 to 1:
+// note (0 when silent), voiceHeld() the last note sung (it stays when you
+// stop), voiceLevel() the loudness, 0 to 1 (quick up, slow down), and
+// voiceColor(0|1|2) the red, green and blue of the note (the twelve notes
+// around the colour wheel, gliding from one to the next):
 //   $: s("sawtooth*8").note(ref(() => voiceNote() || 48))
 import { downsample, framePitch, midiOf } from './hum';
 import { t } from './i18n';
@@ -34,6 +37,23 @@ export function synthNote(midi: number, tuning: Tuning, octave: number, key = sc
   return note + 12 * octave;
 }
 
+// A note's colour: C red, then round the colour wheel a semitone at a time
+// (E green, G azure, A violet), full and bright, as red, green, blue 0-1
+export function noteColour(midi: number): [number, number, number] {
+  const hue = ((((Math.round(midi) % 12) + 12) % 12) / 12) * 6;
+  const x = 1 - Math.abs((hue % 2) - 1);
+  const sector = Math.floor(hue);
+  const table: [number, number, number][] = [
+    [1, x, 0],
+    [x, 1, 0],
+    [0, 1, x],
+    [0, x, 1],
+    [x, 0, 1],
+    [1, 0, x],
+  ];
+  return table[sector];
+}
+
 // Whether a reading is the synth itself coming back through the mic (from
 // the speakers): with the synth an octave or more away it can be told apart
 export function isEcho(midi: number, playing: number, octave: number) {
@@ -48,10 +68,17 @@ export function steady(history: number[]) {
   return sorted[Math.floor(sorted.length / 2)];
 }
 
-const reading = { note: 0, level: 0 };
-const g = globalThis as { voiceNote?: () => number; voiceLevel?: () => number };
+const reading = { note: 0, held: 0, level: 0, colour: [0.5, 0.5, 0.5] as number[] };
+const g = globalThis as {
+  voiceNote?: () => number;
+  voiceHeld?: () => number;
+  voiceLevel?: () => number;
+  voiceColor?: (channel: number) => number;
+};
 g.voiceNote = () => reading.note;
+g.voiceHeld = () => reading.held;
 g.voiceLevel = () => reading.level;
+g.voiceColor = (channel) => reading.colour[channel] ?? 0;
 
 let settings: VoiceSettings = { ...DEFAULTS, ...readStorage<Partial<VoiceSettings>>('jdl:voice', {}) };
 const save = (next: Partial<VoiceSettings>) => {
@@ -139,7 +166,15 @@ export function setupVoice(lang: () => 'en' | 'es') {
     history.push(midi && !(synth && isEcho(midi, playing, settings.octave)) ? midi : 0);
     if (history.length > 5) history.shift();
     reading.note = steady(history);
-    reading.level = Math.min(1, rms * 5);
+    if (reading.note) reading.held = reading.note;
+    // quick up, slow down, so visuals breathe instead of flicker
+    const level = Math.min(1, rms * 5);
+    reading.level = level > reading.level ? level : reading.level * 0.9 + level * 0.1;
+    // the colour glides towards the note's
+    if (reading.held) {
+      const target = noteColour(reading.held);
+      reading.colour = reading.colour.map((value, i) => value + (target[i] - value) * 0.2);
+    }
     status.textContent = '';
     noteView.dataset.silent = String(!reading.note); // the last note stays, dimmed
 

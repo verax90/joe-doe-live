@@ -224,6 +224,29 @@ src(s1)
   .out()`,
   },
   {
+    id: 'voz',
+    name: { en: 'Voice (colour by note)', es: 'Voz (color por nota)' },
+    code: `osc(10, 0.03, 0)
+  .kaleid(5)
+  .color(() => voiceColor(0), () => voiceColor(1), () => voiceColor(2))
+  .scale(() => 1.3 - voiceLevel() * 0.6)
+  .modulate(noise(2.5), () => 0.05 + voiceLevel() * 0.4)
+  .brightness(() => voiceLevel() * 0.3 - 0.15)
+  .out()`,
+  },
+  {
+    id: 'voz-formas',
+    name: { en: 'Voice (shapes by pitch)', es: 'Voz (formas por altura)' },
+    code: `shape(() => 3 + Math.round((voiceHeld() % 24) / 4), 0.28, 0.01)
+  .repeat(2, 2)
+  .rotate(() => voiceHeld() / 12, 0.05)
+  .scale(() => 0.7 + voiceLevel() * 0.9)
+  .color(() => voiceColor(0), () => voiceColor(1), () => voiceColor(2))
+  .modulateScale(osc(4, 0.1), () => voiceLevel() * 0.5)
+  .blend(src(o0).scale(1.015).rotate(0.004), 0.82)
+  .out()`,
+  },
+  {
     id: 'cam',
     name: { en: 'Webcam (warp)', es: 'Webcam (deformada)' },
     camera: true,
@@ -484,7 +507,7 @@ function stopAuto() {
 
 function startAuto() {
   // not the webcam ones, nor those that wait for a controller (Touch: the TouchMe)
-  const pool = visuals.filter((v) => v.code && !v.camera && !['ninguno', 'tacto'].includes(v.id));
+  const pool = visuals.filter((v) => v.code && !v.camera && !['ninguno', 'tacto', 'voz', 'voz-formas'].includes(v.id));
   const step = () => {
     const cycles = clock();
     return cycles === null ? Math.floor(performance.now() / 1000 / AUTO_SECONDS) : Math.floor(cycles / AUTO_BARS);
