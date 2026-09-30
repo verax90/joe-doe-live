@@ -26,4 +26,6 @@ function serviceWorker(): Plugin {
 
 export default defineConfig({
   plugins: [serviceWorker()],
+  // Two pages: the studio, and the phone's controller (mando.html)
+  build: { rollupOptions: { input: { main: 'index.html', mando: 'mando.html' } } },
 });

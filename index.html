@@ -92,6 +92,7 @@
               <h3 class="menu-group-title" data-i18n="menuPlay">Play</h3>
               <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
               <button id="toggle-sp" class="menu-item" type="button" aria-pressed="false" data-panel="sp" data-i18n="spTitle">SP-404 / MIDI out</button>
+              <button id="toggle-remote" class="menu-item" type="button" aria-pressed="false" data-panel="remote" data-i18n="remoteTitle">Phone as controller</button>
               <button id="toggle-mic" class="menu-item" type="button" aria-pressed="false" data-panel="mic" data-i18n="micTitle">Mic</button>
               <button id="toggle-looper" class="menu-item" type="button" aria-pressed="false" data-panel="looper" data-i18n="looperTitle">Looper</button>
               <button id="toggle-backing" class="menu-item" type="button" aria-pressed="false" data-panel="backing" data-i18n="backingTitle">Backing track</button>
@@ -457,6 +458,21 @@
         <label class="set-option"><input id="backing-with-play" type="checkbox" /> <span data-i18n="backingWithPlay">Starts and stops with the studio's Play</span></label>
         <label class="set-option"><input id="backing-loop" type="checkbox" /> <span data-i18n="backingLoop">Repeat</span></label>
         <p class="panel-help" data-i18n="backingTempo">To play over it, match the tempo: tap Tap to the song's beat.</p>
+      </aside>
+
+      <aside class="panel" id="remote" hidden>
+        <h2 data-i18n="remoteTitle">Phone as controller</h2>
+        <p class="panel-help" data-i18n-html="remoteHelp"></p>
+        <button id="remote-on" class="control control-accent" type="button" data-i18n="remoteOn">Turn it on</button>
+        <p id="remote-status" class="panel-status" role="status"></p>
+        <div id="remote-box" hidden>
+          <div id="remote-qr" class="remote-qr" role="img" aria-label="QR"></div>
+          <label class="visually-hidden" for="remote-link" data-i18n="roomLink">Link</label>
+          <div class="video-row">
+            <input id="remote-link" class="control" type="text" readonly />
+            <button id="remote-copy" class="control" type="button" data-i18n="roomCopy">Copy</button>
+          </div>
+        </div>
       </aside>
 
       <aside class="panel" id="mic" hidden>

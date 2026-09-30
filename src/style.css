@@ -1935,3 +1935,18 @@ select.control {
 .compose-layers li {
   padding-block: 0.3rem;
 }
+
+/* Phone as controller: the QR code, on white so any camera reads it */
+.remote-qr {
+  width: 11rem;
+  margin: 0.75rem 0;
+  padding: 0.4rem;
+  border-radius: 0.4rem;
+  background: #fff;
+}
+
+.remote-qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
