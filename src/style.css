@@ -387,6 +387,86 @@ select.control {
   .menu-columns {
     grid-template-columns: 1fr;
   }
+
+  /* Phones: two items a row, so the menu is half as long */
+  .menu-group {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 0.25rem;
+  }
+
+  .menu-group > .menu-group-title,
+  .menu-group > .menu-more,
+  .menu-group > .menu-field {
+    grid-column: 1 / -1;
+  }
+
+  .menu-group > .menu-item {
+    padding-inline: 0.5rem;
+  }
+}
+
+/* Search, at the top of More */
+.menu-search {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.menu-search kbd,
+.finder-kind {
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.7rem;
+}
+
+/* no keyboard on a phone: no shortcut hint */
+@media (hover: none) {
+  .menu-search kbd {
+    display: none;
+  }
+}
+
+/* The quick finder (finder.ts) */
+.finder {
+  width: min(30rem, calc(100vw - 2rem));
+  margin-top: 12vh;
+  padding: 0.6rem;
+}
+
+.finder-input {
+  width: 100%;
+}
+
+.finder-list {
+  display: grid;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.finder-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.3rem;
+  cursor: pointer;
+}
+
+.finder-item[aria-selected='true'] {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.finder-item[aria-selected='true'] > span:first-child {
+  color: var(--accent);
+}
+
+.finder-empty {
+  padding: 0.45rem 0.6rem;
+  color: var(--muted);
 }
 
 /* display: grid above would otherwise override the hidden attribute */

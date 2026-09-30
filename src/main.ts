@@ -28,6 +28,7 @@ import { setupTyping } from './typing';
 import { recordPlayed, setupHistory } from './history';
 import { sessionPlayed, sessionStopped } from './session';
 import { setupVoice } from './voice';
+import { setupFinder } from './finder';
 import { setupOverlay } from './overlay';
 import { setupScalePicker } from './scale';
 import { setupOffline } from './offline';
@@ -280,6 +281,7 @@ const useCodeVisual = () => pickVisual('code');
 
 setupOffline();
 setupMenu();
+setupFinder();
 setupShortcuts(editor);
 setupUndo(editor);
 setupExport(editor, () => visualSelect.value);
