@@ -7,7 +7,8 @@ type Entry = { code: string; note: Localized };
 // How "Try" turns an example into a pattern that plays; null: it needs a
 // controller, so it can only be inserted
 type Demo = (code: string) => string | null;
-type Section = { title: Localized; entries: Entry[]; demo: Demo };
+// tab: which of the panel's three tabs it goes in
+type Section = { title: Localized; entries: Entry[]; demo: Demo; tab: 'rhythm' | 'sound' | 'visual' };
 
 const beat = 's("bd*2, ~ sd, hh*4").bank("RolandTR909").gain(0.8)';
 const notes = 'note("c3 e3 g3 b3")';
@@ -18,7 +19,7 @@ const hydra: Demo = (code) =>
 
 const sections: Section[] = [
   {
-    title: { en: 'Basics', es: 'Lo básico' },
+    title: { en: 'Basics', es: 'Lo básico' }, tab: 'rhythm',
     demo: standalone,
     entries: [
       { code: 's("bd sd hh sd")', note: { en: 'Sounds in sequence, one per step', es: 'Sonidos en secuencia, uno por paso' } },
@@ -28,7 +29,7 @@ const sections: Section[] = [
     ],
   },
   {
-    title: { en: 'Mini-notation (inside the quotes)', es: 'Mini-notación (dentro de las comillas)' },
+    title: { en: 'Mini-notation (inside the quotes)', es: 'Mini-notación (dentro de las comillas)' }, tab: 'rhythm',
     demo: standalone,
     entries: [
       { code: 's("bd*4")', note: { en: '* repeats within the step', es: '* repite dentro del paso' } },
@@ -40,7 +41,7 @@ const sections: Section[] = [
     ],
   },
   {
-    title: { en: 'Sound', es: 'Sonido' },
+    title: { en: 'Sound', es: 'Sonido' }, tab: 'sound',
     demo: onNotes,
     entries: [
       { code: '.gain(0.8)', note: { en: 'Volume', es: 'Volumen' } },
@@ -55,7 +56,7 @@ const sections: Section[] = [
     ],
   },
   {
-    title: { en: 'Instruments', es: 'Instrumentos' },
+    title: { en: 'Instruments', es: 'Instrumentos' }, tab: 'sound',
     demo: (code) => `${notes}${code}`,
     entries: [
       { code: '.s("gm_epiano1")', note: { en: 'Electric piano', es: 'Piano eléctrico' } },
@@ -69,7 +70,7 @@ const sections: Section[] = [
     ],
   },
   {
-    title: { en: 'Harmony', es: 'Armonía' },
+    title: { en: 'Harmony', es: 'Armonía' }, tab: 'rhythm',
     demo: standalone,
     entries: [
       { code: 'chord("<Am7 Dm7 G7 C^7>").voicing()', note: { en: 'Chords, voiced for you', es: 'Acordes ya colocados' } },
@@ -77,7 +78,7 @@ const sections: Section[] = [
     ],
   },
   {
-    title: { en: 'Variation', es: 'Variación' },
+    title: { en: 'Variation', es: 'Variación' }, tab: 'rhythm',
     demo: onNotes,
     entries: [
       { code: '.fast(2)', note: { en: 'Twice as fast (.slow for slower)', es: 'El doble de rápido (.slow para más lento)' } },
@@ -89,7 +90,7 @@ const sections: Section[] = [
     ],
   },
   {
-    title: { en: 'Hydra (visuals)', es: 'Hydra (visuales)' },
+    title: { en: 'Hydra (visuals)', es: 'Hydra (visuales)' }, tab: 'visual',
     demo: hydra,
     entries: [
       { code: 'osc(10, 0.1, 1).out()', note: { en: 'Oscillator: stripes', es: 'Oscilador: franjas' } },
@@ -105,7 +106,7 @@ const sections: Section[] = [
     ],
   },
   {
-    title: { en: 'MIDI', es: 'MIDI' },
+    title: { en: 'MIDI', es: 'MIDI' }, tab: 'visual',
     demo: () => null,
     entries: [
       { code: "const knob = await midin('MPK')", note: { en: 'Read knobs; knob(1) goes 0 to 1', es: 'Leer knobs; knob(1) va de 0 a 1' } },
@@ -190,17 +191,22 @@ export function setupCheatsheet({ editor, useCodeVisual }: { editor: Editor; use
     status.textContent = t('inserted', { line });
   };
 
-  const button = (label: string, className: string, onClick: () => void) => {
+  // Small icon buttons next to the example; their name on hover and for
+  // screen readers
+  const button = (icon: string, label: string, className: string, onClick: () => void) => {
     const element = document.createElement('button');
     element.type = 'button';
-    element.className = `cheat-action ${className}`;
-    element.textContent = label;
+    element.className = `cheat-icon ${className}`;
+    element.textContent = icon;
+    element.title = label;
+    element.setAttribute('aria-label', label);
     element.addEventListener('click', onClick);
     return element;
   };
 
   const render = () => {
-    list.replaceChildren();
+    const panes = { rhythm: '#cheat-tab-rhythm', sound: '#cheat-tab-sound', visual: '#cheat-tab-visual' } as const;
+    for (const pane of Object.values(panes)) list.querySelector(pane)!.replaceChildren();
     for (const section of sections) {
       const group = document.createElement('section');
       group.className = 'cheat-group';
@@ -218,12 +224,12 @@ export function setupCheatsheet({ editor, useCodeVisual }: { editor: Editor; use
         note.className = 'cheat-note';
         note.textContent = pick(entry.note);
         const actions = document.createElement('div');
-        actions.className = 'cheat-actions';
+        actions.className = 'cheat-icons';
         const demo = section.demo(entry.code);
-        if (demo) actions.append(button(t('tryIt'), 'cheat-try', () => tryIt(demo, section.demo === hydra)));
-        actions.append(button(t('insert'), '', () => insert(entry.code)));
+        if (demo) actions.append(button('▶', t('tryIt'), 'cheat-try', () => tryIt(demo, section.demo === hydra)));
+        actions.append(button('+', t('insert'), '', () => insert(entry.code)));
         actions.append(
-          button(t('copy'), '', async () => {
+          button('⧉', t('copy'), '', async () => {
             try {
               await navigator.clipboard.writeText(entry.code);
               status.textContent = t('copied', { code: entry.code });
@@ -232,11 +238,14 @@ export function setupCheatsheet({ editor, useCodeVisual }: { editor: Editor; use
             }
           }),
         );
-        li.append(code, note, actions);
+        const row = document.createElement('div');
+        row.className = 'cheat-row';
+        row.append(code, actions);
+        li.append(row, note);
         ul.append(li);
       }
       group.append(heading, ul);
-      list.append(group);
+      list.querySelector(panes[section.tab])!.append(group);
     }
   };
   render();
@@ -244,6 +253,8 @@ export function setupCheatsheet({ editor, useCodeVisual }: { editor: Editor; use
   // Searches the code and both languages, so "filtro" and "filter" both find .lpf
   const applyFilter = () => {
     const query = filter.value.trim().toLowerCase();
+    // while searching, every tab shows its matches
+    list.closest('.panel')!.classList.toggle('is-searching', Boolean(query));
     list.querySelectorAll<HTMLElement>('.cheat-group').forEach((group) => {
       let visible = 0;
       group.querySelectorAll<HTMLElement>('li').forEach((item) => {

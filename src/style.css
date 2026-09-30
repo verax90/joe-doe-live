@@ -1749,3 +1749,57 @@ select.control {
   color: var(--accent-ink);
   font-weight: 600;
 }
+
+/* Cheatsheet: a search looks through every tab */
+.is-searching .panel-tabs {
+  opacity: 0.4;
+}
+
+.is-searching .panel-tabpanel[hidden] {
+  display: block;
+}
+
+/* Cheatsheet entries: the example and its icons on one line, the note below */
+.cheat-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cheat-icons {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.2rem;
+}
+
+.cheat-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.cheat-icon:hover,
+.cheat-icon:focus-visible {
+  border-color: var(--accent);
+  color: var(--fg);
+  outline: none;
+}
+
+.cheat-icon.cheat-try {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.cheat-entries .cheat-note {
+  margin: 0.1rem 0 0;
+}

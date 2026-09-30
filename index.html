@@ -266,7 +266,16 @@
         <input id="cheat-filter" class="control cheat-filter" type="search" autocomplete="off" placeholder="Search" data-i18n-placeholder="cheatFilter" />
         <p id="cheat-status" class="panel-status" role="status"></p>
         <button id="cheat-back" class="control cheat-back" type="button" data-i18n="backToCode" hidden>Back to my code</button>
-        <div id="cheat-list"></div>
+        <div class="panel-tabs" role="tablist" aria-label="Cheatsheet">
+          <button class="panel-tab" type="button" role="tab" aria-selected="true" aria-controls="cheat-tab-rhythm" data-i18n="cheatTabRhythm">Rhythm and notes</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="cheat-tab-sound" data-i18n="cheatTabSound">Sound</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="cheat-tab-visual" data-i18n="cheatTabVisual">Visuals, MIDI</button>
+        </div>
+        <div id="cheat-list">
+          <section id="cheat-tab-rhythm" class="panel-tabpanel" role="tabpanel"></section>
+          <section id="cheat-tab-sound" class="panel-tabpanel" role="tabpanel" hidden></section>
+          <section id="cheat-tab-visual" class="panel-tabpanel" role="tabpanel" hidden></section>
+        </div>
       </aside>
 
       <aside class="panel" id="tools" hidden>
