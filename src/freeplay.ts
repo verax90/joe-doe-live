@@ -6,6 +6,7 @@ import { onLangChange, pick, t, type Localized } from './i18n';
 import { ensureLimiter } from './limiter';
 import { freePlayKnobs } from './knobs';
 import { NOTE_EVENT, currentBend, type NoteDetail } from './midi';
+import { playedNotes } from './scale';
 import { loadedKits } from './samples';
 import { readStorage, writeStorage } from './storage';
 
@@ -126,15 +127,18 @@ export function setupFreePlay(patternReadsKeys: () => boolean) {
       // Knobs 1-3: echo, filter (squared, so the low end of the knob has room) and reverb;
       // the joystick bends each new note up to two semitones
       const { echo, filter, reverb } = freePlayKnobs;
-      play({
-        s: select.value,
-        note: note + currentBend() * 2,
-        velocity: 0.35 + velocity * 0.65,
-        gain: 0.7,
-        cutoff: 300 + filter * filter * 7700,
-        room: reverb * 0.8,
-        delay: echo * 0.6,
-      });
+      // in a key, the nearest note of the scale, or a chord of it (scale.ts)
+      for (const played of playedNotes(note)) {
+        play({
+          s: select.value,
+          note: played + currentBend() * 2,
+          velocity: 0.35 + velocity * 0.65,
+          gain: 0.7,
+          cutoff: 300 + filter * filter * 7700,
+          room: reverb * 0.8,
+          delay: echo * 0.6,
+        });
+      }
     }
   });
 }

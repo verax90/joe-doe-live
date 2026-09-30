@@ -573,6 +573,14 @@
           <p class="panel-help" data-i18n-html="midiHelp"></p>
           <ul id="midi-devices" class="panel-list"><li class="muted" data-i18n="noPermission">No permission yet</li></ul>
           <button id="midi-enable" class="control" type="button" data-i18n="enableMidi">Enable MIDI</button>
+          <label class="panel-field" for="program-target">
+            <span data-i18n="programTarget">PROG CHANGE pads change</span>
+            <select id="program-target" class="control">
+              <option value="visual" data-i18n="programVisual">the visual</option>
+              <option value="pattern" data-i18n="programPattern">the pattern</option>
+              <option value="set" data-i18n="programSet">the live set song</option>
+            </select>
+          </label>
           <h3 data-i18n="lastMessages">Last messages</h3>
           <ol id="midi-log" class="panel-list midi-log"></ol>
         </section>
@@ -582,6 +590,25 @@
             <span data-i18n="freePlaySound">Sound for the keys</span>
             <select id="freeplay-sound" class="control freeplay-select"></select>
           </label>
+          <div class="set-add">
+            <label class="panel-field" for="scale-root">
+              <span data-i18n="scaleKey">Key</span>
+              <select id="scale-root" class="control"></select>
+            </label>
+            <label class="panel-field" for="scale-type">
+              <span data-i18n="scaleType">Scale</span>
+              <select id="scale-type" class="control">
+                <option value="" data-i18n="scaleFree">Free (all notes)</option>
+                <option value="major" data-i18n="scaleMajor">Major</option>
+                <option value="minor" data-i18n="scaleMinor">Minor</option>
+                <option value="dorian" data-i18n="scaleDorian">Dorian</option>
+                <option value="harmonicMinor" data-i18n="scaleHarmonic">Harmonic minor</option>
+                <option value="pentaMinor" data-i18n="scalePenta">Minor pentatonic</option>
+                <option value="blues" data-i18n="scaleBlues">Blues</option>
+              </select>
+            </label>
+          </div>
+          <label class="set-option"><input id="scale-chords" type="checkbox" /> <span data-i18n="scaleChords">One key plays a chord of the scale</span></label>
           <label class="panel-field" for="pads-kit">
             <span data-i18n="padsKit">Bank B pads play</span>
             <select id="pads-kit" class="control freeplay-select"></select>
@@ -590,14 +617,6 @@
           <select id="pads-page" class="control freeplay-select" hidden></select>
           <label class="set-option"><input id="typing-on" type="checkbox" /> <span data-i18n="typingOn">The computer keyboard plays too</span></label>
           <p id="typing-status" class="panel-status" role="status" data-i18n-title="typingHelp"></p>
-          <label class="panel-field" for="program-target">
-            <span data-i18n="programTarget">PROG CHANGE pads change</span>
-            <select id="program-target" class="control">
-              <option value="visual" data-i18n="programVisual">the visual</option>
-              <option value="pattern" data-i18n="programPattern">the pattern</option>
-              <option value="set" data-i18n="programSet">the live set song</option>
-            </select>
-          </label>
         </section>
         <section id="midi-tab-riff" class="panel-tabpanel" role="tabpanel" hidden>
           <p class="panel-help" data-i18n="riffHelp">Play a few bars on the MPK and get them back as code.</p>

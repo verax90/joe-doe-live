@@ -10,6 +10,7 @@
 import { ensureAudio } from './audio';
 import { heardCycle, whenCycleKnown } from './cycle-clock';
 import { padSound } from './freeplay';
+import { playedNotes } from './scale';
 import { t } from './i18n';
 import { NOTE_EVENT, type NoteDetail } from './midi';
 import { readStorage } from './storage';
@@ -114,7 +115,8 @@ export function setupRiff({ editor, addTrack }: Options) {
         const sound = padSound(note - 32, pads);
         hits.push({ cycle, pad: true, token: 'n' in sound ? `${sound.s}:${sound.n}` : sound.s });
       } else {
-        hits.push({ cycle, pad: false, token: noteName(note) });
+        // what sounded: in a key, the scale's note or chord (scale.ts)
+        for (const played of playedNotes(note)) hits.push({ cycle, pad: false, token: noteName(played) });
       }
     };
     window.addEventListener(NOTE_EVENT, onNote);

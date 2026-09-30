@@ -6,7 +6,7 @@
 import { t } from './i18n';
 import { isEcho } from './sp';
 
-const MAX_LOG = 12;
+const MAX_LOG = 10;
 
 // Strudel's midin() only reads CC messages. The pitch bend (the MPK joystick
 // sideways) is read here and offered as bend(), from -1 to 1, for patterns and

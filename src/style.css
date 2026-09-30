@@ -1950,3 +1950,15 @@ select.control {
   width: 100%;
   height: auto;
 }
+
+/* an empty status line takes no room */
+#typing-status:empty {
+  display: none;
+}
+
+/* The message monitor has a fixed height: the newest are on top, the oldest
+   are cut off below, so the panel never scrolls however many devices */
+.midi-log {
+  max-height: 11rem;
+  overflow: hidden;
+}
