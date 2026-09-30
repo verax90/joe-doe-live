@@ -219,6 +219,34 @@ body {
   font-weight: 600;
 }
 
+/* Play (play-state.ts): outlined while it plays what you see, lit and
+   breathing when there are changes to apply */
+/* the same width whatever it says, so the bar does not shift */
+#play {
+  min-width: 7.4rem;
+}
+
+#play[data-state='playing'] {
+  background: transparent;
+  color: var(--accent);
+}
+
+#play[data-state='changed'] {
+  animation: apply-breathe 1.6s ease-in-out infinite;
+}
+
+@keyframes apply-breathe {
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #play[data-state='changed'] {
+    animation: none;
+  }
+}
+
 .control-accent:hover {
   background: transparent;
   color: var(--accent);
@@ -1364,6 +1392,10 @@ select.control {
      recording), so they fit with the menu on the first row */
   .btn-text {
     display: none;
+  }
+
+  #play {
+    min-width: 0;
   }
 
   .control-record.is-recording .record-label {

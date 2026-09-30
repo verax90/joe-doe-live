@@ -38,7 +38,7 @@ const sections: Section[] = [
         kind: 'table',
         head: [L('Keys', 'Teclas'), L('What it does', 'Qué hace')],
         rows: [
-          ['Ctrl+Enter', L('Play / apply the changes', 'Play / aplicar los cambios')],
+          ['Ctrl+Enter', L('Play / apply the changes (the button says Apply while there are some)', 'Play / aplicar los cambios (el botón dice Aplicar mientras los haya)')],
           ['Ctrl+.', L('Stop', 'Stop')],
           ['Ctrl+Z · ↶ / Ctrl+Shift+Z · ↷', L('Undo / redo; with the buttons, while it plays you hear each step', 'Deshacer / rehacer; con los botones, mientras suena oyes cada paso')],
           ['Ctrl+Shift+H', L('Hide the code (performance mode)', 'Ocultar el código (modo concierto)')],

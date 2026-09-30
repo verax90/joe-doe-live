@@ -30,6 +30,7 @@ import { sessionPlayed, sessionStopped } from './session';
 import { setupVoice } from './voice';
 import { setupFinder } from './finder';
 import { setupProject } from './project';
+import { markApplied, setupPlayState } from './play-state';
 import { setupDrop } from './drop';
 import { setupOverlay } from './overlay';
 import { setupScalePicker } from './scale';
@@ -80,6 +81,7 @@ langButton.dataset.current = lang;
 const editor = await whenEditorReady(repl);
 const scheduler = editor.repl?.scheduler;
 setupStatus(repl);
+setupPlayState(() => editor.code, () => Boolean(scheduler?.started), repl);
 const resetParts = setupScenes(() => editor.code);
 const library = setupLibrary(editor, resetParts);
 
@@ -216,6 +218,7 @@ editor.evaluate = async (autostart?: boolean) => {
   await ensureAudio();
   if (stemsActive()) await playCode(stemsVersion(editor.code));
   else await originalEvaluate(autostart);
+  markApplied(editor.code);
   recordPlayed(editor.code);
   sessionPlayed(editor.code);
   void room?.played();
