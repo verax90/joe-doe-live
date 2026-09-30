@@ -857,6 +857,19 @@ select.control {
   border: none !important;
 }
 
+/* The selection (Ctrl+A, the mouse, Shift+arrows): CodeMirror draws it
+   behind the text, where the lines' dark bands hid it; here it sits on top,
+   lime and see-through, and lets clicks pass */
+.editor .cm-selectionLayer {
+  z-index: 2 !important;
+  pointer-events: none;
+}
+
+.editor .cm-selectionBackground,
+.editor .cm-focused .cm-selectionBackground {
+  background: color-mix(in srgb, var(--accent) 32%, transparent) !important;
+}
+
 /* Paneles laterales (Samples, MIDI) */
 .panel {
   position: relative;
