@@ -7,9 +7,10 @@ import { ensureAudio } from './audio';
 import { onHydraFrame } from './ascii';
 import { scopeCanvas } from './scope';
 import { ensureLimiter, getLimiter } from './limiter';
+import { startStems } from './stems';
 import { micForRecording } from './mic';
 
-type Mode = 'audio' | 'video' | 'vertical' | 'vertical-code';
+type Mode = 'audio' | 'stems' | 'video' | 'vertical' | 'vertical-code';
 
 // MP4 plays everywhere (Instagram, TikTok, phones) and Chrome records it since
 // version 126; older browsers get WebM
@@ -109,7 +110,7 @@ export function encodeWav(channels: Float32Array[][], sampleRate: number) {
   return new Blob([buffer], { type: 'audio/wav' });
 }
 
-function download(blob: Blob, extension: string) {
+export function download(blob: Blob, extension: string) {
   // Local time, so the file name matches the clock on your screen
   const now = new Date();
   const pad = (value: number) => String(value).padStart(2, '0');
@@ -121,7 +122,7 @@ function download(blob: Blob, extension: string) {
   setTimeout(() => URL.revokeObjectURL(link.href), 60_000);
 }
 
-export function setupRecorder(getCode: () => string) {
+export function setupRecorder(getCode: () => string, playCode?: (code: string) => Promise<unknown>) {
   const button = document.querySelector<HTMLButtonElement>('#record')!;
   const label = button.querySelector<HTMLElement>('.record-label')!;
   const modeSelect = document.querySelector<HTMLSelectElement>('#record-mode')!;
@@ -311,7 +312,9 @@ export function setupRecorder(getCode: () => string) {
       if (!limiter) throw new Error(t('recordNoAudio'));
       const mode = modeSelect.value as Mode;
       stop =
-        mode === 'video'
+        mode === 'stems' && playCode
+          ? await startStems(context, limiter.limiter, getCode(), playCode)
+          : mode === 'video'
           ? await startVideo(limiter.limiter, context)
           : mode === 'vertical' || mode === 'vertical-code'
             ? await startVertical(limiter.limiter, context, mode === 'vertical-code')

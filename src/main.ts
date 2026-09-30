@@ -26,6 +26,7 @@ import { setupMic } from './mic';
 import { setupOffline } from './offline';
 import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
 import { builtInPresets, translateIfBuiltIn } from './presets';
+import { stemsActive, stemsVersion } from './stems';
 import { setupRecorder } from './record';
 import { setupRiff } from './riff';
 import { setupCycleClock } from './cycle-clock';
@@ -286,7 +287,16 @@ room = setupRoom({
     runVisual();
   },
 });
-setupRecorder(() => editor.code);
+// Stems: while they record, the code plays with a voice per orbit, also after
+// Ctrl+Enter or a change; the editor keeps the code as you wrote it
+const strudelRepl = editor.repl as { evaluate?: (code: string, autostart?: boolean) => Promise<unknown> } | undefined;
+const playCode = (code: string) => strudelRepl?.evaluate?.(code, true) ?? Promise.resolve();
+const evaluateInEditor = editor.evaluate.bind(editor);
+editor.evaluate = async (autostart?: boolean) => {
+  if (stemsActive()) await playCode(stemsVersion(editor.code));
+  else await evaluateInEditor(autostart);
+};
+setupRecorder(() => editor.code, playCode);
 // Free play stays out of the way when the playing pattern reads the keys itself
 setupFreePlay(() => Boolean(scheduler?.started) && editor.code.includes('midikeys'));
 setupDebug(() => scheduler);

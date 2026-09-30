@@ -95,3 +95,72 @@ export function trackInsertPoint(code: string) {
   const all = statements(code)?.find((s) => s.type === 'ExpressionStatement' && root(s.expression) === 'all');
   return all?.start ?? code.length;
 }
+
+// Stems: every voice of the code on an orbit of its own, so each one comes
+// out of its own output. A voice is a playing track ($: or a named one, not
+// muted) or, for a stack(...), each thing stacked. Voices that already pick
+// their orbit keep it. The first free orbit is 11, away from the usual ones
+export const STEM_ORBIT = 11;
+
+type Voice = { at: number; name: string };
+
+// The stack(...) call a chain grows from, if any: stack(a, b).analyze(1)
+function stackCall(node: Expression | undefined): (Expression & { arguments: Expression[] }) | null {
+  while (node) {
+    if (node.type === 'CallExpression' && node.callee?.type === 'Identifier' && node.callee.name === 'stack') {
+      return node as Expression & { arguments: Expression[] };
+    }
+    if (node.type === 'CallExpression') node = node.callee;
+    else if (node.type === 'MemberExpression') node = node.object;
+    else return null;
+  }
+  return null;
+}
+
+// "bass" for a named track, else the voice's number and its main sound:
+// 2_bd for s("bd ~ sd"), 3_piano for chord(...).s("piano"), 4_notes
+export function voiceName(label: string | undefined, text: string, index: number) {
+  if (label && label !== '$') return label.replace(/^_/, '');
+  const sound = /(?:^|[.\s(,])s\(\s*["'`]([^"'`]+)/.exec(text)?.[1];
+  const first = sound?.split(/[\s<>[\]{}*!?,:~@/()]+/).find(Boolean);
+  const hint = first ?? (/\b(note|n|chord)\(/.test(text) ? 'notes' : 'voice');
+  return `${index}_${hint.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`;
+}
+
+export function stemVoices(code: string): Voice[] | null {
+  const body = statements(code);
+  if (!body) return null;
+  const voices: Voice[] = [];
+  let index = 0;
+  for (const statement of body) {
+    let label: string | undefined;
+    let expression: Expression | undefined;
+    if (statement.type === 'LabeledStatement') {
+      label = statement.label!.name;
+      const inner = (statement as Statement & { body?: Statement }).body;
+      if (label.startsWith('_') || !inner || !isPattern(inner)) continue;
+      expression = inner.expression;
+    } else if (isPattern(statement)) {
+      expression = statement.expression;
+    } else continue;
+    const stack = stackCall(expression);
+    for (const part of stack ? stack.arguments : [expression!]) {
+      index++;
+      const text = code.slice(part.start, part.end);
+      if (/\borbit\s*\(/.test(text)) continue; // it chose its own
+      voices.push({ at: part.end, name: voiceName(label, text, index) });
+    }
+  }
+  return voices;
+}
+
+// The code with .orbit(n) after each voice, and which name each orbit has
+export function stemCode(code: string) {
+  const voices = stemVoices(code) ?? [];
+  const names = new Map<number, string>();
+  const changes = voices.map((voice, i) => {
+    names.set(STEM_ORBIT + i, voice.name);
+    return { from: voice.at, insert: `.orbit(${STEM_ORBIT + i})` };
+  });
+  return { code: applyChanges(code, changes), names };
+}

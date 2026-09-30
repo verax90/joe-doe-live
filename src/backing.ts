@@ -23,6 +23,9 @@ type Settings = { volume: number; withPlay: boolean; loop: boolean };
 // with the volume down
 let playing: AudioNode | undefined;
 export const backingInput = () => playing;
+// For stems: the track as heard, after its volume
+let heard: AudioNode | undefined;
+export const backingOutput = () => (playing ? heard : undefined);
 
 // A loaded song, whichever way it plays
 type Track = {
@@ -163,6 +166,7 @@ export function setupBacking(scheduler: Scheduler | undefined) {
     ensureLimiter();
     const context = (globalThis as { getAudioContext?: () => AudioContext }).getAudioContext!();
     gain ??= new GainNode(context, { gain: settings.volume });
+    heard = gain;
     if (!bus) {
       bus = context.createGain();
       bus.connect(gain);
