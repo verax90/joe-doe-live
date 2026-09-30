@@ -1,3 +1,4 @@
+import { onLangChange, t } from './i18n';
 import { readStorage, writeStorage } from './storage';
 
 // The "More" menu (everything not needed while playing) and the side panels,
@@ -70,5 +71,37 @@ export function setupMenu() {
         other.setAttribute('aria-pressed', String(open));
       });
     });
+  });
+
+  // Every panel closes from its own ✕ (top right), or with Escape
+  const openButton = () => [...panelButtons].find((button) => !document.getElementById(button.dataset.panel!)!.hidden);
+  const closeButtons: HTMLButtonElement[] = [];
+  panelButtons.forEach((button) => {
+    const panel = document.getElementById(button.dataset.panel!)!;
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'control control-icon panel-close';
+    close.textContent = '✕';
+    close.addEventListener('click', () => button.click());
+    panel.prepend(close);
+    closeButtons.push(close);
+  });
+  const label = () => closeButtons.forEach((close) => close.setAttribute('aria-label', t('close')));
+  label();
+  onLangChange(label);
+  // Escape closes the open panel, unless it already closed something else
+  // (a dialog, the menu, the editor's suggestions) or a field is being typed in
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || event.defaultPrevented || !menu.hidden || document.querySelector('dialog[open]')) return;
+    const target = event.target as HTMLElement;
+    if (target.closest('input, select, textarea')) return;
+    if (document.querySelector('.cm-tooltip-autocomplete')) return;
+    const button = openButton();
+    if (!button) return;
+    const panel = document.getElementById(button.dataset.panel!)!;
+    const inside = panel.contains(target);
+    button.click();
+    // focus was in the panel: give it back to the editor
+    if (inside) document.querySelector<HTMLElement>('.cm-content')?.focus();
   });
 }

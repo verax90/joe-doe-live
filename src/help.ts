@@ -42,6 +42,7 @@ const sections: Section[] = [
           ['Ctrl+.', L('Stop', 'Stop')],
           ['Ctrl+Z · ↶ / Ctrl+Shift+Z · ↷', L('Undo / redo; with the buttons, while it plays you hear each step', 'Deshacer / rehacer; con los botones, mientras suena oyes cada paso')],
           ['Ctrl+Shift+H', L('Hide the code (performance mode)', 'Ocultar el código (modo concierto)')],
+          ['Esc', L('Close the open panel, the menu or a dialog', 'Cerrar el panel abierto, el menú o un diálogo')],
           ['Ctrl+S', L('Save the pattern in this browser', 'Guardar el patrón en este navegador')],
           ['Ctrl+K', L('Search: a panel, a pattern, a visual, by a few letters', 'Buscar: un panel, un patrón, un visual, con unas letras')],
           ['Alt+M', L('While recording the whole session: mark this moment', 'Grabando la sesión entera: marcar este momento')],
