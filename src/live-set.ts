@@ -3,6 +3,7 @@
 // the bottom shows where you are; ← → (or a presentation clicker, or the MPK
 // pads in PROG CHANGE mode) move through it, and while it plays the next song
 // comes in on the bar line, with its own tempo and visual.
+import { askText } from './ask';
 import { onLangChange, pick, t, type Localized } from './i18n';
 import { prepareSounds } from './offline';
 import type { Preset } from './presets';
@@ -130,9 +131,9 @@ export function setupLiveSet({ editor, presets, visuals, currentVisual, useVisua
     renderList();
   }
 
-  document.querySelector('#set-add')!.addEventListener('click', () => {
+  document.querySelector('#set-add')!.addEventListener('click', async () => {
     const preset = presets().find((p) => p.id === patternSelect.value);
-    const name = preset?.name ?? prompt(t('setNamePrompt'), '')?.trim();
+    const name = preset?.name ?? (await askText(t('setNamePrompt')));
     if (!name) return;
     update([...songs, { name, code: preset?.code ?? editor.code, visual: visualSelect.value, preset: preset?.id }]);
     toast(t('setAdded', { name, n: songs.length }));

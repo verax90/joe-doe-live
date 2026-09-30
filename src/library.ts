@@ -1,5 +1,6 @@
 // The pattern list: the built-in patterns and the ones you saved in this
 // browser, with Save and Delete in the More menu
+import { askConfirm, askText } from './ask';
 import { onLangChange, t } from './i18n';
 import { builtInPresets, type Preset } from './presets';
 import { readStorage, writeStorage } from './storage';
@@ -44,9 +45,9 @@ export function setupLibrary(editor: StrudelMirror, onLoad: () => void) {
     if (preset) load(preset);
   });
 
-  saveButton.addEventListener('click', () => {
+  saveButton.addEventListener('click', async () => {
     const current = saved.find((p) => p.id === select.value);
-    const name = prompt(t('savePrompt'), current?.name ?? '');
+    const name = await askText(t('savePrompt'), current?.name ?? '');
     if (!name) return;
     const existing = saved.find((p) => p.name === name);
     if (existing) existing.code = editor.code;
@@ -55,9 +56,9 @@ export function setupLibrary(editor: StrudelMirror, onLoad: () => void) {
     render((existing ?? saved.at(-1))!.id);
   });
 
-  deleteButton.addEventListener('click', () => {
+  deleteButton.addEventListener('click', async () => {
     const preset = saved.find((p) => p.id === select.value);
-    if (!preset || !confirm(t('deleteConfirm', { name: preset.name }))) return;
+    if (!preset || !(await askConfirm(t('deleteConfirm', { name: preset.name }), t('delete')))) return;
     saved = saved.filter((p) => p !== preset);
     writeStorage(SAVED_KEY, saved);
     render();

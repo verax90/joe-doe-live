@@ -1,6 +1,7 @@
 // Export and open: copy the code, download it as a .js file (Strudel code is
 // JavaScript; there is no Strudel file format, strudel.cc takes it pasted) and
 // open such a file again, from the menu or dropped on the page
+import { askText } from './ask';
 import { t } from './i18n';
 import { toast } from './toast';
 
@@ -84,8 +85,8 @@ export function setupExport(editor: Editor, getVisual: () => string) {
     toast(t('codeDownloaded', { name }));
   });
 
-  document.querySelector('#save-session')!.addEventListener('click', () => {
-    const title = prompt(t('sessionPrompt'), '')?.trim();
+  document.querySelector('#save-session')!.addEventListener('click', async () => {
+    const title = await askText(t('sessionPrompt'));
     if (!title) return;
     const now = new Date();
     const name = `${localDay(now)}-${slugify(title)}.md`;
