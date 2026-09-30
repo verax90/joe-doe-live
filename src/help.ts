@@ -293,8 +293,8 @@ export function setupHelp() {
     if (item.kind === 'news') {
       const list = document.createElement('ul');
       list.className = 'help-news';
-      // the newest nine: older ones make room, so the section never scrolls
-      for (const news of NEWS.slice(0, 9)) {
+      // the newest eight: older ones make room, so the section never scrolls
+      for (const news of NEWS.slice(0, 8)) {
         const li = document.createElement('li');
         const words = document.createElement('div');
         const title = document.createElement('strong');
