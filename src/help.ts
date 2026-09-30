@@ -1,9 +1,11 @@
 // Help: getting started, shortcuts, every control of the MPK Mini Mk II
 // in each of its modes, the panels, and what to do when something goes wrong.
 import { onLangChange, pick, type Localized } from './i18n';
+import { goTo, hasUnseen, markSeen, NEWS } from './news';
 import { readStorage, writeStorage } from './storage';
 
 type Block =
+  | { kind: 'news' }
   | { kind: 'text'; body: Localized }
   | { kind: 'steps'; items: Localized[] }
   | { kind: 'table'; head: [Localized, Localized]; rows: [string | Localized, Localized][] };
@@ -13,6 +15,11 @@ type Section = { title: Localized; short: Localized; blocks: Block[] };
 const L = (en: string, es: string): Localized => ({ en, es });
 
 const sections: Section[] = [
+  {
+    title: L("What's new", 'Novedades'),
+    short: L("What's new", 'Novedades'),
+    blocks: [{ kind: 'news' }],
+  },
   {
     title: L('Getting started', 'Para empezar'),
     short: L('Getting started', 'Para empezar'),
@@ -256,11 +263,14 @@ const sections: Section[] = [
   },
 ];
 
-// The help opens in its own window over the studio: the ? button, the ? key
+// The help opens in its own window over the studio: the ? button, the ? key.
+// With something new not seen yet, it opens on What's new
+let showNews: (() => void) | undefined;
 export function openHelp() {
   const dialog = document.querySelector<HTMLDialogElement>('#help')!;
-  if (dialog.open) dialog.close();
-  else dialog.showModal();
+  if (dialog.open) return dialog.close();
+  if (hasUnseen()) showNews?.();
+  dialog.showModal();
 }
 
 export function setupHelp() {
@@ -279,6 +289,33 @@ export function setupHelp() {
   // One section at a time: an index on the left, the section on the right
   let current = readStorage<number>('jdl:help-section', 0);
   const block = (item: Block) => {
+    if (item.kind === 'news') {
+      const list = document.createElement('ul');
+      list.className = 'help-news';
+      for (const news of NEWS) {
+        const li = document.createElement('li');
+        const words = document.createElement('div');
+        const title = document.createElement('strong');
+        title.textContent = pick(news.title);
+        const text = document.createElement('span');
+        text.textContent = pick(news.text);
+        words.append(title, text);
+        li.append(words);
+        if (news.go) {
+          const go = document.createElement('button');
+          go.type = 'button';
+          go.className = 'control';
+          go.textContent = pick(L('Open', 'Abrir'));
+          go.addEventListener('click', () => {
+            dialog.close();
+            goTo(news);
+          });
+          li.append(go);
+        }
+        list.append(li);
+      }
+      return list;
+    }
     if (item.kind === 'text') {
       const p = document.createElement('p');
       p.className = 'panel-help';
@@ -341,8 +378,26 @@ export function setupHelp() {
     heading.textContent = pick(sections[current].title);
     pane.append(heading, ...sections[current].blocks.map(block));
     container.replaceChildren(nav, pane);
+    // What's new, seen: the dot on ? goes
+    if (current === 0) {
+      markSeen();
+      dot();
+    }
   };
 
+  // A dot on ? (and on Help in the phone menu) while there is news
+  const dot = () => {
+    for (const id of ['help-button', 'help-menu']) document.getElementById(id)?.classList.toggle('has-news', hasUnseen());
+  };
+  showNews = () => {
+    current = 0;
+    writeStorage('jdl:help-section', current);
+    render();
+  };
+
+  // the help remembers its section, but not while news waits (the dot says so)
+  if (hasUnseen() && current === 0) current = 1;
   render();
+  dot();
   onLangChange(render);
 }
