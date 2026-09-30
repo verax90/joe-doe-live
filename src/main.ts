@@ -26,6 +26,7 @@ import { setupMic } from './mic';
 import { setupRemote } from './remote';
 import { setupTyping } from './typing';
 import { recordPlayed, setupHistory } from './history';
+import { sessionPlayed, sessionStopped } from './session';
 import { setupOverlay } from './overlay';
 import { setupScalePicker } from './scale';
 import { setupOffline } from './offline';
@@ -202,6 +203,7 @@ editor.evaluate = async (autostart?: boolean) => {
   await ensureAudio();
   await originalEvaluate(autostart);
   recordPlayed(editor.code);
+  sessionPlayed(editor.code);
   void room?.played();
   ensureLimiter();
   // Always: with "From the code" it only re-attaches the ASCII filter and the
@@ -223,6 +225,7 @@ const originalStop = editor.stop.bind(editor);
 editor.stop = async () => {
   await originalStop();
   room?.stopped();
+  sessionStopped();
 };
 
 whenStrudelReady().then(() => {
@@ -314,7 +317,7 @@ editor.evaluate = async (autostart?: boolean) => {
   if (stemsActive()) await playCode(stemsVersion(editor.code));
   else await evaluateInEditor(autostart);
 };
-setupRecorder(() => editor.code, playCode);
+setupRecorder(() => editor.code, playCode, () => Boolean(scheduler?.started));
 // Free play stays out of the way when the playing pattern reads the keys itself
 setupFreePlay(() => Boolean(scheduler?.started) && editor.code.includes('midikeys'));
 setupDebug(() => scheduler);

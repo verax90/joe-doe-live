@@ -10,8 +10,9 @@ import { ensureLimiter, getLimiter } from './limiter';
 import { startStems } from './stems';
 import { overlayText } from './overlay';
 import { micForRecording } from './mic';
+import { sessionMark, startSession, whenMarked } from './session';
 
-type Mode = 'audio' | 'stems' | 'video' | 'video-code' | 'vertical' | 'vertical-code';
+type Mode = 'audio' | 'session' | 'stems' | 'video' | 'video-code' | 'vertical' | 'vertical-code';
 
 // MP4 plays everywhere (Instagram, TikTok, phones) and Chrome records it since
 // version 126; older browsers get WebM
@@ -188,11 +189,23 @@ const themeColours = () => {
   };
 };
 
-export function setupRecorder(getCode: () => string, playCode?: (code: string) => Promise<unknown>) {
+export function setupRecorder(getCode: () => string, playCode?: (code: string) => Promise<unknown>, isPlaying = () => false) {
   const button = document.querySelector<HTMLButtonElement>('#record')!;
   const label = button.querySelector<HTMLElement>('.record-label')!;
   const modeSelect = document.querySelector<HTMLSelectElement>('#record-mode')!;
   const status = document.querySelector<HTMLElement>('#record-status')!;
+  const markButton = document.querySelector<HTMLButtonElement>('#record-mark')!;
+  markButton.addEventListener('click', sessionMark);
+  whenMarked((count) => {
+    status.textContent = t('sessionMarks', { n: count });
+  });
+  // Alt+M marks the moment too, from anywhere (by key position, any layout)
+  window.addEventListener('keydown', (event) => {
+    if (event.altKey && event.code === 'KeyM' && !markButton.hidden) {
+      event.preventDefault();
+      sessionMark();
+    }
+  });
 
   let stop: (() => Promise<void>) | null = null;
   let startedAt = 0;
@@ -204,6 +217,7 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
     label.textContent = t('record');
     button.setAttribute('aria-label', t('record'));
     modeSelect.disabled = false;
+    markButton.hidden = true;
     clearInterval(timer);
   };
 
@@ -219,6 +233,14 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
     };
     tick();
     timer = window.setInterval(tick, 500);
+  };
+
+  // The whole session: compressed audio and markers (session.ts)
+  const startSessionMode = (output: AudioNode, context: AudioContext) => {
+    const mic = micForRecording();
+    const finish = startSession(context, mic ? [output, mic] : [output], getCode(), isPlaying());
+    markButton.hidden = false;
+    return async () => download(await finish(), 'zip');
   };
 
   const startAudio = async (output: AudioNode, context: BaseAudioContext) => {
@@ -380,7 +402,9 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
       if (!limiter) throw new Error(t('recordNoAudio'));
       const mode = modeSelect.value as Mode;
       stop =
-        mode === 'stems' && playCode
+        mode === 'session'
+          ? startSessionMode(limiter.limiter, context)
+          : mode === 'stems' && playCode
           ? await startStems(context, limiter.limiter, getCode(), playCode)
           : mode === 'video' || mode === 'video-code'
           ? await startVideo(limiter.limiter, context, mode === 'video-code')

@@ -54,6 +54,7 @@
         <button id="record" class="control control-record" type="button" aria-pressed="false" aria-label="Record" data-i18n-label="record">
           <span class="record-dot" aria-hidden="true"></span><span class="record-label btn-text" data-i18n="record">Record</span>
         </button>
+        <button id="record-mark" class="control control-icon" type="button" hidden aria-keyshortcuts="Alt+M" aria-label="Mark this moment" title="Mark this moment (Alt+M)" data-i18n-label="sessionMarkLabel" data-i18n-title="sessionMarkTitle">★</button>
         <span id="record-status" class="record-status" role="status"></span>
       </div>
 
@@ -111,6 +112,7 @@
                 <span data-i18n="recordMode">What to record</span>
                 <select id="record-mode" class="control">
                   <option value="audio" data-i18n="recordAudio">Audio (WAV)</option>
+                  <option value="session" data-i18n="recordSession">Whole session (audio + markers)</option>
               <option value="stems" data-i18n="recordStems">Separate tracks (.zip of WAVs)</option>
                   <option value="video" data-i18n="recordVideo">Video (screen)</option>
                   <option value="video-code" data-i18n="recordVideoCode">Video with the code</option>

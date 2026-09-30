@@ -42,6 +42,7 @@ const sections: Section[] = [
           ['Ctrl+.', L('Stop', 'Stop')],
           ['Ctrl+Z · ↶ / Ctrl+Shift+Z · ↷', L('Undo / redo; with the buttons, while it plays you hear each step', 'Deshacer / rehacer; con los botones, mientras suena oyes cada paso')],
           ['Ctrl+Shift+H', L('Hide the code (performance mode)', 'Ocultar el código (modo concierto)')],
+          ['Alt+M', L('While recording the whole session: mark this moment', 'Grabando la sesión entera: marcar este momento')],
           ['?', L('This help', 'Esta ayuda')],
           ['1 – 8', L('Switch parts on and off in a pattern that uses them (Scenes)', 'Encender y apagar partes en un patrón que las use (Escenas)')],
           ['Esc', L('Close the menu or an embedded tool', 'Cerrar el menú o una herramienta incrustada')],
@@ -140,8 +141,9 @@ const sections: Section[] = [
         rows: [
           [L('History', 'Historial'), L('Every version that played, the last 50: ↩ loads one (Ctrl+Z undoes), ▶ loads and plays it. For going back to what sounded five minutes ago', 'Cada versión que sonó, las 50 últimas: ↩ carga una (Ctrl+Z la deshace), ▶ la carga y la toca. Para volver a lo que sonaba hace cinco minutos')],
           [L('Copy / Download the code', 'Copiar / Descargar el código'), L('Your code to the clipboard, or as a .js file that opens in any Strudel', 'Tu código al portapapeles, o como archivo .js que se abre en cualquier Strudel')],
-          [L('Offline', 'Sin internet'), L('Once opened, the studio works with no connection and keeps every sound it played. Before a gig: More → Live set → Get ready to play offline. Chrome can install it as an app (the icon in the address bar)', 'Una vez abierto, el estudio funciona sin conexión y guarda cada sonido que ha tocado. Antes de un concierto: Más → Directo → Preparar para tocar sin internet. Chrome puede instalarlo como app (el icono de la barra de direcciones)')],
+          [L('Offline', 'Sin internet'), L('Once opened, the studio works with no connection and keeps every sound it played. Before a gig: More → Live set → Get ready to play offline.', 'Una vez abierto, el estudio funciona sin conexión y guarda cada sonido que ha tocado. Antes de un concierto: Más → Directo → Preparar para tocar sin internet.')],
           [L('What to record', 'Qué grabar'), L('WAV audio, a video of the screen, or a vertical 9:16 video for socials (with the code on top if you like); MP4 when the browser can, else WebM. Then ● Record', 'Audio WAV, vídeo de la pantalla, o vídeo vertical 9:16 para redes (con el código encima si quieres); MP4 si el navegador puede, si no WebM. Luego ● Grabar')],
+          [L('Whole session', 'Sesión entera'), L('In What to record: a long take of the jam, light enough for hours, with a marker at every change of code and every ★ (Alt+M). A .zip with the audio, the markers for Audacity and the code of every moment', 'En Qué grabar: horas de jam en poco espacio, con marcas en cada cambio de código y cada ★ (Alt+M). Un .zip: audio, marcas para Audacity y el código de cada momento')],
           [L('Separate tracks', 'Pistas por separado'), L('In What to record: a .zip with a WAV per track (named after it), the mix, the mic and the backing track, all aligned, to mix in a DAW. A stack(...) is split into its parts', 'En Qué grabar: un .zip con un WAV por pista (con su nombre), la mezcla, el micro y la pista de fondo, todos alineados, para mezclar en un DAW. Un stack(...) se separa en sus partes')],
         ],
       },
