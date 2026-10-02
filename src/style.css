@@ -106,6 +106,15 @@ body {
 /* YouTube behind everything: covers the window like a background image, a
    little dim while the code is on screen. The visuals are laid over it with
    screen, so their black is see-through and their colour lights it up */
+/* where the YouTube player lives (youtube.ts): fixed, out of the page's
+   rows, and never in the way of a click */
+.youtube-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .youtube-bg {
   position: fixed;
   top: 50%;

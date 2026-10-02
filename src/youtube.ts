@@ -84,6 +84,21 @@ async function titleOf(id: string) {
 
 const KEY = 'jdl:youtube-queue';
 
+// A fixed layer of its own for the player: out of the page's rows, so
+// neither the player while it loads nor what the API leaves behind when it
+// goes can push the bar or the code around
+function layer() {
+  let element = document.getElementById('youtube-layer');
+  if (!element) {
+    element = document.createElement('div');
+    element.id = 'youtube-layer';
+    element.className = 'youtube-layer';
+    element.setAttribute('aria-hidden', 'true');
+    document.body.prepend(element);
+  }
+  return element;
+}
+
 export function setupYoutube(say: (text: string) => void) {
   const form = document.querySelector<HTMLFormElement>('#youtube-form')!;
   const input = document.querySelector<HTMLInputElement>('#youtube-url')!;
@@ -183,7 +198,7 @@ export function setupYoutube(say: (text: string) => void) {
       (YT) =>
         new Promise<Player>((resolve) => {
           const holder = document.createElement('div');
-          document.body.prepend(holder);
+          layer().replaceChildren(holder);
           const player: Player = new YT.Player(holder, {
             host: 'https://www.youtube-nocookie.com',
             videoId: queue.list ? undefined : first,
@@ -235,7 +250,8 @@ export function setupYoutube(say: (text: string) => void) {
       ready = undefined;
       playing = undefined;
       (await old)?.destroy();
-      document.getElementById('youtube-bg')?.remove();
+      // the API puts back the element it was made on: nothing may stay
+      layer().replaceChildren();
       return;
     }
     if (want === playing) return;
