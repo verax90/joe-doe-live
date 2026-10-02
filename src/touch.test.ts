@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { easeTowards, touchFromNote } from './midi';
+import { easeTowards, pulseAfter, touchFromNote } from './midi';
 
 describe('TouchMe touch()', () => {
   it('glides towards the new strength instead of jumping', () => {
@@ -26,5 +26,15 @@ describe('TouchMe without CC 90', () => {
     const range = { low: 127, high: 0 };
     touchFromNote(58, range);
     expect(touchFromNote(61, range)).toBeCloseTo(0.5);
+  });
+});
+
+describe('touch pulse', () => {
+  it('is 1 the moment of a touch and fades in about a quarter of a second', () => {
+    expect(pulseAfter(0)).toBe(1);
+    expect(pulseAfter(250)).toBeCloseTo(Math.exp(-1));
+    expect(pulseAfter(1000)).toBeLessThan(0.02);
+    expect(pulseAfter(Infinity)).toBe(0);
+    expect(pulseAfter(-5)).toBe(0);
   });
 });

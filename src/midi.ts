@@ -57,9 +57,16 @@ export function currentTouch() {
   touchAt = now;
   return touchValue;
 }
-const g = globalThis as { touch?: () => number; touching?: () => boolean };
+// A hit for each new touch: 1 the moment hands meet (each TouchMe note-on),
+// fading to 0 in about a quarter of a second, for flashes and beats.
+// touchPulse() in patterns and Hydra
+let pulseAt = -Infinity;
+export const pulseAfter = (elapsedMs: number) => (elapsedMs < 0 ? 0 : Math.exp(-elapsedMs / 250));
+export const touchPulse = () => pulseAfter(performance.now() - pulseAt);
+const g = globalThis as { touch?: () => number; touching?: () => boolean; touchPulse?: () => number };
 g.touch = currentTouch;
 g.touching = touchHeld;
+g.touchPulse = touchPulse;
 
 let connectMidi: (() => Promise<void>) | undefined;
 
@@ -156,6 +163,7 @@ export function setupMidiPanel() {
         }
         if ((status & 0xf0) === 0x90 && high > 0) {
           device.notes.add(low);
+          if (isTouch(id)) pulseAt = performance.now();
           if (isTouch(id) && !touchCc) {
             currentTouch();
             touchTarget = touchFromNote(low, noteRange);

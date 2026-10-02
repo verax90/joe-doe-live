@@ -135,6 +135,8 @@ const sections: Section[] = [
         rows: [
           [L('Touch someone', 'Tocar a alguien'), L('Plays notes on its own, like the MPK keys without Play: light contact low, more contact higher, in the scale set on its back (C major by default)', 'Toca notas solo, como las teclas del MPK sin Play: poco contacto grave, más contacto más agudo, en la escala de su parte de atrás (Do mayor de fábrica)')],
           ['touch()', L('How strong the touch is, 0 to 1, easing back to 0 when you let go: from its CC 90, or, if it sends none, from the note (the range it plays is learnt as you go). In patterns: .lpf(ref(() => 300 + touch() * 5000)); in Hydra: () => touch()', 'Cuánto os tocáis, de 0 a 1, volviendo a 0 al soltar: de su CC 90 o, si no lo manda, de la nota (aprende sobre la marcha el rango que toca). En patrones: .lpf(ref(() => 300 + touch() * 5000)); en Hydra: () => touch()')],
+          ['touchPulse()', L('1 the moment you touch, fading in a quarter of a second: for flashes and beats', '1 en el momento del toque, apagándose en un cuarto de segundo: para destellos y golpes')],
+          [L('Visuals', 'Visuales'), L('Touch, and Touch ripples, sparks and heartbeat: they follow how much you touch', 'Tacto, y Tacto ondas, chispas y latido: siguen cuánto os tocáis')],
           ['touching()', L('true while someone touches', 'true mientras alguien toca')],
           [L('Pattern "TouchMe"', 'Patrón "TouchMe"'), L('A beat where the touch opens the bass and wakes up the hi-hats', 'Un ritmo en el que el contacto abre el bajo y despierta los charles')],
           [L('Visual "Touch"', 'Visual "Tacto"'), L('Grows, spins and brightens with the touch', 'Crece, gira y se ilumina con el contacto')],

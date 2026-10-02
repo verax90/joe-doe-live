@@ -12,6 +12,12 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-10-02-touch',
+    title: L('Three TouchMe visuals', 'Tres visuales para el TouchMe'),
+    text: L('Ripples, sparks and a heartbeat that follow your touch; touchPulse() for each new one', 'Ondas, chispas y un latido que siguen el contacto; touchPulse() en cada toque'),
+    go: [{ value: ['#visual', 'tacto-ondas'] }],
+  },
+  {
     id: '2026-09-30-blank',
     title: L('Start from blank', 'Empezar en blanco'),
     text: L('More → Code: a tempo and a kick to start; Ctrl+Z brings back what you had', 'Más → Código: tempo y un bombo para empezar; Ctrl+Z recupera lo que tenías'),

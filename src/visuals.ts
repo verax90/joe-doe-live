@@ -224,6 +224,36 @@ src(s1)
   .out()`,
   },
   {
+    id: 'tacto-ondas',
+    name: { en: 'Touch (ripples)', es: 'Tacto (ondas)' },
+    code: `osc(() => 12 + touch() * 48, () => 0.04 + touch() * 0.3, 0)
+  .kaleid(64)
+  .color(...tint(1))
+  .mask(shape(64, () => 0.25 + touch() * 0.75, 0.25))
+  .scale(() => 1 + touchPulse() * 0.25)
+  .brightness(() => touchPulse() * 0.35 + touch() * 0.15 - 0.15)
+  .out()`,
+  },
+  {
+    id: 'tacto-chispas',
+    name: { en: 'Touch (sparks)', es: 'Tacto (chispas)' },
+    code: `noise(() => 4 + touch() * 26, () => 0.2 + touch() * 1.5)
+  .thresh(() => 0.85 - touch() * 0.45 - touchPulse() * 0.25, 0.04)
+  .color(...tint(1))
+  .blend(src(o0).scale(1.01).rotate(0.002), () => 0.6 + touch() * 0.3)
+  .out()`,
+  },
+  {
+    id: 'tacto-latido',
+    name: { en: 'Touch (heartbeat)', es: 'Tacto (latido)' },
+    code: `shape(64, () => 0.16 + touch() * 0.22 + touchPulse() * 0.14, () => 0.02 + touch() * 0.18)
+  .color(...tint(1))
+  .modulate(osc(6, 0.1), () => touch() * 0.12)
+  .blend(src(o0).scale(() => 1.03 + touchPulse() * 0.06), 0.55)
+  .brightness(() => touchPulse() * 0.2 - 0.05)
+  .out()`,
+  },
+  {
     id: 'voz',
     name: { en: 'Voice (colour by note)', es: 'Voz (color por nota)' },
     code: `osc(10, 0.03, 0)
@@ -507,7 +537,7 @@ function stopAuto() {
 
 function startAuto() {
   // not the webcam ones, nor those that wait for a controller (Touch: the TouchMe)
-  const pool = visuals.filter((v) => v.code && !v.camera && !['ninguno', 'tacto', 'voz', 'voz-formas'].includes(v.id));
+  const pool = visuals.filter((v) => v.code && !v.camera && !['ninguno', 'tacto', 'tacto-ondas', 'tacto-chispas', 'tacto-latido', 'voz', 'voz-formas'].includes(v.id));
   const step = () => {
     const cycles = clock();
     return cycles === null ? Math.floor(performance.now() / 1000 / AUTO_SECONDS) : Math.floor(cycles / AUTO_BARS);
