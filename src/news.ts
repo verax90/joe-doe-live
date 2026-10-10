@@ -12,6 +12,12 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-10-10-transport',
+    title: L('Play and Stop from a controller', 'Play y Stop desde un mando'),
+    text: L('MIDI Start and Stop press Play and Stop: the Miyoo console, a drum machine…', 'Start y Stop por MIDI pulsan Play y Stop: la consola Miyoo, una caja de ritmos…'),
+    go: [{ click: '#toggle-midi' }],
+  },
+  {
     id: '2026-10-02-touch',
     title: L('Three TouchMe visuals', 'Tres visuales para el TouchMe'),
     text: L('Ripples, sparks and a heartbeat that follow your touch; touchPulse() for each new one', 'Ondas, chispas y un latido que siguen el contacto; touchPulse() en cada toque'),
