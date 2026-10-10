@@ -74,6 +74,13 @@ export function isEcho(data: ArrayLike<number>, at: number) {
   while (sentNotes.length && sentNotes[0].at < at - 1000) sentNotes.shift();
   return sentNotes.some((sent) => sent.key === key && Math.abs(sent.at - at) < 40);
 }
+// The Start and Stop the studio itself sends with "Send the tempo": if the
+// port loops back (Linux's Midi Through), they must not play or stop it again
+const sentTransport: number[] = [];
+export function isTransportEcho(at: number) {
+  while (sentTransport.length && sentTransport[0] < at - 2000) sentTransport.shift();
+  return sentTransport.some((sent) => Math.abs(sent - at) < 60);
+}
 const rememberNote = (data: number[], at: number) => {
   sentNotes.push({ key: ((data[0] & 0x0f) << 8) | data[1], at });
   if (sentNotes.length > 512) sentNotes.shift();
@@ -138,6 +145,7 @@ export function setupSp({ editor, addTrack }: { editor: StrudelMirror; addTrack:
     if (!port) return;
     for (const { data, at } of messages) {
       if ((data[0] & 0xf0) === 0x90) rememberNote(data, at);
+      if (data[0] === 0xfa || data[0] === 0xfc) sentTransport.push(at);
       port.send(data, at);
     }
   };

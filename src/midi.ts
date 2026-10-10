@@ -4,7 +4,7 @@
 // program changes and free play.
 
 import { t } from './i18n';
-import { isEcho } from './sp';
+import { isEcho, isTransportEcho } from './sp';
 
 const MAX_LOG = 10;
 
@@ -77,6 +77,11 @@ export const PROGRAM_EVENT = 'jdl:program-change';
 // Every note-on, for free play (keys sounding without pressing Play)
 export const NOTE_EVENT = 'jdl:note-on';
 export type NoteDetail = { note: number; velocity: number };
+
+// MIDI Start / Continue and Stop from a controller (the Miyoo's Studio
+// Remote, a drum machine…): main.ts presses Play or Stop
+export const TRANSPORT_EVENT = 'jdl:transport';
+export type TransportDetail = 'play' | 'stop';
 
 // Every pitch bend move (the MPK joystick sideways), from -1 to 1
 export const BEND_EVENT = 'jdl:bend';
@@ -185,6 +190,13 @@ export function setupMidiPanel() {
           window.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: low, velocity: high / 127 } }));
         }
         if ((status & 0xf0) === 0xc0) window.dispatchEvent(new CustomEvent(PROGRAM_EVENT, { detail: low }));
+        if ((status === 0xfa || status === 0xfb || status === 0xfc) && !isTransportEcho(event.timeStamp)) {
+          const detail: TransportDetail = status === 0xfc ? 'stop' : 'play';
+          window.dispatchEvent(new CustomEvent<TransportDetail>(TRANSPORT_EVENT, { detail }));
+          flash();
+          addLog(input?.name ?? '', detail === 'play' ? 'Start' : 'Stop');
+          return;
+        }
         if ((status & 0xf0) === 0xb0) {
           const detail: CcDetail = { cc: low, value: high / 127, channel: (status & 0x0f) + 1 };
           window.dispatchEvent(new CustomEvent<CcDetail>(CC_EVENT, { detail }));

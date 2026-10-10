@@ -36,7 +36,7 @@ import { setupSequencer } from './sequencer';
 import { setupOverlay } from './overlay';
 import { setupScalePicker } from './scale';
 import { setupOffline } from './offline';
-import { PROGRAM_EVENT, connectMidiIfAllowed, setupMidiPanel } from './midi';
+import { PROGRAM_EVENT, TRANSPORT_EVENT, connectMidiIfAllowed, setupMidiPanel, type TransportDetail } from './midi';
 import { builtInPresets, translateIfBuiltIn } from './presets';
 import { stemsActive, stemsVersion } from './stems';
 import { setupRecorder } from './record';
@@ -264,6 +264,11 @@ whenStrudelReady().then(() => {
 
 document.querySelector('#play')!.addEventListener('click', () => editor.evaluate());
 document.querySelector('#stop')!.addEventListener('click', () => editor.stop());
+// MIDI Start and Stop from a controller work like the buttons
+window.addEventListener(TRANSPORT_EVENT, (event) => {
+  if ((event as CustomEvent<TransportDetail>).detail === 'play') void editor.evaluate();
+  else editor.stop();
+});
 
 // Start from blank: one edit (Ctrl+Z undoes it), a tempo and a kick to go on
 document.querySelector('#new-code')!.addEventListener('click', () => {

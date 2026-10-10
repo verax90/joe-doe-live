@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { padMessage, parsePad, spMessages } from './sp';
+import { isTransportEcho, padMessage, parsePad, spMessages } from './sp';
 
 const noteToMidi = (note: string) => ({ c3: 48, e3: 52 })[note] ?? NaN;
 
@@ -51,5 +51,11 @@ describe('events to MIDI', () => {
   it('ignores what it cannot play', () => {
     expect(spMessages({ s: 'bd' }, options)).toEqual({});
     expect(spMessages({ n: 20 }, options)).toEqual({});
+  });
+});
+
+describe('transport from controllers', () => {
+  it('takes a Start it did not send itself', () => {
+    expect(isTransportEcho(1000)).toBe(false);
   });
 });
