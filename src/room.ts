@@ -5,7 +5,7 @@
 // needs no server of ours and costs next to no bandwidth.
 // Not sent: your voice, the MPK played without Play. It is the same music,
 // not the same instant: each browser keeps its own bar line.
-// With "share the webcam image" ticked, what your webcam visuals show (the
+// With "share the webcam image" ticked (it is by default), what your webcam visuals show (the
 // camera, a video or a tab) also goes as video, and listeners' own webcam
 // visuals use it, so they see it with the same effect. Their camera is never
 // touched: without your image they see Lime instead.
@@ -25,15 +25,20 @@ type Message =
 
 const PREFIX = 'jdl-room-';
 
-// Short, easy to read out: no 0/o or 1/l
+// Easy to read out and type on a phone: a noun and an adjective that fits
+// either gender, no accents or ñ (luna-azul, tigre-veloz)
+const NOUNS = ['luna', 'sol', 'tigre', 'gato', 'lobo', 'nube', 'rio', 'mar', 'faro', 'zorro', 'oso', 'rayo', 'bosque', 'isla', 'cometa', 'tambor', 'flauta', 'piano', 'disco', 'radio', 'robot', 'trueno', 'ola', 'llama', 'pulpo', 'buho', 'cactus', 'volcan', 'planeta', 'nave'];
+const ADJECTIVES = ['azul', 'verde', 'gris', 'feliz', 'veloz', 'libre', 'alegre', 'dulce', 'fuerte', 'grande', 'audaz', 'rebelde', 'salvaje', 'brillante', 'gigante', 'lunar', 'solar', 'tenaz', 'sutil', 'joven', 'naranja', 'violeta', 'rosa', 'cobalto', 'feroz', 'astral', 'polar', 'tropical', 'digital', 'genial'];
+
 export function roomId(random = Math.random) {
-  const alphabet = 'abcdefghijkmnpqrstuvwxyz23456789';
-  return Array.from({ length: 6 }, () => alphabet[Math.floor(random() * alphabet.length)]).join('');
+  const pick = (words: string[]) => words[Math.floor(random() * words.length)];
+  return `${pick(NOUNS)}-${pick(ADJECTIVES)}`;
 }
 
+// Also the old six-character ids (k3f9x2), so earlier links still work
 export const roomFromUrl = (search = location.search) => {
-  const id = new URLSearchParams(search).get('sala');
-  return id && /^[a-z0-9]{4,12}$/.test(id) ? id : null;
+  const id = new URLSearchParams(search).get('sala')?.toLowerCase();
+  return id && /^[a-z0-9]+(-[a-z0-9]+)?$/.test(id) && id.length <= 24 ? id : null;
 };
 
 // PeerJS (about 100 KB) only loads when a room is used
@@ -117,17 +122,17 @@ export function setupRoom({ editor, currentVisual, showVisual }: Options) {
   }
   shareCam.addEventListener('change', () => void shareCamera());
 
-  openButton.addEventListener('click', async () => {
-    status.textContent = t('roomOpening');
-    const Peer = await loadPeer();
+  // A name already in use by another open room: try another, a few times
+  const openPeer = (Peer: Awaited<ReturnType<typeof loadPeer>>, attempt = 0) => {
     const id = roomId();
-    peer = new Peer(PREFIX + id);
-    peer.on('open', () => {
+    const next = new Peer(PREFIX + id);
+    peer = next;
+    next.on('open', () => {
       linkInput.value = `${location.origin}/?sala=${id}`;
       status.textContent = '';
       renderHost();
     });
-    peer.on('connection', (connection) => {
+    next.on('connection', (connection) => {
       connection.on('open', () => {
         guests.add(connection);
         renderHost();
@@ -141,9 +146,19 @@ export function setupRoom({ editor, currentVisual, showVisual }: Options) {
         renderHost();
       });
     });
-    peer.on('error', (error) => {
+    next.on('error', (error) => {
+      if (error.type === 'unavailable-id' && attempt < 5) {
+        next.destroy();
+        openPeer(Peer, attempt + 1);
+        return;
+      }
       status.textContent = t('roomError', { error: error.type ?? error.message });
     });
+  };
+
+  openButton.addEventListener('click', async () => {
+    status.textContent = t('roomOpening');
+    openPeer(await loadPeer());
   });
 
   closeButton.addEventListener('click', () => {
