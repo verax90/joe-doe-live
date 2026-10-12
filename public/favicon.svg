@@ -1,22 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <rect width="64" height="64" fill="#12151c"/>
-  <!-- J (logo de joedoe.dev, subido para dejar sitio a la onda) -->
-  <path
-    fill="#d6ff4b"
-    d="M27 6v25.2c0 5.4-3.3 8.5-8.6 8.5-3.1 0-5.6-.9-7.4-2.6l3.2-5.5c1 .8 2.2 1.3 3.7 1.3 1.9 0 3-1.1 3-3.3V6H27Z"
-  />
-  <!-- D -->
-  <path
-    fill="#eceae4"
-    fill-rule="evenodd"
-    d="M35 6h9.1C53.4 6 59 11.4 59 20s-5.6 14-14.9 14H35V6Zm8.5 6.4h-1.7v15.2h1.7c5.1 0 8.2-2.8 8.2-7.6s-3.1-7.6-8.2-7.6Z"
-  />
-  <!-- onda: el "live" -->
-  <path
-    stroke="#d6ff4b"
-    stroke-width="4"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    d="M6 52h8l4-7 6 14 6-14 6 14 6-14 4 7h12"
-  />
+  <!-- The sound being made live: a lime wave, and the red dot of "on air". -->
+  <rect width="64" height="64" rx="14" fill="#12151c"/>
+  <path stroke="#d6ff4b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M8 34h7l4-9 6 20 6-28 6 26 5-15 3 6h11"/>
+  <circle cx="50" cy="14" r="5" fill="#ff5a4e"/>
 </svg>
