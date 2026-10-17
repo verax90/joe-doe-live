@@ -1,0 +1,684 @@
+[
+  {
+    "title": "Hydra",
+    "url": "https://hydra.ojack.xyz/?sketch_id=malitzin_1",
+    "category": "livecoding",
+    "note": {
+      "en": "Live visuals in the browser: video synthesis chains you rewrite while they run. It's painting the moment you open it.",
+      "es": "Visuales en vivo en el navegador: cadenas de síntesis de vídeo que se reescriben mientras corren. Abre y ya está pintando."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "Web Audio API — MDN",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API",
+    "category": "sound",
+    "note": {
+      "en": "The documentation you actually work from. Start here rather than with the spec.",
+      "es": "La documentación con la que de verdad se trabaja. Empieza aquí antes que por la spec."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Strudel",
+    "url": "https://strudel.cc/",
+    "category": "livecoding",
+    "note": {
+      "en": "TidalCycles ported to JavaScript. Tidal's algorithmic patterns without installing Haskell or SuperCollider.",
+      "es": "TidalCycles portado a JavaScript. Los patrones algorítmicos de Tidal sin instalar Haskell ni SuperCollider."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "wavesurfer.js",
+    "url": "https://wavesurfer.xyz/",
+    "category": "sound",
+    "note": {
+      "en": "Navigable waveform player. If you're building anything over audio files, this saves you weeks.",
+      "es": "Reproductor de forma de onda navegable. Si haces algo con archivos de audio, esto te ahorra semanas."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "cascade",
+    "url": "https://raphaelbastide.com/cascade/",
+    "category": "livecoding",
+    "note": {
+      "en": "Live coding with CSS. The shortest bridge between your day job and everything else in this section.",
+      "es": "Live coding con CSS. El puente más directo entre lo que haces a diario y todo lo demás de esta sección."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "TOPLAP",
+    "url": "https://toplap.org/",
+    "category": "livecoding",
+    "note": {
+      "en": "The organisation that named this and wrote the manifesto. “Obscurantism is dangerous. Show us your screens.”",
+      "es": "La organización que le puso nombre a esto y escribió el manifiesto. «Obscurantism is dangerous. Show us your screens.»"
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Sonic Pi",
+    "url": "https://sonic-pi.net/",
+    "category": "livecoding",
+    "note": {
+      "en": "Sam Aaron's instrument: you write Ruby and it plays. The friendliest door into all of this.",
+      "es": "El instrumento de Sam Aaron: escribes Ruby y suena. La puerta de entrada más amable a todo esto."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Alda",
+    "url": "https://github.com/alda-lang/alda",
+    "category": "livecoding",
+    "note": {
+      "en": "Music programming language aimed at musicians, not engineers. You write something close to a score.",
+      "es": "Lenguaje de programación musical pensado para músicos, no para ingenieros. Escribes algo parecido a una partitura."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Awesome audio visualization",
+    "url": "https://github.com/willianjusten/awesome-audio-visualization",
+    "category": "livecoding",
+    "note": {
+      "en": "Curated list on audio visualisation — the bridge between what plays and what you see.",
+      "es": "Lista curada de visualización de audio — el puente entre lo que suena y lo que se ve."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Awesome Live Coding Music",
+    "url": "https://awesomeopensource.com/project/pjagielski/awesome-live-coding-music",
+    "category": "livecoding",
+    "note": {
+      "en": "A list focused purely on the music side: frameworks, libraries, and software.",
+      "es": "Lista centrada solo en lo musical: frameworks, librerías y software."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "awesome-livecoding",
+    "url": "https://github.com/toplap/awesome-livecoding",
+    "category": "livecoding",
+    "note": {
+      "en": "The canonical list, maintained by TOPLAP. When this page falls short, continue here.",
+      "es": "La lista canónica, mantenida por TOPLAP. Cuando esta página se quede corta, sigue por aquí."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "awesome-supercollider",
+    "url": "https://github.com/madskjeldgaard/awesome-supercollider",
+    "category": "livecoding",
+    "note": {
+      "en": "Curated list of SuperCollider resources. Archived by its author, so expect nothing new.",
+      "es": "Lista curada de recursos de SuperCollider. Archivada por su autor, así que no espera nada nuevo."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "awesome-webaudio",
+    "url": "https://github.com/notthetup/awesome-webaudio",
+    "category": "sound",
+    "note": {
+      "en": "Curated list of Web Audio packages and resources.",
+      "es": "Lista curada de paquetes y recursos de Web Audio."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "demucs",
+    "url": "https://github.com/facebookresearch/demucs",
+    "category": "sound",
+    "note": {
+      "en": "Meta's source separation: splits a song into vocals, drums, bass, and the rest. The serious tool here.",
+      "es": "Separación de fuentes de Meta: parte una canción en voz, batería, bajo y resto. Lo serio de esta sección."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Dittytoy",
+    "url": "https://dittytoy.net/",
+    "category": "livecoding",
+    "note": {
+      "en": "Code-driven music with a minimal JS API and a gallery to hear what others made.",
+      "es": "Música por código con una API JS mínima y una galería para escuchar lo que hace la gente."
+    },
+    "runs": true,
+    "embed": true
+  },
+  {
+    "title": "End of Life — Sonic Pi beat",
+    "url": "https://www.youtube.com/watch?v=X27G4R6r_OE",
+    "category": "livecoding",
+    "note": {
+      "en": "A lo-fi beat made entirely in Sonic Pi, with the code published. Hearing it work helps you start.",
+      "es": "Un beat lo-fi hecho entero en Sonic Pi, con el código publicado. Ver que suena bien ayuda a empezar."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Estuary",
+    "url": "https://estuary.mcmaster.ca/",
+    "category": "livecoding",
+    "note": {
+      "en": "Collaborative platform for networked performance across several languages at once, from the browser.",
+      "es": "Plataforma colaborativa para tocar en red con varios lenguajes a la vez, desde el navegador."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "Faust IDE",
+    "url": "https://faustide.grame.fr/",
+    "category": "livecoding",
+    "note": {
+      "en": "IDE for the Faust DSP language. Write the signal processor, compile it to a plugin or to the web.",
+      "es": "IDE del lenguaje Faust para DSP. Escribes el procesador de señal y te lo compila a plugin o a web."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "Flocking",
+    "url": "https://flockingjs.org/",
+    "category": "livecoding",
+    "note": {
+      "en": "Declarative synthesis: you describe the sound graph as JSON instead of chaining calls.",
+      "es": "Síntesis declarativa: describes el grafo de sonido en JSON en vez de encadenar llamadas."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "flok",
+    "url": "https://flok.cc/",
+    "category": "livecoding",
+    "note": {
+      "en": "Collaborative P2P editor: several people writing sound and visuals into the same document.",
+      "es": "Editor P2P colaborativo: varias personas escribiendo sonido y visuales en el mismo documento."
+    },
+    "runs": true,
+    "embed": true
+  },
+  {
+    "title": "Gibber",
+    "url": "https://gibber.cc/playground/",
+    "category": "livecoding",
+    "note": {
+      "en": "A complete audiovisual environment in the browser: sound, visuals, and notation in one tab.",
+      "es": "Entorno audiovisual completo en el navegador: sonido, visuales y notación, todo en la misma pestaña."
+    },
+    "runs": true,
+    "embed": true
+  },
+  {
+    "title": "Glicol",
+    "url": "https://glicol.org/",
+    "category": "livecoding",
+    "note": {
+      "en": "Graph-based music language written in Rust and compiled to WebAssembly. Minimal syntax, low latency.",
+      "es": "Lenguaje de música por grafos escrito en Rust y compilado a WebAssembly. Sintaxis mínima, latencia baja."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Glicol Playground",
+    "url": "https://glicol.web.app/",
+    "category": "livecoding",
+    "note": {
+      "en": "Glicol's REPL. Walk in, write two lines, it plays.",
+      "es": "El REPL de Glicol. Entras, escribes dos líneas y suena."
+    },
+    "runs": true,
+    "embed": true
+  },
+  {
+    "title": "Gwion",
+    "url": "https://github.com/Gwion/Gwion",
+    "category": "livecoding",
+    "note": {
+      "en": "Strongly-timed music language in the ChucK lineage, smaller and faster.",
+      "es": "Lenguaje musical strongly-timed en la línea de ChucK, más pequeño y más rápido."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "IDIS",
+    "url": "https://proyectoidis.org/",
+    "category": "livecoding",
+    "note": {
+      "en": "Argentine archive of research on image and sound design. Latin American history of art and technology.",
+      "es": "Archivo argentino de investigaciones sobre diseño de imagen y sonido. Historia latinoamericana del arte y la tecnología."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "in_thread",
+    "url": "https://in-thread.sonic-pi.net/",
+    "category": "livecoding",
+    "note": {
+      "en": "The Sonic Pi community forum. Where you ask when something won't play.",
+      "es": "El foro de la comunidad de Sonic Pi. Donde se pregunta cuando algo no suena."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "jsfxr",
+    "url": "https://sfxr.me/",
+    "category": "sound",
+    "note": {
+      "en": "8-bit sound effect generator. One “randomize” button and you have your game's jump.",
+      "es": "Generador de efectos de 8 bits. Un botón «randomize» y ya tienes el salto de tu juego."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "Limut",
+    "url": "https://github.com/sdclibbery/limut",
+    "category": "livecoding",
+    "note": {
+      "en": "Music and visuals together in the browser, on WebAudio and WebGL.",
+      "es": "Música y visuales a la vez en el navegador, sobre WebAudio y WebGL."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Live Coding Events",
+    "url": "https://livecode.demozoo.org/",
+    "category": "livecoding",
+    "note": {
+      "en": "Calendar of algoraves and live coding gatherings. For when you want to see it in person.",
+      "es": "Calendario de algoraves y encuentros de live coding. Para cuando quieras verlo en persona."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Media Capture and Streams",
+    "url": "https://w3c.github.io/mediacapture-main/",
+    "category": "sound",
+    "note": {
+      "en": "The spec for getting mic and camera into the page. The basis of anything that reacts to what it hears.",
+      "es": "La spec para meter micrófono y cámara en la página. La base de cualquier cosa que reaccione a lo que oye."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Mehackit — Cheatsheet",
+    "url": "https://sonic-pi.mehackit.org/exercises/en/10-cheatsheet/01-cheatsheet.html",
+    "category": "livecoding",
+    "note": {
+      "en": "The Sonic Pi cheatsheet on one page. Keep it open your first week.",
+      "es": "La chuleta de Sonic Pi en una página. Tenla al lado la primera semana."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Mehackit — Sonic Pi",
+    "url": "https://sonic-pi.mehackit.org/",
+    "category": "livecoding",
+    "note": {
+      "en": "Creative coding course built on Sonic Pi, exercise by exercise and well structured.",
+      "es": "Curso de programación creativa con Sonic Pi, por ejercicios y bien estructurado."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "MolinoLab",
+    "url": "https://molinolab.org/",
+    "category": "livecoding",
+    "note": {
+      "en": "Space for artistic and cultural experimentation, with live coding activity in Spanish.",
+      "es": "Espacio de experimentación artística y cultural, con actividad de live coding en castellano."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Motifn",
+    "url": "https://www.motifn.com/",
+    "category": "livecoding",
+    "note": {
+      "en": "Write music in JavaScript and send it over MIDI to your DAW or a real instrument.",
+      "es": "Escribir música con JavaScript y sacarla por MIDI a tu DAW o a un instrumento real."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Music Box Fun",
+    "url": "https://musicbox.fun/",
+    "category": "livecoding",
+    "note": {
+      "en": "Compose for a music box by punching pins on a roll, then share it by URL. Charming and deliberately limited.",
+      "es": "Compones para caja de música marcando púas en un rollo y lo compartes por URL. Encantador y limitado a propósito."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "Musical Design in SuperCollider",
+    "url": "https://github.com/alikthename/Musical-Design-in-Supercollider",
+    "category": "livecoding",
+    "note": {
+      "en": "The code accompanying a video series on musical design in SuperCollider.",
+      "es": "El código que acompaña a una serie de vídeos sobre diseño musical en SuperCollider."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Musical Interactions — Codrops",
+    "url": "https://tympanus.net/Development/MusicalInteractions/",
+    "category": "sound",
+    "note": {
+      "en": "Musical interaction ideas on the web, with demos. Exactly the frontend-meets-sound crossing.",
+      "es": "Ideas de interacción musical en la web, con demos. Justo el cruce entre frontend y sonido."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Olivia Jack",
+    "url": "https://ojack.xyz/",
+    "category": "livecoding",
+    "note": {
+      "en": "The artist behind Hydra. Her site is the best explanation of why it exists.",
+      "es": "La artista que hizo Hydra. Su web es la mejor explicación de por qué existe."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Orca",
+    "url": "https://github.com/hundredrabbits/Orca",
+    "category": "livecoding",
+    "note": {
+      "en": "Esoteric sequencer on a grid where every letter is an operator. Closer to a puzzle game than a DAW.",
+      "es": "Secuenciador esotérico sobre una rejilla donde cada letra es un operador. Se parece más a un juego que a un DAW."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Overtone",
+    "url": "https://overtone.github.io/",
+    "category": "livecoding",
+    "note": {
+      "en": "Clojure talking to SuperCollider. If parentheses don't scare you, it's as expressive as this gets.",
+      "es": "Clojure hablando con SuperCollider. Si el paréntesis no te asusta, es de lo más expresivo que hay."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "peaks.js",
+    "url": "https://github.com/bbc/peaks.js",
+    "category": "sound",
+    "note": {
+      "en": "The BBC's waveform component, built for trimming and annotating long-form audio.",
+      "es": "El componente de formas de onda de la BBC, pensado para recortar y anotar audio largo."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Sandpack",
+    "url": "https://sandpack.codesandbox.io/",
+    "category": "livecoding",
+    "note": {
+      "en": "CodeSandbox's toolkit for embedding editors that actually run. The piece you'd need to put live coding on your own site.",
+      "es": "El toolkit de CodeSandbox para incrustar editores que ejecutan. La pieza que necesitarías para meter live coding en tu propio sitio."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "sccode.org",
+    "url": "https://sccode.org/",
+    "category": "livecoding",
+    "note": {
+      "en": "Community-shared SuperCollider code repository. You learn by reading other people's pieces.",
+      "es": "Repositorio de código de SuperCollider compartido por la comunidad. Se aprende leyendo piezas ajenas."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Sonic Pi Demo",
+    "url": "https://storm-coder-dojo.github.io/activities/python/sonic-pi-demo.html",
+    "category": "livecoding",
+    "note": {
+      "en": "A very short intro built for a coder dojo. Good for showing someone in ten minutes.",
+      "es": "Introducción cortísima pensada para un coder dojo. Sirve para enseñárselo a alguien en diez minutos."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Sonic Pi — Tutorial",
+    "url": "https://sonic-pi.net/tutorial.html",
+    "category": "livecoding",
+    "note": {
+      "en": "The official tutorial, zero to sequencing. It's the material used to teach this in schools.",
+      "es": "El tutorial oficial, de cero a secuenciar. Es el material con el que se enseña en institutos."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "SplitMySong",
+    "url": "https://splitmysong.com/",
+    "category": "sound",
+    "note": {
+      "en": "Same job as the previous one, different implementation. Keep two, because these services go down.",
+      "es": "Lo mismo que el anterior, otra implementación. Ten dos porque estos servicios caen."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "SuperCollider",
+    "url": "https://supercollider.github.io/",
+    "category": "livecoding",
+    "note": {
+      "en": "The synthesis and algorithmic composition platform half this section rests on. Steep curve, very high ceiling.",
+      "es": "La plataforma de síntesis y composición algorítmica sobre la que se apoya media sección. Curva dura, techo altísimo."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "SynteLang",
+    "url": "https://github.com/syntelang/",
+    "category": "livecoding",
+    "note": {
+      "en": "Synthesis-based live coding language and environment, with its own grammar.",
+      "es": "Lenguaje y entorno de live coding basados en síntesis, con su propia gramática."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Taller de Live Coding con Sonic Pi",
+    "url": "https://www.youtube.com/watch?v=yA7epoqrh_o",
+    "category": "livecoding",
+    "note": {
+      "en": "Introductory workshop in Spanish. Sonic Pi was developed by Sam Aaron at Cambridge.",
+      "es": "Taller de introducción en castellano. Sonic Pi lo desarrolló Sam Aaron en Cambridge."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "TidalCycles",
+    "url": "https://tidalcycles.org/",
+    "category": "livecoding",
+    "note": {
+      "en": "The pattern language most of the rest descends from. Powerful, and a real install — Haskell and SuperCollider underneath.",
+      "es": "El lenguaje de patrones del que sale casi todo lo demás. Potente y con instalación de verdad — Haskell y SuperCollider debajo."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Tweakable",
+    "url": "https://tweakable.org/",
+    "category": "livecoding",
+    "note": {
+      "en": "Parametric composition: define rules and ranges, then explore the space of pieces that fall out.",
+      "es": "Composición paramétrica: defines reglas y rangos, y exploras el espacio de piezas que salen de ahí."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Vocal Remover",
+    "url": "https://vocalremover.org/",
+    "category": "sound",
+    "note": {
+      "en": "Split vocals and instrumental with no install. Useful for pulling acapellas out of your own archive.",
+      "es": "Separar voz e instrumental sin instalar nada. Útil para sacar acapellas de un archivo propio."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "Wad",
+    "url": "https://github.com/rserota/wad",
+    "category": "sound",
+    "note": {
+      "en": "Dynamic synthesis with a comfortable API. Its authors call it “jQuery for Web Audio”, and you can see why.",
+      "es": "Síntesis dinámica con una API cómoda. Sus autores lo llaman «jQuery para Web Audio» y se entiende por qué."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "wafxr",
+    "url": "https://fenomas.github.io/wafxr/",
+    "category": "livecoding",
+    "note": {
+      "en": "Game sound effect generator in the browser. A direct descendant of sfxr.",
+      "es": "Generador de efectos de sonido de videojuego en el navegador. Heredero directo de sfxr."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "WASM-music",
+    "url": "https://petersalomonsen.com/wasm-music/",
+    "category": "livecoding",
+    "note": {
+      "en": "Music generated by hand-written WebAssembly. An extreme exercise, and surprisingly musical.",
+      "es": "Música generada por WebAssembly escrito a mano. Ejercicio extremo y sorprendentemente musical."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "wavepot",
+    "url": "https://wavepot.com/",
+    "category": "livecoding",
+    "note": {
+      "en": "A DAW where every track is a JavaScript function returning samples. Raw, straight to the ear.",
+      "es": "Un DAW donde cada pista es una función JavaScript que devuelve muestras. Crudo y directo al oído."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "Web Audio API samples",
+    "url": "https://webaudioapi.com/samples/",
+    "category": "sound",
+    "note": {
+      "en": "The classic samples from Boris Smus's book. Old, short, and still the best way to understand a node.",
+      "es": "Los ejemplos clásicos del libro de Boris Smus. Viejos, cortos y todavía la mejor manera de entender un nodo."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Web Audio API — spec",
+    "url": "https://webaudio.github.io/web-audio-api/",
+    "category": "sound",
+    "note": {
+      "en": "The official spec, for when MDN falls short and you need the fine print.",
+      "es": "La especificación oficial, para cuando MDN se queda corto y necesitas la letra pequeña."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "Web MIDI API",
+    "url": "https://webaudio.github.io/web-midi-api/",
+    "category": "sound",
+    "note": {
+      "en": "Talking to physical keyboards and controllers from the browser. Less known than it deserves.",
+      "es": "Hablar con teclados y controladores físicos desde el navegador. Menos conocida de lo que merece."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "webcam-audio-visualizer",
+    "url": "https://github.com/r21nomi/webcam-audio-visualizer",
+    "category": "sound",
+    "note": {
+      "en": "Visualiser mixing audio with the webcam feed, on Three.js.",
+      "es": "Visualizador que mezcla el audio con la imagen de la webcam, sobre Three.js."
+    },
+    "runs": false,
+    "embed": false
+  },
+  {
+    "title": "WebChucK",
+    "url": "https://chuck.stanford.edu/webchuck/",
+    "category": "livecoding",
+    "note": {
+      "en": "ChucK, Stanford's strongly-timed language, compiled to WebAssembly and running in a tab.",
+      "es": "ChucK, el lenguaje strongly-timed de Stanford, compilado a WebAssembly y corriendo en una pestaña."
+    },
+    "runs": true,
+    "embed": false
+  },
+  {
+    "title": "XSound",
+    "url": "https://xsound.jp/playground/",
+    "category": "livecoding",
+    "note": {
+      "en": "Very complete Japanese Web Audio library — synth, effects, visualisation — with a playground to poke at.",
+      "es": "Librería japonesa de Web Audio muy completa — sintetizador, efectos, visualización — con playground para trastear."
+    },
+    "runs": false,
+    "embed": false
+  }
+]

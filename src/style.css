@@ -1404,6 +1404,20 @@ select.control {
   line-height: 1.45;
 }
 
+.tool-more {
+  margin: 0.2rem 0 0.8rem;
+}
+
+.tool-more summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.tool-more summary:hover {
+  color: var(--fg);
+}
+
 .tool-try {
   height: 1.8rem;
   margin-top: 0.4rem;

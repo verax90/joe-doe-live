@@ -1,7 +1,8 @@
-// Tools panel: other live coding and sound tools that run in the browser. The
-// list lives on joedoe.dev/art (one .md per link) and is only read here; if it
-// cannot be read, the copy bundled with the studio is used.
-import fallback from './tools-fallback.json';
+// Tools panel: other live coding and sound tools that run in the browser, and
+// under them the reading (languages to install, communities, tutorials). The
+// list is src/tools.json, one entry per link with its note in es and en; it
+// used to be read from joedoe.dev/art, which no longer exists.
+import tools from './tools.json';
 import { onLangChange, pick, t, type StringKey } from './i18n';
 
 type Tool = {
@@ -9,31 +10,16 @@ type Tool = {
   url: string;
   category: 'livecoding' | 'sound';
   note: { es: string; en: string };
+  /** Opens and plays in the browser; false = for reading */
+  runs: boolean;
+  /** Works inside the studio's iframe (needs runs) */
   embed: boolean;
 };
-
-const SOURCE = 'https://joedoe.dev/art/runs.json';
 
 const groups: { category: Tool['category']; label: StringKey }[] = [
   { category: 'livecoding', label: 'groupLivecoding' },
   { category: 'sound', label: 'groupSound' },
 ];
-
-// Links the studio already does itself: the Lines visual (FLUUUID's Lines)
-// and the mic's effects (Chris Wilson's Audio Input Effects). They stay on
-// joedoe.dev/art, not here
-const BUILT_IN = ['labs.fluuu.id/lines', 'cwilso.github.io/Audio-Input-Effects'];
-export const notBuiltIn = (tool: { url: string }) => !BUILT_IN.some((part) => tool.url.includes(part));
-
-async function loadTools(): Promise<Tool[]> {
-  try {
-    const response = await fetch(SOURCE, { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) throw new Error(String(response.status));
-    return ((await response.json()) as Tool[]).filter(notBuiltIn);
-  } catch {
-    return (fallback as Tool[]).filter(notBuiltIn);
-  }
-}
 
 export function setupToolsPanel(onEmbedOpen: () => void) {
   const list = document.querySelector<HTMLElement>('#tool-list')!;
@@ -66,44 +52,53 @@ export function setupToolsPanel(onEmbedOpen: () => void) {
     if (event.key === 'Escape' && !embed.hidden) closeEmbed();
   });
 
-  let loaded: Tool[] = [];
   const render = (tools: Tool[]) => {
     list.replaceChildren();
     for (const group of groups) {
-      const items = tools.filter((tool) => tool.category === group.category);
-      if (!items.length) continue;
+      const all = tools.filter((tool) => tool.category === group.category);
+      if (!all.length) continue;
       const heading = document.createElement('h3');
       heading.textContent = t(group.label);
-      const ul = document.createElement('ul');
-      ul.className = 'panel-list tool-list';
-      for (const tool of items) {
-        const li = document.createElement('li');
-        const link = document.createElement('a');
-        link.className = 'tool-name';
-        link.href = tool.url;
-        link.target = '_blank';
-        link.rel = 'noopener';
-        link.textContent = `${tool.title} ↗`;
-        const note = document.createElement('p');
-        note.className = 'tool-note';
-        note.textContent = pick(tool.note);
-        li.append(link, note);
-        if (tool.embed) {
-          const tryHere = document.createElement('button');
-          tryHere.type = 'button';
-          tryHere.className = 'control tool-try';
-          tryHere.textContent = t('tryHere');
-          tryHere.addEventListener('click', () => openEmbed(tool));
-          li.append(tryHere);
-        }
-        ul.append(li);
-      }
+      const ul = toolList(all.filter((tool) => tool.runs));
+      const reading = all.filter((tool) => !tool.runs);
       list.append(heading, ul);
+      if (reading.length) {
+        const more = document.createElement('details');
+        more.className = 'tool-more';
+        const summary = document.createElement('summary');
+        summary.textContent = `${t('toolsMore')} (${reading.length})`;
+        more.append(summary, toolList(reading));
+        list.append(more);
+      }
     }
   };
-  loadTools().then((tools) => {
-    loaded = tools;
-    render(tools);
-  });
-  onLangChange(() => loaded.length && render(loaded));
+  function toolList(items: Tool[]) {
+    const ul = document.createElement('ul');
+    ul.className = 'panel-list tool-list';
+    for (const tool of items) {
+      const li = document.createElement('li');
+      const link = document.createElement('a');
+      link.className = 'tool-name';
+      link.href = tool.url;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = `${tool.title} ↗`;
+      const note = document.createElement('p');
+      note.className = 'tool-note';
+      note.textContent = pick(tool.note);
+      li.append(link, note);
+      if (tool.embed) {
+        const tryHere = document.createElement('button');
+        tryHere.type = 'button';
+        tryHere.className = 'control tool-try';
+        tryHere.textContent = t('tryHere');
+        tryHere.addEventListener('click', () => openEmbed(tool));
+        li.append(tryHere);
+      }
+      ul.append(li);
+    }
+    return ul;
+  }
+  render(tools as Tool[]);
+  onLangChange(() => render(tools as Tool[]));
 }

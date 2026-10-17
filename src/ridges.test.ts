@@ -24,9 +24,14 @@ describe('Lines visual', () => {
 
 describe('Tools panel', () => {
   it('leaves out the links the studio does itself', async () => {
-    const { notBuiltIn } = await import('./tools');
-    expect(notBuiltIn({ url: 'https://labs.fluuu.id/lines/' })).toBe(false);
-    expect(notBuiltIn({ url: 'https://cwilso.github.io/Audio-Input-Effects/' })).toBe(false);
-    expect(notBuiltIn({ url: 'https://strudel.cc/' })).toBe(true);
+    const { default: tools } = await import('./tools.json');
+    const urls = tools.map((tool) => tool.url);
+    expect(urls.some((url) => url.includes('labs.fluuu.id/lines'))).toBe(false);
+    expect(urls.some((url) => url.includes('Audio-Input-Effects'))).toBe(false);
+    expect(urls).toContain('https://strudel.cc/');
+  });
+  it('only embeds tools that run', async () => {
+    const { default: tools } = await import('./tools.json');
+    expect(tools.filter((tool) => tool.embed && !tool.runs)).toEqual([]);
   });
 });

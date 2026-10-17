@@ -156,10 +156,11 @@ const strings = {
     close: 'Close',
     embeddedTool: 'Embedded tool',
     toolsHelp:
-      'Other tools that run in the browser, from the <a href="https://joedoe.dev/art?cat=livecoding" target="_blank" rel="noopener">joedoe.dev/art</a> shelf. The ones with "Try it here" open inside the studio (your pattern stops so they do not clash).',
+      'Other tools that run in the browser, and under each section the reading: languages to install, communities, tutorials. The ones with "Try it here" open inside the studio (your pattern stops so they do not clash).',
     loading: 'Loading…',
     groupLivecoding: 'Live coding',
     groupSound: 'Sound in the browser',
+    toolsMore: 'To read and install',
     tryHere: 'Try it here',
     samplesHelp:
       'Drop audio or folders on the page (or pick them). A file plays with <code>s("name")</code>, a folder is a kit: <code>s("kicks:3")</code>.',
@@ -658,10 +659,11 @@ const strings = {
     close: 'Cerrar',
     embeddedTool: 'Herramienta incrustada',
     toolsHelp:
-      'Otras herramientas que funcionan en el navegador, de la estantería de <a href="https://joedoe.dev/art?cat=livecoding" target="_blank" rel="noopener">joedoe.dev/art</a>. Las que dicen "Probar aquí" se abren dentro del estudio (tu patrón se para para que no choquen).',
+      'Otras herramientas que funcionan en el navegador y, debajo de cada sección, para leer: lenguajes que se instalan, comunidades, tutoriales. Las que dicen "Probar aquí" se abren dentro del estudio (tu patrón se para para que no choquen).',
     loading: 'Cargando…',
     groupLivecoding: 'Live coding',
     groupSound: 'Sonido en el navegador',
+    toolsMore: 'Para leer e instalar',
     tryHere: 'Probar aquí',
     samplesHelp:
       'Arrastra audios o carpetas a la página (o elígelos). Un archivo suena con <code>s("nombre")</code>, una carpeta es un kit: <code>s("kicks:3")</code>.',
