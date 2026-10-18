@@ -13,7 +13,7 @@ import { setupDebug } from './debug';
 import { setupExport } from './export';
 import { setupFreePlay } from './freeplay';
 import { setupHelp } from './help';
-import { lang, onLangChange, pick, setLang, t, translatePage } from './i18n';
+import { lang, LANGS, onLangChange, pick, setLang, t, translatePage } from './i18n';
 import { setupKnobHud } from './knob-hud';
 import { setupKnobs } from './knobs';
 import { setupLearn } from './learn';
@@ -292,8 +292,11 @@ document.querySelector('#share')!.addEventListener('click', async () => {
 });
 
 // Language switch in place, cross-faded: nothing stops playing
-langButton.addEventListener('click', () => {
-  withTransition(() => setLang(lang === 'es' ? 'en' : 'es'));
+// A click on EN / ES / CA picks that one; Enter or Space go to the next
+langButton.addEventListener('click', (event) => {
+  const picked = (event.target as HTMLElement).closest<HTMLElement>('.lang-option')?.dataset.lang;
+  const next = LANGS.find((code) => code === picked) ?? LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length];
+  if (next !== lang) withTransition(() => setLang(next));
 });
 onLangChange(() => {
   langButton.dataset.current = lang;

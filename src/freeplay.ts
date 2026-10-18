@@ -19,18 +19,18 @@ const SOUND_KEY = 'jdl:freeplay-sound';
 
 // A short, playable selection out of Strudel's ~1600 sounds
 export const freePlaySounds: { id: string; name: Localized }[] = [
-  { id: 'piano', name: { en: 'Piano', es: 'Piano' } },
-  { id: 'gm_epiano1', name: { en: 'Electric piano', es: 'Piano eléctrico' } },
-  { id: 'gm_drawbar_organ', name: { en: 'Drawbar organ', es: 'Órgano Hammond' } },
-  { id: 'gm_church_organ', name: { en: 'Church organ', es: 'Órgano de iglesia' } },
-  { id: 'gm_string_ensemble_1', name: { en: 'Strings', es: 'Cuerdas' } },
-  { id: 'gm_pad_warm', name: { en: 'Warm pad', es: 'Pad cálido' } },
-  { id: 'gm_vibraphone', name: { en: 'Vibraphone', es: 'Vibráfono' } },
-  { id: 'gm_marimba', name: { en: 'Marimba', es: 'Marimba' } },
-  { id: 'gm_acoustic_bass', name: { en: 'Double bass', es: 'Contrabajo' } },
-  { id: 'gm_lead_2_sawtooth', name: { en: 'Saw lead', es: 'Lead de sierra' } },
-  { id: 'sawtooth', name: { en: 'Saw synth', es: 'Sinte de sierra' } },
-  { id: 'supersaw', name: { en: 'Supersaw synth', es: 'Sinte supersaw' } },
+  { id: 'piano', name: { en: 'Piano', es: 'Piano', ca: 'Piano' } },
+  { id: 'gm_epiano1', name: { en: 'Electric piano', es: 'Piano eléctrico', ca: 'Piano elèctric' } },
+  { id: 'gm_drawbar_organ', name: { en: 'Drawbar organ', es: 'Órgano Hammond', ca: 'Orgue Hammond' } },
+  { id: 'gm_church_organ', name: { en: 'Church organ', es: 'Órgano de iglesia', ca: "Orgue d'església" } },
+  { id: 'gm_string_ensemble_1', name: { en: 'Strings', es: 'Cuerdas', ca: 'Cordes' } },
+  { id: 'gm_pad_warm', name: { en: 'Warm pad', es: 'Pad cálido', ca: 'Pad càlid' } },
+  { id: 'gm_vibraphone', name: { en: 'Vibraphone', es: 'Vibráfono', ca: 'Vibràfon' } },
+  { id: 'gm_marimba', name: { en: 'Marimba', es: 'Marimba', ca: 'Marimba' } },
+  { id: 'gm_acoustic_bass', name: { en: 'Double bass', es: 'Contrabajo', ca: 'Contrabaix' } },
+  { id: 'gm_lead_2_sawtooth', name: { en: 'Saw lead', es: 'Lead de sierra', ca: 'Lead de serra' } },
+  { id: 'sawtooth', name: { en: 'Saw synth', es: 'Sinte de sierra', ca: 'Sinte de serra' } },
+  { id: 'supersaw', name: { en: 'Supersaw synth', es: 'Sinte supersaw', ca: 'Sinte supersaw' } },
 ];
 
 // Bank B pads of the MPK Mini (notes 32-39): this drum kit, same as the MPK

@@ -9,7 +9,7 @@ type Tool = {
   title: string;
   url: string;
   category: 'livecoding' | 'sound';
-  note: { es: string; en: string };
+  note: { es: string; en: string; ca: string };
   /** Opens and plays in the browser; false = for reading */
   runs: boolean;
   /** Works inside the studio's iframe (needs runs) */

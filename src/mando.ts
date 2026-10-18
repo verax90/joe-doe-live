@@ -5,18 +5,20 @@ import './mando.css';
 import type { DataConnection } from 'peerjs';
 import type { RemoteMessage } from './remote';
 
-const es = (document.cookie.match(/jd-lang=(\w+)/)?.[1] ?? navigator.language).startsWith('es');
-const say = (en: string, spanish: string) => (es ? spanish : en);
-document.documentElement.lang = es ? 'es' : 'en';
+// Same choice as the studio: the jd-lang cookie, or the phone's language
+const code = (document.cookie.match(/jd-lang=(\w+)/)?.[1] ?? navigator.language).slice(0, 2).toLowerCase();
+const lang = code === 'es' || code === 'ca' ? code : 'en';
+const say = (en: string, es: string, ca: string) => ({ en, es, ca })[lang];
+document.documentElement.lang = lang;
 
 const KNOBS = [
-  say('Echo', 'Eco'),
-  say('Filter', 'Filtro'),
-  say('Reverb', 'Reverb'),
+  say('Echo', 'Eco', 'Eco'),
+  say('Filter', 'Filtro', 'Filtre'),
+  say('Reverb', 'Reverb', 'Reverb'),
   'K4',
   'K5',
   'K6',
-  say('Volume', 'Volumen'),
+  say('Volume', 'Volumen', 'Volum'),
   'ASCII',
 ];
 
@@ -94,14 +96,14 @@ KNOBS.forEach((name, i) => {
 // Connect, and again whenever it drops (the studio reloaded, the phone slept)
 async function connect() {
   if (!id) {
-    state.textContent = say('No studio in the link', 'Falta el estudio en el enlace');
+    state.textContent = say('No studio in the link', 'Falta el estudio en el enlace', "Falta l'estudi a l'enllaç");
     return;
   }
-  state.textContent = say('Connecting…', 'Conectando…');
+  state.textContent = say('Connecting…', 'Conectando…', 'Connectant…');
   const { Peer } = await import('peerjs');
   const peer = new Peer();
   const retry = () => {
-    state.textContent = say('Reconnecting…', 'Reconectando…');
+    state.textContent = say('Reconnecting…', 'Reconectando…', 'Reconnectant…');
     state.classList.remove('is-on');
     peer.destroy();
     window.setTimeout(() => void connect(), 2000);
@@ -109,7 +111,7 @@ async function connect() {
   peer.on('open', () => {
     connection = peer.connect(`jdl-mando-${id}`, { reliable: true });
     connection.on('open', () => {
-      state.textContent = say('Connected', 'Conectado');
+      state.textContent = say('Connected', 'Conectado', 'Connectat');
       state.classList.add('is-on');
     });
     connection.on('close', retry);

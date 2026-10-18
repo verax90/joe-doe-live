@@ -16,10 +16,10 @@ export const CODE_VISUAL = 'code';
 export const AUTO_VISUAL = 'auto';
 
 export const visuals: Visual[] = [
-  { id: CODE_VISUAL, name: { en: 'From the code', es: 'Del código' }, code: '' },
+  { id: CODE_VISUAL, name: { en: 'From the code', es: 'Del código', ca: 'Del codi' }, code: '' },
   {
     id: 'lima',
-    name: { en: 'Lime (bar)', es: 'Lima (compás)' },
+    name: { en: 'Lime (bar)', es: 'Lima (compás)', ca: 'Llima (compàs)' },
     code: `osc(6, 0.03, 0.8)
   .color(...tint(0.4))
   .modulate(noise(1.5), 0.25)
@@ -28,7 +28,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'corcheas',
-    name: { en: 'Pulse (eighths)', es: 'Pulso (corcheas)' },
+    name: { en: 'Pulse (eighths)', es: 'Pulso (corcheas)', ca: 'Pols (corxeres)' },
     code: `shape(4, 0.35, 0.02)
   .repeat(3, 3)
   .scale(H("1.25 1 1 1.1 1 1.25 1 1"))
@@ -38,7 +38,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'graves',
-    name: { en: 'Tunnel (bass)', es: 'Túnel (graves)' },
+    name: { en: 'Tunnel (bass)', es: 'Túnel (graves)', ca: 'Túnel (greus)' },
     code: `osc(20, 0.05, 0.4)
   .kaleid(4)
   .color(...tint(0.4))
@@ -48,7 +48,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'celdas',
-    name: { en: 'Cells (volume)', es: 'Celdas (volumen)' },
+    name: { en: 'Cells (volume)', es: 'Celdas (volumen)', ca: 'Cel·les (volum)' },
     code: `voronoi(6, 0.3, 0.2)
   .color(...tint(0.3))
   .modulate(osc(3, 0.05), () => mid() * 0.6)
@@ -57,7 +57,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'eco',
-    name: { en: 'Echo (bar)', es: 'Eco (compás)' },
+    name: { en: 'Echo (bar)', es: 'Eco (compás)', ca: 'Eco (compàs)' },
     code: `shape(H("<3 4 5 6>"), 0.3, 0.01)
   .color(...tint(0.4))
   .rotate(0, 0.1)
@@ -66,7 +66,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'glitch',
-    name: { en: 'Glitch (highs)', es: 'Glitch (agudos)' },
+    name: { en: 'Glitch (highs)', es: 'Glitch (agudos)', ca: 'Glitch (aguts)' },
     code: `osc(40, 0.1, 1.2)
   .color(...tint(0.4))
   .modulate(noise(3).pixelate(8, 8), () => high() * 0.6)
@@ -76,7 +76,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'plasma',
-    name: { en: 'Plasma (bar)', es: 'Plasma (compás)' },
+    name: { en: 'Plasma (bar)', es: 'Plasma (compás)', ca: 'Plasma (compàs)' },
     code: `voronoi(8, 0.4, 0.3)
   .modulateScale(osc(6, 0.05), 0.6)
   .color(...tint(0.42))
@@ -84,10 +84,10 @@ export const visuals: Visual[] = [
   .out()`,
   },
   // Picks the others by itself; after the first eight so the PROG CHANGE pads keep theirs
-  { id: AUTO_VISUAL, name: { en: 'Auto', es: 'Automático' }, code: '' },
+  { id: AUTO_VISUAL, name: { en: 'Auto', es: 'Automático', ca: 'Automàtic' }, code: '' },
   {
     id: 'anillos',
-    name: { en: 'Rings (kick)', es: 'Anillos (bombo)' },
+    name: { en: 'Rings (kick)', es: 'Anillos (bombo)', ca: 'Anells (bombo)' },
     code: `shape(64, 0.42, 0.01)
   .diff(shape(64, 0.3, 0.01))
   .repeat(2, 2)
@@ -98,7 +98,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'estela',
-    name: { en: 'Trails (bar)', es: 'Estela (compás)' },
+    name: { en: 'Trails (bar)', es: 'Estela (compás)', ca: 'Estela (compàs)' },
     code: `shape(H("<3 4 6 8>"), 0.2, 0.01)
   .rotate(0, 0.2)
   .color(...tint(0.4))
@@ -107,7 +107,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'moire',
-    name: { en: 'Moiré (bass)', es: 'Moiré (graves)' },
+    name: { en: 'Moiré (bass)', es: 'Moiré (graves)', ca: 'Moiré (greus)' },
     code: `osc(60, -0.015, 0.3)
   .diff(osc(60, 0.08).rotate(Math.PI / 2))
   .modulateScale(noise(3.5, 0.25), 0.6)
@@ -117,7 +117,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'chispas',
-    name: { en: 'Sparks (highs)', es: 'Chispas (agudos)' },
+    name: { en: 'Sparks (highs)', es: 'Chispas (agudos)', ca: 'Espurnes (aguts)' },
     code: `noise(300, 0.1)
   .thresh(() => 0.55 - high() * 0.3, 0.02)
   .color(...tint(1))
@@ -127,7 +127,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'vortice',
-    name: { en: 'Vortex (bar)', es: 'Vórtice (compás)' },
+    name: { en: 'Vortex (bar)', es: 'Vórtice (compás)', ca: 'Vòrtex (compàs)' },
     code: `osc(12, 0.05, 0)
   .modulateKaleid(voronoi(6, 0.5, 0.3), 8)
   .rotate(0, H("<0.1 0.25>"))
@@ -137,7 +137,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'liquido',
-    name: { en: 'Liquid (mids)', es: 'Líquido (medios)' },
+    name: { en: 'Liquid (mids)', es: 'Líquido (medios)', ca: 'Líquid (mitjos)' },
     code: `osc(4, 0.1, 1.2)
   .modulate(noise(2).add(gradient(), -1), () => 0.4 + mid() * 0.6)
   .color(...tint(0.4))
@@ -146,7 +146,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'flash',
-    name: { en: 'Flash (beat)', es: 'Destello (pulso)' },
+    name: { en: 'Flash (beat)', es: 'Destello (pulso)', ca: 'Llampada (pols)' },
     // On the beat, not on the bass: a long 808 keeps bass() high between kicks
     code: `solid(...tint(0.7))
   .mult(shape(4, H("[1.4 0 0 0]*4"), 0.5))
@@ -155,7 +155,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'matrix',
-    name: { en: 'Matrix (rain)', es: 'Matrix (lluvia)' },
+    name: { en: 'Matrix (rain)', es: 'Matrix (lluvia)', ca: 'Matrix (pluja)' },
     // Green on purpose, whatever the theme: that is the look
     code: `noise(80, 0.05)
   .pixelate(64, 64)
@@ -168,7 +168,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'vhs',
-    name: { en: 'VHS (bar)', es: 'VHS (compás)' },
+    name: { en: 'VHS (bar)', es: 'VHS (compás)', ca: 'VHS (compàs)' },
     code: `osc(8, 0.05, 1.2)
   .color(...tint(0.6))
   .modulate(noise(2, 0.1), 0.05)
@@ -178,7 +178,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'hipnosis',
-    name: { en: 'Hypnosis (volume)', es: 'Hipnosis (volumen)' },
+    name: { en: 'Hypnosis (volume)', es: 'Hipnosis (volumen)', ca: 'Hipnosi (volum)' },
     code: `osc(30, 0.1, 0)
   .kaleid(64)
   .modulateRotate(osc(1, 0.1), () => 1 + level() * 2)
@@ -187,7 +187,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'ondas',
-    name: { en: 'Waves (mids)', es: 'Ondas (medios)' },
+    name: { en: 'Waves (mids)', es: 'Ondas (medios)', ca: 'Ones (mitjos)' },
     code: `osc(40, 0.02, 0)
   .thresh(0.5, 0.02)
   .modulate(osc(3, 0.1).rotate(Math.PI / 2), () => 0.1 + mid() * 0.4)
@@ -196,7 +196,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'terremoto',
-    name: { en: 'Quake (kick)', es: 'Terremoto (bombo)' },
+    name: { en: 'Quake (kick)', es: 'Terremoto (bombo)', ca: 'Terratrèmol (bombo)' },
     code: `voronoi(12, 0.2, 0.1)
   .color(...tint(0.55))
   .scrollX(() => (Math.random() - 0.5) * bass() * 0.08)
@@ -206,7 +206,7 @@ export const visuals: Visual[] = [
   },
   {
     id: 'lineas',
-    name: { en: 'Lines (Unknown Pleasures)', es: 'Líneas (Unknown Pleasures)' },
+    name: { en: 'Lines (Unknown Pleasures)', es: 'Líneas (Unknown Pleasures)', ca: 'Línies (Unknown Pleasures)' },
     code: `ridges()
 src(s1)
   .color(...tint(1))
@@ -214,7 +214,7 @@ src(s1)
   },
   {
     id: 'tacto',
-    name: { en: 'Touch (TouchMe)', es: 'Tacto (TouchMe)' },
+    name: { en: 'Touch (TouchMe)', es: 'Tacto (TouchMe)', ca: 'Tacte (TouchMe)' },
     code: `osc(8, 0.04, () => 0.2 + touch() * 0.25)
   .kaleid(() => 3 + Math.round(touch() * 5))
   .color(...tint(1))
@@ -225,7 +225,7 @@ src(s1)
   },
   {
     id: 'tacto-ondas',
-    name: { en: 'Touch (ripples)', es: 'Tacto (ondas)' },
+    name: { en: 'Touch (ripples)', es: 'Tacto (ondas)', ca: 'Tacte (ones)' },
     code: `osc(() => 12 + touch() * 48, () => 0.04 + touch() * 0.3, 0)
   .kaleid(64)
   .color(...tint(1))
@@ -236,7 +236,7 @@ src(s1)
   },
   {
     id: 'tacto-chispas',
-    name: { en: 'Touch (sparks)', es: 'Tacto (chispas)' },
+    name: { en: 'Touch (sparks)', es: 'Tacto (chispas)', ca: 'Tacte (espurnes)' },
     code: `noise(() => 4 + touch() * 26, () => 0.2 + touch() * 1.5)
   .thresh(() => 0.85 - touch() * 0.45 - touchPulse() * 0.25, 0.04)
   .color(...tint(1))
@@ -245,7 +245,7 @@ src(s1)
   },
   {
     id: 'tacto-latido',
-    name: { en: 'Touch (heartbeat)', es: 'Tacto (latido)' },
+    name: { en: 'Touch (heartbeat)', es: 'Tacto (latido)', ca: 'Tacte (batec)' },
     code: `shape(64, () => 0.16 + touch() * 0.22 + touchPulse() * 0.14, () => 0.02 + touch() * 0.18)
   .color(...tint(1))
   .modulate(osc(6, 0.1), () => touch() * 0.12)
@@ -255,7 +255,7 @@ src(s1)
   },
   {
     id: 'voz',
-    name: { en: 'Voice (colour by note)', es: 'Voz (color por nota)' },
+    name: { en: 'Voice (colour by note)', es: 'Voz (color por nota)', ca: 'Veu (color per nota)' },
     code: `osc(10, 0.03, 0)
   .kaleid(5)
   .color(() => voiceColor(0), () => voiceColor(1), () => voiceColor(2))
@@ -266,7 +266,7 @@ src(s1)
   },
   {
     id: 'voz-formas',
-    name: { en: 'Voice (shapes by pitch)', es: 'Voz (formas por altura)' },
+    name: { en: 'Voice (shapes by pitch)', es: 'Voz (formas por altura)', ca: 'Veu (formes per altura)' },
     code: `shape(() => 3 + Math.round((voiceHeld() % 24) / 4), 0.28, 0.01)
   .repeat(2, 2)
   .rotate(() => voiceHeld() / 12, 0.05)
@@ -278,7 +278,7 @@ src(s1)
   },
   {
     id: 'cam',
-    name: { en: 'Webcam (warp)', es: 'Webcam (deformada)' },
+    name: { en: 'Webcam (warp)', es: 'Webcam (deformada)', ca: 'Webcam (deformada)' },
     camera: true,
     code: `src(s0)
   .saturate(0.3)
@@ -288,7 +288,7 @@ src(s1)
   },
   {
     id: 'cam-kaleid',
-    name: { en: 'Webcam (kaleidoscope)', es: 'Webcam (caleidoscopio)' },
+    name: { en: 'Webcam (kaleidoscope)', es: 'Webcam (caleidoscopio)', ca: 'Webcam (calidoscopi)' },
     camera: true,
     code: `src(s0)
   .kaleid(H("<4 6 8>"))
@@ -298,7 +298,7 @@ src(s1)
   },
   {
     id: 'cam-pixel',
-    name: { en: 'Webcam (pixels)', es: 'Webcam (píxeles)' },
+    name: { en: 'Webcam (pixels)', es: 'Webcam (píxeles)', ca: 'Webcam (píxels)' },
     camera: true,
     code: `src(s0)
   .pixelate(() => 90 - bass() * 70, () => 60 - bass() * 45)
@@ -308,7 +308,7 @@ src(s1)
   },
   {
     id: 'cam-trails',
-    name: { en: 'Webcam (trails)', es: 'Webcam (estela)' },
+    name: { en: 'Webcam (trails)', es: 'Webcam (estela)', ca: 'Webcam (estela)' },
     camera: true,
     code: `src(s0)
   .color(...tint(0.9))
@@ -317,7 +317,7 @@ src(s1)
   },
   {
     id: 'cam-thermal',
-    name: { en: 'Webcam (thermal)', es: 'Webcam (térmica)' },
+    name: { en: 'Webcam (thermal)', es: 'Webcam (térmica)', ca: 'Webcam (tèrmica)' },
     camera: true,
     code: `src(s0)
   .saturate(0)
@@ -327,7 +327,7 @@ src(s1)
   },
   {
     id: 'cam-rgb',
-    name: { en: 'Webcam (RGB split)', es: 'Webcam (RGB desplazado)' },
+    name: { en: 'Webcam (RGB split)', es: 'Webcam (RGB desplazado)', ca: 'Webcam (RGB desplaçat)' },
     camera: true,
     code: `src(s0)
   .color(1, 0, 0)
@@ -337,7 +337,7 @@ src(s1)
   },
   {
     id: 'cam-contrast',
-    name: { en: 'Webcam (high contrast)', es: 'Webcam (alto contraste)' },
+    name: { en: 'Webcam (high contrast)', es: 'Webcam (alto contraste)', ca: 'Webcam (alt contrast)' },
     camera: true,
     code: `src(s0)
   .thresh(() => 0.45 + mid() * 0.2, 0.04)
@@ -346,7 +346,7 @@ src(s1)
   },
   {
     id: 'cam-matrix',
-    name: { en: 'Webcam (Matrix)', es: 'Webcam (Matrix)' },
+    name: { en: 'Webcam (Matrix)', es: 'Webcam (Matrix)', ca: 'Webcam (Matrix)' },
     camera: true,
     code: `src(s0)
   .saturate(0)
@@ -357,7 +357,7 @@ src(s1)
   },
   {
     id: 'cam-mirror',
-    name: { en: 'Webcam (mirror)', es: 'Webcam (espejo)' },
+    name: { en: 'Webcam (mirror)', es: 'Webcam (espejo)', ca: 'Webcam (mirall)' },
     camera: true,
     code: `src(s0)
   .kaleid(2)
@@ -368,7 +368,7 @@ src(s1)
   },
   {
     id: 'cam-vhs',
-    name: { en: 'Webcam (VHS)', es: 'Webcam (VHS)' },
+    name: { en: 'Webcam (VHS)', es: 'Webcam (VHS)', ca: 'Webcam (VHS)' },
     camera: true,
     code: `src(s0)
   .modulate(noise(3, 0.2), 0.015)
@@ -379,7 +379,7 @@ src(s1)
   },
   {
     id: 'cam-pop',
-    name: { en: 'Webcam (pop art)', es: 'Webcam (pop art)' },
+    name: { en: 'Webcam (pop art)', es: 'Webcam (pop art)', ca: 'Webcam (pop art)' },
     camera: true,
     code: `src(s0)
   .saturate(3)
@@ -390,7 +390,7 @@ src(s1)
   },
   {
     id: 'cam-ghost',
-    name: { en: 'Webcam (ghost)', es: 'Webcam (fantasma)' },
+    name: { en: 'Webcam (ghost)', es: 'Webcam (fantasma)', ca: 'Webcam (fantasma)' },
     camera: true,
     code: `src(s0)
   .color(...tint(0.9))
@@ -398,7 +398,7 @@ src(s1)
   .blend(src(o0), 0.5)
   .out()`,
   },
-  { id: 'ninguno', name: { en: 'No visuals', es: 'Sin visuales' }, code: `solid(0, 0, 0, 0).out()` },
+  { id: 'ninguno', name: { en: 'No visuals', es: 'Sin visuales', ca: 'Sense visuals' }, code: `solid(0, 0, 0, 0).out()` },
 ];
 
 type Global = typeof globalThis & {

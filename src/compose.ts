@@ -55,7 +55,7 @@ const boom = (pattern: string, bank: string, extra = '') => `s("${pattern}").ban
 export const STYLES: Style[] = [
   {
     id: 'boombap',
-    name: { en: 'Boom bap', es: 'Boom bap' },
+    name: { en: 'Boom bap', es: 'Boom bap', ca: 'Boom bap' },
     bpm: 90,
     drums: [
       boom('bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~, ~ sd', 'AkaiMPC60'),
@@ -74,7 +74,7 @@ export const STYLES: Style[] = [
   },
   {
     id: 'lofi',
-    name: { en: 'Lo-fi', es: 'Lo-fi' },
+    name: { en: 'Lo-fi', es: 'Lo-fi', ca: 'Lo-fi' },
     bpm: 78,
     drums: [
       boom('bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~, ~ sd', 'EmuSP12', '.lpf(2500).swing(4)'),
@@ -93,7 +93,7 @@ export const STYLES: Style[] = [
   },
   {
     id: 'trap',
-    name: { en: 'Trap', es: 'Trap' },
+    name: { en: 'Trap', es: 'Trap', ca: 'Trap' },
     bpm: 140,
     drums: [
       boom('bd ~ ~ ~ ~ ~ ~ ~ ~ ~ bd ~ ~ ~ ~ ~, ~ ~ ~ ~ ~ ~ ~ ~ [sd,cp] ~ ~ ~ ~ ~ ~ ~', 'RolandTR808', '.gain(1.1)'),
@@ -112,7 +112,7 @@ export const STYLES: Style[] = [
   },
   {
     id: 'drill',
-    name: { en: 'Drill', es: 'Drill' },
+    name: { en: 'Drill', es: 'Drill', ca: 'Drill' },
     bpm: 142,
     drums: [
       boom('bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~, ~ ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ <~ sd>', 'RolandTR808', '.gain(1.1)'),
@@ -135,12 +135,12 @@ export const LAYERS = ['drums', 'hats', 'bass', 'chords', 'melody', 'pad'] as co
 export type Layer = (typeof LAYERS)[number];
 
 export const LAYER_NAMES: Record<Layer, Localized> = {
-  drums: { en: 'Kick and snare', es: 'Bombo y caja' },
-  hats: { en: 'Hi-hats', es: 'Charles' },
-  bass: { en: 'Bass', es: 'Bajo' },
-  chords: { en: 'Chords', es: 'Acordes' },
-  melody: { en: 'Melody', es: 'Melodía' },
-  pad: { en: 'Background', es: 'Ambiente' },
+  drums: { en: 'Kick and snare', es: 'Bombo y caja', ca: 'Bombo i caixa' },
+  hats: { en: 'Hi-hats', es: 'Charles', ca: 'Hi-hat' },
+  bass: { en: 'Bass', es: 'Bajo', ca: 'Baix' },
+  chords: { en: 'Chords', es: 'Acordes', ca: 'Acords' },
+  melody: { en: 'Melody', es: 'Melodía', ca: 'Melodia' },
+  pad: { en: 'Background', es: 'Ambiente', ca: 'Ambient' },
 };
 
 // A two-bar tune in scale degrees: mostly chord tones (0 2 4 7), some rests
@@ -266,12 +266,12 @@ export function newSong(song: Song, layers: Partial<Record<Layer, LayerState>>, 
 
 
 const KEY_NAMES: Record<string, Localized> = {
-  A: { en: 'A minor', es: 'La menor' },
-  C: { en: 'C minor', es: 'Do menor' },
-  D: { en: 'D minor', es: 'Re menor' },
-  E: { en: 'E minor', es: 'Mi menor' },
-  F: { en: 'F minor', es: 'Fa menor' },
-  G: { en: 'G minor', es: 'Sol menor' },
+  A: { en: 'A minor', es: 'La menor', ca: 'La menor' },
+  C: { en: 'C minor', es: 'Do menor', ca: 'Do menor' },
+  D: { en: 'D minor', es: 'Re menor', ca: 'Re menor' },
+  E: { en: 'E minor', es: 'Mi menor', ca: 'Mi menor' },
+  F: { en: 'F minor', es: 'Fa menor', ca: 'Fa menor' },
+  G: { en: 'G minor', es: 'Sol menor', ca: 'Sol menor' },
 };
 
 const STORAGE_KEY = 'jdl:compose';

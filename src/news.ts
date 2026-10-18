@@ -5,7 +5,7 @@
 import type { Localized } from './i18n';
 import { readStorage, writeStorage } from './storage';
 
-const L = (en: string, es: string): Localized => ({ en, es });
+const L = (en: string, es: string, ca: string): Localized => ({ en, es, ca });
 
 type Step = { click?: string; value?: [string, string] }; // a selector to click, or [select, value] to pick
 export type News = { id: string; title: Localized; text: Localized; go?: Step[] };
@@ -13,89 +13,89 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 export const NEWS: News[] = [
   {
     id: '2026-10-10-transport',
-    title: L('Play and Stop from a controller', 'Play y Stop desde un mando'),
-    text: L('MIDI Start and Stop press Play and Stop: the Miyoo console, a drum machine…', 'Start y Stop por MIDI pulsan Play y Stop: la consola Miyoo, una caja de ritmos…'),
+    title: L('Play and Stop from a controller', 'Play y Stop desde un mando', "Play i Stop des d'un comandament"),
+    text: L('MIDI Start and Stop press Play and Stop: the Miyoo console, a drum machine…', 'Start y Stop por MIDI pulsan Play y Stop: la consola Miyoo, una caja de ritmos…', 'Start i Stop per MIDI premen Play i Stop: la consola Miyoo, una caixa de ritmes…'),
     go: [{ click: '#toggle-midi' }],
   },
   {
     id: '2026-10-02-touch',
-    title: L('Three TouchMe visuals', 'Tres visuales para el TouchMe'),
-    text: L('Ripples, sparks and a heartbeat that follow your touch; touchPulse() for each new one', 'Ondas, chispas y un latido que siguen el contacto; touchPulse() en cada toque'),
+    title: L('Three TouchMe visuals', 'Tres visuales para el TouchMe', 'Tres visuals per al TouchMe'),
+    text: L('Ripples, sparks and a heartbeat that follow your touch; touchPulse() for each new one', 'Ondas, chispas y un latido que siguen el contacto; touchPulse() en cada toque', 'Ones, espurnes i un batec que segueixen el contacte; touchPulse() a cada toc'),
     go: [{ value: ['#visual', 'tacto-ondas'] }],
   },
   {
     id: '2026-09-30-blank',
-    title: L('Start from blank', 'Empezar en blanco'),
-    text: L('More → Code: a tempo and a kick to start; Ctrl+Z brings back what you had', 'Más → Código: tempo y un bombo para empezar; Ctrl+Z recupera lo que tenías'),
+    title: L('Start from blank', 'Empezar en blanco', 'Començar en blanc'),
+    text: L('More → Code: a tempo and a kick to start; Ctrl+Z brings back what you had', 'Más → Código: tempo y un bombo para empezar; Ctrl+Z recupera lo que tenías', 'Més → Codi: tempo i un bombo per començar; Ctrl+Z recupera el que tenies'),
     go: [{ click: '#menu-toggle' }],
   },
   {
     id: '2026-09-30-youtube',
-    title: L('YouTube queue', 'Cola de YouTube'),
-    text: L('Paste and Add: it waits its turn, the video on is never cut', 'Pega y Añadir: espera su turno, sin cortar el que suena'),
+    title: L('YouTube queue', 'Cola de YouTube', 'Cua de YouTube'),
+    text: L('Paste and Add: it waits its turn, the video on is never cut', 'Pega y Añadir: espera su turno, sin cortar el que suena', 'Enganxa i Afegir: espera el seu torn, sense tallar el que sona'),
     go: [{ click: '#toggle-video' }, { click: '[aria-controls="video-tab-youtube"]' }],
   },
   {
     id: '2026-09-30-sequencer',
-    title: L('Sequencer view', 'Vista de secuenciador'),
-    text: L('Each track drawn under its line as it plays, in its colour', 'Cada pista dibujada bajo su línea mientras suena, con su color'),
+    title: L('Sequencer view', 'Vista de secuenciador', 'Vista de seqüenciador'),
+    text: L('Each track drawn under its line as it plays, in its colour', 'Cada pista dibujada bajo su línea mientras suena, con su color', 'Cada pista dibuixada sota la seva línia mentre sona, amb el seu color'),
     go: [{ click: '#toggle-sequencer' }],
   },
   {
     id: '2026-09-30-keyboard',
-    title: L('Better with the keyboard', 'Mejor con teclado'),
-    text: L('Tab and Enter keep their place, arrows in the help, and a ring shows where you are', 'Tab e Intro no pierden el sitio, flechas en la ayuda y un anillo marca dónde estás'),
+    title: L('Better with the keyboard', 'Mejor con teclado', 'Millor amb teclat'),
+    text: L('Tab and Enter keep their place, arrows in the help, and a ring shows where you are', 'Tab e Intro no pierden el sitio, flechas en la ayuda y un anillo marca dónde estás', "Tab i Intro no perden el lloc, fletxes a l'ajuda i un anell marca on ets"),
   },
   {
     id: '2026-09-30-goline',
-    title: L('Go to the error', 'Ir al error'),
-    text: L('When the code has an error, a button takes the cursor to its line', 'Si el código tiene un error, un botón lleva el cursor a su línea'),
+    title: L('Go to the error', 'Ir al error', "Anar a l'error"),
+    text: L('When the code has an error, a button takes the cursor to its line', 'Si el código tiene un error, un botón lleva el cursor a su línea', 'Si el codi té un error, un botó porta el cursor a la seva línia'),
   },
   {
     id: '2026-09-30-play',
-    title: L('Play says where you are', 'Play dice dónde estás'),
-    text: L('Playing, or Apply when your changes are not sounding yet. Every panel closes with its ✕ or Escape', 'Sonando, o Aplicar si tus cambios aún no suenan. Cada panel se cierra con su ✕ o con Escape'),
+    title: L('Play says where you are', 'Play dice dónde estás', 'Play diu on ets'),
+    text: L('Playing, or Apply when your changes are not sounding yet. Every panel closes with its ✕ or Escape', 'Sonando, o Aplicar si tus cambios aún no suenan. Cada panel se cierra con su ✕ o con Escape', 'Sonant, o Aplicar si els teus canvis encara no sonen. Cada panell es tanca amb la seva ✕ o amb Escape'),
   },
   {
     id: '2026-09-30-project',
-    title: L('Save and share', 'Guardar y compartir'),
-    text: L('Save, link, export and open, in one place; Ctrl+S saves', 'Guardar, enlace, exportar y abrir, en un sitio; Ctrl+S guarda'),
+    title: L('Save and share', 'Guardar y compartir', 'Desar i compartir'),
+    text: L('Save, link, export and open, in one place; Ctrl+S saves', 'Guardar, enlace, exportar y abrir, en un sitio; Ctrl+S guarda', 'Desar, enllaç, exportar i obrir, en un sol lloc; Ctrl+S desa'),
     go: [{ click: '#project-open' }],
   },
   {
     id: '2026-09-30-finder',
-    title: L('Search (Ctrl+K)', 'Buscar (Ctrl+K)'),
-    text: L('A few letters open any panel, pattern or visual', 'Unas letras abren cualquier panel, patrón o visual'),
+    title: L('Search (Ctrl+K)', 'Buscar (Ctrl+K)', 'Cercar (Ctrl+K)'),
+    text: L('A few letters open any panel, pattern or visual', 'Unas letras abren cualquier panel, patrón o visual', 'Unes quantes lletres obren qualsevol panell, patró o visual'),
     go: [{ click: '#finder-open' }],
   },
   {
     id: '2026-09-30-drop',
-    title: L('Build-up and drop', 'Subidón y drop'),
-    text: L('A few bars that build up, and the drop on the one', 'Unos compases que suben y el drop en el uno'),
+    title: L('Build-up and drop', 'Subidón y drop', 'Pujada i drop'),
+    text: L('A few bars that build up, and the drop on the one', 'Unos compases que suben y el drop en el uno', "Uns quants compassos que pugen i el drop a l'u"),
     go: [{ click: '#toggle-drop' }],
   },
   {
     id: '2026-09-30-voice',
-    title: L('Tuner and voice synth', 'Afinador y sinte con tu voz'),
-    text: L('The note you sing; a synth that follows it; two visuals that follow you', 'La nota que cantas; un sinte que la sigue; dos visuales que te siguen'),
+    title: L('Tuner and voice synth', 'Afinador y sinte con tu voz', 'Afinador i sinte amb la teva veu'),
+    text: L('The note you sing; a synth that follows it; two visuals that follow you', 'La nota que cantas; un sinte que la sigue; dos visuales que te siguen', 'La nota que cantes; un sinte que la segueix; dos visuals que et segueixen'),
     go: [{ click: '#toggle-mic' }, { click: '[aria-controls="mic-tab-tuner"]' }],
   },
   {
     id: '2026-09-30-hum',
-    title: L('Hum a riff', 'Tararea un riff'),
-    text: L('Sing a few bars and get them back as notes', 'Canta unos compases y salen como notas'),
+    title: L('Hum a riff', 'Tararea un riff', 'Taral·leja un riff'),
+    text: L('Sing a few bars and get them back as notes', 'Canta unos compases y salen como notas', 'Canta uns quants compassos i surten com a notes'),
     go: [{ click: '#toggle-midi' }, { click: '[aria-controls="midi-tab-riff"]' }, { value: ['#riff-source', 'voice'] }],
   },
   {
     id: '2026-09-30-session',
-    title: L('Record the whole session', 'Grabar la sesión entera'),
-    text: L('Hours of jam, a marker at every change and every ★ (Alt+M)', 'Horas de jam, una marca en cada cambio y en cada ★ (Alt+M)'),
+    title: L('Record the whole session', 'Grabar la sesión entera', 'Gravar la sessió sencera'),
+    text: L('Hours of jam, a marker at every change and every ★ (Alt+M)', 'Horas de jam, una marca en cada cambio y en cada ★ (Alt+M)', 'Hores de jam, una marca a cada canvi i a cada ★ (Alt+M)'),
     go: [{ value: ['#record-mode', 'session'] }, { click: '#menu-toggle' }],
   },
   {
     id: '2026-09-30-pump',
-    title: L('Pump', 'Bombeo'),
-    text: L('Every kick pushes the rest down, the breathing of house', 'Cada bombo agacha el resto, la respiración del house'),
+    title: L('Pump', 'Bombeo', 'Bombeig'),
+    text: L('Every kick pushes the rest down, the breathing of house', 'Cada bombo agacha el resto, la respiración del house', 'Cada bombo ajup la resta, la respiració del house'),
     go: [{ click: '#toggle-pump' }],
   },
 ];

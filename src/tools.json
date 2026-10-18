@@ -5,7 +5,8 @@
     "category": "livecoding",
     "note": {
       "en": "Live visuals in the browser: video synthesis chains you rewrite while they run. It's painting the moment you open it.",
-      "es": "Visuales en vivo en el navegador: cadenas de síntesis de vídeo que se reescriben mientras corren. Abre y ya está pintando."
+      "es": "Visuales en vivo en el navegador: cadenas de síntesis de vídeo que se reescriben mientras corren. Abre y ya está pintando.",
+      "ca": "Visuals en directe al navegador: cadenes de síntesi de vídeo que es reescriuen mentre corren. L'obres i ja està pintant."
     },
     "runs": true,
     "embed": false
@@ -16,7 +17,8 @@
     "category": "sound",
     "note": {
       "en": "The documentation you actually work from. Start here rather than with the spec.",
-      "es": "La documentación con la que de verdad se trabaja. Empieza aquí antes que por la spec."
+      "es": "La documentación con la que de verdad se trabaja. Empieza aquí antes que por la spec.",
+      "ca": "La documentació amb què de debò es treballa. Comença per aquí abans que per l'especificació."
     },
     "runs": false,
     "embed": false
@@ -27,7 +29,8 @@
     "category": "livecoding",
     "note": {
       "en": "TidalCycles ported to JavaScript. Tidal's algorithmic patterns without installing Haskell or SuperCollider.",
-      "es": "TidalCycles portado a JavaScript. Los patrones algorítmicos de Tidal sin instalar Haskell ni SuperCollider."
+      "es": "TidalCycles portado a JavaScript. Los patrones algorítmicos de Tidal sin instalar Haskell ni SuperCollider.",
+      "ca": "TidalCycles portat a JavaScript. Els patrons algorítmics de Tidal sense instal·lar Haskell ni SuperCollider."
     },
     "runs": true,
     "embed": false
@@ -38,7 +41,8 @@
     "category": "sound",
     "note": {
       "en": "Navigable waveform player. If you're building anything over audio files, this saves you weeks.",
-      "es": "Reproductor de forma de onda navegable. Si haces algo con archivos de audio, esto te ahorra semanas."
+      "es": "Reproductor de forma de onda navegable. Si haces algo con archivos de audio, esto te ahorra semanas.",
+      "ca": "Reproductor de forma d'ona navegable. Si fas alguna cosa amb fitxers d'àudio, això t'estalvia setmanes."
     },
     "runs": false,
     "embed": false
@@ -49,7 +53,8 @@
     "category": "livecoding",
     "note": {
       "en": "Live coding with CSS. The shortest bridge between your day job and everything else in this section.",
-      "es": "Live coding con CSS. El puente más directo entre lo que haces a diario y todo lo demás de esta sección."
+      "es": "Live coding con CSS. El puente más directo entre lo que haces a diario y todo lo demás de esta sección.",
+      "ca": "Live coding amb CSS. El pont més directe entre el que fas cada dia i tota la resta d'aquesta secció."
     },
     "runs": true,
     "embed": false
@@ -60,7 +65,8 @@
     "category": "livecoding",
     "note": {
       "en": "The organisation that named this and wrote the manifesto. “Obscurantism is dangerous. Show us your screens.”",
-      "es": "La organización que le puso nombre a esto y escribió el manifiesto. «Obscurantism is dangerous. Show us your screens.»"
+      "es": "La organización que le puso nombre a esto y escribió el manifiesto. «Obscurantism is dangerous. Show us your screens.»",
+      "ca": "L'organització que va posar nom a tot això i en va escriure el manifest. «Obscurantism is dangerous. Show us your screens.»"
     },
     "runs": false,
     "embed": false
@@ -71,7 +77,8 @@
     "category": "livecoding",
     "note": {
       "en": "Sam Aaron's instrument: you write Ruby and it plays. The friendliest door into all of this.",
-      "es": "El instrumento de Sam Aaron: escribes Ruby y suena. La puerta de entrada más amable a todo esto."
+      "es": "El instrumento de Sam Aaron: escribes Ruby y suena. La puerta de entrada más amable a todo esto.",
+      "ca": "L'instrument de Sam Aaron: escrius Ruby i sona. La porta d'entrada més amable a tot això."
     },
     "runs": false,
     "embed": false
@@ -82,7 +89,8 @@
     "category": "livecoding",
     "note": {
       "en": "Music programming language aimed at musicians, not engineers. You write something close to a score.",
-      "es": "Lenguaje de programación musical pensado para músicos, no para ingenieros. Escribes algo parecido a una partitura."
+      "es": "Lenguaje de programación musical pensado para músicos, no para ingenieros. Escribes algo parecido a una partitura.",
+      "ca": "Llenguatge de programació musical pensat per a músics, no per a enginyers. Escrius una cosa semblant a una partitura."
     },
     "runs": false,
     "embed": false
@@ -93,7 +101,8 @@
     "category": "livecoding",
     "note": {
       "en": "Curated list on audio visualisation — the bridge between what plays and what you see.",
-      "es": "Lista curada de visualización de audio — el puente entre lo que suena y lo que se ve."
+      "es": "Lista curada de visualización de audio — el puente entre lo que suena y lo que se ve.",
+      "ca": "Llista curada de visualització d'àudio: el pont entre el que sona i el que es veu."
     },
     "runs": false,
     "embed": false
@@ -104,7 +113,8 @@
     "category": "livecoding",
     "note": {
       "en": "A list focused purely on the music side: frameworks, libraries, and software.",
-      "es": "Lista centrada solo en lo musical: frameworks, librerías y software."
+      "es": "Lista centrada solo en lo musical: frameworks, librerías y software.",
+      "ca": "Llista centrada només en la part musical: frameworks, llibreries i programari."
     },
     "runs": false,
     "embed": false
@@ -115,7 +125,8 @@
     "category": "livecoding",
     "note": {
       "en": "The canonical list, maintained by TOPLAP. When this page falls short, continue here.",
-      "es": "La lista canónica, mantenida por TOPLAP. Cuando esta página se quede corta, sigue por aquí."
+      "es": "La lista canónica, mantenida por TOPLAP. Cuando esta página se quede corta, sigue por aquí.",
+      "ca": "La llista canònica, mantinguda per TOPLAP. Quan aquesta pàgina se't quedi curta, continua per aquí."
     },
     "runs": false,
     "embed": false
@@ -126,7 +137,8 @@
     "category": "livecoding",
     "note": {
       "en": "Curated list of SuperCollider resources. Archived by its author, so expect nothing new.",
-      "es": "Lista curada de recursos de SuperCollider. Archivada por su autor, así que no espera nada nuevo."
+      "es": "Lista curada de recursos de SuperCollider. Archivada por su autor, así que no espera nada nuevo.",
+      "ca": "Llista curada de recursos de SuperCollider. Arxivada pel seu autor, així que no hi esperis res de nou."
     },
     "runs": false,
     "embed": false
@@ -137,7 +149,8 @@
     "category": "sound",
     "note": {
       "en": "Curated list of Web Audio packages and resources.",
-      "es": "Lista curada de paquetes y recursos de Web Audio."
+      "es": "Lista curada de paquetes y recursos de Web Audio.",
+      "ca": "Llista curada de paquets i recursos de Web Audio."
     },
     "runs": false,
     "embed": false
@@ -148,7 +161,8 @@
     "category": "sound",
     "note": {
       "en": "Meta's source separation: splits a song into vocals, drums, bass, and the rest. The serious tool here.",
-      "es": "Separación de fuentes de Meta: parte una canción en voz, batería, bajo y resto. Lo serio de esta sección."
+      "es": "Separación de fuentes de Meta: parte una canción en voz, batería, bajo y resto. Lo serio de esta sección.",
+      "ca": "Separació de fonts de Meta: parteix una cançó en veu, bateria, baix i la resta. El més seriós d'aquesta secció."
     },
     "runs": false,
     "embed": false
@@ -159,7 +173,8 @@
     "category": "livecoding",
     "note": {
       "en": "Code-driven music with a minimal JS API and a gallery to hear what others made.",
-      "es": "Música por código con una API JS mínima y una galería para escuchar lo que hace la gente."
+      "es": "Música por código con una API JS mínima y una galería para escuchar lo que hace la gente.",
+      "ca": "Música amb codi amb una API JS mínima i una galeria per escoltar el que fa la gent."
     },
     "runs": true,
     "embed": true
@@ -170,7 +185,8 @@
     "category": "livecoding",
     "note": {
       "en": "A lo-fi beat made entirely in Sonic Pi, with the code published. Hearing it work helps you start.",
-      "es": "Un beat lo-fi hecho entero en Sonic Pi, con el código publicado. Ver que suena bien ayuda a empezar."
+      "es": "Un beat lo-fi hecho entero en Sonic Pi, con el código publicado. Ver que suena bien ayuda a empezar.",
+      "ca": "Un beat lo-fi fet sencer amb Sonic Pi, amb el codi publicat. Veure que sona bé ajuda a començar."
     },
     "runs": false,
     "embed": false
@@ -181,7 +197,8 @@
     "category": "livecoding",
     "note": {
       "en": "Collaborative platform for networked performance across several languages at once, from the browser.",
-      "es": "Plataforma colaborativa para tocar en red con varios lenguajes a la vez, desde el navegador."
+      "es": "Plataforma colaborativa para tocar en red con varios lenguajes a la vez, desde el navegador.",
+      "ca": "Plataforma col·laborativa per tocar en xarxa amb diversos llenguatges alhora, des del navegador."
     },
     "runs": true,
     "embed": false
@@ -192,7 +209,8 @@
     "category": "livecoding",
     "note": {
       "en": "IDE for the Faust DSP language. Write the signal processor, compile it to a plugin or to the web.",
-      "es": "IDE del lenguaje Faust para DSP. Escribes el procesador de señal y te lo compila a plugin o a web."
+      "es": "IDE del lenguaje Faust para DSP. Escribes el procesador de señal y te lo compila a plugin o a web.",
+      "ca": "IDE del llenguatge Faust per a DSP. Escrius el processador de senyal i te'l compila a connector o a web."
     },
     "runs": true,
     "embed": false
@@ -203,7 +221,8 @@
     "category": "livecoding",
     "note": {
       "en": "Declarative synthesis: you describe the sound graph as JSON instead of chaining calls.",
-      "es": "Síntesis declarativa: describes el grafo de sonido en JSON en vez de encadenar llamadas."
+      "es": "Síntesis declarativa: describes el grafo de sonido en JSON en vez de encadenar llamadas.",
+      "ca": "Síntesi declarativa: descrius el graf de so en JSON en lloc d'encadenar crides."
     },
     "runs": false,
     "embed": false
@@ -214,7 +233,8 @@
     "category": "livecoding",
     "note": {
       "en": "Collaborative P2P editor: several people writing sound and visuals into the same document.",
-      "es": "Editor P2P colaborativo: varias personas escribiendo sonido y visuales en el mismo documento."
+      "es": "Editor P2P colaborativo: varias personas escribiendo sonido y visuales en el mismo documento.",
+      "ca": "Editor P2P col·laboratiu: unes quantes persones escrivint so i visuals al mateix document."
     },
     "runs": true,
     "embed": true
@@ -225,7 +245,8 @@
     "category": "livecoding",
     "note": {
       "en": "A complete audiovisual environment in the browser: sound, visuals, and notation in one tab.",
-      "es": "Entorno audiovisual completo en el navegador: sonido, visuales y notación, todo en la misma pestaña."
+      "es": "Entorno audiovisual completo en el navegador: sonido, visuales y notación, todo en la misma pestaña.",
+      "ca": "Entorn audiovisual complet al navegador: so, visuals i notació, tot a la mateixa pestanya."
     },
     "runs": true,
     "embed": true
@@ -236,7 +257,8 @@
     "category": "livecoding",
     "note": {
       "en": "Graph-based music language written in Rust and compiled to WebAssembly. Minimal syntax, low latency.",
-      "es": "Lenguaje de música por grafos escrito en Rust y compilado a WebAssembly. Sintaxis mínima, latencia baja."
+      "es": "Lenguaje de música por grafos escrito en Rust y compilado a WebAssembly. Sintaxis mínima, latencia baja.",
+      "ca": "Llenguatge de música per grafs escrit en Rust i compilat a WebAssembly. Sintaxi mínima, latència baixa."
     },
     "runs": false,
     "embed": false
@@ -247,7 +269,8 @@
     "category": "livecoding",
     "note": {
       "en": "Glicol's REPL. Walk in, write two lines, it plays.",
-      "es": "El REPL de Glicol. Entras, escribes dos líneas y suena."
+      "es": "El REPL de Glicol. Entras, escribes dos líneas y suena.",
+      "ca": "El REPL de Glicol. Hi entres, escrius dues línies i sona."
     },
     "runs": true,
     "embed": true
@@ -258,7 +281,8 @@
     "category": "livecoding",
     "note": {
       "en": "Strongly-timed music language in the ChucK lineage, smaller and faster.",
-      "es": "Lenguaje musical strongly-timed en la línea de ChucK, más pequeño y más rápido."
+      "es": "Lenguaje musical strongly-timed en la línea de ChucK, más pequeño y más rápido.",
+      "ca": "Llenguatge musical strongly-timed en la línia de ChucK, més petit i més ràpid."
     },
     "runs": false,
     "embed": false
@@ -269,7 +293,8 @@
     "category": "livecoding",
     "note": {
       "en": "Argentine archive of research on image and sound design. Latin American history of art and technology.",
-      "es": "Archivo argentino de investigaciones sobre diseño de imagen y sonido. Historia latinoamericana del arte y la tecnología."
+      "es": "Archivo argentino de investigaciones sobre diseño de imagen y sonido. Historia latinoamericana del arte y la tecnología.",
+      "ca": "Arxiu argentí de recerques sobre disseny d'imatge i so. Història llatinoamericana de l'art i la tecnologia."
     },
     "runs": false,
     "embed": false
@@ -280,7 +305,8 @@
     "category": "livecoding",
     "note": {
       "en": "The Sonic Pi community forum. Where you ask when something won't play.",
-      "es": "El foro de la comunidad de Sonic Pi. Donde se pregunta cuando algo no suena."
+      "es": "El foro de la comunidad de Sonic Pi. Donde se pregunta cuando algo no suena.",
+      "ca": "El fòrum de la comunitat de Sonic Pi. On es pregunta quan alguna cosa no sona."
     },
     "runs": false,
     "embed": false
@@ -291,7 +317,8 @@
     "category": "sound",
     "note": {
       "en": "8-bit sound effect generator. One “randomize” button and you have your game's jump.",
-      "es": "Generador de efectos de 8 bits. Un botón «randomize» y ya tienes el salto de tu juego."
+      "es": "Generador de efectos de 8 bits. Un botón «randomize» y ya tienes el salto de tu juego.",
+      "ca": "Generador d'efectes de 8 bits. Un botó «randomize» i ja tens el salt del teu joc."
     },
     "runs": true,
     "embed": false
@@ -302,7 +329,8 @@
     "category": "livecoding",
     "note": {
       "en": "Music and visuals together in the browser, on WebAudio and WebGL.",
-      "es": "Música y visuales a la vez en el navegador, sobre WebAudio y WebGL."
+      "es": "Música y visuales a la vez en el navegador, sobre WebAudio y WebGL.",
+      "ca": "Música i visuals alhora al navegador, sobre WebAudio i WebGL."
     },
     "runs": false,
     "embed": false
@@ -313,7 +341,8 @@
     "category": "livecoding",
     "note": {
       "en": "Calendar of algoraves and live coding gatherings. For when you want to see it in person.",
-      "es": "Calendario de algoraves y encuentros de live coding. Para cuando quieras verlo en persona."
+      "es": "Calendario de algoraves y encuentros de live coding. Para cuando quieras verlo en persona.",
+      "ca": "Calendari d'algoraves i trobades de live coding. Per quan ho vulguis veure en persona."
     },
     "runs": false,
     "embed": false
@@ -324,7 +353,8 @@
     "category": "sound",
     "note": {
       "en": "The spec for getting mic and camera into the page. The basis of anything that reacts to what it hears.",
-      "es": "La spec para meter micrófono y cámara en la página. La base de cualquier cosa que reaccione a lo que oye."
+      "es": "La spec para meter micrófono y cámara en la página. La base de cualquier cosa que reaccione a lo que oye.",
+      "ca": "L'especificació per ficar micròfon i càmera a la pàgina. La base de qualsevol cosa que reaccioni al que sent."
     },
     "runs": false,
     "embed": false
@@ -335,7 +365,8 @@
     "category": "livecoding",
     "note": {
       "en": "The Sonic Pi cheatsheet on one page. Keep it open your first week.",
-      "es": "La chuleta de Sonic Pi en una página. Tenla al lado la primera semana."
+      "es": "La chuleta de Sonic Pi en una página. Tenla al lado la primera semana.",
+      "ca": "La xuleta de Sonic Pi en una pàgina. Tingues-la al costat la primera setmana."
     },
     "runs": false,
     "embed": false
@@ -346,7 +377,8 @@
     "category": "livecoding",
     "note": {
       "en": "Creative coding course built on Sonic Pi, exercise by exercise and well structured.",
-      "es": "Curso de programación creativa con Sonic Pi, por ejercicios y bien estructurado."
+      "es": "Curso de programación creativa con Sonic Pi, por ejercicios y bien estructurado.",
+      "ca": "Curs de programació creativa amb Sonic Pi, per exercicis i ben estructurat."
     },
     "runs": false,
     "embed": false
@@ -357,7 +389,8 @@
     "category": "livecoding",
     "note": {
       "en": "Space for artistic and cultural experimentation, with live coding activity in Spanish.",
-      "es": "Espacio de experimentación artística y cultural, con actividad de live coding en castellano."
+      "es": "Espacio de experimentación artística y cultural, con actividad de live coding en castellano.",
+      "ca": "Espai d'experimentació artística i cultural, amb activitat de live coding en castellà."
     },
     "runs": false,
     "embed": false
@@ -368,7 +401,8 @@
     "category": "livecoding",
     "note": {
       "en": "Write music in JavaScript and send it over MIDI to your DAW or a real instrument.",
-      "es": "Escribir música con JavaScript y sacarla por MIDI a tu DAW o a un instrumento real."
+      "es": "Escribir música con JavaScript y sacarla por MIDI a tu DAW o a un instrumento real.",
+      "ca": "Escriure música amb JavaScript i treure-la per MIDI cap al teu DAW o cap a un instrument de veritat."
     },
     "runs": false,
     "embed": false
@@ -379,7 +413,8 @@
     "category": "livecoding",
     "note": {
       "en": "Compose for a music box by punching pins on a roll, then share it by URL. Charming and deliberately limited.",
-      "es": "Compones para caja de música marcando púas en un rollo y lo compartes por URL. Encantador y limitado a propósito."
+      "es": "Compones para caja de música marcando púas en un rollo y lo compartes por URL. Encantador y limitado a propósito.",
+      "ca": "Compons per a capsa de música marcant pues en un rotlle i ho comparteixes per URL. Encantador i limitat expressament."
     },
     "runs": true,
     "embed": false
@@ -390,7 +425,8 @@
     "category": "livecoding",
     "note": {
       "en": "The code accompanying a video series on musical design in SuperCollider.",
-      "es": "El código que acompaña a una serie de vídeos sobre diseño musical en SuperCollider."
+      "es": "El código que acompaña a una serie de vídeos sobre diseño musical en SuperCollider.",
+      "ca": "El codi que acompanya una sèrie de vídeos sobre disseny musical amb SuperCollider."
     },
     "runs": false,
     "embed": false
@@ -401,7 +437,8 @@
     "category": "sound",
     "note": {
       "en": "Musical interaction ideas on the web, with demos. Exactly the frontend-meets-sound crossing.",
-      "es": "Ideas de interacción musical en la web, con demos. Justo el cruce entre frontend y sonido."
+      "es": "Ideas de interacción musical en la web, con demos. Justo el cruce entre frontend y sonido.",
+      "ca": "Idees d'interacció musical al web, amb demos. Just la cruïlla entre frontend i so."
     },
     "runs": false,
     "embed": false
@@ -412,7 +449,8 @@
     "category": "livecoding",
     "note": {
       "en": "The artist behind Hydra. Her site is the best explanation of why it exists.",
-      "es": "La artista que hizo Hydra. Su web es la mejor explicación de por qué existe."
+      "es": "La artista que hizo Hydra. Su web es la mejor explicación de por qué existe.",
+      "ca": "L'artista que va fer Hydra. El seu web és la millor explicació de per què existeix."
     },
     "runs": false,
     "embed": false
@@ -423,7 +461,8 @@
     "category": "livecoding",
     "note": {
       "en": "Esoteric sequencer on a grid where every letter is an operator. Closer to a puzzle game than a DAW.",
-      "es": "Secuenciador esotérico sobre una rejilla donde cada letra es un operador. Se parece más a un juego que a un DAW."
+      "es": "Secuenciador esotérico sobre una rejilla donde cada letra es un operador. Se parece más a un juego que a un DAW.",
+      "ca": "Seqüenciador esotèric sobre una graella on cada lletra és un operador. S'assembla més a un joc que a un DAW."
     },
     "runs": false,
     "embed": false
@@ -434,7 +473,8 @@
     "category": "livecoding",
     "note": {
       "en": "Clojure talking to SuperCollider. If parentheses don't scare you, it's as expressive as this gets.",
-      "es": "Clojure hablando con SuperCollider. Si el paréntesis no te asusta, es de lo más expresivo que hay."
+      "es": "Clojure hablando con SuperCollider. Si el paréntesis no te asusta, es de lo más expresivo que hay.",
+      "ca": "Clojure parlant amb SuperCollider. Si els parèntesis no t'espanten, és del més expressiu que hi ha."
     },
     "runs": false,
     "embed": false
@@ -445,7 +485,8 @@
     "category": "sound",
     "note": {
       "en": "The BBC's waveform component, built for trimming and annotating long-form audio.",
-      "es": "El componente de formas de onda de la BBC, pensado para recortar y anotar audio largo."
+      "es": "El componente de formas de onda de la BBC, pensado para recortar y anotar audio largo.",
+      "ca": "El component de formes d'ona de la BBC, pensat per retallar i anotar àudio llarg."
     },
     "runs": false,
     "embed": false
@@ -456,7 +497,8 @@
     "category": "livecoding",
     "note": {
       "en": "CodeSandbox's toolkit for embedding editors that actually run. The piece you'd need to put live coding on your own site.",
-      "es": "El toolkit de CodeSandbox para incrustar editores que ejecutan. La pieza que necesitarías para meter live coding en tu propio sitio."
+      "es": "El toolkit de CodeSandbox para incrustar editores que ejecutan. La pieza que necesitarías para meter live coding en tu propio sitio.",
+      "ca": "El toolkit de CodeSandbox per incrustar editors que s'executen. La peça que et caldria per ficar live coding al teu propi lloc web."
     },
     "runs": false,
     "embed": false
@@ -467,7 +509,8 @@
     "category": "livecoding",
     "note": {
       "en": "Community-shared SuperCollider code repository. You learn by reading other people's pieces.",
-      "es": "Repositorio de código de SuperCollider compartido por la comunidad. Se aprende leyendo piezas ajenas."
+      "es": "Repositorio de código de SuperCollider compartido por la comunidad. Se aprende leyendo piezas ajenas.",
+      "ca": "Repositori de codi de SuperCollider compartit per la comunitat. S'aprèn llegint peces d'altres."
     },
     "runs": false,
     "embed": false
@@ -478,7 +521,8 @@
     "category": "livecoding",
     "note": {
       "en": "A very short intro built for a coder dojo. Good for showing someone in ten minutes.",
-      "es": "Introducción cortísima pensada para un coder dojo. Sirve para enseñárselo a alguien en diez minutos."
+      "es": "Introducción cortísima pensada para un coder dojo. Sirve para enseñárselo a alguien en diez minutos.",
+      "ca": "Introducció curtíssima pensada per a un coder dojo. Serveix per ensenyar-ho a algú en deu minuts."
     },
     "runs": false,
     "embed": false
@@ -489,7 +533,8 @@
     "category": "livecoding",
     "note": {
       "en": "The official tutorial, zero to sequencing. It's the material used to teach this in schools.",
-      "es": "El tutorial oficial, de cero a secuenciar. Es el material con el que se enseña en institutos."
+      "es": "El tutorial oficial, de cero a secuenciar. Es el material con el que se enseña en institutos.",
+      "ca": "El tutorial oficial, de zero a seqüenciar. És el material amb què s'ensenya als instituts."
     },
     "runs": false,
     "embed": false
@@ -500,7 +545,8 @@
     "category": "sound",
     "note": {
       "en": "Same job as the previous one, different implementation. Keep two, because these services go down.",
-      "es": "Lo mismo que el anterior, otra implementación. Ten dos porque estos servicios caen."
+      "es": "Lo mismo que el anterior, otra implementación. Ten dos porque estos servicios caen.",
+      "ca": "El mateix que l'anterior, una altra implementació. Tingues-ne dos, perquè aquests serveis cauen."
     },
     "runs": true,
     "embed": false
@@ -511,7 +557,8 @@
     "category": "livecoding",
     "note": {
       "en": "The synthesis and algorithmic composition platform half this section rests on. Steep curve, very high ceiling.",
-      "es": "La plataforma de síntesis y composición algorítmica sobre la que se apoya media sección. Curva dura, techo altísimo."
+      "es": "La plataforma de síntesis y composición algorítmica sobre la que se apoya media sección. Curva dura, techo altísimo.",
+      "ca": "La plataforma de síntesi i composició algorítmica en què es recolza mitja secció. Corba dura, sostre altíssim."
     },
     "runs": false,
     "embed": false
@@ -522,7 +569,8 @@
     "category": "livecoding",
     "note": {
       "en": "Synthesis-based live coding language and environment, with its own grammar.",
-      "es": "Lenguaje y entorno de live coding basados en síntesis, con su propia gramática."
+      "es": "Lenguaje y entorno de live coding basados en síntesis, con su propia gramática.",
+      "ca": "Llenguatge i entorn de live coding basats en síntesi, amb la seva pròpia gramàtica."
     },
     "runs": false,
     "embed": false
@@ -533,7 +581,8 @@
     "category": "livecoding",
     "note": {
       "en": "Introductory workshop in Spanish. Sonic Pi was developed by Sam Aaron at Cambridge.",
-      "es": "Taller de introducción en castellano. Sonic Pi lo desarrolló Sam Aaron en Cambridge."
+      "es": "Taller de introducción en castellano. Sonic Pi lo desarrolló Sam Aaron en Cambridge.",
+      "ca": "Taller d'introducció en castellà. Sonic Pi el va desenvolupar Sam Aaron a Cambridge."
     },
     "runs": false,
     "embed": false
@@ -544,7 +593,8 @@
     "category": "livecoding",
     "note": {
       "en": "The pattern language most of the rest descends from. Powerful, and a real install — Haskell and SuperCollider underneath.",
-      "es": "El lenguaje de patrones del que sale casi todo lo demás. Potente y con instalación de verdad — Haskell y SuperCollider debajo."
+      "es": "El lenguaje de patrones del que sale casi todo lo demás. Potente y con instalación de verdad — Haskell y SuperCollider debajo.",
+      "ca": "El llenguatge de patrons d'on surt gairebé tota la resta. Potent i amb instal·lació de veritat: Haskell i SuperCollider a sota."
     },
     "runs": false,
     "embed": false
@@ -555,7 +605,8 @@
     "category": "livecoding",
     "note": {
       "en": "Parametric composition: define rules and ranges, then explore the space of pieces that fall out.",
-      "es": "Composición paramétrica: defines reglas y rangos, y exploras el espacio de piezas que salen de ahí."
+      "es": "Composición paramétrica: defines reglas y rangos, y exploras el espacio de piezas que salen de ahí.",
+      "ca": "Composició paramètrica: defineixes regles i rangs, i explores l'espai de peces que en surten."
     },
     "runs": false,
     "embed": false
@@ -566,7 +617,8 @@
     "category": "sound",
     "note": {
       "en": "Split vocals and instrumental with no install. Useful for pulling acapellas out of your own archive.",
-      "es": "Separar voz e instrumental sin instalar nada. Útil para sacar acapellas de un archivo propio."
+      "es": "Separar voz e instrumental sin instalar nada. Útil para sacar acapellas de un archivo propio.",
+      "ca": "Separar veu i instrumental sense instal·lar res. Útil per treure acapel·les d'un fitxer propi."
     },
     "runs": true,
     "embed": false
@@ -577,7 +629,8 @@
     "category": "sound",
     "note": {
       "en": "Dynamic synthesis with a comfortable API. Its authors call it “jQuery for Web Audio”, and you can see why.",
-      "es": "Síntesis dinámica con una API cómoda. Sus autores lo llaman «jQuery para Web Audio» y se entiende por qué."
+      "es": "Síntesis dinámica con una API cómoda. Sus autores lo llaman «jQuery para Web Audio» y se entiende por qué.",
+      "ca": "Síntesi dinàmica amb una API còmoda. Els seus autors en diuen «jQuery per a Web Audio» i s'entén per què."
     },
     "runs": false,
     "embed": false
@@ -588,7 +641,8 @@
     "category": "livecoding",
     "note": {
       "en": "Game sound effect generator in the browser. A direct descendant of sfxr.",
-      "es": "Generador de efectos de sonido de videojuego en el navegador. Heredero directo de sfxr."
+      "es": "Generador de efectos de sonido de videojuego en el navegador. Heredero directo de sfxr.",
+      "ca": "Generador d'efectes de so de videojoc al navegador. Hereu directe de sfxr."
     },
     "runs": true,
     "embed": false
@@ -599,7 +653,8 @@
     "category": "livecoding",
     "note": {
       "en": "Music generated by hand-written WebAssembly. An extreme exercise, and surprisingly musical.",
-      "es": "Música generada por WebAssembly escrito a mano. Ejercicio extremo y sorprendentemente musical."
+      "es": "Música generada por WebAssembly escrito a mano. Ejercicio extremo y sorprendentemente musical.",
+      "ca": "Música generada per WebAssembly escrit a mà. Exercici extrem i sorprenentment musical."
     },
     "runs": false,
     "embed": false
@@ -610,7 +665,8 @@
     "category": "livecoding",
     "note": {
       "en": "A DAW where every track is a JavaScript function returning samples. Raw, straight to the ear.",
-      "es": "Un DAW donde cada pista es una función JavaScript que devuelve muestras. Crudo y directo al oído."
+      "es": "Un DAW donde cada pista es una función JavaScript que devuelve muestras. Crudo y directo al oído.",
+      "ca": "Un DAW on cada pista és una funció JavaScript que retorna mostres. Cru i directe a l'orella."
     },
     "runs": true,
     "embed": false
@@ -621,7 +677,8 @@
     "category": "sound",
     "note": {
       "en": "The classic samples from Boris Smus's book. Old, short, and still the best way to understand a node.",
-      "es": "Los ejemplos clásicos del libro de Boris Smus. Viejos, cortos y todavía la mejor manera de entender un nodo."
+      "es": "Los ejemplos clásicos del libro de Boris Smus. Viejos, cortos y todavía la mejor manera de entender un nodo.",
+      "ca": "Els exemples clàssics del llibre de Boris Smus. Vells, curts i encara la millor manera d'entendre un node."
     },
     "runs": false,
     "embed": false
@@ -632,7 +689,8 @@
     "category": "sound",
     "note": {
       "en": "The official spec, for when MDN falls short and you need the fine print.",
-      "es": "La especificación oficial, para cuando MDN se queda corto y necesitas la letra pequeña."
+      "es": "La especificación oficial, para cuando MDN se queda corto y necesitas la letra pequeña.",
+      "ca": "L'especificació oficial, per quan MDN es queda curt i necessites la lletra petita."
     },
     "runs": false,
     "embed": false
@@ -643,7 +701,8 @@
     "category": "sound",
     "note": {
       "en": "Talking to physical keyboards and controllers from the browser. Less known than it deserves.",
-      "es": "Hablar con teclados y controladores físicos desde el navegador. Menos conocida de lo que merece."
+      "es": "Hablar con teclados y controladores físicos desde el navegador. Menos conocida de lo que merece.",
+      "ca": "Parlar amb teclats i controladors físics des del navegador. Menys coneguda del que es mereix."
     },
     "runs": false,
     "embed": false
@@ -654,7 +713,8 @@
     "category": "sound",
     "note": {
       "en": "Visualiser mixing audio with the webcam feed, on Three.js.",
-      "es": "Visualizador que mezcla el audio con la imagen de la webcam, sobre Three.js."
+      "es": "Visualizador que mezcla el audio con la imagen de la webcam, sobre Three.js.",
+      "ca": "Visualitzador que barreja l'àudio amb la imatge de la webcam, sobre Three.js."
     },
     "runs": false,
     "embed": false
@@ -665,7 +725,8 @@
     "category": "livecoding",
     "note": {
       "en": "ChucK, Stanford's strongly-timed language, compiled to WebAssembly and running in a tab.",
-      "es": "ChucK, el lenguaje strongly-timed de Stanford, compilado a WebAssembly y corriendo en una pestaña."
+      "es": "ChucK, el lenguaje strongly-timed de Stanford, compilado a WebAssembly y corriendo en una pestaña.",
+      "ca": "ChucK, el llenguatge strongly-timed de Stanford, compilat a WebAssembly i corrent en una pestanya."
     },
     "runs": true,
     "embed": false
@@ -676,7 +737,8 @@
     "category": "livecoding",
     "note": {
       "en": "Very complete Japanese Web Audio library — synth, effects, visualisation — with a playground to poke at.",
-      "es": "Librería japonesa de Web Audio muy completa — sintetizador, efectos, visualización — con playground para trastear."
+      "es": "Librería japonesa de Web Audio muy completa — sintetizador, efectos, visualización — con playground para trastear.",
+      "ca": "Llibreria japonesa de Web Audio molt completa (sintetitzador, efectes, visualització) amb un playground per remenar."
     },
     "runs": false,
     "embed": false

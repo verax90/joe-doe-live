@@ -10,7 +10,7 @@
 // around the colour wheel, gliding from one to the next):
 //   $: s("sawtooth*8").note(ref(() => voiceNote() || 48))
 import { downsample, framePitch, midiOf } from './hum';
-import { t } from './i18n';
+import { t, type Lang } from './i18n';
 import { getLimiter } from './limiter';
 import { micInput } from './mic';
 import { SCALES, scaleSetting, snap } from './scale';
@@ -20,10 +20,10 @@ export type Tuning = 'free' | 'semitone' | 'key';
 export type VoiceSettings = { on: boolean; wave: OscillatorType; octave: number; tuning: Tuning; volume: number };
 const DEFAULTS: VoiceSettings = { on: false, wave: 'sawtooth', octave: 0, tuning: 'semitone', volume: 0.5 };
 
-const NAMES = { en: ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'], es: ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'] };
+const NAMES = { en: ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'], es: ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'], ca: ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'] };
 
 // A sung pitch as a note name and how many cents it is off: 57.3 → La2 +30
-export function describe(midi: number, lang: 'en' | 'es') {
+export function describe(midi: number, lang: Lang) {
   const nearest = Math.round(midi);
   return { name: `${NAMES[lang][((nearest % 12) + 12) % 12]}${Math.floor(nearest / 12) - 1}`, cents: Math.round((midi - nearest) * 100) };
 }
@@ -88,7 +88,7 @@ const save = (next: Partial<VoiceSettings>) => {
 
 type Synth = { osc: OscillatorNode; gain: GainNode; master: AudioNode };
 
-export function setupVoice(lang: () => 'en' | 'es') {
+export function setupVoice(lang: () => Lang) {
   const noteView = document.querySelector<HTMLElement>('#voice-note')!;
   const centsBar = document.querySelector<HTMLElement>('#voice-cents span')!;
   const status = document.querySelector<HTMLElement>('#voice-status')!;

@@ -688,12 +688,12 @@ select.control {
   display: none;
 }
 
-/* EN / ES: the active language stands out */
-/* Language: a two-way switch, a lime thumb sliding under the one in use */
+/* EN / ES / CA: the active language stands out */
+/* Language: a three-way switch, a lime thumb sliding under the one in use */
 .control-lang {
   position: relative;
   display: inline-grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: stretch;
   padding: 0.2rem;
   border-radius: 999px;
@@ -705,7 +705,7 @@ select.control {
   top: 0.2rem;
   bottom: 0.2rem;
   left: 0.2rem;
-  width: calc(50% - 0.2rem);
+  width: calc((100% - 0.4rem) / 3);
   border-radius: 999px;
   background: var(--accent);
   transition: transform 0.2s var(--ease);
@@ -713,6 +713,10 @@ select.control {
 
 .control-lang[data-current='es']::before {
   transform: translateX(100%);
+}
+
+.control-lang[data-current='ca']::before {
+  transform: translateX(200%);
 }
 
 .lang-option {
@@ -726,7 +730,8 @@ select.control {
 }
 
 .control-lang[data-current='en'] .lang-option[data-lang='en'],
-.control-lang[data-current='es'] .lang-option[data-lang='es'] {
+.control-lang[data-current='es'] .lang-option[data-lang='es'],
+.control-lang[data-current='ca'] .lang-option[data-lang='ca'] {
   color: var(--accent-ink);
   font-weight: 600;
 }

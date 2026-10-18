@@ -9,10 +9,10 @@ import { VJ_CONTROLS } from './vj';
 type Context = { code: string; playing: boolean; visual: string; ascii: boolean; vjKnobs?: boolean };
 type Label = { name: Localized; hint?: Localized };
 
-const L = (en: string, es: string): Localized => ({ en, es });
+const L = (en: string, es: string, ca: string): Localized => ({ en, es, ca });
 
-const UNUSED: Label = { name: L('Not used here', 'Sin uso aquí'), hint: L('it acts in the "MPK Mini" pattern', 'actúa en el patrón "MPK Mini"') };
-const FROM_CODE = L('pick the "From the code" visual to see it', 'elige el visual "Del código" para verlo');
+const UNUSED: Label = { name: L('Not used here', 'Sin uso aquí', 'Aquí no es fa servir'), hint: L('it acts in the "MPK Mini" pattern', 'actúa en el patrón "MPK Mini"', 'actua al patró "MPK Mini"') };
+const FROM_CODE = L('pick the "From the code" visual to see it', 'elige el visual "Del código" para verlo', 'tria el visual "Del codi" per veure-ho');
 
 // Knobs 1-8 on channel 1, as the MPK Mini Mk II sends them
 export function knobLabel(knob: number, context: Context): Label {
@@ -20,27 +20,27 @@ export function knobLabel(knob: number, context: Context): Label {
   const ownPattern = context.playing && !mpkPattern && context.code.includes('midin(');
   if (context.vjKnobs && knob <= VJ_CONTROLS.length) {
     const control = VJ_CONTROLS[knob - 1];
-    return { name: { en: `VJ · ${control.name.en}`, es: `VJ · ${control.name.es}` } };
+    return { name: { en: `VJ · ${control.name.en}`, es: `VJ · ${control.name.es}`, ca: `VJ · ${control.name.ca}` } };
   }
-  if (knob === 7) return { name: L('Master volume', 'Volumen general') };
-  if (knob === 8) return { name: L('ASCII size', 'Tamaño del ASCII'), hint: context.ascii ? undefined : L('turn on More → ASCII filter', 'activa Más → Filtro ASCII') };
-  if (ownPattern) return { name: L(`Knob ${knob} · in your pattern`, `Knob ${knob} · en tu patrón`), hint: L(`read with knob(${knob}, 1)`, `se lee con knob(${knob}, 1)`) };
-  const keys = mpkPattern ? undefined : L('keys without Play', 'teclas sin Play');
-  if (knob === 1) return { name: L('Echo', 'Eco'), hint: keys };
-  if (knob === 2) return { name: L('Filter, dark to bright', 'Filtro, de apagado a brillante'), hint: keys };
-  if (knob === 3) return { name: L('Reverb', 'Reverb'), hint: keys };
+  if (knob === 7) return { name: L('Master volume', 'Volumen general', 'Volum general') };
+  if (knob === 8) return { name: L('ASCII size', 'Tamaño del ASCII', "Mida de l'ASCII"), hint: context.ascii ? undefined : L('turn on More → ASCII filter', 'activa Más → Filtro ASCII', 'activa Més → Filtre ASCII') };
+  if (ownPattern) return { name: L(`Knob ${knob} · in your pattern`, `Knob ${knob} · en tu patrón`, `Knob ${knob} · al teu patró`), hint: L(`read with knob(${knob}, 1)`, `se lee con knob(${knob}, 1)`, `es llegeix amb knob(${knob}, 1)`) };
+  const keys = mpkPattern ? undefined : L('keys without Play', 'teclas sin Play', 'tecles sense Play');
+  if (knob === 1) return { name: L('Echo', 'Eco', 'Eco'), hint: keys };
+  if (knob === 2) return { name: L('Filter, dark to bright', 'Filtro, de apagado a brillante', "Filtre, d'apagat a brillant"), hint: keys };
+  if (knob === 3) return { name: L('Reverb', 'Reverb', 'Reverb'), hint: keys };
   if (!mpkPattern) return UNUSED;
-  if (knob === 4) return { name: L('Backing beat volume', 'Volumen del ritmo de fondo') };
+  if (knob === 4) return { name: L('Backing beat volume', 'Volumen del ritmo de fondo', 'Volum del ritme de fons') };
   const visualHint = context.visual === 'code' ? undefined : FROM_CODE;
-  if (knob === 5) return { name: L('Mirrors in the visual', 'Espejos del visual'), hint: visualHint };
-  return { name: L('Visual spin', 'Giro del visual'), hint: visualHint };
+  if (knob === 5) return { name: L('Mirrors in the visual', 'Espejos del visual', 'Miralls del visual'), hint: visualHint };
+  return { name: L('Visual spin', 'Giro del visual', 'Gir del visual'), hint: visualHint };
 }
 
 export function bendLabel(context: Context): Label {
-  const name = L('Joystick · pitch', 'Joystick · desafinar');
-  if (!context.playing) return { name, hint: L('each new key without Play', 'cada tecla nueva sin Play') };
-  if (context.code.includes('bend()')) return { name, hint: L('each new note', 'cada nota nueva') };
-  return { name, hint: L('this pattern does not use it', 'este patrón no lo usa') };
+  const name = L('Joystick · pitch', 'Joystick · desafinar', 'Joystick · desafinar');
+  if (!context.playing) return { name, hint: L('each new key without Play', 'cada tecla nueva sin Play', 'cada tecla nova sense Play') };
+  if (context.code.includes('bend()')) return { name, hint: L('each new note', 'cada nota nueva', 'cada nota nova') };
+  return { name, hint: L('this pattern does not use it', 'este patrón no lo usa', 'aquest patró no el fa servir') };
 }
 
 export function setupKnobHud(getContext: () => Context) {

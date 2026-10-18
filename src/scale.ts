@@ -3,6 +3,7 @@
 // sounds wrong, and one key can play a chord of that scale (the note, the
 // third and the fifth above it in the scale). The riff recorder writes down
 // what sounded, so it uses the same.
+import type { Lang } from './i18n';
 import { readStorage, writeStorage } from './storage';
 
 export const SCALES: Record<string, number[]> = {
@@ -56,10 +57,10 @@ export function playedNotes(note: number, current: Setting = setting) {
   return [base, degreeAbove(base, current.root, steps, third), degreeAbove(base, current.root, steps, fifth)];
 }
 
-const ROOTS = { en: ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'], es: ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'] };
+const ROOTS = { en: ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'], es: ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'], ca: ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'] };
 
 // The key and scale pickers in MIDI → Play without Play
-export function setupScalePicker(lang: () => 'en' | 'es') {
+export function setupScalePicker(lang: () => Lang) {
   const root = document.querySelector<HTMLSelectElement>('#scale-root')!;
   const type = document.querySelector<HTMLSelectElement>('#scale-type')!;
   const chords = document.querySelector<HTMLInputElement>('#scale-chords')!;

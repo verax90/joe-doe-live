@@ -12,12 +12,12 @@ export type VjControl = 'zoom' | 'hue' | 'warp' | 'pixels' | 'trails' | 'spin';
 
 // Each control from 0 to 1 as a slider or knob sees it, and what it means
 export const VJ_CONTROLS: { id: VjControl; name: Localized; neutral: number }[] = [
-  { id: 'zoom', name: { en: 'Zoom', es: 'Zoom' }, neutral: 0.5 },
-  { id: 'hue', name: { en: 'Colour', es: 'Color' }, neutral: 0 },
-  { id: 'warp', name: { en: 'Warp', es: 'Distorsión' }, neutral: 0 },
-  { id: 'pixels', name: { en: 'Pixels', es: 'Píxeles' }, neutral: 0 },
-  { id: 'trails', name: { en: 'Trails', es: 'Estela' }, neutral: 0 },
-  { id: 'spin', name: { en: 'Spin', es: 'Giro' }, neutral: 0.5 },
+  { id: 'zoom', name: { en: 'Zoom', es: 'Zoom', ca: 'Zoom' }, neutral: 0.5 },
+  { id: 'hue', name: { en: 'Colour', es: 'Color', ca: 'Color' }, neutral: 0 },
+  { id: 'warp', name: { en: 'Warp', es: 'Distorsión', ca: 'Distorsió' }, neutral: 0 },
+  { id: 'pixels', name: { en: 'Pixels', es: 'Píxeles', ca: 'Píxels' }, neutral: 0 },
+  { id: 'trails', name: { en: 'Trails', es: 'Estela', ca: 'Estela' }, neutral: 0 },
+  { id: 'spin', name: { en: 'Spin', es: 'Giro', ca: 'Gir' }, neutral: 0.5 },
 ];
 
 const STORAGE_KEY = 'jdl:vj';

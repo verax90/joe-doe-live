@@ -73,7 +73,7 @@ export function setupLiveSet({ editor, presets, visuals, currentVisual, useVisua
   songNow = () => (active ? songs[index]?.name : undefined);
 
   const save = () => writeStorage(STORAGE_KEY, songs);
-  const visualName = (id: string) => pick(visuals.find((v) => v.id === id)?.name ?? { en: id, es: id });
+  const visualName = (id: string) => pick(visuals.find((v) => v.id === id)?.name ?? { en: id, es: id, ca: id });
   const scheduler = () => editor.repl?.scheduler;
 
   const fillSelects = () => {
