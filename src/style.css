@@ -1601,16 +1601,27 @@ select.control {
     margin-left: auto;
   }
 
-  /* Phones: controls on the first row, the two pickers share the second */
+  /* Móvil: los controles en la primera fila, los dos selectores a medias en
+     la segunda y BPM y Tap en la tercera, para que los nombres no se corten */
   .bar-pickers {
     order: 10;
     flex: 1 1 100%;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
 
   .bar-pickers select.control {
-    flex: 1 1 0;
+    flex: 1 1 calc(50% - 0.2rem);
     max-width: none;
+    padding-inline: 0.6rem;
+  }
+
+  .bar-pickers .tempo,
+  .bar-pickers #tap {
+    flex: 1 1 0;
+  }
+
+  .bar-pickers .tempo-input {
+    flex: 1;
   }
 
   .brand-dot,
