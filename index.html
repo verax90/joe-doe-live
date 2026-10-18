@@ -14,6 +14,24 @@
       // code, then fade it in: no English flash, no "// LOADING". Never longer than 4 s.
       document.documentElement.classList.add('booting');
       setTimeout(() => document.documentElement.classList.remove('booting'), 4000);
+
+      // En el navegador del móvil, pantalla completa con el primer toque (la app
+      // instalada ya abre así por el manifest). Si se sale, el siguiente toque
+      // en la barra la recupera.
+      (() => {
+        const root = document.documentElement;
+        const installed = matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
+        if (installed || !matchMedia('(pointer: coarse)').matches || !root.requestFullscreen) return;
+        const enter = () => {
+          if (!document.fullscreenElement) root.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+        };
+        document.addEventListener('pointerup', enter, { once: true, capture: true });
+        document.addEventListener('fullscreenchange', () => {
+          if (!document.fullscreenElement) {
+            document.querySelector('.bar')?.addEventListener('pointerup', enter, { once: true });
+          }
+        });
+      })();
     </script>
     <!-- Preview when the link is pasted in a chat or a social network -->
     <meta property="og:type" content="website" />

@@ -4,7 +4,8 @@
   "description": "Live coding studio: Strudel sound, Hydra visuals and MIDI control, in the browser.",
   "start_url": "/",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
   "background_color": "#12151c",
   "theme_color": "#12151c",
   "icons": [

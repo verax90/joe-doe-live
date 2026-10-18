@@ -2596,3 +2596,93 @@ body:has(canvas.scope:not([hidden])) .overlay {
 :where(.menu-item, .menu-summary, .help-index-item, .project-action, .panel-tab, .cheat-action, .cheat-icon, .sample-toggle, .sample-name, .arrange-cell, .help-news .control, .finder-item):focus-visible {
   outline-offset: -2px;
 }
+
+/* Móvil en horizontal: la pantalla es baja, así que la barra va en una sola
+   fila y el pie solo aparece si tiene partes que tocar */
+@media (orientation: landscape) and (max-height: 500px) {
+  .bar {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+    min-height: 0;
+    padding: 0.3rem max(0.6rem, env(safe-area-inset-right)) 0.3rem max(0.6rem, env(safe-area-inset-left));
+  }
+
+  .brand {
+    margin-right: 0;
+  }
+
+  .brand-name,
+  .brand-dot,
+  .btn-text,
+  .tempo-label {
+    display: none;
+  }
+
+  .control-record.is-recording .record-label {
+    display: inline;
+  }
+
+  #play {
+    min-width: 2.6rem;
+  }
+
+  .bar-group {
+    flex: none;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .bar-pickers {
+    order: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .bar-pickers select.control {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 9rem;
+    padding-inline: 0.5rem;
+  }
+
+  .tempo-input {
+    width: 3.2rem;
+  }
+
+  .menu {
+    margin-left: 0;
+  }
+
+  .foot a {
+    display: none;
+  }
+
+  .foot:not(:has(.parts:not([hidden]))) {
+    display: none;
+  }
+}
+
+/* Móvil en vertical: sin la palabra BPM caben más letras en los selectores */
+@media (max-width: 480px) {
+  .tempo-label {
+    display: none;
+  }
+}
+
+/* Pantalla táctil: sin teclado no sirven los atajos, y los botones crecen
+   un poco para el dedo */
+@media (hover: none) and (pointer: coarse) {
+  .foot span {
+    display: none;
+  }
+
+  .control {
+    height: 2.5rem;
+  }
+
+  .control-icon {
+    width: 2.5rem;
+  }
+}
