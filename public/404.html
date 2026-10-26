@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#12151c" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Fuera del aire · joe doe · live</title>
+    <style>
+      /* Mismos tokens que el estudio (src/style.css), sin cargar la app */
+      :root {
+        --bg: #12151c;
+        --bg-elevated: #1a1e28;
+        --fg: #eceae4;
+        --muted: #9a9aa3;
+        --line: rgba(236, 234, 228, 0.12);
+        --accent: #d6ff4b;
+        --accent-ink: #12151c;
+        --danger: #ff6b5a;
+        --font-display: 'Syne Variable', 'Syne', 'Segoe UI', system-ui, sans-serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, 'DejaVu Sans Mono', monospace;
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-mono);
+        font-size: 15px;
+        line-height: 1.55;
+        overflow-x: hidden;
+      }
+      header, footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.9rem 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      footer { border-bottom: 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+      .brand { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--fg); text-decoration: none; }
+      .brand span { color: var(--accent); }
+      /* Luz ON AIR, apagada */
+      .onair {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.2rem 0.6rem;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.12em;
+      }
+      .onair::before {
+        content: '';
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        background: #3a2422;
+        box-shadow: inset 0 0 0 1px rgba(255, 107, 90, 0.35);
+      }
+      main {
+        width: 100%;
+        max-width: 44rem;
+        margin: 0 auto;
+        padding: 3rem 16px;
+        align-self: center;
+      }
+      .code {
+        margin: 0 0 1rem;
+        color: var(--accent);
+        font-size: 13px;
+        letter-spacing: 0.08em;
+      }
+      h1 {
+        margin: 0 0 1.25rem;
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(2.4rem, 11vw, 4.5rem);
+        line-height: 1;
+        letter-spacing: -0.02em;
+        overflow-wrap: anywhere;
+      }
+      /* Vúmetro quieto: canales en silencio */
+      .vu {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 2.5rem;
+        margin: 0 0 1.75rem;
+      }
+      .vu i {
+        flex: 1;
+        max-width: 1.1rem;
+        height: 4px;
+        border-radius: 1px;
+        background: var(--line);
+      }
+      .vu i:nth-child(3n) { height: 6px; }
+      .lead { margin: 0 0 0.75rem; font-size: 1.05rem; }
+      .alt { margin: 0 0 0.35rem; color: var(--muted); }
+      .alt b { color: var(--fg); font-weight: 600; }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 2.25rem;
+      }
+      nav a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 3rem;
+        padding: 0.7rem 1.25rem;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--bg-elevated);
+        color: var(--fg);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      nav a.main {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: var(--accent-ink);
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+      nav a:hover { border-color: var(--accent); }
+      nav a.main:hover { background: #e4ff7d; }
+      a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      @media (max-width: 480px) {
+        nav a { flex: 1 1 100%; justify-content: center; }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .onair::before { animation: flicker 4s steps(1) infinite; }
+        @keyframes flicker {
+          0%, 100% { opacity: 1; }
+          92% { opacity: 0.4; }
+          94% { opacity: 1; }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/">joe doe<span> · </span>live</a>
+      <span class="onair" aria-hidden="true">ON AIR</span>
+    </header>
+    <main>
+      <p class="code">// 404 · canal vacío</p>
+      <h1>Fuera del aire</h1>
+      <div class="vu" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <p class="lead">Aquí no suena nada: esta página no existe o se ha movido.</p>
+      <p class="alt" lang="ca"><b>Fora d'antena.</b> Aquí no sona res: aquesta pàgina no existeix.</p>
+      <p class="alt" lang="en"><b>Off the air.</b> Nothing is playing here: this page doesn't exist.</p>
+      <nav aria-label="Salidas">
+        <a class="main" href="/">Volver al estudio →</a>
+        <a href="https://joedoe.dev/">joedoe.dev</a>
+      </nav>
+    </main>
+    <footer>
+      <span>joe doe · live</span>
+      <span>404</span>
+    </footer>
+  </body>
+</html>
