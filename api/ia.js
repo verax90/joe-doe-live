@@ -21,14 +21,20 @@ export default async function handler(request) {
   if (range) headers.set('range', range);
   const get = (url) => fetch(url, { method: request.method, headers, redirect: 'follow' });
   let upstream = await get(`https://${match[1]}${match[2]}`);
+  const tried = [upstream.status];
   // a storage node that still says no: the same file by its public address
   const item = match[2].match(/^\/\d+\/items\/(.+)$/);
-  if (!upstream.ok && item) upstream = await get(`https://archive.org/download/${item[1]}`);
+  if (!upstream.ok && item) {
+    upstream = await get(`https://archive.org/download/${item[1]}`);
+    tried.push(upstream.status);
+  }
   const out = new Headers();
   for (const name of ['content-type', 'content-length', 'content-range', 'accept-ranges', 'last-modified', 'etag']) {
     const value = upstream.headers.get(name);
     if (value) out.set(name, value);
   }
+  // what the archive answered, for when something fails
+  out.set('x-upstream', tried.join(','));
   // a day for the videos; a refusal is not kept, the next try asks again
   out.set('cache-control', upstream.ok ? 'public, max-age=86400' : 'no-store');
   return new Response(upstream.body, { status: upstream.status, headers: out });
