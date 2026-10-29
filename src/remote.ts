@@ -12,30 +12,42 @@ import { CC_EVENT, NOTE_EVENT, type CcDetail, type NoteDetail } from './midi';
 import { roomId } from './room';
 import { readStorage, writeStorage } from './storage';
 import { toast } from './toast';
+import { setDjFilter } from './limiter';
+
+// The XY filters the whole mix while a finger is on it (Remote panel option)
+const djOn = () => readStorage<boolean>('jdl:mando-dj', true);
 
 export type RemoteMessage =
   | { t: 'pad'; i: number; v: number }
   | { t: 'cc'; cc: number; v: number }
   | { t: 'xy'; x: number; y: number }
+  | { t: 'xyup' }
   | { t: 'clip'; i: number; on: boolean }
-  | { t: 'fader'; v: number };
+  | { t: 'fader'; v: number }
+  | { t: 'layer'; i: number }
+  | { t: 'glitch'; v: number };
 
 // What the studio tells the phones: the clips to show as pads (with their
 // pictures), which are on screen, and where the crossfader is
 export type StudioMessage =
-  | { t: 'clips'; items: { name: string; thumb?: string }[]; fader: number }
+  | { t: 'clips'; items: { name: string; thumb?: string }[]; fader: number; layer: number; glitch: number }
   | { t: 'live'; on: number[] }
-  | { t: 'fader'; v: number };
+  | { t: 'fader'; v: number }
+  | { t: 'mix'; layer: number; glitch: number }
+  | { t: 'pads'; names: string[] }
+  | { t: 'beat'; b: number };
 
 // The phone's clip pads and crossfader, for the Clips panel to act on
 export const REMOTE_CLIP_EVENT = 'jdl:remote-clip';
 export const REMOTE_FADER_EVENT = 'jdl:remote-fader';
+export const REMOTE_LAYER_EVENT = 'jdl:remote-layer';
+export const REMOTE_GLITCH_EVENT = 'jdl:remote-glitch';
 export type RemoteClipDetail = { i: number; on: boolean };
 
 const phones = new Set<DataConnection>();
-let greeting: (() => StudioMessage | undefined) | undefined;
-// what a phone gets as soon as it connects (the Clips panel sets it)
-export const setPhoneGreeting = (make: () => StudioMessage | undefined) => (greeting = make);
+const greetings: (() => StudioMessage | undefined)[] = [];
+// what a phone gets as soon as it connects (the clips, the pads' sounds)
+export const addPhoneGreeting = (make: () => StudioMessage | undefined) => greetings.push(make);
 export function sendToPhones(message: StudioMessage) {
   for (const phone of phones) if (phone.open) phone.send(message);
 }
@@ -57,6 +69,13 @@ export function applyRemote(message: RemoteMessage, target: EventTarget = window
   } else if (message.t === 'xy') {
     xy.x = clamp(message.x);
     xy.y = clamp(message.y);
+    if (djOn()) setDjFilter(xy.x, xy.y);
+  } else if (message.t === 'xyup') {
+    setDjFilter(null);
+  } else if (message.t === 'layer' && Number.isInteger(message.i) && message.i >= 0 && message.i < 4) {
+    target.dispatchEvent(new CustomEvent<number>(REMOTE_LAYER_EVENT, { detail: message.i }));
+  } else if (message.t === 'glitch') {
+    target.dispatchEvent(new CustomEvent<number>(REMOTE_GLITCH_EVENT, { detail: clamp(message.v) }));
   } else if (message.t === 'clip' && Number.isInteger(message.i) && message.i >= 0 && message.i < 64) {
     target.dispatchEvent(new CustomEvent<RemoteClipDetail>(REMOTE_CLIP_EVENT, { detail: { i: message.i, on: Boolean(message.on) } }));
   } else if (message.t === 'fader') {
@@ -105,8 +124,10 @@ export function setupRemote({ addTrack }: { addTrack: (pattern: string) => void 
     peer.on('connection', (connection) => {
       connection.on('open', () => {
         phones.add(connection);
-        const hello = greeting?.();
-        if (hello) connection.send(hello);
+        for (const make of greetings) {
+          const hello = make();
+          if (hello) connection.send(hello);
+        }
         render();
         toast(t('remoteJoined'));
       });
@@ -137,6 +158,13 @@ export function setupRemote({ addTrack }: { addTrack: (pattern: string) => void 
     status.textContent = '';
     render();
   };
+
+  const djBox = document.querySelector<HTMLInputElement>('#remote-dj')!;
+  djBox.checked = djOn();
+  djBox.addEventListener('change', () => {
+    writeStorage('jdl:mando-dj', djBox.checked);
+    if (!djBox.checked) setDjFilter(null);
+  });
 
   onButton.addEventListener('click', () => (peer ? stop() : void start()));
   document.querySelector('#remote-example')!.addEventListener('click', () => addTrack(XY_EXAMPLE));

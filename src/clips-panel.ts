@@ -3,7 +3,7 @@
 // archives that downloads footage into the pool.
 import { setIcon } from './icon';
 import { heardCycle } from './cycle-clock';
-import { REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, sendToPhones, setPhoneGreeting, type RemoteClipDetail, type StudioMessage } from './remote';
+import { REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, REMOTE_GLITCH_EVENT, REMOTE_LAYER_EVENT, addPhoneGreeting, sendToPhones, type RemoteClipDetail, type StudioMessage } from './remote';
 import { keepingFocus } from './a11y';
 import { download, resolve, resolveLink, search, MAX_BYTES, SUGGESTIONS, type Found, type SourceId } from './clip-search';
 import { openViewer, type ViewerItem } from './clip-viewer';
@@ -601,9 +601,26 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
         return { name: pool.length > 1 ? `${clip.name}:${pool.indexOf(clip)}` : clip.name, thumb: clip.thumb };
       }),
       fader: Number(fader.value),
+      layer: targetLayer,
+      glitch: Number(glitch.value),
     };
   };
-  setPhoneGreeting(phoneClips);
+  addPhoneGreeting(phoneClips);
+  // the layer the pads fire on and the glitch, both ways
+  const tellMix = () => sendToPhones({ t: 'mix', layer: targetLayer, glitch: Number(glitch.value) });
+  rows.addEventListener('click', tellMix);
+  glitch.addEventListener('input', tellMix);
+  fader.addEventListener('input', tellMix);
+  window.addEventListener(REMOTE_LAYER_EVENT, (event) => {
+    targetLayer = (event as CustomEvent<number>).detail;
+    saveMix();
+    renderMixer();
+  });
+  window.addEventListener(REMOTE_GLITCH_EVENT, (event) => {
+    glitch.value = String((event as CustomEvent<number>).detail);
+    setGlitchAmount(Number(glitch.value));
+    writeStorage('jdl:clips-glitch', Number(glitch.value));
+  });
   onClipsChange(() => sendToPhones(phoneClips()));
   fader.addEventListener('input', () => sendToPhones({ t: 'fader', v: Number(fader.value) }));
   window.addEventListener(REMOTE_CLIP_EVENT, (event) => {

@@ -9,6 +9,7 @@ import { NOTE_EVENT, currentBend, type NoteDetail } from './midi';
 import { playedNotes } from './scale';
 import { loadedKits } from './samples';
 import { readStorage, writeStorage } from './storage';
+import { addPhoneGreeting, sendToPhones } from './remote';
 
 type Global = typeof globalThis & {
   superdough?: (value: Record<string, unknown>, time: number, duration: number) => Promise<void>;
@@ -38,6 +39,21 @@ export const freePlaySounds: { id: string; name: Localized }[] = [
 const kit = ['bd', 'sd', 'hh', 'oh', 'cp', 'rim', 'lt', 'ht'];
 const PADS_KEY = 'jdl:pads-kit';
 type PadsKit = { name: string; page: number }; // name '' = the drum kit
+
+// What each pad plays, for the phone's pads
+const DRUM_NAMES: Localized[] = [
+  { en: 'Kick', es: 'Bombo', ca: 'Bombo' },
+  { en: 'Snare', es: 'Caja', ca: 'Caixa' },
+  { en: 'Hi-hat', es: 'Charles', ca: 'Charles' },
+  { en: 'Open hat', es: 'Abierto', ca: 'Obert' },
+  { en: 'Clap', es: 'Palmas', ca: 'Palmes' },
+  { en: 'Rim', es: 'Aro', ca: 'Cércol' },
+  { en: 'Low tom', es: 'Tom grave', ca: 'Tom greu' },
+  { en: 'High tom', es: 'Tom agudo', ca: 'Tom agut' },
+];
+export function padNames(pads: PadsKit) {
+  return pads.name ? Array.from({ length: 8 }, (_, i) => `${pads.name}:${pads.page * 8 + i}`) : DRUM_NAMES.map((name) => pick(name));
+}
 
 // Which sound a pad plays: the drum kit, or sound page*8 + pad of your kit
 export function padSound(pad: number, pads: PadsKit) {
@@ -72,7 +88,12 @@ export function setupFreePlay(patternReadsKeys: () => boolean) {
     );
     pageSelect.value = String(Math.min(pads.page, Math.max(pages - 1, 0)));
   };
-  const savePads = () => writeStorage(PADS_KEY, pads);
+  const savePads = () => {
+    writeStorage(PADS_KEY, pads);
+    sendToPhones({ t: 'pads', names: padNames(pads) });
+  };
+  addPhoneGreeting(() => ({ t: 'pads', names: padNames(pads) }));
+  onLangChange(() => sendToPhones({ t: 'pads', names: padNames(pads) }));
   padsSelect.addEventListener('focus', fillPads);
   padsSelect.addEventListener('pointerdown', fillPads);
   padsSelect.addEventListener('change', () => {

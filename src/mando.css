@@ -241,3 +241,118 @@ body {
   height: 36px;
   accent-color: var(--accent);
 }
+
+/* the XY says what it does */
+.xy-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* pads: the number and the sound */
+.pad {
+  display: grid;
+  place-content: center;
+  gap: 2px;
+}
+
+.pad b {
+  font-weight: 400;
+}
+
+.pad small {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+/* the beat from the studio: the state and the XY's frame blink */
+.beat .state,
+.beat-one .state {
+  animation: beat-blink 0.25s ease-out;
+}
+
+.beat-one .xy,
+.beat-one .fader {
+  animation: beat-frame 0.3s ease-out;
+}
+
+@keyframes beat-blink {
+  from {
+    color: #fff;
+    text-shadow: 0 0 10px var(--accent);
+  }
+}
+
+@keyframes beat-frame {
+  from {
+    border-color: var(--accent);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beat .state,
+  .beat-one .state,
+  .beat-one .xy,
+  .beat-one .fader {
+    animation: none;
+  }
+}
+
+/* Video tab: layer buttons and the glitch */
+.mix {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.layers {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.layer {
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+}
+
+.layer[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.glitch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+}
+
+.glitch input {
+  flex: 1;
+  height: 32px;
+  accent-color: var(--accent);
+}
+
+.board-video {
+  grid-template-rows: minmax(0, 1fr) auto auto;
+}
+
+.mix-label {
+  color: var(--muted);
+  font-size: 12px;
+}

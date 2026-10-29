@@ -26,6 +26,16 @@ const state = document.querySelector<HTMLElement>('#state')!;
 const id = new URLSearchParams(location.search).get('id') ?? '';
 let connection: DataConnection | undefined;
 
+// Keep following a finger that slides off; a pointer the browser no longer
+// knows (it lifted already) is simply not captured
+const capture = (element: HTMLElement, pointer: number) => {
+  try {
+    element.setPointerCapture(pointer);
+  } catch {
+    // nothing to follow
+  }
+};
+
 const send = (message: RemoteMessage) => {
   if (connection?.open) connection.send(message);
 };
@@ -48,14 +58,25 @@ const moveXY = (event: PointerEvent) => {
   pending = { x, y };
 };
 area.addEventListener('pointerdown', (event) => {
-  area.setPointerCapture(event.pointerId);
+  capture(area, event.pointerId);
   area.classList.add('is-on');
   moveXY(event);
 });
 area.addEventListener('pointermove', (event) => {
   if (area.hasPointerCapture(event.pointerId)) moveXY(event);
 });
-area.addEventListener('pointerup', () => area.classList.remove('is-on'));
+const releaseXY = () => {
+  if (!area.classList.contains('is-on')) return;
+  area.classList.remove('is-on');
+  send({ t: 'xyup' });
+};
+area.addEventListener('pointerup', releaseXY);
+area.addEventListener('pointercancel', releaseXY);
+document.querySelector('#xy-hint')!.textContent = say(
+  'Filter: ← fewer highs · fewer lows → · ↑ resonance',
+  'Filtro: ← menos agudos · menos graves → · ↑ resonancia',
+  'Filtre: ← menys aguts · menys greus → · ↑ ressonància',
+);
 
 // Pads: hit on touch, several fingers at once
 const pads = document.querySelector<HTMLElement>('#pads')!;
@@ -63,7 +84,10 @@ for (let i = 0; i < 8; i++) {
   const pad = document.createElement('button');
   pad.type = 'button';
   pad.className = 'pad';
-  pad.textContent = String(i + 1);
+  const number = document.createElement('b');
+  number.textContent = String(i + 1);
+  const sound = document.createElement('small');
+  pad.append(number, sound);
   pad.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     pad.classList.add('is-on');
@@ -129,7 +153,7 @@ const showClips = (items: { name: string; thumb?: string }[]) => {
       pad.append(name);
       pad.addEventListener('pointerdown', (event) => {
         event.preventDefault();
-        pad.setPointerCapture(event.pointerId);
+        capture(pad, event.pointerId);
         pad.classList.add('is-on');
         send({ t: 'clip', i, on: true });
         navigator.vibrate?.(8);
@@ -145,10 +169,42 @@ const showClips = (items: { name: string; thumb?: string }[]) => {
     }),
   );
 };
+// Layer the pads fire on, and the glitch
+const layers = document.querySelector<HTMLElement>('#layers')!;
+const glitch = document.querySelector<HTMLInputElement>('#glitch')!;
+const layerButtons = [0, 1, 2, 3].map((i) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'layer';
+  button.textContent = String(i + 1);
+  button.setAttribute('aria-label', say(`Layer ${i + 1}`, `Capa ${i + 1}`, `Capa ${i + 1}`));
+  button.addEventListener('click', () => {
+    showMix(i, Number(glitch.value));
+    send({ t: 'layer', i });
+  });
+  return button;
+});
+layers.append(...layerButtons);
+document.querySelector('#layers-label')!.textContent = say('Layer the clips go to', 'Capa donde salen los clips', 'Capa on surten els clips');
+glitch.addEventListener('input', () => send({ t: 'glitch', v: Number(glitch.value) }));
+function showMix(layer: number, amount: number) {
+  layerButtons.forEach((button, i) => button.setAttribute('aria-pressed', String(i === layer)));
+  glitch.value = String(amount);
+}
+
 const fromStudio = (message: StudioMessage) => {
   if (message.t === 'clips') {
     showClips(message.items);
     fader.value = String(message.fader);
+    showMix(message.layer, message.glitch);
+  } else if (message.t === 'mix') showMix(message.layer, message.glitch);
+  else if (message.t === 'pads') {
+    pads.querySelectorAll('.pad small').forEach((small, i) => (small.textContent = message.names[i] ?? ''));
+  } else if (message.t === 'beat') {
+    // the whole page blinks on the beat, the first of the bar brighter
+    document.body.classList.remove('beat', 'beat-one');
+    void document.body.offsetWidth;
+    document.body.classList.add(message.b === 0 ? 'beat-one' : 'beat');
   } else if (message.t === 'fader') fader.value = String(message.v);
   else if (message.t === 'live') {
     const on = new Set(message.on);

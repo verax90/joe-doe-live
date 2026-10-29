@@ -3,6 +3,7 @@
 // blinks with each bar while it plays. Read from the audio clock, so it lands
 // with the sound, not with Strudel's look-ahead.
 import { heardCycle } from './cycle-clock';
+import { sendToPhones } from './remote';
 
 type Globals = { getAudioContext?: () => AudioContext };
 
@@ -24,6 +25,8 @@ export function setupBeat() {
   const light = (beat: number) => {
     if (beat === lit) return;
     lit = beat;
+    // the phone blinks along
+    if (beat >= 0) sendToPhones({ t: 'beat', b: beat });
     marks.forEach((mark, index) => mark.classList.toggle('is-on', index === beat));
   };
   const tick = () => {
