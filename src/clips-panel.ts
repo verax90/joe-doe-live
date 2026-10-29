@@ -4,8 +4,8 @@
 import { keepingFocus } from './a11y';
 import { download, resolve, resolveLink, search, MAX_BYTES, SUGGESTIONS, type Found, type SourceId } from './clip-search';
 import { openViewer, type ViewerItem } from './clip-viewer';
-import { addClip, allClips, clipAddress, clipName, fireIndex, liveClips, setClipRange, setGlitchAmount, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
-import { onLangChange, t } from './i18n';
+import { addClip, allClips, clearLayer, clipAddress, clipName, fireIndex, liveClips, MIX_MODES, mixer, setClipRange, setGlitchAmount, type MixMode, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
+import { onLangChange, pick, t, type Localized } from './i18n';
 import { NOTE_EVENT, type NoteDetail } from './midi';
 import { readStorage, writeStorage } from './storage';
 
@@ -21,6 +21,24 @@ const SOURCE_NAMES: Record<SourceId, string> = {
   nasa: 'NASA',
   commons: 'Wikimedia Commons',
 };
+
+const MODE_NAMES: Record<MixMode, Localized> = {
+  auto: { en: 'per the code', es: 'según el código', ca: 'segons el codi' },
+  normal: { en: 'on top', es: 'encima, tapando', ca: 'a sobre, tapant' },
+  screen: { en: 'screen (lighter)', es: 'pantalla (aclara)', ca: 'pantalla (aclareix)' },
+  add: { en: 'add (light)', es: 'suma (luz)', ca: 'suma (llum)' },
+  diff: { en: 'difference', es: 'diferencia', ca: 'diferència' },
+  mult: { en: 'multiply (darker)', es: 'multiplicar (oscurece)', ca: 'multiplicar (enfosqueix)' },
+  overlay: { en: 'overlay', es: 'superponer', ca: 'superposar' },
+  lighten: { en: 'lighten', es: 'aclarar', ca: 'aclarir' },
+  key: { en: 'key: no darks', es: 'key: sin oscuros', ca: 'key: sense foscos' },
+  dark: { en: 'key: no lights', es: 'key: sin claros', ca: 'key: sense clars' },
+  tiles: { en: 'tiles', es: 'mosaico', ca: 'mosaic' },
+  bands: { en: 'bands', es: 'franjas', ca: 'franges' },
+  cols: { en: 'columns', es: 'columnas', ca: 'columnes' },
+  half: { en: 'half and half', es: 'mitad y mitad', ca: 'meitat i meitat' },
+};
+const modeName = (mode: MixMode) => pick(MODE_NAMES[mode]);
 
 const megabytes = (bytes: number) => `${Math.max(0.1, bytes / 1024 / 1024).toFixed(bytes < 10 * 1024 * 1024 ? 1 : 0)} MB`;
 const seconds = (value?: number) => {
@@ -142,13 +160,13 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     pad.append(number, length);
     pad.addEventListener('pointerdown', (event) => {
       if (event.button !== 0) return;
-      fireIndex(index, { holdMs: undefined });
+      fireIndex(index, { layer: targetLayer });
       showClipsIfNeeded();
     });
     pad.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
-      fireIndex(index);
+      fireIndex(index, { layer: targetLayer });
       showClipsIfNeeded();
     });
 
@@ -220,6 +238,9 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     return item;
   };
 
+  // The layer pads, keys and MIDI fire on (0 is the bottom one)
+  let targetLayer = 0;
+
   // Firing a pad while another visual shows: switch to the clips, once
   let switched = false;
   const showClipsIfNeeded = () => {
@@ -251,6 +272,75 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     say(t('clipsMissing', { names: [...missingNames].join(', ') }));
     missingNames.clear();
   }, 1000);
+
+  // ── Layers: where pads, keys and MIDI fire, and how each layer mixes ──
+  const rows = document.querySelector<HTMLElement>('#clips-mixer-rows')!;
+  const savedMix = readStorage<{ target?: number; layers?: { opacity: number; mode: MixMode }[] }>('jdl:clips-mixer', {});
+  targetLayer = Math.min(3, Math.max(0, savedMix.target ?? 0));
+  savedMix.layers?.forEach((saved, i) => {
+    if (!mixer[i]) return;
+    mixer[i].opacity = Math.min(1, Math.max(0, Number(saved.opacity) || 0));
+    if (MIX_MODES.includes(saved.mode)) mixer[i].mode = saved.mode;
+  });
+  const saveMix = () => writeStorage('jdl:clips-mixer', { target: targetLayer, layers: mixer });
+  const renderMixer = () => keepingFocus(rows, renderMixerNow);
+  const renderMixerNow = () => {
+    rows.replaceChildren(
+      ...mixer.map((mix, i) => {
+        const row = document.createElement('div');
+        row.className = 'clips-mixer-row';
+        const pick = document.createElement('button');
+        pick.type = 'button';
+        pick.className = 'control clips-layer-pick';
+        pick.textContent = String(i + 1);
+        pick.setAttribute('aria-pressed', String(i === targetLayer));
+        pick.setAttribute('aria-label', t('clipsLayerPick', { n: i + 1 }));
+        pick.title = t('clipsLayerPick', { n: i + 1 });
+        pick.addEventListener('click', () => {
+          targetLayer = i;
+          saveMix();
+          renderMixer();
+        });
+        const mode = document.createElement('select');
+        mode.className = 'control clips-layer-mode';
+        mode.setAttribute('aria-label', t('clipsLayerMode', { n: i + 1 }));
+        if (i === 0) {
+          mode.append(new Option(t('clipsLayerBottom'), 'auto'));
+          mode.disabled = true;
+        } else {
+          for (const each of MIX_MODES) mode.append(new Option(modeName(each), each));
+          mode.value = mix.mode;
+        }
+        mode.addEventListener('change', () => {
+          mix.mode = mode.value as MixMode;
+          saveMix();
+        });
+        const opacity = document.createElement('input');
+        opacity.type = 'range';
+        opacity.min = '0';
+        opacity.max = '1';
+        opacity.step = '0.01';
+        opacity.value = String(mix.opacity);
+        opacity.className = 'clips-layer-opacity';
+        opacity.setAttribute('aria-label', t('clipsLayerOpacity', { n: i + 1 }));
+        opacity.addEventListener('input', () => {
+          mix.opacity = Number(opacity.value);
+          saveMix();
+        });
+        const clear = document.createElement('button');
+        clear.type = 'button';
+        clear.className = 'clip-remove';
+        clear.textContent = '×';
+        clear.setAttribute('aria-label', t('clipsLayerClear', { n: i + 1 }));
+        clear.title = t('clipsLayerClear', { n: i + 1 });
+        clear.addEventListener('click', () => clearLayer(i));
+        row.append(pick, mode, opacity, clear);
+        return row;
+      }),
+    );
+  };
+  renderMixer();
+  onLangChange(renderMixer);
 
   // Glitch: how often any hit gets a glitch at random, remembered
   const glitch = document.querySelector<HTMLInputElement>('#clips-glitch')!;
@@ -286,7 +376,7 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     if ((event.target as HTMLElement).closest('.cm-editor, input, select, textarea, [contenteditable], dialog')) return;
     if (!allClips().length) return;
     event.preventDefault();
-    fireIndex(Number(digit) - 1, event.shiftKey ? { layer: 1, fx: ['screen'] } : {});
+    fireIndex(Number(digit) - 1, { layer: event.shiftKey ? Math.min(3, targetLayer + 1) : targetLayer });
     showClipsIfNeeded();
   });
 
@@ -296,7 +386,7 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
   window.addEventListener(NOTE_EVENT, (event) => {
     if (!midiBox.checked || !allClips().length) return;
     const { note, velocity } = (event as CustomEvent<NoteDetail>).detail;
-    fireIndex(note - 36, { gain: Math.min(1, 0.35 + velocity / 127) });
+    fireIndex(note - 36, { layer: targetLayer, gain: Math.min(1, 0.35 + velocity / 127) });
     showClipsIfNeeded();
   });
 

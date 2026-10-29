@@ -464,6 +464,31 @@ export function fireIndex(index: number, hit: Hit = {}) {
   if (clip) void fire(clip, hit);
 }
 
+// The layer mixer in the panel: how solid each layer is, and how layers 2-4
+// mix with the ones under them. auto leaves it to each hit's fx; any other
+// mode replaces the hit's own way of mixing
+export type MixMode = 'auto' | 'normal' | 'screen' | 'add' | 'diff' | 'mult' | 'overlay' | 'lighten' | 'key' | 'dark' | 'tiles' | 'bands' | 'cols' | 'half';
+export const MIX_MODES: MixMode[] = ['auto', 'normal', 'screen', 'add', 'diff', 'mult', 'overlay', 'lighten', 'key', 'dark', 'tiles', 'bands', 'cols', 'half'];
+const MIXING = new Set<string>(['add', 'screen', 'diff', 'mult', 'lighten', 'overlay', 'dodge', 'hard', 'bands', 'cols', 'tiles', 'half', 'key', 'dark']);
+export const mixer = Array.from({ length: LAYERS }, () => ({ opacity: 1, mode: 'auto' as MixMode }));
+
+export function mixedFx(fx: Fx[], index: number): Fx[] {
+  const mode = mixer[index]?.mode ?? 'auto';
+  if (index === 0 || mode === 'auto') return fx;
+  const rest = fx.filter((f) => !MIXING.has(f));
+  return mode === 'normal' ? rest : [...rest, mode];
+}
+
+// Empties one layer: what was under it shows again
+export function clearLayer(index: number) {
+  const layer = layers[index];
+  if (!layer) return;
+  const element = layer.video;
+  layer.video = undefined;
+  layer.until = 0;
+  if (element && !inUse(element)) element.pause();
+}
+
 // The clips on screen now, and on which layer, for the pads to light up
 export function liveClips() {
   const now = performance.now();
@@ -588,10 +613,9 @@ function drawSliced(source: HTMLCanvasElement, now: number) {
 // Pieces of a layer: the rest is left out, so the layers under it show
 // through and two videos weave together. Tiles change on every hit; bands
 // and columns drift with time
-function clipToPieces(layer: Layer, now: number) {
-  const fx = layer.fx;
+function clipToPieces(fx: Fx[], hitAt: number, now: number) {
   if (!fx.some((f) => f === 'bands' || f === 'cols' || f === 'tiles' || f === 'half')) return;
-  let seed = Math.floor(layer.hitAt) * 7919 + 13;
+  let seed = Math.floor(hitAt) * 7919 + 13;
   const random = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
   context.beginPath();
   if (fx.includes('bands')) {
@@ -794,15 +818,17 @@ function draw(now: number) {
       layer.fallback = undefined;
     }
     const picture = renderLayer(layer, shown);
+    const mix = mixer[index];
+    const fx = mixedFx(layer.fx, index);
     context.save();
-    context.globalAlpha = layer.opacity;
-    const blend = layer.fx.map((fx) => BLENDS[fx]).find(Boolean);
+    context.globalAlpha = layer.opacity * mix.opacity;
+    const blend = fx.map((f) => BLENDS[f]).find(Boolean);
     // Layers above mix in with screen, unless they are cut into pieces: then
     // the pieces show whole, woven into the picture under them
-    const pieces = layer.fx.some((f) => f === 'bands' || f === 'cols' || f === 'tiles' || f === 'half' || f === 'key' || f === 'dark');
-    context.globalCompositeOperation = index === 0 ? 'source-over' : blend ?? (pieces ? 'source-over' : 'screen');
-    clipToPieces(layer, now);
-    const key = layer.fx.includes('key') ? 'key' : layer.fx.includes('dark') ? 'dark' : undefined;
+    const pieces = fx.some((f) => f === 'bands' || f === 'cols' || f === 'tiles' || f === 'half' || f === 'key' || f === 'dark');
+    context.globalCompositeOperation = index === 0 || mix.mode === 'normal' ? 'source-over' : blend ?? (pieces ? 'source-over' : 'screen');
+    clipToPieces(fx, layer.hitAt, now);
+    const key = fx.includes('key') ? 'key' : fx.includes('dark') ? 'dark' : undefined;
     if (key) context.filter = `url(#${ensureKeyFilters()}-${key})`;
     if (layer.fx.includes('slice')) drawSliced(picture, now);
     else context.drawImage(picture, 0, 0);
