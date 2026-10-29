@@ -3,7 +3,7 @@
 // Hydra, only PeerJS and this.
 import './mando.css';
 import type { DataConnection } from 'peerjs';
-import type { RemoteMessage } from './remote';
+import type { RemoteMessage, StudioMessage } from './remote';
 
 // Same choice as the studio: the jd-lang cookie, or the phone's language
 const code = (document.cookie.match(/jd-lang=(\w+)/)?.[1] ?? navigator.language).slice(0, 2).toLowerCase();
@@ -93,6 +93,69 @@ KNOBS.forEach((name, i) => {
   knobs.append(label);
 });
 
+// Video: the studio sends its clips; each is a pad with its picture, lit
+// while it is on screen, and the A/B crossfader of the scenes. The tab only
+// shows once the studio has clips.
+const tabs = document.querySelector<HTMLElement>('#tabs')!;
+const tabMusic = document.querySelector<HTMLButtonElement>('#tab-music')!;
+const tabVideo = document.querySelector<HTMLButtonElement>('#tab-video')!;
+const music = document.querySelector<HTMLElement>('#music')!;
+const video = document.querySelector<HTMLElement>('#video')!;
+const clips = document.querySelector<HTMLElement>('#clips')!;
+const fader = document.querySelector<HTMLInputElement>('#fader')!;
+tabMusic.textContent = say('Music', 'Música', 'Música');
+tabVideo.textContent = say('Video', 'Vídeo', 'Vídeo');
+const showTab = (onVideo: boolean) => {
+  music.hidden = onVideo;
+  video.hidden = !onVideo;
+  tabMusic.setAttribute('aria-pressed', String(!onVideo));
+  tabVideo.setAttribute('aria-pressed', String(onVideo));
+};
+tabMusic.addEventListener('click', () => showTab(false));
+tabVideo.addEventListener('click', () => showTab(true));
+fader.addEventListener('input', () => send({ t: 'fader', v: Number(fader.value) }));
+
+const showClips = (items: { name: string; thumb?: string }[]) => {
+  tabs.hidden = !items.length;
+  if (!items.length) showTab(false);
+  clips.replaceChildren(
+    ...items.map((item, i) => {
+      const pad = document.createElement('button');
+      pad.type = 'button';
+      pad.className = 'clip';
+      if (item.thumb) pad.style.backgroundImage = `url("${item.thumb}")`;
+      const name = document.createElement('span');
+      name.textContent = item.name;
+      pad.append(name);
+      pad.addEventListener('pointerdown', (event) => {
+        event.preventDefault();
+        pad.setPointerCapture(event.pointerId);
+        pad.classList.add('is-on');
+        send({ t: 'clip', i, on: true });
+        navigator.vibrate?.(8);
+      });
+      const up = () => {
+        if (!pad.classList.contains('is-on')) return;
+        pad.classList.remove('is-on');
+        send({ t: 'clip', i, on: false });
+      };
+      pad.addEventListener('pointerup', up);
+      pad.addEventListener('pointercancel', up);
+      return pad;
+    }),
+  );
+};
+const fromStudio = (message: StudioMessage) => {
+  if (message.t === 'clips') {
+    showClips(message.items);
+    fader.value = String(message.fader);
+  } else if (message.t === 'fader') fader.value = String(message.v);
+  else if (message.t === 'live') {
+    const on = new Set(message.on);
+    clips.querySelectorAll('.clip').forEach((pad, i) => pad.classList.toggle('is-live', on.has(i)));
+  }
+};
+
 // Connect, and again whenever it drops (the studio reloaded, the phone slept)
 async function connect() {
   if (!id) {
@@ -114,6 +177,7 @@ async function connect() {
       state.textContent = say('Connected', 'Conectado', 'Connectat');
       state.classList.add('is-on');
     });
+    connection.on('data', (data) => fromStudio(data as StudioMessage));
     connection.on('close', retry);
   });
   peer.on('error', retry);

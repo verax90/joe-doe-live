@@ -12,10 +12,22 @@
       <span class="brand">joe doe <b>mando</b></span>
       <span id="state" class="state">…</span>
     </header>
-    <main class="board">
+    <nav id="tabs" class="tabs" hidden>
+      <button id="tab-music" class="tab" type="button" aria-pressed="true"></button>
+      <button id="tab-video" class="tab" type="button" aria-pressed="false"></button>
+    </nav>
+    <main id="music" class="board">
       <section id="xy" class="xy" aria-label="XY"><span id="xy-dot" class="xy-dot"></span></section>
       <section id="pads" class="pads"></section>
       <section id="knobs" class="knobs"></section>
+    </main>
+    <main id="video" class="board-video" hidden>
+      <section id="clips" class="clips"></section>
+      <label class="fader">
+        <b>A</b>
+        <input id="fader" type="range" min="0" max="1" step="0.01" value="0" />
+        <b>B</b>
+      </label>
     </main>
     <script type="module" src="/src/mando.ts"></script>
   </body>

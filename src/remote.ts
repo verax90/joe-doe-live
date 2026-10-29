@@ -16,7 +16,29 @@ import { toast } from './toast';
 export type RemoteMessage =
   | { t: 'pad'; i: number; v: number }
   | { t: 'cc'; cc: number; v: number }
-  | { t: 'xy'; x: number; y: number };
+  | { t: 'xy'; x: number; y: number }
+  | { t: 'clip'; i: number; on: boolean }
+  | { t: 'fader'; v: number };
+
+// What the studio tells the phones: the clips to show as pads (with their
+// pictures), which are on screen, and where the crossfader is
+export type StudioMessage =
+  | { t: 'clips'; items: { name: string; thumb?: string }[]; fader: number }
+  | { t: 'live'; on: number[] }
+  | { t: 'fader'; v: number };
+
+// The phone's clip pads and crossfader, for the Clips panel to act on
+export const REMOTE_CLIP_EVENT = 'jdl:remote-clip';
+export const REMOTE_FADER_EVENT = 'jdl:remote-fader';
+export type RemoteClipDetail = { i: number; on: boolean };
+
+const phones = new Set<DataConnection>();
+let greeting: (() => StudioMessage | undefined) | undefined;
+// what a phone gets as soon as it connects (the Clips panel sets it)
+export const setPhoneGreeting = (make: () => StudioMessage | undefined) => (greeting = make);
+export function sendToPhones(message: StudioMessage) {
+  for (const phone of phones) if (phone.open) phone.send(message);
+}
 
 const PREFIX = 'jdl-mando-';
 const clamp = (value: number) => Math.min(1, Math.max(0, Number(value) || 0));
@@ -35,6 +57,10 @@ export function applyRemote(message: RemoteMessage, target: EventTarget = window
   } else if (message.t === 'xy') {
     xy.x = clamp(message.x);
     xy.y = clamp(message.y);
+  } else if (message.t === 'clip' && Number.isInteger(message.i) && message.i >= 0 && message.i < 64) {
+    target.dispatchEvent(new CustomEvent<RemoteClipDetail>(REMOTE_CLIP_EVENT, { detail: { i: message.i, on: Boolean(message.on) } }));
+  } else if (message.t === 'fader') {
+    target.dispatchEvent(new CustomEvent<number>(REMOTE_FADER_EVENT, { detail: clamp(message.v) }));
   }
 }
 
@@ -57,7 +83,6 @@ export function setupRemote({ addTrack }: { addTrack: (pattern: string) => void 
   writeStorage('jdl:mando-id', id);
   const link = remoteLink(location.origin, id);
   let peer: Peer | undefined;
-  const phones = new Set<DataConnection>();
 
   const render = () => {
     const on = Boolean(peer && !peer.destroyed);
@@ -80,6 +105,8 @@ export function setupRemote({ addTrack }: { addTrack: (pattern: string) => void 
     peer.on('connection', (connection) => {
       connection.on('open', () => {
         phones.add(connection);
+        const hello = greeting?.();
+        if (hello) connection.send(hello);
         render();
         toast(t('remoteJoined'));
       });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CC_EVENT, NOTE_EVENT } from './midi';
-import { applyRemote, remoteLink } from './remote';
+import { applyRemote, remoteLink, REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT } from './remote';
 
 describe('phone as controller', () => {
   const heard = () => {
@@ -35,5 +35,14 @@ describe('phone as controller', () => {
   });
   it('gives the phone a link to the controller page', () => {
     expect(remoteLink('https://live.joedoe.dev', 'abc234')).toBe('https://live.joedoe.dev/mando.html?id=abc234');
+  });
+  it('passes clip pads and the crossfader on to the Clips panel', () => {
+    const target = new EventTarget();
+    const got: unknown[] = [];
+    for (const type of [REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT]) target.addEventListener(type, (e) => got.push((e as CustomEvent).detail));
+    applyRemote({ t: 'clip', i: 2, on: true }, target);
+    applyRemote({ t: 'clip', i: -1, on: true }, target);
+    applyRemote({ t: 'fader', v: 2 }, target);
+    expect(got).toEqual([{ i: 2, on: true }, 1]);
   });
 });

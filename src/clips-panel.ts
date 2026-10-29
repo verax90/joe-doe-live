@@ -3,6 +3,7 @@
 // archives that downloads footage into the pool.
 import { setIcon } from './icon';
 import { heardCycle } from './cycle-clock';
+import { REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, sendToPhones, setPhoneGreeting, type RemoteClipDetail, type StudioMessage } from './remote';
 import { keepingFocus } from './a11y';
 import { download, resolve, resolveLink, search, MAX_BYTES, SUGGESTIONS, type Found, type SourceId } from './clip-search';
 import { openViewer, type ViewerItem } from './clip-viewer';
@@ -588,6 +589,34 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
   });
   showLearn();
 
+  // The phone as controller (remote.ts) gets the clips as pads, with their
+  // pictures, and the crossfader; what it plays comes back here
+  const PHONE_PADS = 16;
+  const phoneClips = (): StudioMessage => {
+    const clips = allClips().slice(0, PHONE_PADS);
+    return {
+      t: 'clips',
+      items: clips.map((clip) => {
+        const pool = allClips().filter((other) => other.name === clip.name);
+        return { name: pool.length > 1 ? `${clip.name}:${pool.indexOf(clip)}` : clip.name, thumb: clip.thumb };
+      }),
+      fader: Number(fader.value),
+    };
+  };
+  setPhoneGreeting(phoneClips);
+  onClipsChange(() => sendToPhones(phoneClips()));
+  fader.addEventListener('input', () => sendToPhones({ t: 'fader', v: Number(fader.value) }));
+  window.addEventListener(REMOTE_CLIP_EVENT, (event) => {
+    const { i, on } = (event as CustomEvent<RemoteClipDetail>).detail;
+    if (i >= allClips().length) return;
+    if (on) press(`phone-${i}`, i, { layer: targetLayer });
+    else letGo(`phone-${i}`);
+  });
+  window.addEventListener(REMOTE_FADER_EVENT, (event) => {
+    fader.value = String((event as CustomEvent<number>).detail);
+    applyFader();
+  });
+
   // The pads of the clips on screen light up, with their layer
   let lastLive = '';
   setInterval(() => {
@@ -595,6 +624,8 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     const key = [...live].join();
     if (key === lastLive) return;
     lastLive = key;
+    const clips = allClips();
+    sendToPhones({ t: 'live', on: clips.flatMap((clip, i) => (live.has(clip.id) ? [i] : [])) });
     for (const item of list.querySelectorAll<HTMLElement>('.clip')) {
       const layer = live.get(item.dataset.clip ?? '');
       item.classList.toggle('is-live', layer !== undefined);
