@@ -5,11 +5,10 @@
 // only GET and HEAD, ranges kept so the video can seek. The same job as
 // worker/ia-proxy.js and the Vite middleware in development.
 //   /ia/dn600203.us.archive.org/0/items/DuckandC1951/DuckandC1951_512kb.mp4
-export const config = { runtime: 'edge' };
 
 const ALLOWED_HOST = /^(([a-z0-9-]+\.)*archive\.org|images-assets\.nasa\.gov)$/;
 
-export default async function handler(request) {
+async function handler(request) {
   if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
   const path = new URL(request.url).searchParams.get('p') ?? '';
   const match = path.match(/^([^/]+)(\/.+)$/);
@@ -39,3 +38,8 @@ export default async function handler(request) {
   out.set('cache-control', upstream.ok ? 'public, max-age=86400' : 'no-store');
   return new Response(upstream.body, { status: upstream.status, headers: out });
 }
+
+// A Node function, not an edge one: the archive turns away the edge network
+// (460, 400) but not the regular servers
+export const GET = handler;
+export const HEAD = handler;
