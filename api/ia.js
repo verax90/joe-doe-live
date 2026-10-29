@@ -14,15 +14,22 @@ export default async function handler(request) {
   const path = new URL(request.url).searchParams.get('p') ?? '';
   const match = path.match(/^([^/]+)(\/.+)$/);
   if (!match || !ALLOWED_HOST.test(match[1])) return new Response('Not found', { status: 404 });
-  const headers = new Headers();
+  // the archive turns away anonymous requests from cloud servers (460):
+  // say who asks
+  const headers = new Headers({ 'user-agent': 'joedoe-live/1.0 (+https://live.joedoe.dev; video clips for live coding)' });
   const range = request.headers.get('range');
   if (range) headers.set('range', range);
-  const upstream = await fetch(`https://${match[1]}${match[2]}`, { method: request.method, headers, redirect: 'follow' });
+  const get = (url) => fetch(url, { method: request.method, headers, redirect: 'follow' });
+  let upstream = await get(`https://${match[1]}${match[2]}`);
+  // a storage node that still says no: the same file by its public address
+  const item = match[2].match(/^\/\d+\/items\/(.+)$/);
+  if (!upstream.ok && item) upstream = await get(`https://archive.org/download/${item[1]}`);
   const out = new Headers();
   for (const name of ['content-type', 'content-length', 'content-range', 'accept-ranges', 'last-modified', 'etag']) {
     const value = upstream.headers.get(name);
     if (value) out.set(name, value);
   }
-  out.set('cache-control', 'public, max-age=86400');
+  // a day for the videos; a refusal is not kept, the next try asks again
+  out.set('cache-control', upstream.ok ? 'public, max-age=86400' : 'no-store');
   return new Response(upstream.body, { status: upstream.status, headers: out });
 }
