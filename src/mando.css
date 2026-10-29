@@ -356,3 +356,42 @@ body {
   color: var(--muted);
   font-size: 12px;
 }
+
+/* Play, Stop and Tap, always on top */
+.transport {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1.2fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.t-button {
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--fg);
+  font: inherit;
+  touch-action: none;
+}
+
+.t-button:active {
+  transform: scale(0.96);
+}
+
+#t-play {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+#t-play.is-on {
+  background: none;
+  color: var(--accent);
+}
+
+.t-tap small {
+  color: var(--muted);
+  font-size: 10px;
+}

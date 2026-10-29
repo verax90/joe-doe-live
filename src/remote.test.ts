@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CC_EVENT, NOTE_EVENT } from './midi';
-import { applyRemote, remoteLink, REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, REMOTE_GLITCH_EVENT, REMOTE_LAYER_EVENT } from './remote';
+import { applyRemote, remoteLink, REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, REMOTE_GLITCH_EVENT, REMOTE_LAYER_EVENT, REMOTE_TRANSPORT_EVENT } from './remote';
 
 describe('phone as controller', () => {
   const heard = () => {
@@ -53,5 +53,12 @@ describe('phone as controller', () => {
     applyRemote({ t: 'layer', i: 4 }, target);
     applyRemote({ t: 'glitch', v: -1 }, target);
     expect(got).toEqual([3, 0]);
+  });
+  it('passes Play, Stop and Tap on', () => {
+    const target = new EventTarget();
+    const got: unknown[] = [];
+    target.addEventListener(REMOTE_TRANSPORT_EVENT, (e) => got.push((e as CustomEvent).detail));
+    for (const t of ['play', 'stop', 'tap'] as const) applyRemote({ t }, target);
+    expect(got).toEqual(['play', 'stop', 'tap']);
   });
 });

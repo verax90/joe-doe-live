@@ -192,7 +192,32 @@ function showMix(layer: number, amount: number) {
   glitch.value = String(amount);
 }
 
+// Play, Stop and Tap, with the studio's state and tempo
+const tPlay = document.querySelector<HTMLButtonElement>('#t-play')!;
+const tStop = document.querySelector<HTMLButtonElement>('#t-stop')!;
+const tTap = document.querySelector<HTMLButtonElement>('#t-tap')!;
+const tBpm = document.querySelector<HTMLElement>('#t-bpm')!;
+tPlay.textContent = '▶ Play';
+tStop.textContent = '■ Stop';
+for (const [button, t] of [
+  [tPlay, 'play'],
+  [tStop, 'stop'],
+  [tTap, 'tap'],
+] as const) {
+  button.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    send({ t });
+    navigator.vibrate?.(8);
+  });
+}
+
 const fromStudio = (message: StudioMessage) => {
+  if (message.t === 'transport') {
+    tPlay.classList.toggle('is-on', message.playing);
+    tPlay.textContent = message.playing ? say('▶ Playing · apply', '▶ Sonando · aplicar', '▶ Sonant · aplicar') : '▶ Play';
+    tBpm.textContent = message.bpm ? String(Math.round(message.bpm)) : '–';
+    return;
+  }
   if (message.t === 'clips') {
     showClips(message.items);
     fader.value = String(message.fader);

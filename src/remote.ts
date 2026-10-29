@@ -25,7 +25,10 @@ export type RemoteMessage =
   | { t: 'clip'; i: number; on: boolean }
   | { t: 'fader'; v: number }
   | { t: 'layer'; i: number }
-  | { t: 'glitch'; v: number };
+  | { t: 'glitch'; v: number }
+  | { t: 'play' }
+  | { t: 'stop' }
+  | { t: 'tap' };
 
 // What the studio tells the phones: the clips to show as pads (with their
 // pictures), which are on screen, and where the crossfader is
@@ -35,13 +38,16 @@ export type StudioMessage =
   | { t: 'fader'; v: number }
   | { t: 'mix'; layer: number; glitch: number }
   | { t: 'pads'; names: string[] }
-  | { t: 'beat'; b: number };
+  | { t: 'beat'; b: number }
+  | { t: 'transport'; playing: boolean; bpm: number };
 
 // The phone's clip pads and crossfader, for the Clips panel to act on
 export const REMOTE_CLIP_EVENT = 'jdl:remote-clip';
 export const REMOTE_FADER_EVENT = 'jdl:remote-fader';
 export const REMOTE_LAYER_EVENT = 'jdl:remote-layer';
 export const REMOTE_GLITCH_EVENT = 'jdl:remote-glitch';
+// Play, Stop and Tap from the phone: the studio presses its own buttons
+export const REMOTE_TRANSPORT_EVENT = 'jdl:remote-transport';
 export type RemoteClipDetail = { i: number; on: boolean };
 
 const phones = new Set<DataConnection>();
@@ -74,6 +80,8 @@ export function applyRemote(message: RemoteMessage, target: EventTarget = window
     setDjFilter(null);
   } else if (message.t === 'layer' && Number.isInteger(message.i) && message.i >= 0 && message.i < 4) {
     target.dispatchEvent(new CustomEvent<number>(REMOTE_LAYER_EVENT, { detail: message.i }));
+  } else if (message.t === 'play' || message.t === 'stop' || message.t === 'tap') {
+    target.dispatchEvent(new CustomEvent<string>(REMOTE_TRANSPORT_EVENT, { detail: message.t }));
   } else if (message.t === 'glitch') {
     target.dispatchEvent(new CustomEvent<number>(REMOTE_GLITCH_EVENT, { detail: clamp(message.v) }));
   } else if (message.t === 'clip' && Number.isInteger(message.i) && message.i >= 0 && message.i < 64) {
@@ -158,6 +166,28 @@ export function setupRemote({ addTrack }: { addTrack: (pattern: string) => void 
     status.textContent = '';
     render();
   };
+
+  // Play, Stop and Tap from the phone press the studio's own buttons; the
+  // phone hears back whether it plays and at what tempo
+  window.addEventListener(REMOTE_TRANSPORT_EVENT, (event) => {
+    const which = (event as CustomEvent<string>).detail;
+    document.querySelector<HTMLButtonElement>(`#${which}`)?.click();
+  });
+  const playButton = document.querySelector<HTMLButtonElement>('#play')!;
+  const bpmInput = document.querySelector<HTMLInputElement>('#bpm')!;
+  const transport = (): StudioMessage => ({ t: 'transport', playing: playButton.dataset.state !== 'stopped', bpm: Number(bpmInput.value) || 0 });
+  let lastTransport = '';
+  const tellTransport = () => {
+    const now = transport();
+    const key = JSON.stringify(now);
+    if (key === lastTransport) return;
+    lastTransport = key;
+    sendToPhones(now);
+  };
+  addPhoneGreeting(transport);
+  new MutationObserver(tellTransport).observe(playButton, { attributes: true, attributeFilter: ['data-state'] });
+  // the tempo changes by typing, Tap, a pattern's setcps: a light check
+  window.setInterval(tellTransport, 500);
 
   const djBox = document.querySelector<HTMLInputElement>('#remote-dj')!;
   djBox.checked = djOn();
