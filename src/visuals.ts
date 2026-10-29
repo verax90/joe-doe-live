@@ -3,6 +3,7 @@
 // - bass(), mid(), high(), level() listen to the audio (the pattern needs .analyze(1)).
 
 import { attachAscii } from './ascii';
+import { attachClips } from './clips';
 import { stopRidges } from './ridges';
 import { connectSource } from './video';
 import { withVj } from './vj';
@@ -10,7 +11,8 @@ import type { Localized } from './i18n';
 
 // camera: the visual uses s0 (the webcam, or the video or tab picked in the
 // Video panel); it is switched on only while picked
-export type Visual = { id: string; name: Localized; code: string; camera?: boolean };
+// clips: shows the clips (s2), fired from patterns with .video() or the pads
+export type Visual = { id: string; name: Localized; code: string; camera?: boolean; clips?: boolean };
 
 export const CODE_VISUAL = 'code';
 export const AUTO_VISUAL = 'auto';
@@ -398,6 +400,72 @@ src(s1)
   .blend(src(o0), 0.5)
   .out()`,
   },
+  {
+    id: 'clips',
+    name: { en: 'Clips', es: 'Clips', ca: 'Clips' },
+    clips: true,
+    code: `src(s2)
+  .out()`,
+  },
+  {
+    id: 'clips-bass',
+    name: { en: 'Clips (warp on the bass)', es: 'Clips (deformados con graves)', ca: 'Clips (deformats amb greus)' },
+    clips: true,
+    code: `src(s2)
+  .modulate(noise(3, 0.2), () => bass() * 0.25)
+  .scale(() => 1 + bass() * 0.12)
+  .out()`,
+  },
+  {
+    id: 'clips-vhs',
+    name: { en: 'Clips (VHS)', es: 'Clips (VHS)', ca: 'Clips (VHS)' },
+    clips: true,
+    code: `src(s2)
+  .modulate(noise(3, 0.2), 0.012)
+  .add(src(s2).scrollX(() => 0.004 + high() * 0.02).color(1, 0, 0.2), 0.4)
+  .add(osc(300, 0, 0).rotate(Math.PI / 2).thresh(0.5).color(0.1, 0.1, 0.1), -1)
+  .scrollY(H("<0 0 0 0.03>"))
+  .out()`,
+  },
+  {
+    id: 'clips-trails',
+    name: { en: 'Clips (trails)', es: 'Clips (estela)', ca: 'Clips (estela)' },
+    clips: true,
+    code: `src(s2)
+  .blend(src(o0).scale(1.01), () => 0.55 + mid() * 0.35)
+  .out()`,
+  },
+  {
+    id: 'clips-kaleid',
+    name: { en: 'Clips (kaleidoscope)', es: 'Clips (caleidoscopio)', ca: 'Clips (calidoscopi)' },
+    clips: true,
+    code: `src(s2)
+  .kaleid(H("<4 6 8 3>"))
+  .rotate(0, 0.05)
+  .out()`,
+  },
+  {
+    id: 'clips-tint',
+    name: { en: 'Clips (theme colour, posterised)', es: 'Clips (color del tema, posterizados)', ca: 'Clips (color del tema, posteritzats)' },
+    clips: true,
+    code: `src(s2)
+  .saturate(0)
+  .posterize(4, 0.6)
+  .color(...tint(1))
+  .contrast(() => 1.2 + level() * 0.6)
+  .out()`,
+  },
+  {
+    id: 'clips-cam',
+    name: { en: 'Clips over the webcam', es: 'Clips sobre la webcam', ca: 'Clips sobre la webcam' },
+    clips: true,
+    camera: true,
+    code: `src(s0)
+  .saturate(0.2)
+  .color(...tint(0.8))
+  .blend(src(s2), () => 0.5 + bass() * 0.5)
+  .out()`,
+  },
   { id: 'ninguno', name: { en: 'No visuals', es: 'Sin visuales', ca: 'Sense visuals' }, code: `solid(0, 0, 0, 0).out()` },
 ];
 
@@ -537,7 +605,7 @@ function stopAuto() {
 
 function startAuto() {
   // not the webcam ones, nor those that wait for a controller (Touch: the TouchMe)
-  const pool = visuals.filter((v) => v.code && !v.camera && !['ninguno', 'tacto', 'tacto-ondas', 'tacto-chispas', 'tacto-latido', 'voz', 'voz-formas'].includes(v.id));
+  const pool = visuals.filter((v) => v.code && !v.camera && !v.clips && !['ninguno', 'tacto', 'tacto-ondas', 'tacto-chispas', 'tacto-latido', 'voz', 'voz-formas'].includes(v.id));
   const step = () => {
     const cycles = clock();
     return cycles === null ? Math.floor(performance.now() / 1000 / AUTO_SECONDS) : Math.floor(cycles / AUTO_BARS);
@@ -566,6 +634,8 @@ export async function applyVisual(id: string) {
   // hush() in a pattern resets both, so they are set again on every visual
   capFrameRate();
   attachAscii(hydra);
+  // The clips canvas is always s2, also for src(s2) in your own Hydra code
+  attachClips();
   if (visual.id === CODE_VISUAL) return;
   if (visual.id === AUTO_VISUAL) {
     connectSource(false);

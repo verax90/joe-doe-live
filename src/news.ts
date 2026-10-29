@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-10-29-clips',
+    title: L('Clips: footage played like samples', 'Clips: vídeo tocado como samples', 'Clips: vídeo tocat com a samples'),
+    text: L(
+      'Video → Clips: s("tele*4").video() cuts on each hit, with chance and effects per hit; Find brings odd old films, VHS tapes and NASA footage',
+      'Vídeo → Clips: s("tele*4").video() corta en cada golpe, con azar y efectos por golpe; Buscar trae películas antiguas raras, cintas VHS y la NASA',
+      'Vídeo → Clips: s("tele*4").video() talla a cada cop, amb atzar i efectes per cop; Cercar porta pel·lícules antigues rares, cintes VHS i la NASA',
+    ),
+    go: [{ click: '#toggle-video' }, { click: '[aria-controls="video-tab-clips"]' }],
+  },
+  {
     id: '2026-10-10-transport',
     title: L('Play and Stop from a controller', 'Play y Stop desde un mando', "Play i Stop des d'un comandament"),
     text: L('MIDI Start and Stop press Play and Stop: the Miyoo console, a drum machine…', 'Start y Stop por MIDI pulsan Play y Stop: la consola Miyoo, una caja de ritmos…', 'Start i Stop per MIDI premen Play i Stop: la consola Miyoo, una caixa de ritmes…'),

@@ -2697,3 +2697,259 @@ body:has(canvas.scope:not([hidden])) .overlay {
     width: 2.5rem;
   }
 }
+
+/* Clips (clips-panel.ts): the Video panel is wider for the pads and results */
+#video.panel {
+  width: min(26rem, 94vw);
+}
+
+#video.is-dropping {
+  outline: 2px dashed var(--accent);
+  outline-offset: -6px;
+}
+
+/* Four tabs: two rows of two when they do not fit in one */
+@media (max-width: 40rem) {
+  #video .panel-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-radius: 1.1rem;
+  }
+}
+
+.clips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.6rem;
+  margin: 0.75rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clips-results {
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+}
+
+.clip {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.clip-pad,
+.clip-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  background: var(--bg-elevated) center / cover no-repeat;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), transform 0.08s var(--ease);
+}
+
+.clip-preview {
+  object-fit: cover;
+  cursor: default;
+}
+
+.clip-pad:hover,
+.clip-pad:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.clip-pad:active {
+  transform: scale(0.96);
+}
+
+.clip-pad:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.clip-number,
+.clip-length {
+  position: absolute;
+  bottom: 0.25rem;
+  padding: 0 0.3rem;
+  border-radius: 0.25rem;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.clip-number {
+  left: 0.25rem;
+  font-weight: 600;
+}
+
+.clip-length {
+  right: 0.25rem;
+}
+
+.clip-length:empty {
+  display: none;
+}
+
+.clip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.clip-name {
+  flex: 0 1 auto;
+  field-sizing: content;
+  min-width: 3ch;
+  max-width: 100%;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid transparent;
+  border-radius: 0.3rem;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.clip-name:hover,
+.clip-name:focus {
+  border-color: var(--line);
+  outline: none;
+  background: var(--bg-elevated);
+}
+
+.clip-tag {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.clip-remove {
+  flex: none;
+  margin-left: auto;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: none;
+  border-radius: 0.3rem;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.clip-remove:hover,
+.clip-remove:focus-visible {
+  color: var(--danger);
+  outline: 1px solid var(--danger);
+}
+
+.clip-credit,
+.clip-title {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clip-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: var(--fg);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.clip-credit:hover,
+.clip-title:hover {
+  color: var(--accent);
+}
+
+.clip-take {
+  height: 1.8rem;
+  font-size: 0.8rem;
+}
+
+.clip-take.is-done {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.clips-empty {
+  margin: 0.5rem 0;
+}
+
+.clips-search {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.clips-search select.control {
+  max-width: 100%;
+}
+
+.clips-ideas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+}
+
+.clips-idea {
+  padding: 0.15rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.clips-idea:hover,
+.clips-idea:focus-visible {
+  border-color: var(--accent);
+  color: var(--fg);
+  outline: none;
+}
+
+.clips-surprise {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.clips-link {
+  margin-top: 0.75rem;
+}
+
+.clips-note {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+}
+
+.clips-how {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.clips-how summary {
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.clips-how-list {
+  margin: 0.4rem 0;
+  padding-left: 1.1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clip-pad:active {
+    transform: none;
+  }
+}

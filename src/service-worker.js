@@ -52,6 +52,9 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || request.headers.has('range')) return;
   const url = new URL(request.url);
   if (!url.protocol.startsWith('http')) return;
+  // Clips being downloaded (Internet Archive through /ia/, NASA, Commons) and
+  // the searches for them: always fresh, and kept by the clips' own store
+  if (url.pathname.startsWith('/ia/') || /(^|\.)(archive\.org|nasa\.gov|wikimedia\.org)$/.test(url.hostname)) return;
   // The page: the latest when online, the saved one offline (any ?lang= or #)
   if (request.mode === 'navigate') {
     event.respondWith(networkFirst(request, SHELL).catch(() => caches.match('/')));

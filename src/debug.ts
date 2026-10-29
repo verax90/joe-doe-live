@@ -5,6 +5,7 @@
 import { getLimiter } from './limiter';
 import { measureLatency } from './latency';
 import { midiStats } from './midi';
+import { clipStats } from './clips';
 
 type Scheduler = { started?: boolean };
 type Snapshot = {
@@ -74,6 +75,7 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
   let tapped: GainNode | undefined;
   const buffer = new Float32Array(2048);
   let lastNotes = midiStats.notes;
+  let lastClips = { ...clipStats };
   let quietSince: number | null = null;
   const dropouts: Snapshot[] = [];
   const history: Snapshot[] = [];
@@ -108,6 +110,12 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
       playing: Boolean(getScheduler()?.started),
     };
     lagMs = 0;
+    const clipLine = () => {
+      const frames = clipStats.frames - lastClips.frames;
+      const line = `${(clipStats.hits - lastClips.hits) * 4} hits/s · ${frames ? Math.round(((clipStats.waiting - lastClips.waiting) / frames) * 100) : 0} % frames seeking`;
+      lastClips = { ...clipStats };
+      return line;
+    };
     history.push(snap);
     if (history.length > 40) history.shift();
 
@@ -120,6 +128,7 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
       `audio         ${snap.audio}`,
       `scheduler     ${snap.playing ? 'playing' : 'stopped'}`,
       `visuals fps   ${hydraSynth?.stats?.fps ?? '–'}`,
+      `clips         ${clipLine()}`,
       `gpu           ${gpu}`,
     ].join('\n');
 

@@ -63,6 +63,8 @@ import { setupToolsPanel } from './tools';
 import { withTransition } from './transition';
 import { setupUndo } from './undo';
 import { setupVideo } from './video';
+import { setupClipPatterns } from './clips';
+import { setupClipsPanel } from './clips-panel';
 import { setupVj, vjTakesKnobs } from './vj';
 import { applyVisual, fitVisuals, setVisualClock, useBundledHydra, visuals } from './visuals';
 // A direct path: the package does not export dist/ by name
@@ -258,6 +260,16 @@ whenStrudelReady().then(() => {
   setupSampler({ editor, addTrack });
   setupLooper({ editor, addTrack });
   setupRemote({ addTrack });
+  // Clips: .video() in patterns, and the pool and the search in the Video panel
+  setupClipPatterns();
+  setupClipsPanel({
+    addTrack,
+    showClips: () => {
+      if (visuals.find((v) => v.id === visualSelect.value)?.clips) return;
+      pickVisual('clips');
+      runVisual();
+    },
+  });
   setupCycleClock(scheduler as Parameters<typeof setupCycleClock>[0]);
   setupPump(scheduler as Parameters<typeof setupPump>[0]);
 });

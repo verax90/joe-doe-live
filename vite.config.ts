@@ -24,8 +24,47 @@ function serviceWorker(): Plugin {
   };
 }
 
+// Internet Archive video files, which pages may not read directly: in
+// development Vite passes them on (online it is worker/ia-proxy.js)
+//   /ia/dn600203.us.archive.org/0/items/… -> https://dn600203.us.archive.org/0/items/…
+const IA_PATH = /^\/ia\/(([a-z0-9-]+\.)*archive\.org)(\/[^?#]*)/;
+
+function iaProxy(): Plugin {
+  return {
+    name: 'jdl-ia-proxy',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const match = req.url?.match(IA_PATH);
+        if (!match) return next();
+        try {
+          const headers: Record<string, string> = {};
+          if (typeof req.headers.range === 'string') headers.range = req.headers.range;
+          const upstream = await fetch(`https://${match[1]}${match[3]}`, { headers, redirect: 'follow' });
+          res.statusCode = upstream.status;
+          for (const name of ['content-type', 'content-length', 'content-range', 'accept-ranges']) {
+            const value = upstream.headers.get(name);
+            if (value) res.setHeader(name, value);
+          }
+          if (!upstream.body) return res.end();
+          const reader = upstream.body.getReader();
+          req.on('close', () => void reader.cancel().catch(() => undefined));
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            res.write(value);
+          }
+          res.end();
+        } catch {
+          if (!res.headersSent) res.statusCode = 502;
+          res.end();
+        }
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [serviceWorker()],
+  plugins: [serviceWorker(), iaProxy()],
   // Two pages: the studio, and the phone's controller (mando.html)
   build: { rollupOptions: { input: { main: 'index.html', mando: 'mando.html' } } },
 });
