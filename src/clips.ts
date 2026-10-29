@@ -8,9 +8,11 @@
 //   gain(0.5)   half see-through
 //   legato(0.5) gone after half the step (without it, it holds to the next hit)
 //   coarse(8)   big pixels
-//   fx("inv")   inv, bw, mirror, flip, zoom, hue, blur, freeze, strobe; several
-//               joined with _ (fx("bw_mirror")); on layers 1-3 also add, screen,
-//               diff, mult for how they mix
+//   fx("inv")   inv, bw, mirror, flip, zoom, hue, blur, freeze, strobe; broken
+//               signal and light: rgb, slice, echo, glow, flash; several joined
+//               with _ (fx("bw_mirror")). On layers 1-3, how they mix: add,
+//               screen, diff, mult, lighten, overlay, dodge, hard; and woven
+//               with the layer under: bands, cols, tiles, half
 // .video(1) draws on a layer over layer 0, up to 3. The layers are drawn on a
 // canvas that Hydra reads as s2: the Clips visuals show it, and src(s2) works
 // in your own Hydra code. Pads in the panel and MIDI notes fire clips too.
@@ -220,7 +222,16 @@ export function findClip(name: string, n?: number): Clip | undefined {
 }
 
 // fx("bw_mirror") -> ['bw', 'mirror'], unknown words left out
-export const FX = ['inv', 'bw', 'mirror', 'flip', 'zoom', 'hue', 'blur', 'freeze', 'strobe', 'add', 'screen', 'diff', 'mult'] as const;
+export const FX = [
+  // the picture
+  'inv', 'bw', 'mirror', 'flip', 'zoom', 'hue', 'blur', 'freeze', 'strobe',
+  // signal damage and light
+  'rgb', 'slice', 'echo', 'glow', 'flash',
+  // only pieces of the layer, so the one under it shows between them
+  'bands', 'cols', 'tiles', 'half',
+  // how a layer mixes with the ones under it
+  'add', 'screen', 'diff', 'mult', 'lighten', 'overlay', 'dodge', 'hard',
+] as const;
 export type Fx = (typeof FX)[number];
 export function parseFx(value: unknown): Fx[] {
   if (typeof value !== 'string') return [];
@@ -230,7 +241,16 @@ export function parseFx(value: unknown): Fx[] {
     .filter((word): word is Fx => (FX as readonly string[]).includes(word));
 }
 
-const BLENDS: Partial<Record<Fx, GlobalCompositeOperation>> = { add: 'lighter', screen: 'screen', diff: 'difference', mult: 'multiply' };
+const BLENDS: Partial<Record<Fx, GlobalCompositeOperation>> = {
+  add: 'lighter',
+  screen: 'screen',
+  diff: 'difference',
+  mult: 'multiply',
+  lighten: 'lighten',
+  overlay: 'overlay',
+  dodge: 'color-dodge',
+  hard: 'hard-light',
+};
 
 // ── The layers and the canvas Hydra reads ───────────────────────────────────
 
@@ -248,6 +268,7 @@ type Layer = {
   fx: Fx[];
   coarse: number;
   hitAt: number;
+  trail?: HTMLCanvasElement; // echo: what this layer showed, fading
 };
 const layers: Layer[] = Array.from({ length: LAYERS }, () => ({ until: 0, opacity: 1, rate: 1, fx: [], coarse: 0, hitAt: 0 }));
 
@@ -349,6 +370,7 @@ export async function fire(clip: Clip, hit: Hit = {}, ready?: Plan) {
   layer.fx = hit.fx ?? [];
   layer.coarse = hit.coarse ?? 0;
   layer.hitAt = now;
+  if (!layer.fx.includes('echo')) layer.trail = undefined;
   clipStats.hits++;
   if (!plan.seeked && plan.start !== undefined) element.currentTime = plan.start;
   const freeze = layer.fx.includes('freeze');
@@ -385,6 +407,129 @@ const FILTERS: Partial<Record<Fx, string>> = {
   hue: 'hue-rotate(180deg) saturate(1.6)',
   blur: 'blur(6px)',
 };
+
+// Scratch canvases: one layer's picture before it is mixed in, and its
+// colour channels for rgb
+const makeCanvas = () => {
+  const made = document.createElement('canvas');
+  made.width = WIDTH;
+  made.height = HEIGHT;
+  return made;
+};
+const scratch = makeCanvas();
+const scratchContext = scratch.getContext('2d')!;
+const channel = makeCanvas();
+const channelContext = channel.getContext('2d')!;
+const split = makeCanvas();
+const splitContext = split.getContext('2d')!;
+
+// One layer's picture: framing, filters, pixels, colour split and echo
+function renderLayer(layer: Layer, shown: HTMLVideoElement): HTMLCanvasElement {
+  const c = scratchContext;
+  c.save();
+  c.fillStyle = '#000';
+  c.fillRect(0, 0, WIDTH, HEIGHT);
+  c.filter = layer.fx.map((fx) => FILTERS[fx]).filter(Boolean).join(' ') || 'none';
+  const mirror = layer.fx.includes('mirror');
+  const flip = layer.fx.includes('flip');
+  if (mirror || flip) {
+    c.translate(mirror ? WIDTH : 0, flip ? HEIGHT : 0);
+    c.scale(mirror ? -1 : 1, flip ? -1 : 1);
+  }
+  const zoom = layer.fx.includes('zoom') ? 2 : 1;
+  if (layer.coarse > 1) {
+    const w = Math.max(2, Math.round(WIDTH / layer.coarse));
+    const h = Math.max(2, Math.round(HEIGHT / layer.coarse));
+    if (tiny.width !== w || tiny.height !== h) {
+      tiny.width = w;
+      tiny.height = h;
+    }
+    cover(tinyContext, shown, w, h, zoom);
+    c.imageSmoothingEnabled = false;
+    c.drawImage(tiny, 0, 0, WIDTH, HEIGHT);
+    c.imageSmoothingEnabled = true;
+  } else {
+    cover(c, shown, WIDTH, HEIGHT, zoom);
+  }
+  c.restore();
+  let picture = scratch;
+  if (layer.fx.includes('rgb')) picture = rgbSplit(picture, 6 + Math.round(Math.random() * 6));
+  if (layer.fx.includes('echo')) picture = echo(layer, picture);
+  return picture;
+}
+
+// Red, green and blue pulled apart sideways, like a badly tuned TV
+function rgbSplit(source: HTMLCanvasElement, offset: number) {
+  splitContext.globalCompositeOperation = 'source-over';
+  splitContext.fillStyle = '#000';
+  splitContext.fillRect(0, 0, WIDTH, HEIGHT);
+  (['#f00', '#0f0', '#00f'] as const).forEach((colour, i) => {
+    channelContext.globalCompositeOperation = 'source-over';
+    channelContext.drawImage(source, 0, 0);
+    channelContext.globalCompositeOperation = 'multiply';
+    channelContext.fillStyle = colour;
+    channelContext.fillRect(0, 0, WIDTH, HEIGHT);
+    splitContext.globalCompositeOperation = 'lighter';
+    splitContext.drawImage(channel, (i - 1) * offset, 0);
+  });
+  splitContext.globalCompositeOperation = 'source-over';
+  return split;
+}
+
+// Each frame laid at a quarter over the ones before: movement leaves ghosts
+function echo(layer: Layer, source: HTMLCanvasElement) {
+  if (!layer.trail) {
+    layer.trail = makeCanvas();
+    layer.trail.getContext('2d')!.drawImage(source, 0, 0);
+  }
+  const t = layer.trail.getContext('2d')!;
+  t.globalAlpha = 0.25;
+  t.drawImage(source, 0, 0);
+  t.globalAlpha = 1;
+  return layer.trail;
+}
+
+// Horizontal bands shifted sideways, new ones every 70 ms: a torn signal
+function drawSliced(source: HTMLCanvasElement, now: number) {
+  const bands = 12;
+  const height = HEIGHT / bands;
+  let seed = Math.floor(now / 70) * 9301 + 49297;
+  const random = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+  for (let i = 0; i < bands; i++) {
+    const torn = random() < 0.45;
+    const dx = torn ? (random() - 0.5) * WIDTH * 0.25 : 0;
+    context.drawImage(source, 0, i * height, WIDTH, height, dx, i * height, WIDTH, height);
+  }
+}
+
+// Pieces of a layer: the rest is left out, so the layers under it show
+// through and two videos weave together. Tiles change on every hit; bands
+// and columns drift with time
+function clipToPieces(layer: Layer, now: number) {
+  const fx = layer.fx;
+  if (!fx.some((f) => f === 'bands' || f === 'cols' || f === 'tiles' || f === 'half')) return;
+  let seed = Math.floor(layer.hitAt) * 7919 + 13;
+  const random = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+  context.beginPath();
+  if (fx.includes('bands')) {
+    const size = HEIGHT / 8;
+    const drift = ((now / 40) % (size * 2)) - size * 2;
+    for (let y = drift; y < HEIGHT; y += size * 2) context.rect(0, y, WIDTH, size);
+  } else if (fx.includes('cols')) {
+    const size = WIDTH / 10;
+    const drift = ((now / 30) % (size * 2)) - size * 2;
+    for (let x = drift; x < WIDTH; x += size * 2) context.rect(x, 0, size, HEIGHT);
+  } else if (fx.includes('tiles')) {
+    const columns = 8;
+    const rows = 5;
+    const w = WIDTH / columns;
+    const h = HEIGHT / rows;
+    for (let y = 0; y < rows; y++) for (let x = 0; x < columns; x++) if (random() < 0.5) context.rect(x * w, y * h, w + 0.5, h + 0.5);
+  } else {
+    context.rect(random() < 0.5 ? 0 : WIDTH / 2, 0, WIDTH / 2, HEIGHT);
+  }
+  context.clip();
+}
 
 let drawing = false;
 let lastFrame = performance.now();
@@ -431,31 +576,34 @@ function draw(now: number) {
       if (!inUse(layer.fallback)) layer.fallback.pause();
       layer.fallback = undefined;
     }
+    const picture = renderLayer(layer, shown);
     context.save();
     context.globalAlpha = layer.opacity;
     const blend = layer.fx.map((fx) => BLENDS[fx]).find(Boolean);
-    context.globalCompositeOperation = index === 0 ? 'source-over' : blend ?? 'screen';
-    context.filter = layer.fx.map((fx) => FILTERS[fx]).filter(Boolean).join(' ') || 'none';
-    const mirror = layer.fx.includes('mirror');
-    const flip = layer.fx.includes('flip');
-    if (mirror || flip) {
-      context.translate(mirror ? WIDTH : 0, flip ? HEIGHT : 0);
-      context.scale(mirror ? -1 : 1, flip ? -1 : 1);
+    // Layers above mix in with screen, unless they are cut into pieces: then
+    // the pieces show whole, woven into the picture under them
+    const pieces = layer.fx.some((f) => f === 'bands' || f === 'cols' || f === 'tiles' || f === 'half');
+    context.globalCompositeOperation = index === 0 ? 'source-over' : blend ?? (pieces ? 'source-over' : 'screen');
+    clipToPieces(layer, now);
+    if (layer.fx.includes('slice')) drawSliced(picture, now);
+    else context.drawImage(picture, 0, 0);
+    // Light: a blurred, brighter copy added on top, so highlights bloom
+    if (layer.fx.includes('glow')) {
+      context.globalCompositeOperation = 'lighter';
+      context.globalAlpha = layer.opacity * 0.55;
+      context.filter = 'blur(10px) brightness(1.5)';
+      context.drawImage(picture, 0, 0);
+      context.filter = 'none';
     }
-    const zoom = layer.fx.includes('zoom') ? 2 : 1;
-    if (layer.coarse > 1) {
-      const w = Math.max(2, Math.round(WIDTH / layer.coarse));
-      const h = Math.max(2, Math.round(HEIGHT / layer.coarse));
-      if (tiny.width !== w || tiny.height !== h) {
-        tiny.width = w;
-        tiny.height = h;
+    // A white burst on the hit that fades out in a fifth of a second
+    if (layer.fx.includes('flash')) {
+      const left = 1 - (now - layer.hitAt) / 200;
+      if (left > 0) {
+        context.globalCompositeOperation = 'lighter';
+        context.globalAlpha = left * 0.85;
+        context.fillStyle = '#fff';
+        context.fillRect(0, 0, WIDTH, HEIGHT);
       }
-      cover(tinyContext, shown, w, h, zoom);
-      context.imageSmoothingEnabled = false;
-      context.drawImage(tiny, 0, 0, WIDTH, HEIGHT);
-      context.imageSmoothingEnabled = true;
-    } else {
-      cover(context, shown, WIDTH, HEIGHT, zoom);
     }
     context.restore();
   });

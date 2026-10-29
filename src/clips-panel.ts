@@ -28,13 +28,27 @@ const seconds = (value?: number) => {
   return whole >= 60 ? `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}` : `${whole} s`;
 };
 
-// The pattern "Into the code" writes: each pool once, a cut every beat in
-// turn, sometimes backwards or flashing
+// The pattern "Into the code" writes: three layers at once, after the
+// stacked, broken look of Abjext's videos. Layer 0 cuts on the beat, layer 1
+// weaves pieces of another clip into it (tiles, bands, columns, halves),
+// layer 2 throws short bursts of light and pixels on top
 export function examplePattern(names: string[]) {
   const pools = [...new Set(names)].slice(0, 4);
   if (!pools.length) return '';
-  const steps = pools.length === 1 ? `${pools[0]}*4` : `<${pools.join(' ')}>*4`;
-  return `s("${steps}")\n  .sometimesBy(0.25, x => x.speed(-1))\n  .rarely(x => x.fx("<inv bw_mirror strobe>"))\n  .video()`;
+  const turn = (shift: number) => {
+    const order = [...pools.slice(shift % pools.length), ...pools.slice(0, shift % pools.length)];
+    return order.length === 1 ? order[0] : `<${order.join(' ')}>`;
+  };
+  return `s("${turn(0)}*4")
+  .sometimesBy(0.25, x => x.speed(-1))
+  .sometimesBy(0.2, x => x.fx("<rgb slice>"))
+  .video()
+$: s("${turn(1)}*2").fx("<tiles bands_echo cols half_rgb>")
+  .speed("<0.5 1>")
+  .video(1)
+$: s("[~ ${turn(2)}]*2?").fx("<add_glow dodge_flash diff_rgb>")
+  .coarse("<1 6 1 12>").legato(0.4).gain(0.8)
+  .video(2)`;
 }
 
 export function setupClipsPanel({ showClips, addTrack }: Options) {

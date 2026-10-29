@@ -456,6 +456,63 @@ src(s1)
   .out()`,
   },
   {
+    id: 'clips-feedback',
+    name: { en: 'Clips (feedback on the kick)', es: 'Clips (realimentación con el bombo)', ca: 'Clips (realimentació amb el bombo)' },
+    clips: true,
+    // The last frame, a little bigger and turned, under the new one: a tunnel
+    // that slams outwards on the kick
+    code: `src(o0)
+  .scale(() => 1.025 + bass() * 0.1)
+  .rotate(() => 0.006 + bass() * 0.04)
+  .color(0.97, 0.92, 1)
+  .blend(src(s2), () => 0.5 - bass() * 0.3)
+  .out()`,
+  },
+  {
+    id: 'clips-rgb',
+    name: { en: 'Clips (broken signal)', es: 'Clips (señal rota)', ca: 'Clips (senyal trencat)' },
+    clips: true,
+    code: `src(s2)
+  .color(1, 0, 0)
+  .add(src(s2).scrollX(() => 0.008 + bass() * 0.05).color(0, 1, 0))
+  .add(src(s2).scrollX(() => -0.008 - bass() * 0.05).color(0, 0, 1))
+  .modulate(osc(200, 0, 0).rotate(Math.PI / 2).thresh(0.97), () => high() * 0.15)
+  .scrollY(H("<0 0 0.05 0>"))
+  .out()`,
+  },
+  {
+    id: 'clips-dots',
+    name: { en: 'Clips (dot screen)', es: 'Clips (pantalla de puntos)', ca: 'Clips (pantalla de punts)' },
+    clips: true,
+    code: `src(s2)
+  .pixelate(96, 54)
+  .mult(shape(32, () => 0.55 + bass() * 0.35, 0.25).repeat(96, 54))
+  .saturate(0)
+  .color(1, 0.45, 0.15)
+  .contrast(1.4)
+  .out()`,
+  },
+  {
+    id: 'clips-static',
+    name: { en: 'Clips (out of the static)', es: 'Clips (saliendo de la estática)', ca: "Clips (sortint de l'estàtica)" },
+    clips: true,
+    code: `noise(400, 0.8)
+  .thresh(0.5, 0.2)
+  .saturate(0)
+  .blend(src(s2).contrast(1.3), () => Math.min(1, 0.25 + level() * 1.4))
+  .out()`,
+  },
+  {
+    id: 'clips-light',
+    name: { en: 'Clips (light and glow)', es: 'Clips (luz y brillo)', ca: 'Clips (llum i brillantor)' },
+    clips: true,
+    code: `src(s2)
+  .add(src(s2).luma(0.55, 0.2).scale(1.02).color(1, 0.85, 0.6), () => 0.6 + high() * 0.8)
+  .add(src(o0).scale(1.015), 0.4)
+  .brightness(() => bass() * 0.12)
+  .out()`,
+  },
+  {
     id: 'clips-cam',
     name: { en: 'Clips over the webcam', es: 'Clips sobre la webcam', ca: 'Clips sobre la webcam' },
     clips: true,
