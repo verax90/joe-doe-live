@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { archiveIdFromUrl, archiveQuery, parseArchiveSearch, parseCommonsSearch, pickArchiveFile, pickCommonsFile, pickNasaFile } from './clip-search';
-import { examplePattern } from './clips-panel';
+import { examplePattern, hitsToPattern } from './clips-panel';
 import { clipName, GLITCHES, hitFromValue, parseFx, pickFromPool, setGlitchAmount, withGlitch } from './clips';
 
 describe('clip names', () => {
@@ -138,5 +138,14 @@ describe('glitch', () => {
     expect(withGlitch(['inv'], () => 0.4)).toHaveLength(2);
     expect(withGlitch(['inv'], () => 0.6)).toEqual(['inv']);
     setGlitchAmount(0);
+  });
+});
+
+describe('pads into code', () => {
+  it('writes what was played, one bar per cycle', () => {
+    expect(hitsToPattern([{ cycle: 4, token: 'fire' }, { cycle: 4.5, token: 'aurora:1' }, { cycle: 4.625, token: 'fire' }], 4, 1)).toBe('fire ~ [aurora:1 ~ fire ~] ~');
+    expect(hitsToPattern([{ cycle: 2.01, token: 'a' }, { cycle: 3.25, token: 'b' }], 2, 2)).toBe('<\n  [a ~ ~ ~]\n  [~ b ~ ~]\n>');
+    // begun on the last beat of cycle 3: the hit after the end wraps to cycle 2
+    expect(hitsToPattern([{ cycle: 3.75, token: 'a' }, { cycle: 4.5, token: 'b' }], 2, 2)).toBe('<\n  [~ ~ b ~]\n  [~ ~ ~ a]\n>');
   });
 });

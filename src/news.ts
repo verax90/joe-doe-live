@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-10-29-projector',
+    title: L('Projector and record what you play', 'Proyector y grabar lo que tocas', 'Projector i gravar el que toques'),
+    text: L(
+      'More → Projector opens a window with only the picture for the big screen; in Clips, Record what you play turns your pad hits into a looping track',
+      'Más → Proyector abre una ventana solo con la imagen para la pantalla grande; en Clips, Grabar lo que tocas convierte tus golpes en los pads en una pista que se repite',
+      'Més → Projector obre una finestra només amb la imatge per a la pantalla gran; a Clips, Gravar el que toques converteix els teus cops als pads en una pista que es repeteix',
+    ),
+    go: [{ click: '#toggle-video' }, { click: '[aria-controls="video-tab-clips"]' }],
+  },
+  {
     id: '2026-10-29-at-hand',
     title: L('Tools at hand and the beat in the bar', 'Herramientas a mano y el pulso en la barra', 'Eines a mà i el pols a la barra'),
     text: L(

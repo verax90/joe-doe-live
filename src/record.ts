@@ -144,7 +144,7 @@ function drawCode(g: CanvasRenderingContext2D, code: string, width: number, heig
 
 // The stream caption (overlay.ts) into a frame, bottom right: name, title
 // in the display font, the site's name under them. size scales everything
-function drawCaption(g: CanvasRenderingContext2D, width: number, height: number, size: number, colours: { fg: string; muted: string; accent: string }) {
+export function drawCaption(g: CanvasRenderingContext2D, width: number, height: number, size: number, colours: { fg: string; muted: string; accent: string }) {
   const caption = overlayText();
   const margin = size * 1.6;
   g.save();
@@ -180,7 +180,7 @@ function drawCaption(g: CanvasRenderingContext2D, width: number, height: number,
   g.restore();
 }
 
-const themeColours = () => {
+export const themeColours = () => {
   const style = getComputedStyle(document.documentElement);
   return {
     accent: style.getPropertyValue('--accent').trim() || '#d6ff4b',

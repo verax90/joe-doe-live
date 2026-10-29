@@ -2,6 +2,7 @@
 // fire it, rename it to make pools, take it out), and the search of free
 // archives that downloads footage into the pool.
 import { setIcon } from './icon';
+import { heardCycle } from './cycle-clock';
 import { keepingFocus } from './a11y';
 import { download, resolve, resolveLink, search, MAX_BYTES, SUGGESTIONS, type Found, type SourceId } from './clip-search';
 import { openViewer, type ViewerItem } from './clip-viewer';
@@ -53,6 +54,34 @@ const seconds = (value?: number) => {
 // stacked, broken look of Abjext's videos. Layer 0 cuts on the beat, layer 1
 // weaves pieces of another clip into it (tiles, bands, columns, halves),
 // layer 2 throws short bursts of light and pixels on top
+// Pads played by hand, written as a pattern: each hit is a cycle position
+// (what you heard) and a clip, quantised to sixteenths, one bar per cycle.
+// start is a cycle that is a multiple of bars, so <…> lines up with the
+// cycles as they ran; a take that began mid-bar wraps its tail round to the
+// beginning, in its place.
+// A beat with nothing is ~, a beat with only its first sixteenth is the clip
+// alone, anything else is [a ~ b ~].
+export type PlayedHit = { cycle: number; token: string };
+export function hitsToPattern(hits: PlayedHit[], start: number, bars: number) {
+  const steps = Array.from({ length: bars * 16 }, () => '~');
+  for (const hit of hits) {
+    const step = Math.round((hit.cycle - start) * 16);
+    steps[((step % steps.length) + steps.length) % steps.length] = hit.token;
+  }
+  const bar = (b: number) =>
+    [0, 1, 2, 3]
+      .map((beat) => {
+        const four = steps.slice(b * 16 + beat * 4, b * 16 + beat * 4 + 4);
+        if (four.every((step) => step === '~')) return '~';
+        if (four.slice(1).every((step) => step === '~')) return four[0];
+        return `[${four.join(' ')}]`;
+      })
+      .join(' ');
+  const all = Array.from({ length: bars }, (_, b) => bar(b));
+  // one bar a line, so a long take reads without scrolling
+  return all.length === 1 ? all[0] : `<\n  [${all.join(']\n  [')}]\n>`;
+}
+
 export function examplePattern(names: string[]) {
   const pools = [...new Set(names)].slice(0, 4);
   if (!pools.length) return '';
@@ -270,6 +299,7 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
   holdBox.addEventListener('change', () => writeStorage('jdl:clips-hold', holdBox.checked));
   const pressed = new Map<string, { id: string; layer: number; shown: Promise<void> }>();
   const press = (by: string, index: number, hit: Hit) => {
+    if (take) noteHit(index, hit.layer ?? 0);
     const fired = fireIndex(index, hit);
     showClipsIfNeeded();
     if (fired) pressed.set(by, { id: fired.clip.id, layer: hit.layer ?? 0, shown: fired.shown });
@@ -280,6 +310,70 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     if (!held || !holdBox.checked) return;
     void held.shown.then(() => releaseClip(held.id, held.layer));
   };
+
+  // Record what you play: armed, the first hit starts the take on its bar;
+  // after the bars chosen, the hits become a track in the code, quantised to
+  // sixteenths, so the jam keeps going by itself
+  const recButton = document.querySelector<HTMLButtonElement>('#clips-rec')!;
+  const recBars = document.querySelector<HTMLSelectElement>('#clips-rec-bars')!;
+  // start: the first hit (to the sixteenth); the take lasts whole bars from it
+  let take: { hits: PlayedHit[]; start?: number; bars: number; layer?: number; timer: number } | undefined;
+  const heard = () => {
+    const context = (globalThis as { getAudioContext?: () => AudioContext }).getAudioContext?.();
+    return context ? heardCycle(context.currentTime) : undefined;
+  };
+  // a pool's clip by its place in it, so the take plays that very clip
+  const tokenFor = (index: number) => {
+    const clips = allClips();
+    const clip = clips[((index % clips.length) + clips.length) % clips.length];
+    const pool = clips.filter((other) => other.name === clip.name);
+    return pool.length > 1 ? `${clip.name}:${pool.indexOf(clip)}` : clip.name;
+  };
+  const showTake = () => {
+    recButton.setAttribute('aria-pressed', String(Boolean(take)));
+    recButton.classList.toggle('is-recording', Boolean(take));
+    if (!take) recButton.textContent = t('clipsRec');
+    else if (take.start === undefined) recButton.textContent = t('clipsRecArmed');
+    else {
+      const now = heard() ?? take.start;
+      recButton.textContent = t('clipsRecRunning', { bar: Math.min(take.bars, Math.floor(now - take.start) + 1), bars: take.bars });
+    }
+  };
+  const noteHit = (index: number, layer: number) => {
+    const cycle = heard();
+    if (!take || cycle === undefined || !allClips().length) return;
+    take.start ??= Math.round(cycle * 16) / 16;
+    take.layer ??= layer;
+    take.hits.push({ cycle, token: tokenFor(index) });
+  };
+  const finishTake = () => {
+    if (!take) return;
+    window.clearInterval(take.timer);
+    const done = take;
+    take = undefined;
+    showTake();
+    if (!done.hits.length || done.start === undefined) return say(t('clipsRecEmpty'));
+    const pattern = hitsToPattern(done.hits, Math.floor(done.start / done.bars) * done.bars, done.bars);
+    // backticks: Strudel reads them as mini-notation too, over several lines
+    const quote = pattern.includes('\n') ? '`' : '"';
+    addTrack(`s(${quote}${pattern}${quote}).video(${done.layer ? done.layer : ''})`);
+    say(t('clipsRecDone'));
+  };
+  recButton.addEventListener('click', () => {
+    if (take) return finishTake();
+    if (heard() === undefined) return say(t('clipsRecNeedsPlay'));
+    take = {
+      hits: [],
+      bars: Number(recBars.value) || 2,
+      timer: window.setInterval(() => {
+        if (take?.start !== undefined && (heard() ?? 0) >= take.start + take.bars) finishTake();
+        else showTake();
+      }, 100),
+    };
+    showTake();
+  });
+  onLangChange(showTake);
+  showTake();
 
   // Firing a pad while another visual shows: switch to the clips, once
   let switched = false;

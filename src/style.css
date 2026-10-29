@@ -3329,3 +3329,35 @@ body:not(.is-playing) .beat {
   width: 1em;
   height: 1em;
 }
+
+/* Record what you play (clips-panel.ts): the button and how many bars */
+.clips-rec {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0.25rem;
+}
+
+.clips-rec #clips-rec {
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.clips-rec #clips-rec::before {
+  color: var(--danger);
+  background: var(--danger);
+}
+
+#clips-rec.is-recording {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+#clips-rec.is-recording::before {
+  animation: record-pulse 1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #clips-rec.is-recording::before {
+    animation: none;
+  }
+}

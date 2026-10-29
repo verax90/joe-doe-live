@@ -116,6 +116,7 @@
             </div>
             <div class="menu-group">
               <h3 class="menu-group-title" data-i18n="menuLive">Perform</h3>
+              <button id="toggle-projector" class="menu-item" type="button" aria-pressed="false" data-icon="projector" data-i18n="projectorTitle">Projector (second screen)</button>
               <button id="toggle-set" class="menu-item" type="button" aria-pressed="false" data-icon="set" data-panel="set" data-i18n="liveSet">Live set</button>
               <button id="toggle-room" class="menu-item" type="button" aria-pressed="false" data-icon="room" data-panel="room" data-i18n="roomTitle">Live room</button>
               <button id="toggle-overlay" class="menu-item" type="button" aria-pressed="false" data-icon="overlay-panel" data-panel="overlay-panel" data-i18n="overlayTitle">Caption</button>
@@ -738,6 +739,15 @@
             <span data-i18n="clipsGlitch">Glitch</span>
             <input id="clips-glitch" type="range" min="0" max="1" step="0.01" value="0" />
           </label>
+          <div class="clips-rec">
+            <button id="clips-rec" class="control" type="button" aria-pressed="false" data-icon="record" data-i18n-title="clipsRecHint">Record what you play</button>
+            <label class="visually-hidden" for="clips-rec-bars" data-i18n="clipsRecBars">Bars</label>
+            <select id="clips-rec-bars" class="control">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="4">4</option>
+            </select>
+          </div>
           <label class="set-option"><input id="clips-hold" type="checkbox" /> <span data-i18n="clipsHold">Only while held</span></label>
           <label class="set-option"><input id="clips-midi" type="checkbox" /> <span data-i18n="clipsMidi">MIDI notes fire clips</span></label>
           <details class="clips-how">
