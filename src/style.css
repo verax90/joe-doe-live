@@ -3361,3 +3361,36 @@ body:not(.is-playing) .beat {
     animation: none;
   }
 }
+
+/* Scenes (clips-panel.ts): A — fader — B, and the MIDI link */
+.clips-fader-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clips-scene {
+  width: 2.4rem;
+  padding: 0;
+  font-weight: 700;
+}
+
+#clips-fader {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
+/* the scene the fader leans to lights up */
+.clips-scene.is-near {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#clips-fader-learn.is-linked {
+  color: var(--accent);
+}
+
+#clips-fader-learn[aria-pressed='true'] {
+  animation: apply-breathe 1.2s ease-in-out infinite;
+}

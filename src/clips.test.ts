@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { archiveIdFromUrl, archiveQuery, parseArchiveSearch, parseCommonsSearch, pickArchiveFile, pickCommonsFile, pickNasaFile } from './clip-search';
 import { examplePattern, hitsToPattern } from './clips-panel';
-import { clipName, GLITCHES, hitFromValue, parseFx, pickFromPool, setGlitchAmount, withGlitch } from './clips';
+import { blendScenes, clipName, GLITCHES, hitFromValue, parseFx, pickFromPool, setGlitchAmount, withGlitch } from './clips';
 
 describe('clip names', () => {
   it('reads well inside s("…")', () => {
@@ -147,5 +147,14 @@ describe('pads into code', () => {
     expect(hitsToPattern([{ cycle: 2.01, token: 'a' }, { cycle: 3.25, token: 'b' }], 2, 2)).toBe('<\n  [a ~ ~ ~]\n  [~ b ~ ~]\n>');
     // begun on the last beat of cycle 3: the hit after the end wraps to cycle 2
     expect(hitsToPattern([{ cycle: 3.75, token: 'a' }, { cycle: 4.5, token: 'b' }], 2, 2)).toBe('<\n  [~ ~ b ~]\n  [~ ~ ~ a]\n>');
+  });
+});
+
+describe('scenes', () => {
+  it('slides opacity and glitch, and flips the blend half way', () => {
+    const a = { layers: [{ opacity: 1, mode: 'auto' as const }, { opacity: 0, mode: 'screen' as const }], glitch: 0 };
+    const b = { layers: [{ opacity: 0.5, mode: 'auto' as const }, { opacity: 1, mode: 'key' as const }], glitch: 1 };
+    expect(blendScenes(a, b, 0.25)).toEqual({ layers: [{ opacity: 0.875, mode: 'auto' }, { opacity: 0.25, mode: 'screen' }], glitch: 0.25 });
+    expect(blendScenes(a, b, 0.75).layers[1].mode).toBe('key');
   });
 });

@@ -683,6 +683,22 @@ function clipToPieces(fx: Fx[], hitAt: number, now: number) {
 // panel adds one at random to any hit, as often as it is turned up
 export const GLITCHES: Fx[] = ['mosh', 'blocks', 'melt', 'vhs', 'stutter', 'rgb', 'slice', 'burn', 'scan'];
 let glitchAmount = 0;
+// Scenes (Clips panel): two saved mixes and a crossfader between them, as on
+// the Octatrack. Opacity and glitch slide; a layer's blend mode is a switch,
+// so it flips half way.
+export type Scene = { layers: { opacity: number; mode: MixMode }[]; glitch: number };
+export function blendScenes(a: Scene, b: Scene, x: number): Scene {
+  const at = Math.min(1, Math.max(0, x));
+  const lerp = (from: number, to: number) => from + (to - from) * at;
+  return {
+    layers: a.layers.map((layer, i) => {
+      const other = b.layers[i] ?? layer;
+      return { opacity: lerp(layer.opacity, other.opacity), mode: at < 0.5 ? layer.mode : other.mode };
+    }),
+    glitch: lerp(a.glitch, b.glitch),
+  };
+}
+
 export const setGlitchAmount = (amount: number) => (glitchAmount = Math.min(1, Math.max(0, amount)));
 export const getGlitchAmount = () => glitchAmount;
 const anyGlitch = () => GLITCHES[Math.floor(Math.random() * GLITCHES.length)];

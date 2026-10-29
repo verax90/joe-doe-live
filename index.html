@@ -739,6 +739,16 @@
             <span data-i18n="clipsGlitch">Glitch</span>
             <input id="clips-glitch" type="range" min="0" max="1" step="0.01" value="0" />
           </label>
+          <section class="clips-mixer clips-scenes" aria-labelledby="clips-scenes-title">
+            <h3 id="clips-scenes-title" class="clips-mixer-title" data-i18n="clipsScenes">Scenes</h3>
+            <p class="panel-help clips-mixer-help" data-i18n="clipsScenesHelp">A and B keep the mix as it is now; the fader goes from one to the other.</p>
+            <div class="clips-fader-row">
+              <button id="clips-scene-a" class="control clips-scene" type="button" data-i18n-title="clipsSceneSave">A</button>
+              <input id="clips-fader" type="range" min="0" max="1" step="0.01" value="0" data-i18n-label="clipsFader" aria-label="Crossfader" />
+              <button id="clips-scene-b" class="control clips-scene" type="button" data-i18n-title="clipsSceneSave">B</button>
+              <button id="clips-fader-learn" class="control control-icon" type="button" aria-pressed="false" data-icon="midi" data-i18n-label="clipsFaderLearn" data-i18n-title="clipsFaderLearn"></button>
+            </div>
+          </section>
           <div class="clips-rec">
             <button id="clips-rec" class="control" type="button" aria-pressed="false" data-icon="record" data-i18n-title="clipsRecHint">Record what you play</button>
             <label class="visually-hidden" for="clips-rec-bars" data-i18n="clipsRecBars">Bars</label>

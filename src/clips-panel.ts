@@ -7,9 +7,9 @@ import { keepingFocus } from './a11y';
 import { download, resolve, resolveLink, search, MAX_BYTES, SUGGESTIONS, type Found, type SourceId } from './clip-search';
 import { openViewer, type ViewerItem } from './clip-viewer';
 import type { Hit } from './clips';
-import { addClip, addPiece, allClips, clearLayer, clipAddress, clipName, fireIndex, liveClips, releaseClip, MIX_MODES, mixer, setClipRange, setGlitchAmount, type MixMode, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
+import { addClip, addPiece, allClips, clearLayer, clipAddress, clipName, fireIndex, liveClips, releaseClip, MIX_MODES, mixer, setClipRange, setGlitchAmount, blendScenes, type Scene, type MixMode, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
 import { onLangChange, pick, t, type Localized } from './i18n';
-import { NOTE_EVENT, NOTE_OFF_EVENT, type NoteDetail } from './midi';
+import { CC_EVENT, NOTE_EVENT, NOTE_OFF_EVENT, type CcDetail, type NoteDetail } from './midi';
 import { readStorage, writeStorage } from './storage';
 
 type Options = {
@@ -523,6 +523,70 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     setGlitchAmount(Number(glitch.value));
     writeStorage('jdl:clips-glitch', Number(glitch.value));
   });
+
+  // Scenes: A and B keep the mix as it is (opacity and blend of each layer,
+  // glitch); the crossfader slides between them. A MIDI knob can drive it:
+  // press the MIDI button, then move the knob.
+  const fader = document.querySelector<HTMLInputElement>('#clips-fader')!;
+  const learn = document.querySelector<HTMLButtonElement>('#clips-fader-learn')!;
+  const sceneButtons = { a: document.querySelector<HTMLButtonElement>('#clips-scene-a')!, b: document.querySelector<HTMLButtonElement>('#clips-scene-b')! };
+  const snapshot = (): Scene => ({ layers: mixer.map((layer) => ({ ...layer })), glitch: Number(glitch.value) });
+  const savedScenes = readStorage<{ a?: Scene; b?: Scene; at?: number; cc?: number }>('jdl:clips-scenes', {});
+  const scenes = { a: savedScenes.a ?? snapshot(), b: savedScenes.b ?? snapshot() };
+  let faderCc = savedScenes.cc;
+  let learning = false;
+  fader.value = String(savedScenes.at ?? 0);
+  const saveScenes = () => writeStorage('jdl:clips-scenes', { ...scenes, at: Number(fader.value), cc: faderCc });
+  const applyFader = () => {
+    const mix = blendScenes(scenes.a, scenes.b, Number(fader.value));
+    mix.layers.forEach((layer, i) => mixer[i] && Object.assign(mixer[i], layer));
+    setGlitchAmount(mix.glitch);
+    glitch.value = String(mix.glitch);
+    writeStorage('jdl:clips-glitch', mix.glitch);
+    showNear();
+    renderMixer();
+    saveMix();
+    saveScenes();
+  };
+  for (const [which, button] of Object.entries(sceneButtons) as ['a' | 'b', HTMLButtonElement][]) {
+    button.addEventListener('click', () => {
+      scenes[which] = snapshot();
+      // what you see now is that scene: the fader goes to its end
+      fader.value = which === 'a' ? '0' : '1';
+      showNear();
+      saveScenes();
+      say(t('clipsSceneSaved', { scene: which.toUpperCase() }));
+    });
+  }
+  function showNear() {
+    sceneButtons.a.classList.toggle('is-near', Number(fader.value) < 0.5);
+    sceneButtons.b.classList.toggle('is-near', Number(fader.value) >= 0.5);
+  }
+  showNear();
+  fader.addEventListener('input', applyFader);
+  const showLearn = () => {
+    learn.setAttribute('aria-pressed', String(learning));
+    learn.classList.toggle('is-linked', faderCc !== undefined);
+  };
+  learn.addEventListener('click', () => {
+    learning = !learning;
+    showLearn();
+    say(learning ? t('clipsFaderLearning') : '');
+  });
+  window.addEventListener(CC_EVENT, (event) => {
+    const { cc, value } = (event as CustomEvent<CcDetail>).detail;
+    if (learning) {
+      faderCc = cc;
+      learning = false;
+      showLearn();
+      saveScenes();
+      say(t('clipsFaderLinked', { cc }));
+    }
+    if (cc !== faderCc) return;
+    fader.value = String(value);
+    applyFader();
+  });
+  showLearn();
 
   // The pads of the clips on screen light up, with their layer
   let lastLive = '';
