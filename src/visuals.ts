@@ -513,6 +513,28 @@ src(s1)
   .out()`,
   },
   {
+    id: 'clips-mosh',
+    name: { en: 'Clips (datamosh)', es: 'Clips (datamosh)', ca: 'Clips (datamosh)' },
+    clips: true,
+    // The last frame pushed around by the new picture's own shapes, refreshed
+    // whole only once a bar: shots melt into each other, then snap back
+    code: `src(o0)
+  .modulate(src(s2).add(src(o0), -1), () => 0.02 + bass() * 0.06)
+  .blend(src(s2), H("<[0.9 0.04 0.04 0.04]>"))
+  .out()`,
+  },
+  {
+    id: 'clips-crash',
+    name: { en: 'Clips (crashing on the highs)', es: 'Clips (petando con los agudos)', ca: 'Clips (petant amb els aguts)' },
+    clips: true,
+    code: `src(s2)
+  .modulate(osc(6, 0, 0).rotate(Math.PI / 2).pixelate(1, 12).posterize(3, 1), () => high() * 0.35)
+  .pixelate(() => (high() > 0.35 ? 40 : 2000), () => (high() > 0.35 ? 22 : 2000))
+  .posterize(() => (bass() > 0.5 ? 3 : 32), 0.8)
+  .scrollY(() => (Math.random() < high() * 0.3 ? Math.random() * 0.2 : 0))
+  .out()`,
+  },
+  {
     id: 'clips-cam',
     name: { en: 'Clips over the webcam', es: 'Clips sobre la webcam', ca: 'Clips sobre la webcam' },
     clips: true,

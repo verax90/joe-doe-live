@@ -3,7 +3,7 @@
 // archives that downloads footage into the pool.
 import { keepingFocus } from './a11y';
 import { download, resolve, resolveLink, search, MAX_BYTES, SUGGESTIONS, type Found, type SourceId } from './clip-search';
-import { addClip, allClips, clipName, fireIndex, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
+import { addClip, allClips, clipName, fireIndex, setGlitchAmount, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
 import { onLangChange, t } from './i18n';
 import { NOTE_EVENT, type NoteDetail } from './midi';
 import { readStorage, writeStorage } from './storage';
@@ -41,12 +41,12 @@ export function examplePattern(names: string[]) {
   };
   return `s("${turn(0)}*4")
   .sometimesBy(0.25, x => x.speed(-1))
-  .sometimesBy(0.2, x => x.fx("<rgb slice>"))
+  .sometimesBy(0.3, x => x.fx("<mosh vhs rgb blocks>"))
   .video()
 $: s("${turn(1)}*2").fx("<tiles bands_echo cols half_rgb>")
   .speed("<0.5 1>")
   .video(1)
-$: s("[~ ${turn(2)}]*2?").fx("<add_glow dodge_flash diff_rgb>")
+$: s("[~ ${turn(2)}]*2?").fx("<add_glow dodge_flash diff_melt screen_stutter>")
   .coarse("<1 6 1 12>").legato(0.4).gain(0.8)
   .video(2)`;
 }
@@ -219,6 +219,15 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     say(t('clipsMissing', { names: [...missingNames].join(', ') }));
     missingNames.clear();
   }, 1000);
+
+  // Glitch: how often any hit gets a glitch at random, remembered
+  const glitch = document.querySelector<HTMLInputElement>('#clips-glitch')!;
+  glitch.value = String(readStorage<number>('jdl:clips-glitch', 0));
+  setGlitchAmount(Number(glitch.value));
+  glitch.addEventListener('input', () => {
+    setGlitchAmount(Number(glitch.value));
+    writeStorage('jdl:clips-glitch', Number(glitch.value));
+  });
 
   // ── MIDI: note 36 (C1, the MPK's first pad) is the first clip ──────────
   midiBox.checked = readStorage<boolean>('jdl:clips-midi', false);

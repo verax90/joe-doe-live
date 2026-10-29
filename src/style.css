@@ -2953,3 +2953,7 @@ body:has(canvas.scope:not([hidden])) .overlay {
     transform: none;
   }
 }
+
+.clips-glitch {
+  margin: 0.75rem 0;
+}

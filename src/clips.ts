@@ -229,6 +229,9 @@ export const FX = [
   'rgb', 'slice', 'echo', 'glow', 'flash',
   // only pieces of the layer, so the one under it shows between them
   'bands', 'cols', 'tiles', 'half',
+  // glitches: datamosh, displaced blocks, pixel-sort drips, VHS tracking,
+  // a stuttering loop, burnt colour, scan lines; glitch picks one per hit
+  'mosh', 'blocks', 'melt', 'vhs', 'stutter', 'burn', 'scan', 'glitch',
   // how a layer mixes with the ones under it
   'add', 'screen', 'diff', 'mult', 'lighten', 'overlay', 'dodge', 'hard',
 ] as const;
@@ -269,8 +272,11 @@ type Layer = {
   coarse: number;
   hitAt: number;
   trail?: HTMLCanvasElement; // echo: what this layer showed, fading
+  mosh?: HTMLCanvasElement; // mosh: the picture the new one smears into
+  startAt: number; // where the hit started in its video, for stutter
+  stutterAt: number;
 };
-const layers: Layer[] = Array.from({ length: LAYERS }, () => ({ until: 0, opacity: 1, rate: 1, fx: [], coarse: 0, hitAt: 0 }));
+const layers: Layer[] = Array.from({ length: LAYERS }, () => ({ until: 0, opacity: 1, rate: 1, fx: [], coarse: 0, hitAt: 0, startAt: 0, stutterAt: 0 }));
 
 const canvas = document.createElement('canvas');
 canvas.width = WIDTH;
@@ -360,6 +366,7 @@ export async function fire(clip: Clip, hit: Hit = {}, ready?: Plan) {
   const layer = layers[index];
   const previous = layer.video;
   const now = performance.now();
+  const somethingShowing = layers.some((l) => l.video && l.until > now);
   layer.video = element;
   // While the new one is still jumping to its spot, the old picture stays
   layer.fallback = previous !== element && previous?.readyState && previous.readyState >= 2 ? previous : undefined;
@@ -367,10 +374,18 @@ export async function fire(clip: Clip, hit: Hit = {}, ready?: Plan) {
   layer.until = hit.holdMs === undefined ? Infinity : now + hit.holdMs;
   layer.opacity = Math.min(1, Math.max(0, hit.gain ?? 1));
   layer.rate = hit.speed ?? 1;
-  layer.fx = hit.fx ?? [];
+  layer.fx = withGlitch(hit.fx ?? []);
   layer.coarse = hit.coarse ?? 0;
   layer.hitAt = now;
   if (!layer.fx.includes('echo')) layer.trail = undefined;
+  layer.startAt = plan.start ?? element.currentTime;
+  // Datamosh starts from what was on screen, so the new clip melts out of it
+  if (!layer.fx.includes('mosh')) layer.mosh = undefined;
+  else if (!layer.mosh && somethingShowing) {
+    layer.mosh = makeCanvas();
+    layer.mosh.getContext('2d')!.drawImage(canvas, 0, 0);
+  }
+  layer.stutterAt = now;
   clipStats.hits++;
   if (!plan.seeked && plan.start !== undefined) element.currentTime = plan.start;
   const freeze = layer.fx.includes('freeze');
@@ -402,6 +417,7 @@ export function clearLayers() {
 }
 
 const FILTERS: Partial<Record<Fx, string>> = {
+  burn: 'contrast(2.4) saturate(2.8) brightness(1.1)',
   inv: 'invert(1)',
   bw: 'grayscale(1) contrast(1.5)',
   hue: 'hue-rotate(180deg) saturate(1.6)',
@@ -455,6 +471,7 @@ function renderLayer(layer: Layer, shown: HTMLVideoElement): HTMLCanvasElement {
   let picture = scratch;
   if (layer.fx.includes('rgb')) picture = rgbSplit(picture, 6 + Math.round(Math.random() * 6));
   if (layer.fx.includes('echo')) picture = echo(layer, picture);
+  picture = glitches(layer, picture, performance.now());
   return picture;
 }
 
@@ -531,6 +548,130 @@ function clipToPieces(layer: Layer, now: number) {
   context.clip();
 }
 
+// glitch: one of the glitches at random on each hit. The Glitch slider in the
+// panel adds one at random to any hit, as often as it is turned up
+export const GLITCHES: Fx[] = ['mosh', 'blocks', 'melt', 'vhs', 'stutter', 'rgb', 'slice', 'burn', 'scan'];
+let glitchAmount = 0;
+export const setGlitchAmount = (amount: number) => (glitchAmount = Math.min(1, Math.max(0, amount)));
+export const getGlitchAmount = () => glitchAmount;
+const anyGlitch = () => GLITCHES[Math.floor(Math.random() * GLITCHES.length)];
+export function withGlitch(fx: Fx[], random = Math.random): Fx[] {
+  const out = fx.map((f) => (f === 'glitch' ? anyGlitch() : f));
+  if (glitchAmount > 0 && random() < glitchAmount) out.push(anyGlitch());
+  return out;
+}
+
+const glitchA = makeCanvas();
+const glitchB = makeCanvas();
+
+// A seeded random, so a glitch holds still for a few frames instead of
+// boiling every frame
+function seeded(seed: number) {
+  let value = Math.abs(Math.floor(seed)) % 233280;
+  return () => ((value = (value * 9301 + 49297) % 233280) / 233280);
+}
+
+// The glitches that rework a layer's finished picture, one after another
+function glitches(layer: Layer, source: HTMLCanvasElement, now: number): HTMLCanvasElement {
+  let picture = source;
+  let target = glitchA;
+  const step = (run: (c: CanvasRenderingContext2D, from: HTMLCanvasElement) => void) => {
+    const c = target.getContext('2d')!;
+    c.globalAlpha = 1;
+    c.globalCompositeOperation = 'source-over';
+    c.drawImage(picture, 0, 0);
+    run(c, picture);
+    picture = target;
+    target = target === glitchA ? glitchB : glitchA;
+  };
+  if (layer.fx.includes('mosh')) picture = mosh(layer, picture, now);
+  if (layer.fx.includes('blocks')) {
+    // Rectangles of the picture copied to the wrong place
+    step((c, from) => {
+      const random = seeded(now / 70);
+      for (let i = 0; i < 9; i++) {
+        const w = 30 + random() * 220;
+        const h = 8 + random() * 70;
+        c.drawImage(from, random() * (WIDTH - w), random() * (HEIGHT - h), w, h, random() * (WIDTH - w), random() * (HEIGHT - h), w, h);
+      }
+    });
+  }
+  if (layer.fx.includes('melt')) {
+    // Pixel-sort drips: a row of each column stretched down to the bottom
+    step((c, from) => {
+      const random = seeded(now / 140);
+      const columns = 32;
+      const w = WIDTH / columns;
+      for (let i = 0; i < columns; i++) {
+        if (random() < 0.45) continue;
+        const y = random() * HEIGHT * 0.8;
+        c.drawImage(from, i * w, y, w, 2, i * w, y, w, HEIGHT - y);
+      }
+    });
+  }
+  if (layer.fx.includes('vhs')) {
+    // Tracking: bands wobbling sideways, a bright noisy band rolling down
+    step((c, from) => {
+      const random = seeded(now / 400);
+      const kick = random() < 0.3 ? 30 : 6;
+      c.fillStyle = '#000';
+      c.fillRect(0, 0, WIDTH, HEIGHT);
+      const bands = 45;
+      const h = HEIGHT / bands;
+      for (let i = 0; i < bands; i++) {
+        const dx = Math.sin(i * 0.4 + now / 90) * kick * (0.3 + random());
+        c.drawImage(from, 0, i * h, WIDTH, h, dx, i * h, WIDTH, h);
+      }
+      const roll = (now / 6) % (HEIGHT + 40) - 20;
+      c.globalCompositeOperation = 'lighter';
+      c.globalAlpha = 0.18;
+      c.fillStyle = '#fff';
+      c.fillRect(0, roll, WIDTH, 14);
+      c.drawImage(from, 0, roll, WIDTH, 14, 18, roll, WIDTH, 14);
+    });
+  }
+  if (layer.fx.includes('scan')) {
+    // Dark lines like an old screen, over a slightly green phosphor
+    step((c) => {
+      c.globalCompositeOperation = 'multiply';
+      c.fillStyle = 'rgb(200, 255, 210)';
+      c.fillRect(0, 0, WIDTH, HEIGHT);
+      c.globalCompositeOperation = 'source-over';
+      c.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      for (let y = 0; y < HEIGHT; y += 3) c.fillRect(0, y, WIDTH, 1);
+    });
+  }
+  return picture;
+}
+
+// Datamosh, faked: the new picture only gets through in some blocks each
+// frame, the rest keeps the old one sliding along, so one shot melts into
+// the next instead of cutting
+function mosh(layer: Layer, source: HTMLCanvasElement, now: number) {
+  if (!layer.mosh) {
+    layer.mosh = makeCanvas();
+    layer.mosh.getContext('2d')!.drawImage(source, 0, 0);
+  }
+  const c = layer.mosh.getContext('2d')!;
+  const columns = 16;
+  const rows = 9;
+  const w = WIDTH / columns;
+  const h = HEIGHT / rows;
+  const random = seeded(now / 33);
+  const drift = seeded(layer.hitAt);
+  const dx = (drift() - 0.5) * 6;
+  const dy = (drift() - 0.5) * 6;
+  // fewer blocks get through right after a hit: that is when it smears most
+  const through = Math.min(0.5, 0.04 + (now - layer.hitAt) / 4000);
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < columns; x++) {
+      if (random() < through) c.drawImage(source, x * w, y * h, w, h, x * w, y * h, w, h);
+      else c.drawImage(layer.mosh, x * w, y * h, w, h, x * w + dx, y * h + dy, w, h);
+    }
+  }
+  return layer.mosh;
+}
+
 let drawing = false;
 let lastFrame = performance.now();
 
@@ -565,6 +706,11 @@ function draw(now: number) {
       element.currentTime = back > 0 ? back : element.duration - 0.05;
     }
     if (layer.fx.includes('strobe') && Math.floor((now - layer.hitAt) / 60) % 2 === 1) return;
+    // Stutter: back to where the hit started, about nine times a second
+    if (layer.fx.includes('stutter') && now - layer.stutterAt > 110 && !element.seeking) {
+      layer.stutterAt = now;
+      element.currentTime = layer.startAt;
+    }
     clipStats.frames++;
     let shown = element;
     if (element.seeking || element.readyState < 2) {

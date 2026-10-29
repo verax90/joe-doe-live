@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-10-29-glitch',
+    title: L('Clips: layers, weaving and glitches', 'Clips: capas, entrelazado y glitches', 'Clips: capes, entrellaçat i glitches'),
+    text: L(
+      'Three layers at once, pieces of one clip woven into another, datamosh, VHS, pixel-sort drips, a Glitch slider and nine new Clips visuals',
+      'Tres capas a la vez, trozos de un clip metidos en otro, datamosh, VHS, chorreones tipo pixel sort, un deslizador Glitch y nueve visuales Clips nuevos',
+      'Tres capes alhora, trossos d\'un clip ficats dins d\'un altre, datamosh, VHS, regalims tipus pixel sort, un control Glitch i nou visuals Clips nous',
+    ),
+    go: [{ click: '#toggle-video' }, { click: '[aria-controls="video-tab-clips"]' }, { click: '#clips-code' }],
+  },
+  {
     id: '2026-10-29-clips',
     title: L('Clips: footage played like samples', 'Clips: vídeo tocado como samples', 'Clips: vídeo tocat com a samples'),
     text: L(

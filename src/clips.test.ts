@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { archiveIdFromUrl, archiveQuery, parseArchiveSearch, parseCommonsSearch, pickArchiveFile, pickCommonsFile, pickNasaFile } from './clip-search';
 import { examplePattern } from './clips-panel';
-import { clipName, hitFromValue, parseFx, pickFromPool } from './clips';
+import { clipName, GLITCHES, hitFromValue, parseFx, pickFromPool, setGlitchAmount, withGlitch } from './clips';
 
 describe('clip names', () => {
   it('reads well inside s("…")', () => {
@@ -122,5 +122,20 @@ describe('NASA and Commons', () => {
     };
     expect(pickCommonsFile(page)).toEqual({ url: 'small.webm', size: 2000000, preview: 'small.webm' });
     expect(parseCommonsSearch({ query: { pages: { 1: { ...page, imageinfo: [{ thumburl: 't.jpg' }] } } } })[0]).toMatchObject({ title: 'Glitch', thumb: 't.jpg' });
+  });
+});
+
+describe('glitch', () => {
+  it('turns glitch into one of the glitches', () => {
+    setGlitchAmount(0);
+    const [picked] = withGlitch(['glitch']);
+    expect(GLITCHES).toContain(picked);
+  });
+
+  it('adds one at random as often as the slider says', () => {
+    setGlitchAmount(0.5);
+    expect(withGlitch(['inv'], () => 0.4)).toHaveLength(2);
+    expect(withGlitch(['inv'], () => 0.6)).toEqual(['inv']);
+    setGlitchAmount(0);
   });
 });
