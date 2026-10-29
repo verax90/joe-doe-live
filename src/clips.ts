@@ -310,6 +310,13 @@ async function videoFor(clip: Clip) {
   return element;
 }
 
+// A clip's video as an address of its own, for the big viewer; free it with
+// URL.revokeObjectURL when done
+export async function clipAddress(clip: Clip) {
+  const blob = await inStore<Blob | undefined>(BLOBS, 'readonly', (store) => store.get(clip.id));
+  return blob ? URL.createObjectURL(blob) : null;
+}
+
 // Videos the patterns use are opened ahead, so the first hit does not wait
 export function warmUp(names: string[]) {
   for (const clip of clips) if (names.includes(clip.name)) void videoFor(clip);

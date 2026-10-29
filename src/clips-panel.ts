@@ -3,7 +3,8 @@
 // archives that downloads footage into the pool.
 import { keepingFocus } from './a11y';
 import { download, resolve, resolveLink, search, MAX_BYTES, SUGGESTIONS, type Found, type SourceId } from './clip-search';
-import { addClip, allClips, clipName, fireIndex, setGlitchAmount, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
+import { openViewer, type ViewerItem } from './clip-viewer';
+import { addClip, allClips, clipAddress, clipName, fireIndex, setGlitchAmount, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
 import { onLangChange, t } from './i18n';
 import { NOTE_EVENT, type NoteDetail } from './midi';
 import { readStorage, writeStorage } from './storage';
@@ -171,9 +172,32 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     remove.title = t('clipsRemove', { name: clip.title });
     remove.addEventListener('click', () => void removeClip(clip.id).then(() => say(t('clipsRemoved', { name: clip.title }))));
 
+    const look = document.createElement('button');
+    look.type = 'button';
+    look.className = 'clip-remove clip-look';
+    look.textContent = '⤢';
+    look.setAttribute('aria-label', t('clipsLookBig', { name: clip.title }));
+    look.title = t('clipsLookBig', { name: clip.title });
+    look.addEventListener('click', () => {
+      const clips = allClips();
+      openViewer(
+        clips.map((each) => {
+          let address: string | null = null;
+          return {
+            title: each.title,
+            meta: [each.name, seconds(each.duration), each.credit?.source].filter(Boolean).join(' · '),
+            page: each.credit?.page,
+            load: async () => (address = await clipAddress(each)),
+            done: () => address && URL.revokeObjectURL(address),
+          };
+        }),
+        clips.findIndex((each) => each.id === clip.id),
+      );
+    });
+
     const row = document.createElement('div');
     row.className = 'clip-row';
-    row.append(name, tag, remove);
+    row.append(name, tag, look, remove);
     item.append(pad, row);
     if (clip.credit) {
       const credit = document.createElement('a');
@@ -265,6 +289,7 @@ function setupFinder(sayInPool: (text: string) => void) {
   // Files already worked out (a pasted link), so they are not looked up again
   const known = new Map<string, Awaited<ReturnType<typeof resolve>>>();
   const fileFor = async (found: Found) => known.get(found.id) ?? resolve(found);
+  const viewerItems = new WeakMap<Element, ViewerItem>();
 
   const renderIdeas = () => {
     const surprise = document.createElement('button');
@@ -319,28 +344,11 @@ function setupFinder(sayInPool: (text: string) => void) {
     year.className = 'clip-length';
     year.textContent = found.year ?? '';
     look.append(year);
-    // A look before downloading: the video plays in place, straight from its
-    // site (showing it needs no permission, only reading its pixels does)
-    look.addEventListener('click', async () => {
-      look.disabled = true;
-      try {
-        const file = await fileFor(found);
-        if (!file) throw new Error('no video');
-        const preview = document.createElement('video');
-        preview.className = 'clip-preview';
-        preview.src = file.preview;
-        preview.muted = true;
-        preview.autoplay = true;
-        preview.loop = true;
-        preview.playsInline = true;
-        preview.addEventListener('loadedmetadata', () => {
-          if (preview.duration > 20) preview.currentTime = preview.duration * 0.2;
-        });
-        look.replaceWith(preview);
-      } catch {
-        look.disabled = false;
-        say(t('clipsNoVideo'));
-      }
+    // A big look before downloading, straight from its site (showing it needs
+    // no permission, only reading its pixels does); ← → go through the results
+    look.addEventListener('click', () => {
+      const shown = [...results.children].map((li) => viewerItems.get(li)).filter((entry): entry is ViewerItem => Boolean(entry));
+      openViewer(shown, Math.max(0, shown.indexOf(viewerItems.get(item)!)));
     });
 
     const title = document.createElement('a');
@@ -356,6 +364,13 @@ function setupFinder(sayInPool: (text: string) => void) {
     take.textContent = t('clipsTake');
     take.addEventListener('click', () => void takeIt(found, take));
     item.append(look, title, take);
+    viewerItems.set(item, {
+      title: found.title,
+      meta: [found.year, SOURCE_NAMES[found.source]].filter(Boolean).join(' · '),
+      page: found.page,
+      take,
+      load: async () => (await fileFor(found))?.preview ?? null,
+    });
     return item;
   };
 
