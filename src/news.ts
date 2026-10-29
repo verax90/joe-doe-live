@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-10-29-pieces',
+    title: L('Clips: pieces, held pads and Fill', 'Clips: trozos, pads mantenidos y Llenar', 'Clips: trossos, pads mantinguts i Omplir'),
+    text: L(
+      'Several pieces of one long video without downloading it again; a layer mixer; pads that last only while held; 🎲 Fill for three odd clips at once',
+      'Varios trozos de un vídeo largo sin bajarlo otra vez; una mesa de capas; pads que duran solo mientras pulsas; 🎲 Llenar para tener tres clips raros de golpe',
+      "Diversos trossos d'un vídeo llarg sense baixar-lo de nou; una taula de capes; pads que duren només mentre prems; 🎲 Omplir per tenir tres clips rars de cop",
+    ),
+    go: [{ click: '#toggle-video' }, { click: '[aria-controls="video-tab-clips"]' }],
+  },
+  {
     id: '2026-10-29-glitch',
     title: L('Clips: layers, weaving and glitches', 'Clips: capas, entrelazado y glitches', 'Clips: capes, entrellaçat i glitches'),
     text: L(

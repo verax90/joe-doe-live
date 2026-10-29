@@ -248,7 +248,7 @@ export async function resolveLink(text: string): Promise<{ found: Found; file: R
 
 // Downloads a file whole, telling how far it got (0 to 1, or -1 when the
 // size is unknown)
-export async function download(url: string, onProgress: (done: number) => void, signal?: AbortSignal): Promise<Blob> {
+export async function download(url: string, onProgress: (done: number) => void, signal?: AbortSignal, maxBytes = MAX_BYTES): Promise<Blob> {
   // A CDN can hand back a copy saved without the header that lets pages read
   // it (NASA's does now and then): once more, past any saved copy
   const response = await fetch(url, { signal }).catch(() =>
@@ -256,7 +256,7 @@ export async function download(url: string, onProgress: (done: number) => void, 
   );
   if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
   const total = Number(response.headers.get('content-length')) || 0;
-  if (total > MAX_BYTES) throw new Error('too big');
+  if (total > maxBytes) throw new Error('too big');
   const reader = response.body.getReader();
   const chunks: BlobPart[] = [];
   let received = 0;
@@ -265,7 +265,7 @@ export async function download(url: string, onProgress: (done: number) => void, 
     if (done) break;
     chunks.push(value);
     received += value.length;
-    if (received > MAX_BYTES) {
+    if (received > maxBytes) {
       await reader.cancel();
       throw new Error('too big');
     }

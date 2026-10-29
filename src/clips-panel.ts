@@ -4,9 +4,10 @@
 import { keepingFocus } from './a11y';
 import { download, resolve, resolveLink, search, MAX_BYTES, SUGGESTIONS, type Found, type SourceId } from './clip-search';
 import { openViewer, type ViewerItem } from './clip-viewer';
-import { addClip, allClips, clearLayer, clipAddress, clipName, fireIndex, liveClips, MIX_MODES, mixer, setClipRange, setGlitchAmount, type MixMode, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
+import type { Hit } from './clips';
+import { addClip, addPiece, allClips, clearLayer, clipAddress, clipName, fireIndex, liveClips, releaseClip, MIX_MODES, mixer, setClipRange, setGlitchAmount, type MixMode, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
 import { onLangChange, pick, t, type Localized } from './i18n';
-import { NOTE_EVENT, type NoteDetail } from './midi';
+import { NOTE_EVENT, NOTE_OFF_EVENT, type NoteDetail } from './midi';
 import { readStorage, writeStorage } from './storage';
 
 type Options = {
@@ -160,14 +161,18 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     pad.append(number, length);
     pad.addEventListener('pointerdown', (event) => {
       if (event.button !== 0) return;
-      fireIndex(index, { layer: targetLayer });
-      showClipsIfNeeded();
+      press(`pointer`, index, { layer: targetLayer });
+      // the release counts even if the finger slides off the pad
+      pad.setPointerCapture?.(event.pointerId);
     });
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) pad.addEventListener(type, () => letGo('pointer'));
     pad.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
-      fireIndex(index, { layer: targetLayer });
-      showClipsIfNeeded();
+      if (!event.repeat) press('pad-key', index, { layer: targetLayer });
+    });
+    pad.addEventListener('keyup', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') letGo('pad-key');
     });
 
     const name = document.createElement('input');
@@ -200,26 +205,7 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     look.textContent = '⤢';
     look.setAttribute('aria-label', t('clipsLookBig', { name: clip.title }));
     look.title = t('clipsLookBig', { name: clip.title });
-    look.addEventListener('click', () => {
-      const clips = allClips();
-      openViewer(
-        clips.map((each) => {
-          let address: string | null = null;
-          return {
-            title: each.title,
-            meta: [each.name, seconds(each.duration), each.credit?.source].filter(Boolean).join(' · '),
-            page: each.credit?.page,
-            load: async () => (address = await clipAddress(each)),
-            done: () => address && URL.revokeObjectURL(address),
-            range: {
-              get: () => allClips().find((c) => c.id === each.id)?.range,
-              set: (range, thumb) => void setClipRange(each.id, range, thumb),
-            },
-          };
-        }),
-        clips.findIndex((each) => each.id === clip.id),
-      );
-    });
+    look.addEventListener('click', () => openPool(clip.id));
 
     const row = document.createElement('div');
     row.className = 'clip-row';
@@ -238,8 +224,56 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     return item;
   };
 
+  // Your clips big, from one of them; startAt opens it at that time (a new
+  // piece, where the last one was being looked at)
+  const openPool = (id: string, startAt?: number) => {
+    const clips = allClips();
+    openViewer(
+      clips.map((each) => {
+        let address: string | null = null;
+        return {
+          title: each.title,
+          meta: [each.name, seconds(each.duration), each.credit?.source].filter(Boolean).join(' · '),
+          page: each.credit?.page,
+          load: async () => (address = await clipAddress(each)),
+          done: () => address && URL.revokeObjectURL(address),
+          startAt: each.id === id ? startAt : undefined,
+          range: {
+            get: () => allClips().find((c) => c.id === each.id)?.range,
+            set: (range, thumb) => void setClipRange(each.id, range, thumb),
+            piece: (at) =>
+              void addPiece(each.id).then((piece) => {
+                if (!piece) return;
+                openPool(piece.id, at);
+                say(t('clipsPieceAdded', { name: piece.name }));
+              }),
+          },
+        };
+      }),
+      clips.findIndex((each) => each.id === id),
+    );
+  };
+
   // The layer pads, keys and MIDI fire on (0 is the bottom one)
   let targetLayer = 0;
+
+  // Held: with "Only while held", letting go of a pad, key or note takes its
+  // clip off again; each press is remembered by what pressed it
+  const holdBox = document.querySelector<HTMLInputElement>('#clips-hold')!;
+  holdBox.checked = readStorage<boolean>('jdl:clips-hold', false);
+  holdBox.addEventListener('change', () => writeStorage('jdl:clips-hold', holdBox.checked));
+  const pressed = new Map<string, { id: string; layer: number; shown: Promise<void> }>();
+  const press = (by: string, index: number, hit: Hit) => {
+    const fired = fireIndex(index, hit);
+    showClipsIfNeeded();
+    if (fired) pressed.set(by, { id: fired.clip.id, layer: hit.layer ?? 0, shown: fired.shown });
+  };
+  const letGo = (by: string) => {
+    const held = pressed.get(by);
+    pressed.delete(by);
+    if (!held || !holdBox.checked) return;
+    void held.shown.then(() => releaseClip(held.id, held.layer));
+  };
 
   // Firing a pad while another visual shows: switch to the clips, once
   let switched = false;
@@ -248,6 +282,45 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     switched = true;
     showClips();
   };
+
+  // Fill: three odd videos at random from different archives, light ones,
+  // all called raro, so s("raro") plays at once
+  const fillButton = document.querySelector<HTMLButtonElement>('#clips-fill')!;
+  fillButton.addEventListener('click', async () => {
+    fillButton.disabled = true;
+    const sources: SourceId[] = ['nasa', 'commons', 'prelinger', 'vhs'];
+    const ideas = sources.flatMap((source) => SUGGESTIONS[source].map((word) => [source, word] as const));
+    for (let i = ideas.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ideas[i], ideas[j]] = [ideas[j], ideas[i]];
+    }
+    const WANTED = 3;
+    const LIGHT = 60 * 1024 * 1024;
+    let taken = 0;
+    for (const [source, word] of ideas.slice(0, 12)) {
+      if (taken >= WANTED) break;
+      say(t('clipsFilling', { done: taken, total: WANTED, word }));
+      try {
+        const found = await search(source, word);
+        const pick = found[Math.floor(Math.random() * Math.min(found.length, 12))];
+        if (!pick) continue;
+        const file = await resolve(pick);
+        if (!file || (file.size && file.size > LIGHT)) continue;
+        const blob = await download(
+          file.url,
+          (done) => done >= 0 && say(t('clipsFillingFile', { done: taken + 1, total: WANTED, title: pick.title, percent: Math.round(done * 100) })),
+          undefined,
+          LIGHT,
+        );
+        await addClip(blob, { title: pick.title, name: 'raro', credit: { source: SOURCE_NAMES[pick.source], page: pick.page } });
+        taken++;
+      } catch {
+        // that one would not come: the next idea
+      }
+    }
+    fillButton.disabled = false;
+    say(taken ? t('clipsFilled', { count: taken }) : t('clipsFillFailed'));
+  });
 
   document.querySelector('#clips-show')!.addEventListener('click', () => {
     switched = true;
@@ -373,11 +446,14 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
   document.addEventListener('keydown', (event) => {
     const digit = event.code.match(/^(?:Digit|Numpad)([1-9])$/)?.[1];
     if (!digit || event.ctrlKey || event.metaKey || event.altKey || event.repeat) return;
-    if ((event.target as HTMLElement).closest('.cm-editor, input, select, textarea, [contenteditable], dialog')) return;
+    if (event.target instanceof Element && event.target.closest('.cm-editor, input, select, textarea, [contenteditable], dialog')) return;
     if (!allClips().length) return;
     event.preventDefault();
-    fireIndex(Number(digit) - 1, { layer: event.shiftKey ? Math.min(3, targetLayer + 1) : targetLayer });
-    showClipsIfNeeded();
+    press(`key-${digit}`, Number(digit) - 1, { layer: event.shiftKey ? Math.min(3, targetLayer + 1) : targetLayer });
+  });
+  document.addEventListener('keyup', (event) => {
+    const digit = event.code.match(/^(?:Digit|Numpad)([1-9])$/)?.[1];
+    if (digit) letGo(`key-${digit}`);
   });
 
   // ── MIDI: note 36 (C1, the MPK's first pad) is the first clip ──────────
@@ -386,9 +462,10 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
   window.addEventListener(NOTE_EVENT, (event) => {
     if (!midiBox.checked || !allClips().length) return;
     const { note, velocity } = (event as CustomEvent<NoteDetail>).detail;
-    fireIndex(note - 36, { layer: targetLayer, gain: Math.min(1, 0.35 + velocity / 127) });
-    showClipsIfNeeded();
+    // velocity comes from 0 to 1: soft hits are see-through
+    press(`note-${note}`, note - 36, { layer: targetLayer, gain: Math.min(1, 0.35 + velocity * 0.65) });
   });
+  window.addEventListener(NOTE_OFF_EVENT, (event) => letGo(`note-${(event as CustomEvent<number>).detail}`));
 
   setupFinder(say);
 }

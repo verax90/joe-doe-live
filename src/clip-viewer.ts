@@ -12,7 +12,12 @@ export type ViewerItem = {
   take?: HTMLButtonElement; // the Take button in the list, mirrored here
   done?: () => void; // when the viewer stops using the address
   // A clip of yours: the part to use can be marked here
-  range?: { get(): [number, number] | undefined; set(range: [number, number] | undefined, thumb?: string): void };
+  range?: {
+    get(): [number, number] | undefined;
+    set(range: [number, number] | undefined, thumb?: string): void;
+    piece(at: number): void; // another piece of the same video, opened at that time
+  };
+  startAt?: number; // open at this time instead
 };
 
 const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
@@ -45,6 +50,7 @@ function build() {
         <span class="clip-viewer-span"></span>
         <button class="control clip-viewer-out" type="button"></button>
         <button class="control clip-viewer-all" type="button"></button>
+        <button class="control clip-viewer-piece" type="button"></button>
       </div>
     </div>`;
   document.body.append(element);
@@ -56,7 +62,9 @@ function build() {
   // the titles
   video.addEventListener('loadedmetadata', () => {
     const marked = items[index]?.range?.get();
-    if (marked) video.currentTime = marked[0];
+    const start = items[index]?.startAt;
+    if (start !== undefined) video.currentTime = start;
+    else if (marked) video.currentTime = marked[0];
     else if (video.duration > 20) video.currentTime = video.duration * 0.2;
     showRange();
   });
@@ -97,6 +105,7 @@ function build() {
   element.querySelector('.clip-viewer-in')!.addEventListener('click', () => mark(0));
   element.querySelector('.clip-viewer-out')!.addEventListener('click', () => mark(1));
   element.querySelector('.clip-viewer-all')!.addEventListener('click', () => mark(null));
+  element.querySelector('.clip-viewer-piece')!.addEventListener('click', () => items[index]?.range?.piece(video.currentTime));
   element.querySelector('.clip-viewer-prev')!.addEventListener('click', () => show(index - 1));
   element.querySelector('.clip-viewer-next')!.addEventListener('click', () => show(index + 1));
   element.querySelector('.clip-viewer-close')!.addEventListener('click', () => element.close());
@@ -141,6 +150,10 @@ function showRange() {
   const all = dialog.querySelector<HTMLButtonElement>('.clip-viewer-all')!;
   all.textContent = t('clipsMarkAll');
   all.hidden = !marked;
+  const piece = dialog.querySelector<HTMLButtonElement>('.clip-viewer-piece')!;
+  piece.textContent = t('clipsPiece');
+  piece.title = t('clipsPieceHint');
+  piece.hidden = !marked;
   dialog.querySelector('.clip-viewer-span')!.textContent = marked
     ? t('clipsMarked', { from: clock(marked[0]), to: clock(marked[1]) })
     : Number.isFinite(video.duration)

@@ -76,6 +76,8 @@ export const PROGRAM_EVENT = 'jdl:program-change';
 
 // Every note-on, for free play (keys sounding without pressing Play)
 export const NOTE_EVENT = 'jdl:note-on';
+// and every note-off, for what lasts only while a key is held (clip pads)
+export const NOTE_OFF_EVENT = 'jdl:note-off';
 export type NoteDetail = { note: number; velocity: number };
 
 // MIDI Start / Continue and Stop from a controller (the Miyoo's Studio
@@ -176,6 +178,7 @@ export function setupMidiPanel() {
         }
         if ((status & 0xf0) === 0x80 || ((status & 0xf0) === 0x90 && high === 0)) {
           device.notes.delete(low);
+          window.dispatchEvent(new CustomEvent<number>(NOTE_OFF_EVENT, { detail: low }));
           if (isTouch(id) && !device.notes.size) {
             currentTouch();
             touchTarget = 0;

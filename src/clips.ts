@@ -26,8 +26,12 @@ export type Clip = {
   size?: number;
   credit?: { source: string; page: string };
   range?: [number, number]; // the part to use, in seconds; the rest is left out
+  blob?: string; // a piece of another clip's video: whose stored video it uses
   added: number;
 };
+
+// Where a clip's video is stored: its own, or the one it is a piece of
+const blobKey = (clip: Pick<Clip, 'id' | 'blob'>) => clip.blob ?? clip.id;
 
 const DB_NAME = 'jdl-clips';
 const META = 'clips';
@@ -79,7 +83,10 @@ export const allClips = () => clips;
 export async function loadClips() {
   try {
     const saved = await inStore<Clip[]>(META, 'readonly', (store) => store.getAll());
-    clips = saved.sort((a, b) => a.added - b.added);
+    // Pieces of one video stay together, where its first one was
+    const first = new Map<string, number>();
+    for (const clip of saved) first.set(blobKey(clip), Math.min(first.get(blobKey(clip)) ?? Infinity, clip.added));
+    clips = saved.sort((a, b) => first.get(blobKey(a))! - first.get(blobKey(b))! || a.added - b.added);
   } catch (error) {
     console.warn('[clips]', error);
     clips = [];
@@ -119,8 +126,12 @@ export async function renameClip(id: string, name: string) {
 }
 
 export async function removeClip(id: string) {
+  const gone = clips.find((c) => c.id === id);
   await inStore(META, 'readwrite', (store) => store.delete(id));
-  await inStore(BLOBS, 'readwrite', (store) => store.delete(id));
+  // The video itself goes only when no other piece of it is left
+  if (gone && !clips.some((c) => c.id !== id && blobKey(c) === blobKey(gone))) {
+    await inStore(BLOBS, 'readwrite', (store) => store.delete(blobKey(gone)));
+  }
   const element = videos.get(id);
   if (element) {
     for (const layer of layers) {
@@ -324,7 +335,7 @@ export const clipStats = { hits: 0, frames: 0, waiting: 0 };
 async function videoFor(clip: Clip) {
   const existing = videos.get(clip.id);
   if (existing) return existing;
-  const blob = await inStore<Blob | undefined>(BLOBS, 'readonly', (store) => store.get(clip.id));
+  const blob = await inStore<Blob | undefined>(BLOBS, 'readonly', (store) => store.get(blobKey(clip)));
   if (!blob) return undefined;
   if (videos.has(clip.id)) return videos.get(clip.id);
   const element = document.createElement('video');
@@ -340,7 +351,7 @@ async function videoFor(clip: Clip) {
 // A clip's video as an address of its own, for the big viewer; free it with
 // URL.revokeObjectURL when done
 export async function clipAddress(clip: Clip) {
-  const blob = await inStore<Blob | undefined>(BLOBS, 'readonly', (store) => store.get(clip.id));
+  const blob = await inStore<Blob | undefined>(BLOBS, 'readonly', (store) => store.get(blobKey(clip)));
   return blob ? URL.createObjectURL(blob) : null;
 }
 
@@ -378,6 +389,29 @@ export function clipSpan(clip: Pick<Clip, 'range'>, duration: number): [number, 
   const from = Math.max(0, Math.min(clip.range[0], duration - 0.5));
   const to = Math.min(duration, Math.max(clip.range[1], from + 0.5));
   return [from, to];
+}
+
+// Another piece of the same video, as a clip of its own with the same name
+// (so the pieces make a pool), sharing the stored video: nothing is copied
+export async function addPiece(id: string) {
+  const source = clips.find((c) => c.id === id);
+  if (!source) return undefined;
+  const siblings = clips.filter((c) => blobKey(c) === blobKey(source)).length;
+  const piece: Clip = {
+    ...source,
+    id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`,
+    title: `${source.title.replace(/ · \d+$/, '')} · ${siblings + 1}`,
+    range: undefined,
+    blob: blobKey(source),
+    added: Date.now(),
+  };
+  await inStore(META, 'readwrite', (store) => store.put(piece));
+  // the new piece goes right after the last piece of that video
+  const last = clips.map((c) => blobKey(c)).lastIndexOf(blobKey(source));
+  clips = [...clips.slice(0, last + 1), piece, ...clips.slice(last + 1)];
+  bags.clear();
+  changed();
+  return piece;
 }
 
 // Marks the part of a clip to use (none: all of it), with a new thumbnail
@@ -458,10 +492,17 @@ export async function fire(clip: Clip, hit: Hit = {}, ready?: Plan) {
   startDrawing();
 }
 
-// Pads and MIDI: a clip by its place in the pool list
+// Pads and MIDI: a clip by its place in the pool list. Returns the clip and
+// when it is on screen (the first time, its video has to be opened)
 export function fireIndex(index: number, hit: Hit = {}) {
   const clip = clips[((index % clips.length) + clips.length) % clips.length];
-  if (clip) void fire(clip, hit);
+  if (!clip) return undefined;
+  return { clip, shown: fire(clip, hit) };
+}
+
+// Held pads: letting go empties the layer, if it still shows that clip
+export function releaseClip(clipId: string, index: number) {
+  if (layers[index]?.clipId === clipId) clearLayer(index);
 }
 
 // The layer mixer in the panel: how solid each layer is, and how layers 2-4
