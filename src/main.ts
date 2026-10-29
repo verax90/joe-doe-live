@@ -5,6 +5,7 @@ import '@fontsource/ibm-plex-mono/600.css';
 import '@fontsource-variable/syne';
 import '@strudel/repl';
 import './style.css';
+import './icons.css';
 import { isAsciiOn, readAsciiSetting, setAscii } from './ascii';
 import { ensureAudio } from './audio';
 import { setupCheatsheet } from './cheatsheet';

@@ -6,6 +6,7 @@
 // embedded is skipped with a word. The queue is remembered.
 // It drives YouTube's own player (the IFrame API, loaded on first use), so
 // adding or skipping never reloads the video that is on.
+import { setIcon } from './icon';
 import { keepingFocus } from './a11y';
 import { t } from './i18n';
 import { shortName } from './samples';
@@ -134,7 +135,7 @@ export function setupYoutube(say: (text: string) => void) {
               const play = document.createElement('button');
               play.type = 'button';
               play.className = 'cheat-icon';
-              play.textContent = '▶';
+              setIcon(play, '▶');
               play.setAttribute('aria-label', t('youtubePlayNow', { name: titles.get(id) ?? id }));
               play.addEventListener('click', () => {
                 queue = { ...queue, index: i };
@@ -143,7 +144,7 @@ export function setupYoutube(say: (text: string) => void) {
               const remove = document.createElement('button');
               remove.type = 'button';
               remove.className = 'cheat-icon';
-              remove.textContent = '✕';
+              setIcon(remove, '✕');
               remove.setAttribute('aria-label', t('youtubeRemove', { name: titles.get(id) ?? id }));
               remove.addEventListener('click', () => {
                 const wasOn = i === queue.index;

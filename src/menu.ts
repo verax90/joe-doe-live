@@ -1,3 +1,4 @@
+import { setIcon } from './icon';
 import { onLangChange, t } from './i18n';
 import { readStorage, writeStorage } from './storage';
 
@@ -103,7 +104,7 @@ export function setupMenu() {
     const close = document.createElement('button');
     close.type = 'button';
     close.className = 'control control-icon panel-close';
-    close.textContent = '✕';
+    setIcon(close, '✕');
     close.addEventListener('click', () => {
       button.click();
       editorFocus();

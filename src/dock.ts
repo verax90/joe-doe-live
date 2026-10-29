@@ -42,6 +42,7 @@ export function setupDock() {
         chip.type = 'button';
         chip.className = 'dock-item';
         chip.dataset.dock = panel;
+        if (source.dataset.icon) chip.dataset.icon = source.dataset.icon;
         chip.textContent = label(source);
         chip.setAttribute('aria-pressed', source.getAttribute('aria-pressed') ?? 'false');
         // the same as picking it in More, so the panel logic stays in one place

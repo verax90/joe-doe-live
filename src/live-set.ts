@@ -3,6 +3,7 @@
 // the bottom shows where you are; ← → (or a presentation clicker, or the MPK
 // pads in PROG CHANGE mode) move through it, and while it plays the next song
 // comes in on the bar line, with its own tempo and visual.
+import { setIcon } from './icon';
 import { keepingFocus } from './a11y';
 import { askText } from './ask';
 import { onLangChange, pick, t, type Localized } from './i18n';
@@ -105,7 +106,7 @@ export function setupLiveSet({ editor, presets, visuals, currentVisual, useVisua
           const element = document.createElement('button');
           element.type = 'button';
           element.className = 'cheat-action';
-          element.textContent = label;
+          setIcon(element, label);
           element.title = title;
           element.setAttribute('aria-label', `${title}: ${song.name}`);
           element.addEventListener('click', onClick);

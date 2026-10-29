@@ -3,6 +3,7 @@
 // all of them share the style's tempo, the key and the chord progression, so
 // whatever you add fits. "Another" swaps a layer for a variant, "Mute" puts _
 // in front of its name, "Remove" deletes it.
+import { setIcon } from './icon';
 import { keepingFocus } from './a11y';
 import { onLangChange, pick, t, type Localized } from './i18n';
 import { withTempo } from './tempo';
@@ -473,6 +474,7 @@ export function setupCompose(editor: Editor) {
         const icon = (glyph: string, text: string, onClick: () => void) => {
           const element = button(glyph, onClick);
           element.className = 'cheat-icon';
+          setIcon(element, glyph);
           element.title = text;
           element.setAttribute('aria-label', text);
           return element;

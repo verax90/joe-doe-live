@@ -183,7 +183,9 @@ export function setupBacking(scheduler: Scheduler | undefined) {
     const loaded = Boolean(track || tab);
     controls.hidden = !loaded;
     playButton.hidden = !track;
-    playButton.textContent = track && !track.paused() ? t('backingPause') : t('backingPlayTrack');
+    const playing = Boolean(track && !track.paused());
+    playButton.textContent = playing ? t('backingPause') : t('backingPlayTrack');
+    playButton.dataset.icon = playing ? 'pause' : 'play';
     if (!loaded) status.textContent = t('backingNone');
     else if (tab) status.textContent = t('backingTab', { name });
     else status.textContent = `${name} · ${clockTime(track!.position())} / ${clockTime(track!.duration())}`;

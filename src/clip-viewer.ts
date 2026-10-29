@@ -37,20 +37,20 @@ function build() {
       <p class="clip-viewer-loading" hidden></p>
     </div>
     <div class="clip-viewer-bar">
-      <button class="control clip-viewer-prev" type="button">←</button>
+      <button class="control control-icon clip-viewer-prev" type="button" data-icon="back"></button>
       <div class="clip-viewer-info">
         <a class="clip-viewer-title" target="_blank" rel="noopener"></a>
         <span class="clip-viewer-meta"></span>
       </div>
-      <button class="control control-accent clip-viewer-take" type="button"></button>
-      <button class="control clip-viewer-next" type="button">→</button>
-      <button class="control clip-viewer-close" type="button">✕</button>
+      <button class="control control-accent clip-viewer-take" type="button" data-icon="download"></button>
+      <button class="control control-icon clip-viewer-next" type="button" data-icon="next"></button>
+      <button class="control control-icon clip-viewer-close" type="button" data-icon="close"></button>
       <div class="clip-viewer-range" hidden>
-        <button class="control clip-viewer-in" type="button"></button>
+        <button class="control clip-viewer-in" type="button" data-icon="in"></button>
         <span class="clip-viewer-span"></span>
-        <button class="control clip-viewer-out" type="button"></button>
-        <button class="control clip-viewer-all" type="button"></button>
-        <button class="control clip-viewer-piece" type="button"></button>
+        <button class="control clip-viewer-out" type="button" data-icon-end="out"></button>
+        <button class="control clip-viewer-all" type="button" data-icon="all"></button>
+        <button class="control clip-viewer-piece" type="button" data-icon="cut"></button>
       </div>
     </div>`;
   document.body.append(element);

@@ -636,7 +636,7 @@ select.control {
 }
 
 /* Open panel or visible code: a lime mark in front */
-.menu-item[aria-pressed='true']::before {
+.menu-item[aria-pressed='true']:not([data-icon])::before {
   content: '●';
   margin-right: 0.5rem;
   color: var(--accent);
@@ -3299,4 +3299,33 @@ body:not(.is-playing) .beat {
   color: #fff;
   font-size: 0.8rem;
   line-height: 1;
+}
+
+/* Menu items with an icon: icon, then the words, lined up on the left; an
+   open panel lights up in lime instead of the old dot */
+.menu-item[data-icon]:not([hidden]) {
+  justify-content: flex-start;
+  gap: 0.6em;
+}
+
+.menu-item[data-icon]::before {
+  opacity: 0.75;
+}
+
+.menu-item[data-icon][aria-pressed='true'] {
+  color: var(--accent);
+}
+
+.menu-item[data-icon][aria-pressed='true']::before {
+  opacity: 1;
+}
+
+.menu-search kbd {
+  margin-left: auto;
+}
+
+/* the tools at hand carry their panel's icon too */
+.dock-item[data-icon]::before {
+  width: 1em;
+  height: 1em;
 }

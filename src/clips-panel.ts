@@ -1,6 +1,7 @@
 // The Clips and Find tabs of the Video panel: the pool as pads (click one to
 // fire it, rename it to make pools, take it out), and the search of free
 // archives that downloads footage into the pool.
+import { setIcon } from './icon';
 import { keepingFocus } from './a11y';
 import { download, resolve, resolveLink, search, MAX_BYTES, SUGGESTIONS, type Found, type SourceId } from './clip-search';
 import { openViewer, type ViewerItem } from './clip-viewer';
@@ -157,7 +158,8 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     number.textContent = String(index + 1);
     const length = document.createElement('span');
     length.className = 'clip-length';
-    length.textContent = clip.range ? `✂ ${seconds(clip.range[1] - clip.range[0])}` : seconds(clip.duration);
+    length.textContent = clip.range ? seconds(clip.range[1] - clip.range[0]) : seconds(clip.duration);
+    if (clip.range) length.dataset.icon = 'cut';
     pad.append(number, length);
     pad.addEventListener('pointerdown', (event) => {
       if (event.button !== 0) return;
@@ -194,7 +196,7 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.className = 'clip-remove';
-    remove.textContent = '×';
+    remove.dataset.icon = 'remove';
     remove.setAttribute('aria-label', t('clipsRemove', { name: clip.title }));
     remove.title = t('clipsRemove', { name: clip.title });
     remove.addEventListener('click', () => void removeClip(clip.id).then(() => say(t('clipsRemoved', { name: clip.title }))));
@@ -202,7 +204,7 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     const look = document.createElement('button');
     look.type = 'button';
     look.className = 'clip-remove clip-look';
-    look.textContent = '⤢';
+    look.dataset.icon = 'look';
     look.setAttribute('aria-label', t('clipsLookBig', { name: clip.title }));
     look.title = t('clipsLookBig', { name: clip.title });
     look.addEventListener('click', () => openPool(clip.id));
@@ -407,7 +409,7 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
         const clear = document.createElement('button');
         clear.type = 'button';
         clear.className = 'clip-remove';
-        clear.textContent = '×';
+        setIcon(clear, '×');
         clear.setAttribute('aria-label', t('clipsLayerClear', { n: i + 1 }));
         clear.title = t('clipsLayerClear', { n: i + 1 });
         clear.addEventListener('click', () => clearLayer(i));
@@ -504,6 +506,7 @@ function setupFinder(sayInPool: (text: string) => void) {
     surprise.type = 'button';
     surprise.className = 'clips-idea clips-surprise';
     surprise.textContent = t('clipsSurprise');
+    surprise.dataset.icon = 'dice';
     surprise.addEventListener('click', () => {
       const all = SUGGESTIONS[source];
       run(all[Math.floor(Math.random() * all.length)]);

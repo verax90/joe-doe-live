@@ -2,6 +2,7 @@
 // page and play them with s("name"). They are kept in IndexedDB so they are
 // still there after a reload (in this browser only).
 
+import { setIcon } from './icon';
 import { keepingFocus } from './a11y';
 import { isCodeFile } from './export';
 import { ensureAudio } from './audio';
@@ -230,7 +231,8 @@ export function setupSamplesPanel({ addTrack, getCode }: { addTrack: (pattern: s
         const chip = document.createElement('button');
         chip.type = 'button';
         chip.className = 'cheat-action';
-        chip.textContent = `${token} ✕`;
+        chip.textContent = token;
+        chip.dataset.iconEnd = 'close';
         chip.title = t('pickedRemove');
         chip.addEventListener('click', () => {
           picked = picked.filter((_, j) => j !== i);
@@ -268,8 +270,8 @@ export function setupSamplesPanel({ addTrack, getCode }: { addTrack: (pattern: s
   // ▶ to hear it (again to stop), + to pick it
   const soundActions = (name: string, index: number, token: string) => [
     smallButton('▶', t('samplePreview', { token }), (button) => {
-      button.textContent = '■';
-      void preview(name, index, () => (button.textContent = '▶')).catch(() => (button.textContent = '▶'));
+      setIcon(button, '■');
+      void preview(name, index, () => setIcon(button, '▶')).catch(() => setIcon(button, '▶'));
     }),
     smallButton('+', t('samplePick', { token }), () => {
       picked.push(token);
@@ -311,7 +313,7 @@ export function setupSamplesPanel({ addTrack, getCode }: { addTrack: (pattern: s
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.className = 'sample-remove';
-      remove.textContent = '×';
+      setIcon(remove, '×');
       remove.setAttribute('aria-label', t('deleteSample', { name }));
       remove.addEventListener('click', async () => {
         names.delete(name);

@@ -79,6 +79,7 @@ export function setupDrop(scheduler: Scheduler | undefined) {
     if (limiter) reset(limiter.master.context);
     running = undefined;
     go.textContent = t('dropGo');
+    delete go.dataset.icon;
     status.textContent = t('dropCancelled');
   };
 
@@ -159,6 +160,7 @@ export function setupDrop(scheduler: Scheduler | undefined) {
     }
 
     go.textContent = t('dropCancel');
+    go.dataset.icon = 'close';
     const timer = window.setInterval(() => {
       while (pending.length && pending[0].time < context.currentTime + 0.25) {
         const { time, value, duration } = pending.shift()!;
@@ -171,6 +173,7 @@ export function setupDrop(scheduler: Scheduler | undefined) {
         window.clearInterval(timer);
         running = undefined;
         go.textContent = t('dropGo');
+        delete go.dataset.icon;
         status.textContent = t('dropDone');
       }
     }, 50);

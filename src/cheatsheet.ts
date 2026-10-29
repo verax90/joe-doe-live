@@ -1,5 +1,6 @@
 // Cheatsheet panel: the Strudel and Hydra basics, each with a short example
 // that copies with one click. Checked against Strudel 1.3 / hydra-synth 1.4.
+import { setIcon } from './icon';
 import { onLangChange, pick, t, type Localized } from './i18n';
 import { isPatternSnippet, trackChanges } from './tracks';
 
@@ -197,7 +198,7 @@ export function setupCheatsheet({ editor, useCodeVisual }: { editor: Editor; use
     const element = document.createElement('button');
     element.type = 'button';
     element.className = `cheat-icon ${className}`;
-    element.textContent = icon;
+    setIcon(element, icon);
     element.title = label;
     element.setAttribute('aria-label', label);
     element.addEventListener('click', onClick);

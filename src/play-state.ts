@@ -38,12 +38,12 @@ export function setupPlayState(getCode: () => string, isPlaying: () => boolean, 
     button.dataset.state = state;
     const [icon, label, title] =
       state === 'changed'
-        ? ['↻', t('playApply'), t('playApplyTitle')]
+        ? ['apply', t('playApply'), t('playApplyTitle')]
         : state === 'playing'
-          ? ['▶', t('playPlaying'), t('playPlayingTitle')]
-          : ['▶', 'Play', 'Play (Ctrl+Enter)'];
-    button.firstChild!.textContent = icon;
-    if (text) text.textContent = ` ${label}`;
+          ? ['play', t('playPlaying'), t('playPlayingTitle')]
+          : ['play', 'Play', 'Play (Ctrl+Enter)'];
+    button.dataset.icon = icon;
+    if (text) text.textContent = label;
     button.setAttribute('aria-label', label);
     button.title = title;
   };

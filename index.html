@@ -65,62 +65,62 @@
       </div>
 
       <div class="bar-group">
-        <button id="play" class="control control-accent" type="button" aria-label="Play" aria-keyshortcuts="Control+Enter">▶<span class="btn-text"> Play</span></button>
-        <button id="stop" class="control" type="button" aria-label="Stop" title="Stop (Ctrl+.)" aria-keyshortcuts="Control+.">■<span class="btn-text"> Stop</span></button>
-        <button id="undo" class="control control-icon" type="button" aria-label="Undo" title="Undo (Ctrl+Z)" data-i18n-label="undo" data-i18n-title="undoTitle">↶</button>
-        <button id="redo" class="control control-icon" type="button" aria-label="Redo" title="Redo (Ctrl+Shift+Z)" data-i18n-label="redo" data-i18n-title="redoTitle">↷</button>
+        <button id="play" class="control control-accent" type="button" aria-label="Play" aria-keyshortcuts="Control+Enter" data-icon="play"><span class="btn-text">Play</span></button>
+        <button id="stop" class="control" type="button" aria-label="Stop" title="Stop (Ctrl+.)" aria-keyshortcuts="Control+." data-icon="stop"><span class="btn-text">Stop</span></button>
+        <button id="undo" class="control control-icon" type="button" aria-label="Undo" title="Undo (Ctrl+Z)" data-i18n-label="undo" data-i18n-title="undoTitle" data-icon="undo"></button>
+        <button id="redo" class="control control-icon" type="button" aria-label="Redo" title="Redo (Ctrl+Shift+Z)" data-i18n-label="redo" data-i18n-title="redoTitle" data-icon="redo"></button>
         <button id="record" class="control control-record" type="button" aria-pressed="false" aria-label="Record" data-i18n-label="record" data-i18n-title="record">
           <span class="record-dot" aria-hidden="true"></span><span class="record-label btn-text" data-i18n="record">Record</span>
         </button>
-        <button id="record-mark" class="control control-icon" type="button" hidden aria-keyshortcuts="Alt+M" aria-label="Mark this moment" title="Mark this moment (Alt+M)" data-i18n-label="sessionMarkLabel" data-i18n-title="sessionMarkTitle">★</button>
+        <button id="record-mark" class="control control-icon" type="button" hidden aria-keyshortcuts="Alt+M" aria-label="Mark this moment" title="Mark this moment (Alt+M)" data-i18n-label="sessionMarkLabel" data-i18n-title="sessionMarkTitle" data-icon="mark"></button>
         <span id="record-status" class="record-status" role="status"></span>
       </div>
 
-      <button id="help-button" class="control control-icon" type="button" aria-haspopup="dialog" aria-keyshortcuts="?" aria-label="Help" data-i18n-label="help" title="?">?</button>
+      <button id="help-button" class="control control-icon" type="button" aria-haspopup="dialog" aria-keyshortcuts="?" aria-label="Help" data-i18n-label="help" title="?" data-icon="help"></button>
 
       <div class="menu">
         <button id="menu-toggle" class="control menu-toggle" type="button" aria-expanded="false" aria-controls="menu">
           <span data-i18n="more">More</span>
         </button>
         <div id="menu" class="menu-panel" hidden>
-          <button id="finder-open" class="menu-item menu-search" type="button" aria-keyshortcuts="Control+K">
+          <button id="finder-open" class="menu-item menu-search" data-icon="search" type="button" aria-keyshortcuts="Control+K">
             <span data-i18n="finderOpen">Search…</span><kbd>Ctrl K</kbd>
           </button>
           <div class="menu-columns">
             <div class="menu-group">
               <h3 class="menu-group-title" data-i18n="menuCode">Code</h3>
-              <button id="project-open" class="menu-item" type="button" aria-haspopup="dialog" aria-keyshortcuts="Control+S" data-i18n="projectOpen">Save and share…</button>
-              <button id="toggle-history" class="menu-item" type="button" aria-pressed="false" data-panel="history" data-i18n="historyTitle">History</button>
-              <button id="new-code" class="menu-item" type="button" data-i18n="newCode" data-i18n-title="newCodeHint">Start from blank</button>
+              <button id="project-open" class="menu-item" data-icon="save" type="button" aria-haspopup="dialog" aria-keyshortcuts="Control+S" data-i18n="projectOpen">Save and share…</button>
+              <button id="toggle-history" class="menu-item" type="button" aria-pressed="false" data-icon="history" data-panel="history" data-i18n="historyTitle">History</button>
+              <button id="new-code" class="menu-item" data-icon="new" type="button" data-i18n="newCode" data-i18n-title="newCodeHint">Start from blank</button>
             </div>
             <div class="menu-group">
               <h3 class="menu-group-title" data-i18n="menuCreate">Create</h3>
-              <button id="toggle-learn" class="menu-item" type="button" aria-pressed="false" data-panel="learn" data-i18n="learn">Learn</button>
-              <button id="toggle-compose" class="menu-item" type="button" aria-pressed="false" data-panel="compose" data-i18n="compose">Compose</button>
-              <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
-              <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-panel="samples" data-i18n="samples">Samples</button>
-              <button id="toggle-sampler" class="menu-item" type="button" aria-pressed="false" data-panel="sampler" data-i18n="samplerTitle">Sampler</button>
-              <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-panel="tools" data-i18n="tools">Tools</button>
+              <button id="toggle-learn" class="menu-item" type="button" aria-pressed="false" data-icon="learn" data-panel="learn" data-i18n="learn">Learn</button>
+              <button id="toggle-compose" class="menu-item" type="button" aria-pressed="false" data-icon="compose" data-panel="compose" data-i18n="compose">Compose</button>
+              <button id="toggle-cheats" class="menu-item" type="button" aria-pressed="false" data-icon="cheats" data-panel="cheats" data-i18n="cheatsheet">Cheatsheet</button>
+              <button id="toggle-samples" class="menu-item" type="button" aria-pressed="false" data-icon="samples" data-panel="samples" data-i18n="samples">Samples</button>
+              <button id="toggle-sampler" class="menu-item" type="button" aria-pressed="false" data-icon="sampler" data-panel="sampler" data-i18n="samplerTitle">Sampler</button>
+              <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-icon="tools" data-panel="tools" data-i18n="tools">Tools</button>
             </div>
             <div class="menu-group">
               <h3 class="menu-group-title" data-i18n="menuPlay">Play</h3>
-              <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
-              <button id="toggle-sp" class="menu-item" type="button" aria-pressed="false" data-panel="sp" data-i18n="spTitle">SP-404 / MIDI out</button>
-              <button id="toggle-remote" class="menu-item" type="button" aria-pressed="false" data-panel="remote" data-i18n="remoteTitle">Phone as controller</button>
-              <button id="toggle-mic" class="menu-item" type="button" aria-pressed="false" data-panel="mic" data-i18n="micTitle">Mic</button>
-              <button id="toggle-looper" class="menu-item" type="button" aria-pressed="false" data-panel="looper" data-i18n="looperTitle">Looper</button>
-              <button id="toggle-backing" class="menu-item" type="button" aria-pressed="false" data-panel="backing" data-i18n="backingTitle">Backing track</button>
-              <button id="toggle-pump" class="menu-item" type="button" aria-pressed="false" data-panel="pump" data-i18n="pumpTitle">Pump</button>
-              <button id="toggle-vj" class="menu-item" type="button" aria-pressed="false" data-panel="vj" data-i18n="vjTitle">VJ</button>
-              <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-panel="video" data-i18n="video">Video</button>
+              <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-icon="midi" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
+              <button id="toggle-sp" class="menu-item" type="button" aria-pressed="false" data-icon="sp" data-panel="sp" data-i18n="spTitle">SP-404 / MIDI out</button>
+              <button id="toggle-remote" class="menu-item" type="button" aria-pressed="false" data-icon="remote" data-panel="remote" data-i18n="remoteTitle">Phone as controller</button>
+              <button id="toggle-mic" class="menu-item" type="button" aria-pressed="false" data-icon="mic" data-panel="mic" data-i18n="micTitle">Mic</button>
+              <button id="toggle-looper" class="menu-item" type="button" aria-pressed="false" data-icon="looper" data-panel="looper" data-i18n="looperTitle">Looper</button>
+              <button id="toggle-backing" class="menu-item" type="button" aria-pressed="false" data-icon="backing" data-panel="backing" data-i18n="backingTitle">Backing track</button>
+              <button id="toggle-pump" class="menu-item" type="button" aria-pressed="false" data-icon="pump" data-panel="pump" data-i18n="pumpTitle">Pump</button>
+              <button id="toggle-vj" class="menu-item" type="button" aria-pressed="false" data-icon="vj" data-panel="vj" data-i18n="vjTitle">VJ</button>
+              <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-icon="video" data-panel="video" data-i18n="video">Video</button>
             </div>
             <div class="menu-group">
               <h3 class="menu-group-title" data-i18n="menuLive">Perform</h3>
-              <button id="toggle-set" class="menu-item" type="button" aria-pressed="false" data-panel="set" data-i18n="liveSet">Live set</button>
-              <button id="toggle-room" class="menu-item" type="button" aria-pressed="false" data-panel="room" data-i18n="roomTitle">Live room</button>
-              <button id="toggle-overlay" class="menu-item" type="button" aria-pressed="false" data-panel="overlay-panel" data-i18n="overlayTitle">Caption</button>
-              <button id="toggle-drop" class="menu-item" type="button" aria-pressed="false" data-panel="drop" data-i18n="dropTitle">Build-up</button>
-              <button id="toggle-frame" class="menu-item" type="button" aria-pressed="false" data-i18n="verticalFrame">Vertical framing (9:16 streams)</button>
+              <button id="toggle-set" class="menu-item" type="button" aria-pressed="false" data-icon="set" data-panel="set" data-i18n="liveSet">Live set</button>
+              <button id="toggle-room" class="menu-item" type="button" aria-pressed="false" data-icon="room" data-panel="room" data-i18n="roomTitle">Live room</button>
+              <button id="toggle-overlay" class="menu-item" type="button" aria-pressed="false" data-icon="overlay-panel" data-panel="overlay-panel" data-i18n="overlayTitle">Caption</button>
+              <button id="toggle-drop" class="menu-item" type="button" aria-pressed="false" data-icon="drop" data-panel="drop" data-i18n="dropTitle">Build-up</button>
+              <button id="toggle-frame" class="menu-item" data-icon="frame" type="button" aria-pressed="false" data-i18n="verticalFrame">Vertical framing (9:16 streams)</button>
               <label class="menu-field">
                 <span data-i18n="recordMode">What to record</span>
                 <select id="record-mode" class="control">
@@ -137,11 +137,11 @@
           </div>
           <div class="menu-footer">
             <span class="menu-group-title" data-i18n="menuView">View</span>
-            <button id="help-menu" class="menu-item help-in-menu" type="button" data-i18n="help">Help</button>
-            <button id="toggle-code" class="menu-item" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
-            <button id="toggle-ascii" class="menu-item" type="button" aria-pressed="false" data-i18n="asciiFilter">ASCII filter</button>
-            <button id="toggle-scope" class="menu-item" type="button" aria-pressed="false" data-i18n="audioWaves">Audio waves</button>
-            <button id="toggle-sequencer" class="menu-item" type="button" aria-pressed="false" data-i18n="sequencer" data-i18n-title="sequencerHint">Sequencer</button>
+            <button id="help-menu" class="menu-item help-in-menu" data-icon="help" type="button" data-i18n="help">Help</button>
+            <button id="toggle-code" class="menu-item" data-icon="code" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
+            <button id="toggle-ascii" class="menu-item" data-icon="ascii" type="button" aria-pressed="false" data-i18n="asciiFilter">ASCII filter</button>
+            <button id="toggle-scope" class="menu-item" data-icon="scope" type="button" aria-pressed="false" data-i18n="audioWaves">Audio waves</button>
+            <button id="toggle-sequencer" class="menu-item" data-icon="sequencer" type="button" aria-pressed="false" data-i18n="sequencer" data-i18n-title="sequencerHint">Sequencer</button>
             <label class="menu-inline">
               <span data-i18n="theme">Theme</span>
               <select id="theme" class="control"></select>
@@ -187,7 +187,7 @@
       <dialog id="project" class="help-dialog project-dialog" aria-labelledby="project-title">
         <div class="help-head">
           <h2 id="project-title" data-i18n="projectTitle">Save and share</h2>
-          <button id="project-close" class="control control-icon" type="button" aria-label="Close" data-i18n-label="close">✕</button>
+          <button id="project-close" class="control control-icon" type="button" aria-label="Close" data-i18n-label="close" data-icon="close"></button>
         </div>
         <form id="project-save" class="project-save">
           <label class="visually-hidden" for="save-name" data-i18n="savePrompt">Pattern name</label>
@@ -236,7 +236,7 @@
       <dialog id="help" class="help-dialog" aria-labelledby="help-title">
         <div class="help-head">
           <h2 id="help-title" data-i18n="help">Help</h2>
-          <button id="help-close" class="control control-icon" type="button" aria-label="Close" data-i18n-label="close">✕</button>
+          <button id="help-close" class="control control-icon" type="button" aria-label="Close" data-i18n-label="close" data-icon="close"></button>
         </div>
         <div id="help-content"></div>
       </dialog>
@@ -286,13 +286,13 @@
         <p id="learn-text" class="panel-help"></p>
         <pre class="learn-code"><code id="learn-code"></code></pre>
         <div class="compose-buttons">
-          <button id="learn-try" class="control control-accent" type="button" data-i18n="learnTry">▶ Try it</button>
-          <button id="learn-back" class="control" type="button" data-i18n="backToCode" hidden>Back to my code</button>
+          <button id="learn-try" class="control control-accent" type="button" data-icon="play" data-i18n="learnTry">▶ Try it</button>
+          <button id="learn-back" class="control" type="button" data-icon="back" data-i18n="backToCode" hidden>Back to my code</button>
         </div>
         <p class="learn-challenge"><strong data-i18n="learnYourTurn">Your turn:</strong> <span id="learn-challenge"></span></p>
         <div class="learn-nav">
-          <button id="learn-previous" class="control" type="button" data-i18n="learnPrevious">← Previous</button>
-          <button id="learn-next" class="control" type="button" data-i18n="learnNext">Next →</button>
+          <button id="learn-previous" class="control" type="button" data-icon="back" data-i18n="learnPrevious">← Previous</button>
+          <button id="learn-next" class="control" type="button" data-icon-end="next" data-i18n="learnNext">Next →</button>
         </div>
       </aside>
 
@@ -364,7 +364,7 @@
         <label class="visually-hidden" for="cheat-filter" data-i18n="cheatFilter">Search</label>
         <input id="cheat-filter" class="control cheat-filter" type="search" autocomplete="off" placeholder="Search" data-i18n-placeholder="cheatFilter" />
         <p id="cheat-status" class="panel-status" role="status"></p>
-        <button id="cheat-back" class="control cheat-back" type="button" data-i18n="backToCode" hidden>Back to my code</button>
+        <button id="cheat-back" class="control cheat-back" type="button" data-icon="back" data-i18n="backToCode" hidden>Back to my code</button>
         <div class="panel-tabs" role="tablist" aria-label="Cheatsheet">
           <button class="panel-tab" type="button" role="tab" aria-selected="true" aria-controls="cheat-tab-rhythm" data-i18n="cheatTabRhythm">Rhythm and notes</button>
           <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="cheat-tab-sound" data-i18n="cheatTabSound">Sound</button>
@@ -469,7 +469,7 @@
             <option value="4">4</option>
           </select>
         </label>
-        <button id="looper-record" class="control control-accent" type="button" data-i18n="looperRecord">● Record a layer</button>
+        <button id="looper-record" class="control control-accent" type="button" data-icon="record" data-i18n="looperRecord">● Record a layer</button>
         <p id="looper-status" class="panel-status" role="status"></p>
         <ol id="looper-layers" class="panel-list"></ol>
         <div class="compose-buttons">
@@ -504,7 +504,7 @@
             </select>
           </label>
         </div>
-        <button id="sampler-record" class="control control-accent" type="button" data-i18n="samplerRecord" data-i18n-title="samplerTip">● Sample</button>
+        <button id="sampler-record" class="control control-accent" type="button" data-icon="record" data-i18n="samplerRecord" data-i18n-title="samplerTip">● Sample</button>
         <p id="sampler-status" class="panel-status" role="status"></p>
         <div id="sampler-result" hidden>
           <canvas id="sampler-wave" class="sampler-wave" width="600" height="90" aria-hidden="true"></canvas>
@@ -525,7 +525,7 @@
             </label>
           </div>
           <div class="compose-buttons">
-            <button id="sampler-listen" class="control" type="button" data-i18n="samplerListen">▶ Listen</button>
+            <button id="sampler-listen" class="control" type="button" data-icon="play" data-i18n="samplerListen">▶ Listen</button>
             <button id="sampler-save" class="control control-accent" type="button" data-i18n="samplerSave">Save</button>
             <button id="sampler-discard" class="control" type="button" data-i18n="riffDiscard">Discard</button>
           </div>
@@ -551,7 +551,7 @@
         <p id="backing-status" class="panel-status" role="status"></p>
         <div id="backing-controls" hidden>
           <div class="compose-buttons">
-            <button id="backing-play" class="control" type="button">▶</button>
+            <button id="backing-play" class="control" type="button" data-icon="play"></button>
             <button id="backing-clear" class="control" type="button" data-i18n="backingClear">Remove</button>
           </div>
           <div class="compose-buttons">
@@ -719,12 +719,12 @@
           <p class="panel-help" data-i18n-html="clipsHelp">Footage played like samples.</p>
           <div class="sample-pickers">
             <label class="control file-button">
-              <span data-i18n="clipsAdd">Add videos</span>
+              <span data-icon="upload" data-i18n="clipsAdd">Add videos</span>
               <input id="clips-file" type="file" accept="video/*" multiple />
             </label>
-            <button id="clips-fill" class="control" type="button" data-i18n="clipsFill" data-i18n-title="clipsFillHint">🎲 Fill</button>
-            <button id="clips-show" class="control" type="button" data-i18n="clipsShow">See the clips</button>
-            <button id="clips-code" class="control control-accent" type="button" data-i18n="clipsToCode">Into the code</button>
+            <button id="clips-fill" class="control" type="button" data-icon="dice" data-i18n="clipsFill" data-i18n-title="clipsFillHint">🎲 Fill</button>
+            <button id="clips-show" class="control" type="button" data-icon="look" data-i18n="clipsShow">See the clips</button>
+            <button id="clips-code" class="control control-accent" type="button" data-icon="code" data-i18n="clipsToCode">Into the code</button>
           </div>
           <p id="clips-status" class="panel-status" role="status"></p>
           <ul id="clips-list" class="clips-grid" data-i18n-label="clipsListLabel"></ul>
@@ -767,7 +767,7 @@
           <div id="clips-ideas" class="clips-ideas"></div>
           <p id="clips-find-status" class="panel-status" role="status"></p>
           <ul id="clips-results" class="clips-grid clips-results"></ul>
-          <button id="clips-more" class="control" type="button" data-i18n="clipsMore" hidden>More results</button>
+          <button id="clips-more" class="control" type="button" data-icon="plus" data-i18n="clipsMore" hidden>More results</button>
           <form id="clips-link" class="youtube-add clips-link">
             <label class="visually-hidden" for="clips-link-url" data-i18n="clipsLinkLabel">A link</label>
             <input id="clips-link-url" class="control" type="text" inputmode="url" autocomplete="off" spellcheck="false" data-i18n-placeholder="clipsLinkPlaceholder" />
@@ -885,7 +885,7 @@
               </select>
             </label>
           </div>
-          <button id="riff-record" class="control control-accent" type="button" data-i18n="riffRecord" data-i18n-title="riffHint">● Record a riff</button>
+          <button id="riff-record" class="control control-accent" type="button" data-icon="record" data-i18n="riffRecord" data-i18n-title="riffHint">● Record a riff</button>
           <p id="riff-status" class="panel-status" role="status"></p>
           <div id="riff-result" hidden>
             <pre class="learn-code"><code id="riff-code"></code></pre>
@@ -900,7 +900,7 @@
 
     <div id="room-bar" class="room-bar" role="status" hidden>
       <p class="room-bar-text"></p>
-      <button id="room-listen" class="control control-accent" type="button" data-i18n="roomListen">▶ Listen</button>
+      <button id="room-listen" class="control control-accent" type="button" data-icon="play" data-i18n="roomListen">▶ Listen</button>
       <button id="room-leave" class="control" type="button" data-i18n="roomLeave">Leave</button>
     </div>
 
@@ -913,8 +913,8 @@
     <div id="set-bar" class="set-bar" role="group" aria-label="Live set" data-i18n-label="liveSet" hidden>
       <button id="set-prev" class="control control-icon" type="button" aria-label="Previous song" data-i18n-label="setPrev">◀</button>
       <p class="set-bar-text"><strong id="set-now"></strong> <span id="set-upcoming"></span></p>
-      <button id="set-next" class="control control-icon" type="button" aria-label="Next song" data-i18n-label="setNextSong">▶</button>
-      <button id="set-exit" class="control control-icon" type="button" aria-label="Leave the set" data-i18n-label="setExit">✕</button>
+      <button id="set-next" class="control control-icon" type="button" aria-label="Next song" data-i18n-label="setNextSong" data-icon="skip"></button>
+      <button id="set-exit" class="control control-icon" type="button" aria-label="Leave the set" data-i18n-label="setExit" data-icon="close"></button>
     </div>
 
     <div class="drop-hint" aria-hidden="true" data-i18n="dropHere">Drop your samples here</div>

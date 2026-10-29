@@ -3,6 +3,7 @@
 // you can go back to what sounded five minutes ago. Undo walks back letter
 // by letter; this walks back version by version. Loading one is a single
 // edit, so Ctrl+Z brings back what you had.
+import { setIcon } from './icon';
 import { keepingFocus } from './a11y';
 import { t } from './i18n';
 import { readStorage, writeStorage } from './storage';
@@ -89,7 +90,7 @@ export function setupHistory(editor: StrudelMirror) {
           const b = document.createElement('button');
           b.type = 'button';
           b.className = 'cheat-icon';
-          b.textContent = glyph;
+          setIcon(b, glyph);
           b.title = label;
           b.setAttribute('aria-label', label);
           b.addEventListener('click', onClick);
