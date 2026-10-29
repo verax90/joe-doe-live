@@ -1620,8 +1620,13 @@ select.control {
     flex: 1 1 0;
   }
 
+  .bar-pickers .tempo-field {
+    flex: 1;
+  }
+
   .bar-pickers .tempo-input {
     flex: 1;
+    width: 100%;
   }
 
   .brand-dot,
@@ -3134,4 +3139,164 @@ body:has(canvas.scope:not([hidden])) .overlay {
 .clips-layer-opacity {
   width: 100%;
   accent-color: var(--accent);
+}
+
+/* Beat (beat.ts): four marks inside the BPM field, one per beat, the first of
+   the bar brighter; the «live» of the brand blinks on each bar */
+.tempo-field {
+  position: relative;
+  display: inline-flex;
+}
+
+.beat {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.28rem;
+  left: 0.55rem;
+  display: flex;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.beat i {
+  flex: 1;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--line);
+  transition: background 0.08s linear;
+}
+
+.beat i.is-on {
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.beat i:first-child.is-on {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+
+body:not(.is-playing) .beat {
+  opacity: 0;
+}
+
+.brand.is-bar .brand-live {
+  animation: bar-blink 0.45s var(--ease);
+}
+
+@keyframes bar-blink {
+  from {
+    text-shadow: 0 0 12px var(--accent);
+    filter: brightness(1.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand.is-bar .brand-live {
+    animation: none;
+  }
+}
+
+/* At hand (dock.ts): the panels opened last, one click away in the foot */
+.dock {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.dock-list {
+  display: flex;
+  gap: 0.3rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dock-item {
+  flex: none;
+  height: 1.4rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.dock-item:hover {
+  border-color: var(--accent);
+}
+
+.dock-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.dock-item[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.foot > .shortcuts-text {
+  margin-left: auto;
+}
+
+/* the shortcuts give way first when the foot gets tight */
+@media (max-width: 1100px) {
+  .foot > .shortcuts-text {
+    display: none;
+  }
+}
+
+/* Phones: the foot stays for the tools at hand, without its title */
+@media (max-width: 700px) {
+  .foot:has(.dock-item) {
+    display: flex;
+  }
+
+  .dock-title,
+  .foot:has(.dock-item) > a {
+    display: none;
+  }
+}
+
+/* Clip pads: ⤢ and × on the picture's top-left corner, shown on hover (always
+   on touch screens), so the name has the row to itself */
+.clip {
+  position: relative;
+}
+
+.clip-tools {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  display: flex;
+  gap: 0.2rem;
+  opacity: 0;
+  transition: opacity 0.15s var(--ease);
+}
+
+.clip:hover .clip-tools,
+.clip:focus-within .clip-tools {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .clip-tools {
+    opacity: 1;
+  }
+}
+
+.clip-tools .clip-remove {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1;
 }

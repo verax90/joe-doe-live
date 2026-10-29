@@ -12,6 +12,15 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-10-29-at-hand',
+    title: L('Tools at hand and the beat in the bar', 'Herramientas a mano y el pulso en la barra', 'Eines a mà i el pols a la barra'),
+    text: L(
+      'The panels you open stay in the foot, one click away; the BPM field lights up each beat; the visuals menu comes in groups',
+      'Los paneles que abres se quedan abajo, a un clic; el campo de BPM se ilumina en cada pulso; el menú de visuales va por grupos',
+      "Els panells que obres es queden a baix, a un clic; el camp de BPM s'il·lumina a cada pols; el menú de visuals va per grups",
+    ),
+  },
+  {
     id: '2026-10-29-pieces',
     title: L('Clips: pieces, held pads and Fill', 'Clips: trozos, pads mantenidos y Llenar', 'Clips: trossos, pads mantinguts i Omplir'),
     text: L(

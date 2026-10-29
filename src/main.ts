@@ -21,6 +21,8 @@ import { setupLibrary } from './library';
 import { setupLiveSet } from './live-set';
 import { ensureLimiter } from './limiter';
 import { setupMenu } from './menu';
+import { setupDock } from './dock';
+import { setupBeat } from './beat';
 import { setupBacking } from './backing';
 import { setupMic } from './mic';
 import { setupRemote } from './remote';
@@ -66,7 +68,7 @@ import { setupVideo } from './video';
 import { setupClipPatterns } from './clips';
 import { setupClipsPanel } from './clips-panel';
 import { setupVj, vjTakesKnobs } from './vj';
-import { applyVisual, fitVisuals, setVisualClock, useBundledHydra, visuals } from './visuals';
+import { applyVisual, fitVisuals, setVisualClock, useBundledHydra, visualGroup, visuals, type VisualGroup } from './visuals';
 // A direct path: the package does not export dist/ by name
 import hydraUrl from '../node_modules/hydra-synth/dist/hydra-synth.js?url';
 
@@ -125,7 +127,23 @@ document.addEventListener('visibilitychange', () => document.visibilityState ===
 
 // Visuals are picked apart from the pattern and applied again after every
 // play, except "From the code", which leaves them to the pattern
-for (const visual of visuals) visualSelect.append(new Option(pick(visual.name), visual.id));
+const visualGroups = new Map<VisualGroup, HTMLOptGroupElement>();
+for (const visual of visuals) {
+  const group = visualGroup(visual);
+  const option = new Option(pick(visual.name), visual.id);
+  if (group === 'top') {
+    visualSelect.append(option);
+    continue;
+  }
+  if (!visualGroups.has(group)) {
+    const element = document.createElement('optgroup');
+    visualGroups.set(group, element);
+  }
+  visualGroups.get(group)!.append(option);
+}
+visualSelect.append(...visualGroups.values());
+const labelVisualGroups = () => visualGroups.forEach((element, group) => (element.label = t(`visualGroup_${group}` as Parameters<typeof t>[0])));
+labelVisualGroups();
 const initialVisual = shared.visualId ?? readStorage<string>(VISUAL_KEY, 'lima');
 // The camera only switches on when you pick a webcam visual yourself: a saved
 // or shared one does not turn it on just by opening the page
@@ -312,7 +330,11 @@ langButton.addEventListener('click', (event) => {
 });
 onLangChange(() => {
   langButton.dataset.current = lang;
-  [...visualSelect.options].forEach((option, index) => (option.text = pick(visuals[index].name)));
+  for (const option of visualSelect.options) {
+    const visual = visuals.find((v) => v.id === option.value);
+    if (visual) option.text = pick(visual.name);
+  }
+  labelVisualGroups();
   [...themeSelect.options].forEach((option, index) => (option.text = pick(themes[index].name)));
   // An untouched built-in pattern follows the language; edited code stays as is
   const translated = translateIfBuiltIn(editor.code);
@@ -324,6 +346,8 @@ const useCodeVisual = () => pickVisual('code');
 
 setupOffline();
 setupMenu();
+setupDock();
+setupBeat();
 setupProject();
 setupFinder();
 setupShortcuts(editor);

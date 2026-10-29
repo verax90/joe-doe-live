@@ -207,10 +207,14 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     look.title = t('clipsLookBig', { name: clip.title });
     look.addEventListener('click', () => openPool(clip.id));
 
+    // ⤢ and × sit on the picture's corner, so the name gets the whole row
+    const tools = document.createElement('div');
+    tools.className = 'clip-tools';
+    tools.append(look, remove);
     const row = document.createElement('div');
     row.className = 'clip-row';
-    row.append(name, tag, look, remove);
-    item.append(pad, row);
+    row.append(name, tag);
+    item.append(pad, tools, row);
     if (clip.credit) {
       const credit = document.createElement('a');
       credit.className = 'clip-credit';

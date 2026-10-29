@@ -17,6 +17,18 @@ export type Visual = { id: string; name: Localized; code: string; camera?: boole
 export const CODE_VISUAL = 'code';
 export const AUTO_VISUAL = 'auto';
 
+// The Visual menu groups them, so 55 looks are not one long list. The ones
+// that are not looks (from the code, automatic, none) stay at the top.
+export type VisualGroup = 'top' | 'sound' | 'touch' | 'voice' | 'cam' | 'clips';
+export function visualGroup(visual: Visual): VisualGroup {
+  if (visual.id === CODE_VISUAL || visual.id === AUTO_VISUAL || visual.id === 'ninguno') return 'top';
+  if (visual.clips) return 'clips';
+  if (visual.camera) return 'cam';
+  if (visual.id.startsWith('tacto')) return 'touch';
+  if (visual.id.startsWith('voz')) return 'voice';
+  return 'sound';
+}
+
 export const visuals: Visual[] = [
   { id: CODE_VISUAL, name: { en: 'From the code', es: 'Del código', ca: 'Del codi' }, code: '' },
   {
