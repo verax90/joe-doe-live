@@ -5,7 +5,7 @@
 import { getLimiter } from './limiter';
 import { measureLatency } from './latency';
 import { midiStats } from './midi';
-import { clipStats } from './clips';
+import { clipStats, struggling, videoCounts } from './clips';
 
 type Scheduler = { started?: boolean };
 type Snapshot = {
@@ -112,7 +112,8 @@ export function setupDebug(getScheduler: () => Scheduler | undefined) {
     lagMs = 0;
     const clipLine = () => {
       const frames = clipStats.frames - lastClips.frames;
-      const line = `${(clipStats.hits - lastClips.hits) * 4} hits/s · ${frames ? Math.round(((clipStats.waiting - lastClips.waiting) / frames) * 100) : 0} % frames seeking`;
+      const { open, playing } = videoCounts();
+      const line = `${(clipStats.hits - lastClips.hits) * 4} hits/s · ${frames ? Math.round(((clipStats.waiting - lastClips.waiting) / frames) * 100) : 0} % frames seeking · ${playing}/${open} videos playing${struggling() ? ' · slow: no jumps' : ''}`;
       lastClips = { ...clipStats };
       return line;
     };

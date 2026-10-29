@@ -331,6 +331,9 @@ const videos = new Map<string, HTMLVideoElement>();
 // For the ?debug panel: hits fired, and layer frames drawn while the video
 // was still seeking (a cut that showed the old picture for a moment)
 export const clipStats = { hits: 0, frames: 0, waiting: 0 };
+// how many clip videos are open and how many decode right now (each one
+// playing costs the processor, shown or not)
+export const videoCounts = () => ({ open: videos.size, playing: [...videos.values()].filter((video) => !video.paused).length });
 
 async function videoFor(clip: Clip) {
   const existing = videos.get(clip.id);
@@ -372,12 +375,22 @@ export type Hit = {
   holdMs?: number; // how long it shows; undefined holds to the next hit
 };
 
+// How often the layers are still waiting for a jump (0 to 1, the last second
+// or so). A slow machine decoding several videos at once falls behind: then a
+// hit with no begin of its own keeps the clip running where it is instead of
+// jumping (each jump decodes from the last keyframe), and the cuts between
+// clips stay on the beat. A fast machine never gets there.
+let seekLag = 0;
+const STRUGGLING = 0.35;
+export const struggling = () => seekLag > STRUGGLING;
+
 // Where a hit starts in its video, in seconds. No begin: somewhere at random,
 // leaving a second before the end
 function startTime(element: HTMLVideoElement, clip: Clip, hit: Hit) {
   const duration = Number.isFinite(element.duration) ? element.duration : clip.duration ?? 0;
   if (!(duration > 0)) return undefined;
   const [from, to] = clipSpan(clip, duration);
+  if (hit.begin === undefined && struggling() && element.currentTime >= from && element.currentTime < to - 0.5) return undefined;
   const length = to - from;
   const begin = hit.begin ?? Math.random() * Math.max(0, 1 - 1 / length);
   return Math.min(to - 0.05, Math.max(from, from + begin * length));
@@ -865,7 +878,9 @@ function draw(now: number) {
     }
     clipStats.frames++;
     let shown = element;
-    if (element.seeking || element.readyState < 2) {
+    const waiting = element.seeking || element.readyState < 2;
+    seekLag = seekLag * 0.97 + (waiting ? 0.03 : 0);
+    if (waiting) {
       clipStats.waiting++;
       // The old picture (another video, or this one before its jump)
       if (layer.fallback) shown = layer.fallback;
