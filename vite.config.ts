@@ -25,9 +25,10 @@ function serviceWorker(): Plugin {
 }
 
 // Internet Archive video files, which pages may not read directly: in
-// development Vite passes them on (online it is worker/ia-proxy.js)
+// development Vite passes them on (online it is worker/ia-proxy.js); NASA's
+// video files too, as its CDN does not always allow it
 //   /ia/dn600203.us.archive.org/0/items/… -> https://dn600203.us.archive.org/0/items/…
-const IA_PATH = /^\/ia\/(([a-z0-9-]+\.)*archive\.org)(\/[^?#]*)/;
+const IA_PATH = /^\/ia\/(([a-z0-9-]+\.)*archive\.org|images-assets\.nasa\.gov)(\/[^?#]*)/;
 
 function iaProxy(): Plugin {
   return {

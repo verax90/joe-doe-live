@@ -2955,6 +2955,8 @@ body:has(canvas.scope:not([hidden])) .overlay {
 }
 
 .clips-glitch {
+  grid-template-columns: 1fr;
+  gap: 0.3rem;
   margin: 0.75rem 0;
 }
 
@@ -3043,4 +3045,40 @@ body:has(canvas.scope:not([hidden])) .overlay {
 .clip-look:focus-visible {
   color: var(--accent);
   outline-color: var(--accent);
+}
+
+/* The pad of a clip on screen: lit, with its layer when it is not the first */
+.clip.is-live .clip-pad {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent), 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.clip.is-live .clip-pad[data-layer]:not([data-layer='0'])::after {
+  content: 'L' attr(data-layer);
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  padding: 0 0.3rem;
+  border-radius: 0.25rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.clip-viewer-range {
+  display: flex;
+  flex: 1 0 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clip-viewer-range[hidden] {
+  display: none;
+}
+
+.clip-viewer-span {
+  color: var(--muted);
+  font-size: 0.8rem;
 }

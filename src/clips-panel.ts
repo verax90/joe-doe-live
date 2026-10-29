@@ -4,7 +4,7 @@
 import { keepingFocus } from './a11y';
 import { download, resolve, resolveLink, search, MAX_BYTES, SUGGESTIONS, type Found, type SourceId } from './clip-search';
 import { openViewer, type ViewerItem } from './clip-viewer';
-import { addClip, allClips, clipAddress, clipName, fireIndex, setGlitchAmount, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
+import { addClip, allClips, clipAddress, clipName, fireIndex, liveClips, setClipRange, setGlitchAmount, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
 import { onLangChange, t } from './i18n';
 import { NOTE_EVENT, type NoteDetail } from './midi';
 import { readStorage, writeStorage } from './storage';
@@ -105,7 +105,10 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     for (const clip of allClips()) byName.set(clip.name, (byName.get(clip.name) ?? 0) + 1);
     return byName;
   };
-  const renderPool = () => keepingFocus(list, renderPoolNow);
+  const renderPool = () => {
+    keepingFocus(list, renderPoolNow);
+    lastLive = ''; // light the new pads up again
+  };
   const renderPoolNow = () => {
     const clips = allClips();
     const pools = counts();
@@ -123,6 +126,7 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
   const clipItem = (clip: Clip, index: number, nth: number | undefined) => {
     const item = document.createElement('li');
     item.className = 'clip';
+    item.dataset.clip = clip.id;
     const pad = document.createElement('button');
     pad.type = 'button';
     pad.className = 'clip-pad';
@@ -134,7 +138,7 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     number.textContent = String(index + 1);
     const length = document.createElement('span');
     length.className = 'clip-length';
-    length.textContent = seconds(clip.duration);
+    length.textContent = clip.range ? `✂ ${seconds(clip.range[1] - clip.range[0])}` : seconds(clip.duration);
     pad.append(number, length);
     pad.addEventListener('pointerdown', (event) => {
       if (event.button !== 0) return;
@@ -189,6 +193,10 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
             page: each.credit?.page,
             load: async () => (address = await clipAddress(each)),
             done: () => address && URL.revokeObjectURL(address),
+            range: {
+              get: () => allClips().find((c) => c.id === each.id)?.range,
+              set: (range, thumb) => void setClipRange(each.id, range, thumb),
+            },
           };
         }),
         clips.findIndex((each) => each.id === clip.id),
@@ -251,6 +259,35 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
   glitch.addEventListener('input', () => {
     setGlitchAmount(Number(glitch.value));
     writeStorage('jdl:clips-glitch', Number(glitch.value));
+  });
+
+  // The pads of the clips on screen light up, with their layer
+  let lastLive = '';
+  setInterval(() => {
+    const live = liveClips();
+    const key = [...live].join();
+    if (key === lastLive) return;
+    lastLive = key;
+    for (const item of list.querySelectorAll<HTMLElement>('.clip')) {
+      const layer = live.get(item.dataset.clip ?? '');
+      item.classList.toggle('is-live', layer !== undefined);
+      const pad = item.querySelector<HTMLElement>('.clip-pad');
+      if (!pad) continue;
+      if (layer === undefined) delete pad.dataset.layer;
+      else pad.dataset.layer = String(layer);
+    }
+  }, 100);
+
+  // Keys 1-9 fire the first nine clips (with Shift, on layer 1, over the
+  // others), whenever you are not typing
+  document.addEventListener('keydown', (event) => {
+    const digit = event.code.match(/^(?:Digit|Numpad)([1-9])$/)?.[1];
+    if (!digit || event.ctrlKey || event.metaKey || event.altKey || event.repeat) return;
+    if ((event.target as HTMLElement).closest('.cm-editor, input, select, textarea, [contenteditable], dialog')) return;
+    if (!allClips().length) return;
+    event.preventDefault();
+    fireIndex(Number(digit) - 1, event.shiftKey ? { layer: 1, fx: ['screen'] } : {});
+    showClipsIfNeeded();
   });
 
   // ── MIDI: note 36 (C1, the MPK's first pad) is the first clip ──────────

@@ -99,7 +99,8 @@ describe('Internet Archive', () => {
 describe('NASA and Commons', () => {
   it('takes NASA’s phone-sized copy over https', () => {
     const file = pickNasaFile(['http://images-assets.nasa.gov/video/A b/A b~orig.mp4', 'http://images-assets.nasa.gov/video/A b/A b~mobile.mp4']);
-    expect(file?.url).toBe('https://images-assets.nasa.gov/video/A%20b/A%20b~mobile.mp4');
+    expect(file?.preview).toBe('https://images-assets.nasa.gov/video/A%20b/A%20b~mobile.mp4');
+    expect(file?.url).toBe('/ia/images-assets.nasa.gov/video/A%20b/A%20b~mobile.mp4');
   });
 
   it('takes Commons’ smallest playable copy and works out its size', () => {

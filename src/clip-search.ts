@@ -4,7 +4,9 @@
 //   and the VHS Vault): search and file lists allow pages to read them, the
 //   video files do not, so they come through a small proxy (/ia/…: Vite's in
 //   development, a Cloudflare Worker online, see worker/ia-proxy.js).
-// - NASA's image and video library and Wikimedia Commons allow it directly.
+// - NASA's image and video library: search and file lists directly, the
+//   videos through the same proxy (its CDN does not always allow it).
+// - Wikimedia Commons allows it directly.
 // A picked result is downloaded whole into the browser: cutting between
 // moments of a video is only quick when the whole file is at hand.
 
@@ -96,7 +98,7 @@ export function parseNasaSearch(data: { collection?: { items?: NasaItem[] } }): 
       const info = item.data![0];
       return {
         source: 'nasa' as const,
-        id: item.href,
+        id: info.nasa_id,
         title: info.title ?? info.nasa_id,
         year: info.date_created?.slice(0, 4),
         thumb: (item.links?.[0]?.href ?? '').replace(/^http:/, 'https:'),
@@ -105,14 +107,17 @@ export function parseNasaSearch(data: { collection?: { items?: NasaItem[] } }): 
     });
 }
 
-// NASA's files list: the phone-sized copy first, it is plenty for clips
+// NASA's files list: the phone-sized copy first, it is plenty for clips.
+// Its CDN sometimes keeps a copy without the header that lets pages read it,
+// so the download goes through the proxy too
 export function pickNasaFile(files: string[]): Resolved | null {
   const order = ['~mobile.mp4', '~small.mp4', '~preview.mp4', '~medium.mp4', '~large.mp4', '~orig.mp4'];
   for (const ending of order) {
     const file = files.find((url) => url.endsWith(ending));
     if (file) {
-      const url = encodeURI(decodeURI(file.replace(/^http:/, 'https:')));
-      return { url, preview: url };
+      const preview = encodeURI(decodeURI(file.replace(/^http:/, 'https:')));
+      const { host, pathname } = new URL(preview);
+      return { url: `${IA_PROXY}/${host}${pathname}`, preview };
     }
   }
   return null;
@@ -197,7 +202,10 @@ export async function search(source: SourceId, text: string, page = 1): Promise<
 
 // Which file to download for a result
 export async function resolve(found: Found): Promise<Resolved | null> {
-  if (found.source === 'nasa') return pickNasaFile(await getJson<string[]>(found.id.replace(/^http:/, 'https:')));
+  if (found.source === 'nasa') {
+    const data = await getJson<{ collection?: { items?: { href: string }[] } }>(`https://images-api.nasa.gov/asset/${encodeURIComponent(found.id)}`);
+    return pickNasaFile((data.collection?.items ?? []).map((item) => item.href));
+  }
   if (found.source === 'commons') {
     const params = new URLSearchParams({
       action: 'query',
@@ -241,7 +249,11 @@ export async function resolveLink(text: string): Promise<{ found: Found; file: R
 // Downloads a file whole, telling how far it got (0 to 1, or -1 when the
 // size is unknown)
 export async function download(url: string, onProgress: (done: number) => void, signal?: AbortSignal): Promise<Blob> {
-  const response = await fetch(url, { signal });
+  // A CDN can hand back a copy saved without the header that lets pages read
+  // it (NASA's does now and then): once more, past any saved copy
+  const response = await fetch(url, { signal }).catch(() =>
+    fetch(`${url}${url.includes('?') ? '&' : '?'}fresh=${Date.now()}`, { signal, cache: 'no-store' }),
+  );
   if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
   const total = Number(response.headers.get('content-length')) || 0;
   if (total > MAX_BYTES) throw new Error('too big');

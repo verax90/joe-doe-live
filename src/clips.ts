@@ -25,6 +25,7 @@ export type Clip = {
   duration?: number;
   size?: number;
   credit?: { source: string; page: string };
+  range?: [number, number]; // the part to use, in seconds; the rest is left out
   added: number;
 };
 
@@ -232,6 +233,9 @@ export const FX = [
   // glitches: datamosh, displaced blocks, pixel-sort drips, VHS tracking,
   // a stuttering loop, burnt colour, scan lines; glitch picks one per hit
   'mosh', 'blocks', 'melt', 'vhs', 'stutter', 'burn', 'scan', 'glitch',
+  // keys: the dark parts (key) or the light parts (dark) let the layers
+  // under show through: fire, smoke or light over other footage
+  'key', 'dark',
   // how a layer mixes with the ones under it
   'add', 'screen', 'diff', 'mult', 'lighten', 'overlay', 'dodge', 'hard',
 ] as const;
@@ -275,7 +279,30 @@ type Layer = {
   mosh?: HTMLCanvasElement; // mosh: the picture the new one smears into
   startAt: number; // where the hit started in its video, for stutter
   stutterAt: number;
+  span?: [number, number]; // the clip's marked part: playback stays inside it
 };
+// The keys are SVG filters the canvas borrows: the picture's brightness
+// becomes how solid it is (key), or the opposite (dark)
+let keyFilters: string | undefined;
+function ensureKeyFilters() {
+  if (keyFilters) return keyFilters;
+  keyFilters = 'jdl-clips-key';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', '0');
+  svg.setAttribute('height', '0');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.style.position = 'absolute';
+  svg.innerHTML = `
+    <filter id="${keyFilters}-key" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0.9 1.8 0.3 0 -0.35" />
+    </filter>
+    <filter id="${keyFilters}-dark" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -0.9 -1.8 -0.3 0 2.2" />
+    </filter>`;
+  document.body.append(svg);
+  return keyFilters;
+}
+
 const layers: Layer[] = Array.from({ length: LAYERS }, () => ({ until: 0, opacity: 1, rate: 1, fx: [], coarse: 0, hitAt: 0, startAt: 0, stutterAt: 0 }));
 
 const canvas = document.createElement('canvas');
@@ -339,8 +366,29 @@ export type Hit = {
 function startTime(element: HTMLVideoElement, clip: Clip, hit: Hit) {
   const duration = Number.isFinite(element.duration) ? element.duration : clip.duration ?? 0;
   if (!(duration > 0)) return undefined;
-  const begin = hit.begin ?? Math.random() * Math.max(0, 1 - 1 / duration);
-  return Math.min(duration - 0.05, Math.max(0, begin * duration));
+  const [from, to] = clipSpan(clip, duration);
+  const length = to - from;
+  const begin = hit.begin ?? Math.random() * Math.max(0, 1 - 1 / length);
+  return Math.min(to - 0.05, Math.max(from, from + begin * length));
+}
+
+// The part of a clip that plays: its marked range, or all of it
+export function clipSpan(clip: Pick<Clip, 'range'>, duration: number): [number, number] {
+  if (!clip.range) return [0, duration];
+  const from = Math.max(0, Math.min(clip.range[0], duration - 0.5));
+  const to = Math.min(duration, Math.max(clip.range[1], from + 0.5));
+  return [from, to];
+}
+
+// Marks the part of a clip to use (none: all of it), with a new thumbnail
+// from that part if one is given
+export async function setClipRange(id: string, range: [number, number] | undefined, thumb?: string) {
+  const clip = clips.find((c) => c.id === id);
+  if (!clip) return;
+  clip.range = range && range[1] > range[0] ? range : undefined;
+  if (thumb) clip.thumb = thumb;
+  await inStore(META, 'readwrite', (store) => store.put(clip));
+  changed();
 }
 
 // Hits planned but not shown yet, per video
@@ -378,6 +426,7 @@ export async function fire(clip: Clip, hit: Hit = {}, ready?: Plan) {
   // While the new one is still jumping to its spot, the old picture stays
   layer.fallback = previous !== element && previous?.readyState && previous.readyState >= 2 ? previous : undefined;
   layer.clipId = clip.id;
+  layer.span = Number.isFinite(element.duration) ? clipSpan(clip, element.duration) : undefined;
   layer.until = hit.holdMs === undefined ? Infinity : now + hit.holdMs;
   layer.opacity = Math.min(1, Math.max(0, hit.gain ?? 1));
   layer.rate = hit.speed ?? 1;
@@ -413,6 +462,16 @@ export async function fire(clip: Clip, hit: Hit = {}, ready?: Plan) {
 export function fireIndex(index: number, hit: Hit = {}) {
   const clip = clips[((index % clips.length) + clips.length) % clips.length];
   if (clip) void fire(clip, hit);
+}
+
+// The clips on screen now, and on which layer, for the pads to light up
+export function liveClips() {
+  const now = performance.now();
+  const live = new Map<string, number>();
+  layers.forEach((layer, index) => {
+    if (layer.video && layer.clipId && layer.until > now && !live.has(layer.clipId)) live.set(layer.clipId, index);
+  });
+  return live;
 }
 
 export function clearLayers() {
@@ -713,6 +772,11 @@ function draw(now: number) {
       element.currentTime = back > 0 ? back : element.duration - 0.05;
     }
     if (layer.fx.includes('strobe') && Math.floor((now - layer.hitAt) / 60) % 2 === 1) return;
+    // A marked part loops inside itself
+    if (layer.span && !element.seeking) {
+      if (layer.rate >= 0 && element.currentTime >= layer.span[1]) element.currentTime = layer.span[0];
+      else if (layer.rate < 0 && element.currentTime <= layer.span[0]) element.currentTime = layer.span[1] - 0.05;
+    }
     // Stutter: back to where the hit started, about nine times a second
     if (layer.fx.includes('stutter') && now - layer.stutterAt > 110 && !element.seeking) {
       layer.stutterAt = now;
@@ -735,11 +799,14 @@ function draw(now: number) {
     const blend = layer.fx.map((fx) => BLENDS[fx]).find(Boolean);
     // Layers above mix in with screen, unless they are cut into pieces: then
     // the pieces show whole, woven into the picture under them
-    const pieces = layer.fx.some((f) => f === 'bands' || f === 'cols' || f === 'tiles' || f === 'half');
+    const pieces = layer.fx.some((f) => f === 'bands' || f === 'cols' || f === 'tiles' || f === 'half' || f === 'key' || f === 'dark');
     context.globalCompositeOperation = index === 0 ? 'source-over' : blend ?? (pieces ? 'source-over' : 'screen');
     clipToPieces(layer, now);
+    const key = layer.fx.includes('key') ? 'key' : layer.fx.includes('dark') ? 'dark' : undefined;
+    if (key) context.filter = `url(#${ensureKeyFilters()}-${key})`;
     if (layer.fx.includes('slice')) drawSliced(picture, now);
     else context.drawImage(picture, 0, 0);
+    context.filter = 'none';
     // Light: a blurred, brighter copy added on top, so highlights bloom
     if (layer.fx.includes('glow')) {
       context.globalCompositeOperation = 'lighter';

@@ -1,9 +1,10 @@
 // Internet Archive video for live.joedoe.dev: the archive lets pages read its
 // search and file lists, not its video files, and the studio needs to read
 // their pixels (effects, Hydra). This passes the files on with the header
-// that allows it. Only *.archive.org, only GET and HEAD, ranges kept.
+// that allows it. Only *.archive.org and NASA's video files (its CDN does not
+// always send the header), only GET and HEAD, ranges kept.
 //   /ia/dn600203.us.archive.org/0/items/DuckandC1951/DuckandC1951_512kb.mp4
-const ALLOWED_HOST = /^([a-z0-9-]+\.)*archive\.org$/;
+const ALLOWED_HOST = /^(([a-z0-9-]+\.)*archive\.org|images-assets\.nasa\.gov)$/;
 const ORIGINS = /^https:\/\/(live\.joedoe\.dev|[a-z0-9-]+-veraxs-projects\.vercel\.app)$|^http:\/\/localhost(:\d+)?$/;
 
 export default {
