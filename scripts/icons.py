@@ -6,7 +6,7 @@ names = {
  'mark':'star','look':'maximize-2','remove':'trash-2','dice':'dices','cut':'scissors','record':'circle-dot',
  'back':'arrow-left','next':'arrow-right','skip':'skip-forward','in':'arrow-left-to-line','out':'arrow-right-to-line',
  'all':'move-horizontal','code':'code-xml','film':'film','plus':'plus','upload':'upload','search':'search',
- 'up':'arrow-up','down':'arrow-down','volume':'volume-2','mute':'volume-x','learn':'graduation-cap','compose':'music','cheats':'book-open','samples':'audio-waveform','sampler':'disc-3','tools':'wrench','midi':'piano','sp':'keyboard-music','remote':'smartphone','mic':'mic','looper':'repeat','backing':'list-music','pump':'activity','vj':'sparkles','video':'film','set':'list-ordered','room':'radio','overlay-panel':'type','drop':'trending-up','frame':'rectangle-vertical','history':'history','save':'save','new':'file-plus','ascii':'binary','scope':'audio-lines','sequencer':'grid-3x3',
+ 'up':'arrow-up','down':'arrow-down','volume':'volume-2','mute':'volume-x','learn':'graduation-cap','compose':'music','cheats':'book-open','samples':'audio-waveform','sampler':'disc-3','tools':'wrench','midi':'piano','sp':'keyboard-music','remote':'smartphone','mic':'mic','looper':'repeat','backing':'list-music','pump':'activity','react':'drum','vj':'sparkles','video':'film','set':'list-ordered','room':'radio','overlay-panel':'type','drop':'trending-up','frame':'rectangle-vertical','history':'history','save':'save','new':'file-plus','ascii':'binary','scope':'audio-lines','sequencer':'grid-3x3',
  'projector':'projector',
  'more':'ellipsis','apply':'refresh-cw','pause':'pause','layers':'layers','headphones':'headphones','check':'check','copy':'copy','download':'download',
 }

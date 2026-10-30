@@ -3330,6 +3330,26 @@ body:not(.is-playing) .beat {
   height: 1em;
 }
 
+/* Follow the music (clips-react.ts): a label and its select on one row */
+.clips-react {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.25rem;
+}
+
+.clips-react label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.clips-react select {
+  flex: 1;
+  min-width: 0;
+}
+
 /* Record what you play (clips-panel.ts): the button and how many bars */
 .clips-rec {
   display: flex;

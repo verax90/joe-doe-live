@@ -12,6 +12,7 @@ import { addClip, addPiece, allClips, clearLayer, clipAddress, clipName, fireInd
 import { onLangChange, pick, t, type Localized } from './i18n';
 import { CC_EVENT, NOTE_EVENT, NOTE_OFF_EVENT, type CcDetail, type NoteDetail } from './midi';
 import { readStorage, writeStorage } from './storage';
+import { onReact, reactMode, setReactMode, type ReactMode } from './clips-react';
 
 type Options = {
   showClips: () => void; // picks a Clips visual
@@ -295,6 +296,17 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
 
   // Held: with "Only while held", letting go of a pad, key or note takes its
   // clip off again; each press is remembered by what pressed it
+  // Follow the music: the drums move the clips (clips-react.ts)
+  const reactSelect = document.querySelector<HTMLSelectElement>('#clips-react')!;
+  reactSelect.value = reactMode();
+  reactSelect.addEventListener('change', () => {
+    setReactMode(reactSelect.value as ReactMode);
+    if (reactSelect.value === 'off') return;
+    if (!allClips().length) status.textContent = t('clipsReactNoClips');
+    else showClips();
+  });
+  onReact(() => showClipsIfNeeded());
+
   const holdBox = document.querySelector<HTMLInputElement>('#clips-hold')!;
   holdBox.checked = readStorage<boolean>('jdl:clips-hold', false);
   holdBox.addEventListener('change', () => writeStorage('jdl:clips-hold', holdBox.checked));

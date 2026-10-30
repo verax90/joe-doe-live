@@ -513,6 +513,18 @@ export function fireIndex(index: number, hit: Hit = {}) {
   return { clip, shown: fire(clip, hit) };
 }
 
+// Back to where the layer's clip was cut in: a stutter on the snare. False if
+// the layer shows nothing
+export function rewindLayer(index: number) {
+  const layer = layers[index];
+  const now = performance.now();
+  if (!layer?.video || layer.until <= now) return false;
+  layer.video.currentTime = layer.startAt;
+  layer.hitAt = now;
+  layer.stutterAt = now;
+  return true;
+}
+
 // Held pads: letting go empties the layer, if it still shows that clip
 export function releaseClip(clipId: string, index: number) {
   if (layers[index]?.clipId === clipId) clearLayer(index);

@@ -47,6 +47,7 @@ import { setupRecorder } from './record';
 import { setupRiff } from './riff';
 import { setupCycleClock } from './cycle-clock';
 import { setupPump, setupPumpPanel } from './pump';
+import { setupClipsReact } from './clips-react';
 import { setupLooper } from './looper';
 import { setupSampler } from './sampler';
 import { setupSp } from './sp';
@@ -292,6 +293,7 @@ whenStrudelReady().then(() => {
   });
   setupCycleClock(scheduler as Parameters<typeof setupCycleClock>[0]);
   setupPump(scheduler as Parameters<typeof setupPump>[0]);
+  setupClipsReact(scheduler as Parameters<typeof setupClipsReact>[0]);
 });
 
 document.querySelector('#play')!.addEventListener('click', () => editor.evaluate());

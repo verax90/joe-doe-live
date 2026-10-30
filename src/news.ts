@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-10-30-follow',
+    title: L('Clips that follow the music', 'Clips que siguen la música', 'Clips que segueixen la música'),
+    text: L(
+      'In Clips, Follow the music: the kick cuts to another clip, the snare jumps back and the hi-hats flash, with any pattern and no code',
+      'En Clips, Seguir la música: el bombo cambia de clip, la caja vuelve atrás y los platos destellan, con cualquier patrón y sin código',
+      'A Clips, Seguir la música: el bombo canvia de clip, la caixa torna enrere i els plats espurnegen, amb qualsevol patró i sense codi',
+    ),
+    go: [{ click: '#toggle-video' }, { click: '[aria-controls="video-tab-clips"]' }, { value: ['#clips-react', 'drums'] }],
+  },
+  {
     id: '2026-10-29-projector',
     title: L('Projector and record what you play', 'Proyector y grabar lo que tocas', 'Projector i gravar el que toques'),
     text: L(
