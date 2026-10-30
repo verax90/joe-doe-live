@@ -12,6 +12,15 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-10-30-glass',
+    title: L('The screen breaks on the drop', 'La pantalla se rompe en el drop', 'La pantalla es trenca al drop'),
+    text: L(
+      'With Build-up, the picture cracks over the last bar, bursts into shards on the drop and puts itself back together a bar later; on the projector and in recordings too',
+      'Con Subidón, la imagen se agrieta en el último compás, estalla en trozos en el drop y se recompone un compás después; también en el proyector y en las grabaciones',
+      "Amb Pujada, la imatge s'esquerda a l'últim compàs, esclata en trossos al drop i es recompon un compàs després; també al projector i a les gravacions",
+    ),
+  },
+  {
     id: '2026-10-30-follow',
     title: L('Clips that follow the music', 'Clips que siguen la música', 'Clips que segueixen la música'),
     text: L(

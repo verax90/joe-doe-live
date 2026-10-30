@@ -6,6 +6,7 @@ import { onHydraFrame } from './ascii';
 import { onLangChange, t } from './i18n';
 import { overlayText } from './overlay';
 import { drawCaption, themeColours } from './record';
+import { shatterCanvas } from './shatter';
 import { toast } from './toast';
 
 let popup: Window | null = null;
@@ -79,6 +80,8 @@ export function setupProjector() {
       const w = shown.width * fit;
       const h = shown.height * fit;
       g.drawImage(shown, (width - w) / 2, (height - h) / 2, w, h);
+      const glass = shatterCanvas();
+      if (glass) g.drawImage(glass, (width - w) / 2, (height - h) / 2, w, h);
       // no watermark on the club's screen: only your Caption, when there is one
       if (overlayText()) drawCaption(g, width, height, Math.max(14, Math.round(height / 48)), colours);
     });

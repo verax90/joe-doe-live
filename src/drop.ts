@@ -10,9 +10,10 @@ import { audioTimeOfCycle, heardCycle, whenCycleKnown } from './cycle-clock';
 import { t } from './i18n';
 import { getLimiter } from './limiter';
 import { readStorage, writeStorage } from './storage';
+import { cancelShatter, shatterAt } from './shatter';
 
-export type DropSettings = { bars: number; roll: boolean; riser: boolean; filter: boolean; gap: boolean; impact: boolean };
-const DEFAULTS: DropSettings = { bars: 4, roll: true, riser: true, filter: true, gap: true, impact: true };
+export type DropSettings = { bars: number; roll: boolean; riser: boolean; filter: boolean; gap: boolean; impact: boolean; glass: boolean };
+const DEFAULTS: DropSettings = { bars: 4, roll: true, riser: true, filter: true, gap: true, impact: true, glass: true };
 
 // The snare roll: seconds from the build's start and a gain for each hit.
 // The build is split in four stages of 4, 8, 16 and 32 hits a bar; the gap,
@@ -40,7 +41,7 @@ export function setupDrop(scheduler: Scheduler | undefined) {
   const go = document.querySelector<HTMLButtonElement>('#drop-go')!;
   const bars = document.querySelector<HTMLSelectElement>('#drop-bars')!;
   const status = document.querySelector<HTMLElement>('#drop-status')!;
-  for (const key of ['roll', 'riser', 'filter', 'gap', 'impact'] as const) {
+  for (const key of ['roll', 'riser', 'filter', 'gap', 'impact', 'glass'] as const) {
     const box = document.querySelector<HTMLInputElement>(`#drop-${key}`)!;
     box.checked = settings[key];
     box.addEventListener('change', () => save({ [key]: box.checked }));
@@ -76,6 +77,7 @@ export function setupDrop(scheduler: Scheduler | undefined) {
       }
     }
     window.clearInterval(running.timer);
+    cancelShatter();
     if (limiter) reset(limiter.master.context);
     running = undefined;
     go.textContent = t('dropGo');
@@ -159,6 +161,9 @@ export function setupDrop(scheduler: Scheduler | undefined) {
       nodes.push(boom);
     }
 
+    // the screen cracks over the last bar and breaks on the one (shatter.ts),
+    // at the moment it is heard, not when it is scheduled
+    if (settings.glass) shatterAt(performance.now() + (dropAt - context.currentTime + (context.outputLatency || 0)) * 1000, barSeconds);
     go.textContent = t('dropCancel');
     go.dataset.icon = 'close';
     const timer = window.setInterval(() => {

@@ -5,6 +5,7 @@
 import { onLangChange, t } from './i18n';
 import { ensureAudio } from './audio';
 import { onHydraFrame } from './ascii';
+import { shatterCanvas } from './shatter';
 import { scopeCanvas } from './scope';
 import { ensureLimiter, getLimiter } from './limiter';
 import { startStems } from './stems';
@@ -330,6 +331,8 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
       draw2d.fillStyle = '#000';
       draw2d.fillRect(0, 0, size.width, size.height);
       draw2d.drawImage(shownCanvas(canvas), 0, 0, size.width, size.height);
+      const glass = shatterCanvas();
+      if (glass) draw2d.drawImage(glass, 0, 0, size.width, size.height);
       const scope = scopeCanvas();
       // the caption sits above the waves when they are on, as on screen
       let captionBottom = size.height;
@@ -368,6 +371,8 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
       draw2d.fillStyle = '#000';
       draw2d.fillRect(0, 0, VERTICAL.width, VERTICAL.height);
       draw2d.drawImage(shownCanvas(canvas), 0, 0, VERTICAL.width, VERTICAL.height);
+      const verticalGlass = shatterCanvas();
+      if (verticalGlass) draw2d.drawImage(verticalGlass, 0, 0, VERTICAL.width, VERTICAL.height);
       // The audio waves, if on, along the bottom as on screen
       const scope = scopeCanvas();
       if (scope) draw2d.drawImage(scope, 0, VERTICAL.height - 260, VERTICAL.width, 200);
