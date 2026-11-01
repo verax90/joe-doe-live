@@ -69,7 +69,7 @@ g.phoneY = () => xy.y;
 // A message from the phone, as the MPK would have sent it
 export function applyRemote(message: RemoteMessage, target: EventTarget = window) {
   if (message.t === 'pad' && message.i >= 0 && message.i < 8) {
-    target.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: 32 + message.i, velocity: clamp(message.v) } }));
+    target.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: 32 + message.i, velocity: clamp(message.v), device: 'phone' } }));
   } else if (message.t === 'cc' && message.cc >= 1 && message.cc <= 8) {
     target.dispatchEvent(new CustomEvent<CcDetail>(CC_EVENT, { detail: { cc: message.cc, value: clamp(message.v), channel: 1 } }));
   } else if (message.t === 'xy') {

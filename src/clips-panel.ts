@@ -10,7 +10,7 @@ import { openViewer, type ViewerItem } from './clip-viewer';
 import type { Hit } from './clips';
 import { addClip, addPiece, allClips, clearLayer, clipAddress, clipName, fireIndex, liveClips, releaseClip, MIX_MODES, mixer, setClipRange, setGlitchAmount, blendScenes, type Scene, type MixMode, loadClips, missingNames, onClipsChange, removeClip, renameClip, warmUp, type Clip } from './clips';
 import { onLangChange, pick, t, type Localized } from './i18n';
-import { CC_EVENT, NOTE_EVENT, NOTE_OFF_EVENT, type CcDetail, type NoteDetail } from './midi';
+import { CC_EVENT, NOTE_EVENT, NOTE_OFF_EVENT, noteRouting, type CcDetail, type NoteDetail } from './midi';
 import { readStorage, writeStorage } from './storage';
 import { onReact, reactMode, setReactMode, type ReactMode } from './clips-react';
 
@@ -682,12 +682,29 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
 
   // ── MIDI: note 36 (C1, the MPK's first pad) is the first clip ──────────
   midiBox.checked = readStorage<boolean>('jdl:clips-midi', false);
-  midiBox.addEventListener('change', () => writeStorage('jdl:clips-midi', midiBox.checked));
+  const silentBox = document.querySelector<HTMLInputElement>('#clips-midi-silent')!;
+  silentBox.checked = readStorage<boolean>('jdl:clips-midi-silent', false);
+  // Video only counts while the notes fire clips: otherwise the keys would just go quiet
+  const route = () => {
+    silentBox.disabled = !midiBox.checked;
+    noteRouting.videoOnly = midiBox.checked && silentBox.checked;
+  };
+  route();
+  midiBox.addEventListener('change', () => {
+    writeStorage('jdl:clips-midi', midiBox.checked);
+    route();
+  });
+  silentBox.addEventListener('change', () => {
+    writeStorage('jdl:clips-midi-silent', silentBox.checked);
+    route();
+  });
   window.addEventListener(NOTE_EVENT, (event) => {
     if (!midiBox.checked || !allClips().length) return;
-    const { note, velocity } = (event as CustomEvent<NoteDetail>).detail;
+    const { note, velocity, device } = (event as CustomEvent<NoteDetail>).detail;
+    // The Miyoo Flip's and the phone's pads start at note 32, the MPK's at 36: each first pad is clip 1
+    const first = /miyoo|phone/i.test(device ?? '') ? 32 : 36;
     // velocity comes from 0 to 1: soft hits are see-through
-    press(`note-${note}`, note - 36, { layer: targetLayer, gain: Math.min(1, 0.35 + velocity * 0.65) });
+    press(`note-${note}`, note - first, { layer: targetLayer, gain: Math.min(1, 0.35 + velocity * 0.65) });
   });
   window.addEventListener(NOTE_OFF_EVENT, (event) => letGo(`note-${(event as CustomEvent<number>).detail}`));
 

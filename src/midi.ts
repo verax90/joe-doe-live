@@ -78,7 +78,9 @@ export const PROGRAM_EVENT = 'jdl:program-change';
 export const NOTE_EVENT = 'jdl:note-on';
 // and every note-off, for what lasts only while a key is held (clip pads)
 export const NOTE_OFF_EVENT = 'jdl:note-off';
-export type NoteDetail = { note: number; velocity: number };
+export type NoteDetail = { note: number; velocity: number; device?: string };
+// Clips → Video only: notes change the clip and free play stays quiet
+export const noteRouting = { videoOnly: false };
 
 // MIDI Start / Continue and Stop from a controller (the Miyoo's Studio
 // Remote, a drum machine…): main.ts presses Play or Stop
@@ -190,7 +192,7 @@ export function setupMidiPanel() {
         }
         if ((status & 0xf0) === 0x90 && high > 0 && !isEcho(data, event.timeStamp)) {
           midiStats.notes++;
-          window.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: low, velocity: high / 127 } }));
+          window.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: low, velocity: high / 127, device: device.name } }));
         }
         if ((status & 0xf0) === 0xc0) window.dispatchEvent(new CustomEvent(PROGRAM_EVENT, { detail: low }));
         if ((status === 0xfa || status === 0xfb || status === 0xfc) && !isTransportEcho(event.timeStamp)) {

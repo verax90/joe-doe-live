@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-01-video-only',
+    title: L('Change clips without a sound', 'Cambiar de clip sin que suene', 'Canviar de clip sense que soni'),
+    text: L(
+      'In Clips, Video only: a MIDI controller (the Miyoo Flip too) changes the clip without playing the studio sounds',
+      'En Clips, Solo vídeo: un controlador MIDI (también la Miyoo Flip) cambia de clip sin tocar los sonidos del estudio',
+      "A Clips, Només vídeo: un controlador MIDI (també la Miyoo Flip) canvia de clip sense tocar els sons de l'estudi",
+    ),
+    go: [{ click: '#toggle-video' }, { click: '[aria-controls="video-tab-clips"]' }],
+  },
+  {
     id: '2026-10-30-glass',
     title: L('The screen breaks on the drop', 'La pantalla se rompe en el drop', 'La pantalla es trenca al drop'),
     text: L(

@@ -5,7 +5,7 @@ import { ensureAudio } from './audio';
 import { onLangChange, pick, t, type Localized } from './i18n';
 import { ensureLimiter } from './limiter';
 import { freePlayKnobs } from './knobs';
-import { NOTE_EVENT, currentBend, type NoteDetail } from './midi';
+import { NOTE_EVENT, currentBend, noteRouting, type NoteDetail } from './midi';
 import { playedNotes } from './scale';
 import { loadedKits } from './samples';
 import { readStorage, writeStorage } from './storage';
@@ -139,7 +139,7 @@ export function setupFreePlay(patternReadsKeys: () => boolean) {
   });
 
   window.addEventListener(NOTE_EVENT, (event) => {
-    if (patternReadsKeys()) return;
+    if (patternReadsKeys() || noteRouting.videoOnly) return;
     const { note, velocity } = (event as CustomEvent<NoteDetail>).detail;
     if (note >= 32 && note < 40) {
       play({ ...padSound(note - 32, pads), gain: velocity * 0.8 });

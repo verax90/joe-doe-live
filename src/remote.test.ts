@@ -15,8 +15,8 @@ describe('phone as controller', () => {
     applyRemote({ t: 'pad', i: 7, v: 0.5 }, target);
     applyRemote({ t: 'cc', cc: 7, v: 0.25 }, target);
     expect(events).toEqual([
-      { type: NOTE_EVENT, detail: { note: 32, velocity: 1 } },
-      { type: NOTE_EVENT, detail: { note: 39, velocity: 0.5 } },
+      { type: NOTE_EVENT, detail: { note: 32, velocity: 1, device: 'phone' } },
+      { type: NOTE_EVENT, detail: { note: 39, velocity: 0.5, device: 'phone' } },
       { type: CC_EVENT, detail: { cc: 7, value: 0.25, channel: 1 } },
     ]);
   });
