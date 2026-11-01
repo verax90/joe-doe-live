@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-01-flip',
+    title: L('The Miyoo Flip as a controller, anywhere', 'La Miyoo Flip como mando, desde donde sea', 'La Miyoo Flip com a comandament, des d\'on sigui'),
+    text: L(
+      'More → Miyoo Flip: type the code Studio Remote shows and the console plays the studio over the internet, with no bridge on the PC. Once is enough: next time they find each other',
+      'Más → Miyoo Flip: escribe el código que sale en Studio Remote y la consola toca el estudio por internet, sin puente en el PC. Basta una vez: la próxima se encuentran solos',
+      "Més → Miyoo Flip: escriu el codi que surt a Studio Remote i la consola toca l'estudi per internet, sense pont al PC. N'hi ha prou amb un cop: la propera es troben sols",
+    ),
+    go: [{ click: '#toggle-flip' }],
+  },
+  {
     id: '2026-11-01-video-only',
     title: L('Change clips without a sound', 'Cambiar de clip sin que suene', 'Canviar de clip sense que soni'),
     text: L(

@@ -9,7 +9,7 @@ import { receiveMidi } from './midi';
 import { readStorage, writeStorage } from './storage';
 import { toast } from './toast';
 
-const RELAY = 'wss://joedoe-relay.deno.dev/ws';
+const RELAY = 'wss://studio-relay.verax90.deno.net/ws';
 const CODE_KEY = 'jdl:flip-code';
 const HI_EVERY = 3000;
 const GONE_AFTER = 10000;
