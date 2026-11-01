@@ -105,16 +105,22 @@ export async function connectMidiIfAllowed() {
   }
 }
 
+// MIDI that does not come through Web MIDI (the Miyoo Flip over the relay):
+// it goes through the same path as a device's messages
+let feedMidi: (data: Uint8Array, name: string) => void = () => {};
+export const receiveMidi = (data: Uint8Array, name: string) => feedMidi(data, name);
+
 export function setupMidiPanel() {
   const enable = document.querySelector<HTMLButtonElement>('#midi-enable')!;
   const deviceList = document.querySelector<HTMLUListElement>('#midi-devices')!;
   const log = document.querySelector<HTMLOListElement>('#midi-log')!;
   const dot = document.querySelector<HTMLElement>('#midi-dot')!;
 
-  if (!('requestMIDIAccess' in navigator)) {
+  // Without Web MIDI (Firefox, Safari) the Miyoo Flip still arrives over the relay
+  const webMidi = 'requestMIDIAccess' in navigator;
+  if (!webMidi) {
     deviceList.innerHTML = `<li class="muted">${t('noWebMidi')}</li>`;
     enable.hidden = true;
-    return;
   }
 
   let flashTimer: number | undefined;
@@ -150,67 +156,71 @@ export function setupMidiPanel() {
     while (log.children.length > MAX_LOG) log.lastElementChild!.remove();
   };
 
+  // Every message, from a device or from the Miyoo Flip over the relay (flip.ts)
+  const onMessage = (event: Event) => {
+    const { data, target } = event as MIDIMessageEvent;
+    if (!data) return;
+    const [status, low, high] = data;
+    const input = target as MIDIInput | null;
+    const id = input?.id ?? '';
+    if (!held.has(id)) held.set(id, { name: input?.name ?? '', notes: new Set() });
+    const device = held.get(id)!;
+    // The TouchMe, by its name or as the device sending CC 90
+    if ((status & 0xf0) === 0xb0 && low === TOUCH_CC) {
+      touchInput = id;
+      touchCc = true;
+      currentTouch();
+      touchTarget = high / 127;
+    }
+    if ((status & 0xf0) === 0x90 && high > 0) {
+      device.notes.add(low);
+      if (isTouch(id)) pulseAt = performance.now();
+      if (isTouch(id) && !touchCc) {
+        currentTouch();
+        touchTarget = touchFromNote(low, noteRange);
+      }
+    }
+    if ((status & 0xf0) === 0x80 || ((status & 0xf0) === 0x90 && high === 0)) {
+      device.notes.delete(low);
+      window.dispatchEvent(new CustomEvent<number>(NOTE_OFF_EVENT, { detail: low }));
+      if (isTouch(id) && !device.notes.size) {
+        currentTouch();
+        touchTarget = 0;
+      }
+    }
+    if ((status & 0xf0) === 0xe0) {
+      bendValue = (((high << 7) | low) - 8192) / 8192;
+      window.dispatchEvent(new CustomEvent<number>(BEND_EVENT, { detail: bendValue }));
+    }
+    if ((status & 0xf0) === 0x90 && high > 0 && !isEcho(data, event.timeStamp)) {
+      midiStats.notes++;
+      window.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: low, velocity: high / 127, device: device.name } }));
+    }
+    if ((status & 0xf0) === 0xc0) window.dispatchEvent(new CustomEvent(PROGRAM_EVENT, { detail: low }));
+    if ((status === 0xfa || status === 0xfb || status === 0xfc) && !isTransportEcho(event.timeStamp)) {
+      const detail: TransportDetail = status === 0xfc ? 'stop' : 'play';
+      window.dispatchEvent(new CustomEvent<TransportDetail>(TRANSPORT_EVENT, { detail }));
+      flash();
+      addLog(input?.name ?? '', detail === 'play' ? 'Start' : 'Stop');
+      return;
+    }
+    if ((status & 0xf0) === 0xb0) {
+      const detail: CcDetail = { cc: low, value: high / 127, channel: (status & 0x0f) + 1 };
+      window.dispatchEvent(new CustomEvent<CcDetail>(CC_EVENT, { detail }));
+    }
+    const text = describe(data);
+    if (!text) return;
+    flash();
+    addLog((target as MIDIInput | null)?.name ?? '', text);
+  };
+  feedMidi = (data, name) =>
+    onMessage({ data, timeStamp: performance.now(), target: { id: `relay:${name}`, name } } as unknown as Event);
+
   let connected = false;
   const connect = async () => {
     if (connected) return;
     try {
       const access = await navigator.requestMIDIAccess();
-      const onMessage = (event: Event) => {
-        const { data, target } = event as MIDIMessageEvent;
-        if (!data) return;
-        const [status, low, high] = data;
-        const input = target as MIDIInput | null;
-        const id = input?.id ?? '';
-        if (!held.has(id)) held.set(id, { name: input?.name ?? '', notes: new Set() });
-        const device = held.get(id)!;
-        // The TouchMe, by its name or as the device sending CC 90
-        if ((status & 0xf0) === 0xb0 && low === TOUCH_CC) {
-          touchInput = id;
-          touchCc = true;
-          currentTouch();
-          touchTarget = high / 127;
-        }
-        if ((status & 0xf0) === 0x90 && high > 0) {
-          device.notes.add(low);
-          if (isTouch(id)) pulseAt = performance.now();
-          if (isTouch(id) && !touchCc) {
-            currentTouch();
-            touchTarget = touchFromNote(low, noteRange);
-          }
-        }
-        if ((status & 0xf0) === 0x80 || ((status & 0xf0) === 0x90 && high === 0)) {
-          device.notes.delete(low);
-          window.dispatchEvent(new CustomEvent<number>(NOTE_OFF_EVENT, { detail: low }));
-          if (isTouch(id) && !device.notes.size) {
-            currentTouch();
-            touchTarget = 0;
-          }
-        }
-        if ((status & 0xf0) === 0xe0) {
-          bendValue = (((high << 7) | low) - 8192) / 8192;
-          window.dispatchEvent(new CustomEvent<number>(BEND_EVENT, { detail: bendValue }));
-        }
-        if ((status & 0xf0) === 0x90 && high > 0 && !isEcho(data, event.timeStamp)) {
-          midiStats.notes++;
-          window.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: low, velocity: high / 127, device: device.name } }));
-        }
-        if ((status & 0xf0) === 0xc0) window.dispatchEvent(new CustomEvent(PROGRAM_EVENT, { detail: low }));
-        if ((status === 0xfa || status === 0xfb || status === 0xfc) && !isTransportEcho(event.timeStamp)) {
-          const detail: TransportDetail = status === 0xfc ? 'stop' : 'play';
-          window.dispatchEvent(new CustomEvent<TransportDetail>(TRANSPORT_EVENT, { detail }));
-          flash();
-          addLog(input?.name ?? '', detail === 'play' ? 'Start' : 'Stop');
-          return;
-        }
-        if ((status & 0xf0) === 0xb0) {
-          const detail: CcDetail = { cc: low, value: high / 127, channel: (status & 0x0f) + 1 };
-          window.dispatchEvent(new CustomEvent<CcDetail>(CC_EVENT, { detail }));
-        }
-        const text = describe(data);
-        if (!text) return;
-        flash();
-        addLog((target as MIDIInput | null)?.name ?? '', text);
-      };
       const render = () => {
         deviceList.replaceChildren();
         if (!access.inputs.size) {
@@ -236,6 +246,7 @@ export function setupMidiPanel() {
     }
   };
 
+  if (!webMidi) return;
   enable.addEventListener('click', connect);
   connectMidi = connect;
   connectMidiIfAllowed();

@@ -107,6 +107,7 @@
               <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-icon="midi" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
               <button id="toggle-sp" class="menu-item" type="button" aria-pressed="false" data-icon="sp" data-panel="sp" data-i18n="spTitle">SP-404 / MIDI out</button>
               <button id="toggle-remote" class="menu-item" type="button" aria-pressed="false" data-icon="remote" data-panel="remote" data-i18n="remoteTitle">Phone as controller</button>
+              <button id="toggle-flip" class="menu-item" type="button" aria-pressed="false" data-icon="flip" data-panel="flip">Miyoo Flip <span id="flip-dot" class="dot" aria-hidden="true"></span></button>
               <button id="toggle-mic" class="menu-item" type="button" aria-pressed="false" data-icon="mic" data-panel="mic" data-i18n="micTitle">Mic</button>
               <button id="toggle-looper" class="menu-item" type="button" aria-pressed="false" data-icon="looper" data-panel="looper" data-i18n="looperTitle">Looper</button>
               <button id="toggle-backing" class="menu-item" type="button" aria-pressed="false" data-icon="backing" data-panel="backing" data-i18n="backingTitle">Backing track</button>
@@ -631,6 +632,17 @@
             <button id="remote-copy" class="control" type="button" data-i18n="roomCopy">Copy</button>
           </div>
         </div>
+      </aside>
+
+      <aside class="panel" id="flip" hidden>
+        <h2>Miyoo Flip</h2>
+        <p class="panel-help" data-i18n-html="flipHelp"></p>
+        <label class="visually-hidden" for="flip-code" data-i18n="flipCode">Code</label>
+        <div class="video-row">
+          <input id="flip-code" class="control" type="text" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="K7QX2" />
+          <button id="flip-connect" class="control control-accent" type="button" data-i18n="flipConnect">Connect</button>
+        </div>
+        <p id="flip-status" class="panel-status" role="status"></p>
       </aside>
 
       <aside class="panel" id="mic" hidden>
