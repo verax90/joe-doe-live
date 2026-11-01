@@ -816,10 +816,19 @@ function glitches(layer: Layer, source: HTMLCanvasElement, now: number): HTMLCan
   return picture;
 }
 
+const MOSH_MS = 1200;
+
 // Datamosh, faked: the new picture only gets through in some blocks each
 // frame, the rest keeps the old one sliding along, so one shot melts into
 // the next instead of cutting
 function mosh(layer: Layer, source: HTMLCanvasElement, now: number) {
+  // A second after the hit the melt is over and the clip shows clean: the
+  // blocks never stay on screen for the whole clip
+  const since = now - layer.hitAt;
+  if (since > MOSH_MS) {
+    layer.mosh = undefined;
+    return source;
+  }
   if (!layer.mosh) {
     layer.mosh = makeCanvas();
     layer.mosh.getContext('2d')!.drawImage(source, 0, 0);
@@ -833,8 +842,9 @@ function mosh(layer: Layer, source: HTMLCanvasElement, now: number) {
   const drift = seeded(layer.hitAt);
   const dx = (drift() - 0.5) * 6;
   const dy = (drift() - 0.5) * 6;
-  // fewer blocks get through right after a hit: that is when it smears most
-  const through = Math.min(0.5, 0.04 + (now - layer.hitAt) / 4000);
+  // fewer blocks get through right after a hit: that is when it smears most;
+  // then more and more, until the whole new picture is there
+  const through = Math.min(1, 0.04 + (since / MOSH_MS) ** 2);
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < columns; x++) {
       if (random() < through) c.drawImage(source, x * w, y * h, w, h, x * w, y * h, w, h);
