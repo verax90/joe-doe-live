@@ -2516,13 +2516,7 @@ select.control {
   display: none;
 }
 
-/* with a side panel open, the caption moves left of it (on phones the
-   panel covers the screen: it stays where it is) */
-@media (min-width: 701px) {
-  body:has(.stage > .panel:not([hidden])) .overlay {
-    right: calc(min(22rem, 90vw) + 1rem);
-  }
-}
+/* with a side panel open, overlay.ts moves the caption left of it */
 
 /* with the audio waves on, the caption sits above them */
 body:has(canvas.scope:not([hidden])) .overlay {
