@@ -61,6 +61,7 @@ import { setupShortcuts } from './shortcuts';
 import { setupStatus } from './status';
 import { readStorage, writeStorage } from './storage';
 import { whenEditorReady, whenStrudelReady, type StrudelMirror } from './strudel';
+import { loadDirtSamples } from './dirt';
 import { trackChanges } from './tracks';
 import { setupTempo } from './tempo';
 import { applyTheme, readTheme, themes } from './themes';
@@ -273,6 +274,7 @@ editor.stop = async () => {
 };
 
 whenStrudelReady().then(() => {
+  loadDirtSamples();
   useBundledHydra(hydraUrl);
   runVisual();
   setupSamplesPanel({ addTrack, getCode: () => editor.code });
