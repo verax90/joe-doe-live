@@ -2518,6 +2518,13 @@ select.control {
 
 /* with a side panel open, overlay.ts moves the caption left of it */
 
+/* on phones the panel covers the screen: the caption would sit on its text */
+@media (max-width: 700px) {
+  body:has(.stage > .panel:not([hidden])) .overlay {
+    display: none;
+  }
+}
+
 /* with the audio waves on, the caption sits above them */
 body:has(canvas.scope:not([hidden])) .overlay {
   bottom: calc(2.25rem + 90px + 0.5rem);
