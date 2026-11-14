@@ -215,6 +215,9 @@ let monitoredInto: AudioNode | undefined;
 // output (which recordings tap); undefined when off or when heard
 export const micForRecording = () => (chain && !monitoring ? chain.out : undefined);
 
+// Which input the mic is on, so the same one is not recorded twice (machines.ts)
+export const micDeviceId = () => chain?.stream.getAudioTracks()[0]?.getSettings().deviceId;
+
 // For the sampler: the voice with its effects, whenever the mic is on
 export const micOutput = () => chain?.out;
 

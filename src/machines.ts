@@ -8,6 +8,7 @@
 import { ensureAudio } from './audio';
 import { hearRole, type Role } from './clips-react';
 import { onLangChange, t } from './i18n';
+import { micDeviceId } from './mic';
 import { CLOCK_EVENT, requestMidi } from './midi';
 import { readStorage, writeStorage } from './storage';
 import { bandOf, setExtraBand } from './visuals';
@@ -149,6 +150,16 @@ type Listening = {
 };
 let listening: Listening | undefined;
 export const machinesOn = () => Boolean(listening);
+
+// For record.ts: what the machines play, as it comes in (before the
+// sensitivity), so a recording of the jam has its sound: the studio never
+// plays this input, so its output does not carry it. Not when the mic is on
+// the same input, which is recorded already
+export function machinesForRecording(): AudioNode | undefined {
+  if (!listening) return undefined;
+  const device = listening.stream.getAudioTracks()[0]?.getSettings().deviceId;
+  return device !== undefined && device === micDeviceId() ? undefined : listening.source;
+}
 
 export function setupMachines() {
   const deviceSelect = document.querySelector<HTMLSelectElement>('#machines-device')!;

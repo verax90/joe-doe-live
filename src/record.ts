@@ -10,6 +10,7 @@ import { scopeCanvas } from './scope';
 import { ensureLimiter, getLimiter } from './limiter';
 import { startStems } from './stems';
 import { overlayText } from './overlay';
+import { machinesForRecording } from './machines';
 import { micForRecording } from './mic';
 import { sessionMark, startSession, whenMarked } from './session';
 
@@ -236,18 +237,19 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
     timer = window.setInterval(tick, 500);
   };
 
+  // What sounds without going through the studio output: the mic when it is
+  // not heard here, and the machines being listened to (VJ → Machines)
+  const inputs = () => [micForRecording(), machinesForRecording()].filter((node): node is AudioNode => Boolean(node));
+
   // The whole session: compressed audio and markers (session.ts)
   const startSessionMode = (output: AudioNode, context: AudioContext) => {
-    const mic = micForRecording();
-    const finish = startSession(context, mic ? [output, mic] : [output], getCode(), isPlaying());
+    const finish = startSession(context, [output, ...inputs()], getCode(), isPlaying());
     markButton.hidden = false;
     return async () => download(await finish(), 'zip');
   };
 
   const startAudio = async (output: AudioNode, context: BaseAudioContext) => {
-    // The mic, when it is not already in the studio output
-    const mic = micForRecording();
-    const stop = await startTap(context, mic ? [output, mic] : [output]);
+    const stop = await startTap(context, [output, ...inputs()]);
     return async () => {
       download(
         encodeWav(
@@ -263,8 +265,8 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
   const recordCanvas = (source: HTMLCanvasElement, output: AudioNode, context: AudioContext, onStop: () => void) => {
     const audio = context.createMediaStreamDestination();
     output.connect(audio);
-    const mic = micForRecording();
-    mic?.connect(audio);
+    const extra = inputs();
+    for (const input of extra) input.connect(audio);
     const stream = new MediaStream([...source.captureStream(30).getVideoTracks(), ...audio.stream.getAudioTracks()]);
     const { mimeType, extension } = videoFormat((type) => MediaRecorder.isTypeSupported(type));
     const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
@@ -276,7 +278,7 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
         recorder.onstop = () => {
           onStop();
           output.disconnect(audio);
-          mic?.disconnect(audio);
+          for (const input of extra) input.disconnect(audio);
           stream.getTracks().forEach((track) => track.stop());
           download(new Blob(chunks, { type: mimeType.split(';')[0] }), extension);
           resolve();
