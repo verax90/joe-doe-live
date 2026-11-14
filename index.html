@@ -76,6 +76,7 @@
         <span id="record-status" class="record-status" role="status"></span>
       </div>
 
+      <button id="fullscreen" class="control control-icon" type="button" aria-pressed="false" aria-keyshortcuts="Control+Shift+F" aria-label="Full screen" title="Full screen (Ctrl+Shift+F)" data-i18n-label="fullscreen" data-i18n-title="fullscreenTitle" data-icon="fullscreen"></button>
       <button id="help-button" class="control control-icon" type="button" aria-haspopup="dialog" aria-keyshortcuts="?" aria-label="Help" data-i18n-label="help" title="?" data-icon="help"></button>
 
       <div class="menu">
@@ -140,6 +141,7 @@
           <div class="menu-footer">
             <span class="menu-group-title" data-i18n="menuView">View</span>
             <button id="help-menu" class="menu-item help-in-menu" data-icon="help" type="button" data-i18n="help">Help</button>
+            <button id="fullscreen-menu" class="menu-item" data-icon="fullscreen" type="button" aria-pressed="false" aria-keyshortcuts="Control+Shift+F" data-i18n="fullscreen">Full screen</button>
             <button id="toggle-code" class="menu-item" data-icon="code" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
             <button id="toggle-ascii" class="menu-item" data-icon="ascii" type="button" aria-pressed="false" data-i18n="asciiFilter">ASCII filter</button>
             <button id="toggle-scope" class="menu-item" data-icon="scope" type="button" aria-pressed="false" data-i18n="audioWaves">Audio waves</button>
@@ -715,11 +717,37 @@
 
       <aside class="panel" id="vj" hidden>
         <h2 data-i18n="vjTitle">VJ</h2>
-        <p class="panel-help" data-i18n="vjHelp">Play the visuals: six effects over any built-in visual.</p>
-        <label class="set-option"><input id="vj-on" type="checkbox" /> <span data-i18n="vjOn">VJ effects on the visual</span></label>
-        <label class="set-option"><input id="vj-knobs" type="checkbox" /> <span data-i18n="vjKnobs">MPK knobs 1–6 move these</span></label>
-        <div id="vj-sliders" class="vj-sliders"></div>
-        <button id="vj-reset" class="control" type="button" data-i18n="vjReset">All neutral</button>
+        <div class="panel-tabs" role="tablist" aria-label="VJ">
+          <button class="panel-tab" type="button" role="tab" aria-selected="true" aria-controls="vj-tab-effects" data-i18n="vjTabEffects">Effects</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="vj-tab-machines" data-i18n="machinesTitle">Machines</button>
+        </div>
+        <section id="vj-tab-effects" class="panel-tabpanel" role="tabpanel">
+          <p class="panel-help" data-i18n="vjHelp">Play the visuals: six effects over any built-in visual.</p>
+          <label class="set-option"><input id="vj-on" type="checkbox" /> <span data-i18n="vjOn">VJ effects on the visual</span></label>
+          <label class="set-option"><input id="vj-knobs" type="checkbox" /> <span data-i18n="vjKnobs">MPK knobs 1–6 move these</span></label>
+          <div id="vj-sliders" class="vj-sliders"></div>
+          <button id="vj-reset" class="control" type="button" data-i18n="vjReset">All neutral</button>
+        </section>
+        <section id="vj-tab-machines" class="panel-tabpanel" role="tabpanel" hidden>
+          <p class="panel-help" data-i18n="machinesHelp">The visuals listen to your machines through an audio input. Nothing is played back.</p>
+          <label class="panel-field" for="machines-device">
+            <span data-i18n="micDevice">Input</span>
+            <select id="machines-device" class="control"></select>
+          </label>
+          <button id="machines-on" class="control control-accent" type="button" aria-pressed="false" data-i18n="machinesOn">Listen to the machines</button>
+          <div id="machines-meters" class="machines-meters" aria-hidden="true">
+            <span class="machines-meter" data-role="kick"><i></i><b data-i18n="machinesKick">Kick</b></span>
+            <span class="machines-meter" data-role="snare"><i></i><b data-i18n="machinesSnare">Snare</b></span>
+            <span class="machines-meter" data-role="hat"><i></i><b data-i18n="machinesHat">Hats</b></span>
+          </div>
+          <p id="machines-status" class="panel-status" role="status"></p>
+          <div class="vj-sliders">
+            <label class="vj-slider"><span data-i18n="machinesGain">Sensitivity</span><input id="machines-gain" type="range" min="0" max="1" step="0.01" value="0.5" /></label>
+          </div>
+          <p class="panel-help" data-i18n="machinesClips">For the drums to change the clips: Video → Clips → Follow the music.</p>
+          <label class="set-option"><input id="machines-clock" type="checkbox" /> <span data-i18n="machinesClock">The tempo follows the machine's MIDI clock</span></label>
+          <p id="machines-clock-status" class="panel-status" role="status"></p>
+        </section>
       </aside>
 
       <aside class="panel" id="video" hidden>

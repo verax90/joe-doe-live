@@ -1,6 +1,8 @@
 // Tempo in the bar: a BPM field and a Tap button. A change applies at once and
 // is also written into the pattern's setcps(...) line, so the next Ctrl+Enter
 // does not undo it. BPM here means 4 beats per cycle: setcps(BPM / 60 / 4).
+// Whole numbers from the field and Tap; a machine's MIDI clock may bring a
+// tenth (93.5), which the code and the field keep.
 
 type Editor = {
   code: string;
@@ -10,6 +12,7 @@ type Editor = {
 
 const MIN = 40;
 const MAX = 300;
+const tenth = (bpm: number) => Math.round(bpm * 10) / 10;
 const SETCPS = /setcps\(\s*[^()]*\)/;
 
 // The pattern's tempo line, rewritten or added at the top
@@ -24,7 +27,7 @@ export function tempoInCode(code: string) {
   if (!match) return null;
   const value = Number(match[1]);
   const bpm = match[0].includes('/') ? value : value * 240;
-  return Number.isFinite(bpm) ? Math.round(bpm) : null;
+  return Number.isFinite(bpm) ? tenth(bpm) : null;
 }
 
 // Average of the last few taps; a pause of 2 s starts over
@@ -41,10 +44,10 @@ export function setupTempo(editor: Editor) {
   const scheduler = () => editor.repl?.scheduler;
   // Playing: the tempo you hear. Stopped: the one the code will set on Play
   const current = () =>
-    scheduler()?.started ? Math.round((scheduler()?.cps ?? 0.5) * 240) : (tempoInCode(editor.code) ?? 120);
+    scheduler()?.started ? tenth((scheduler()?.cps ?? 0.5) * 240) : (tempoInCode(editor.code) ?? 120);
 
   const setBpm = (value: number) => {
-    const bpm = Math.min(MAX, Math.max(MIN, Math.round(value)));
+    const bpm = Math.min(MAX, Math.max(MIN, tenth(value)));
     scheduler()?.setCps?.(bpm / 240);
     const next = withTempo(editor.code, bpm);
     if (next !== editor.code) editor.setCode(next);
@@ -72,4 +75,5 @@ export function setupTempo(editor: Editor) {
   };
   show();
   setInterval(show, 500);
+  return { setBpm, current };
 }

@@ -4,7 +4,7 @@
 // program changes and free play.
 
 import { t } from './i18n';
-import { isEcho, isTransportEcho } from './sp';
+import { isEcho, isTransportEcho, sendsClock } from './sp';
 
 const MAX_LOG = 10;
 
@@ -87,6 +87,32 @@ export const noteRouting = { videoOnly: false };
 export const TRANSPORT_EVENT = 'jdl:transport';
 export type TransportDetail = 'play' | 'stop';
 
+// MIDI clock from a machine (an MPC, a drum machine): 24 ticks per beat. The
+// tempo is the average over the last four beats, to a tenth of a BPM, told
+// once per beat; a gap of half a second (the machine stopped) starts over
+export const CLOCK_EVENT = 'jdl:clock';
+const CLOCK_WINDOW = 96;
+export function clockBpm(ticks: number[]) {
+  if (ticks.length < 25) return null; // a whole beat at least
+  const span = ticks[ticks.length - 1] - ticks[0];
+  if (span <= 0) return null;
+  const bpm = 60000 / ((span / (ticks.length - 1)) * 24);
+  return bpm >= 30 && bpm <= 300 ? Math.round(bpm * 10) / 10 : null;
+}
+let clockTicks: number[] = [];
+let clockCount = 0;
+function onClockTick(at: number) {
+  if (clockTicks.length && at - clockTicks[clockTicks.length - 1] > 500) {
+    clockTicks = [];
+    clockCount = 0;
+  }
+  clockTicks.push(at);
+  if (clockTicks.length > CLOCK_WINDOW + 1) clockTicks.shift();
+  if (clockCount++ % 24 !== 0) return;
+  const bpm = clockBpm(clockTicks);
+  if (bpm) window.dispatchEvent(new CustomEvent<number>(CLOCK_EVENT, { detail: bpm }));
+}
+
 // Every pitch bend move (the MPK joystick sideways), from -1 to 1
 export const BEND_EVENT = 'jdl:bend';
 
@@ -96,6 +122,9 @@ export type CcDetail = { cc: number; value: number; channel: number };
 
 // Once MIDI permission exists (a pattern with midin() asks for it too), start
 // listening without asking again
+// From a click (a box that needs MIDI): asks for the permission if need be
+export const requestMidi = () => connectMidi?.() ?? Promise.resolve();
+
 export async function connectMidiIfAllowed() {
   try {
     const permission = await navigator.permissions?.query({ name: 'midi' as PermissionName });
@@ -161,6 +190,12 @@ export function setupMidiPanel() {
     const { data, target } = event as MIDIMessageEvent;
     if (!data) return;
     const [status, low, high] = data;
+    // 24 a beat: counted and nothing else, before any of the work below.
+    // Not the studio's own clock coming back through a looped port
+    if (status === 0xf8) {
+      if (!sendsClock()) onClockTick(event.timeStamp);
+      return;
+    }
     const input = target as MIDIInput | null;
     const id = input?.id ?? '';
     if (!held.has(id)) held.set(id, { name: input?.name ?? '', notes: new Set() });

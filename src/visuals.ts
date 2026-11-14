@@ -4,6 +4,7 @@
 
 import { attachAscii } from './ascii';
 import { attachClips } from './clips';
+import { kickHit } from './hits';
 import { stopRidges } from './ridges';
 import { connectSource } from './video';
 import { withVj } from './vj';
@@ -19,11 +20,12 @@ export const AUTO_VISUAL = 'auto';
 
 // The Visual menu groups them, so 55 looks are not one long list. The ones
 // that are not looks (from the code, automatic, none) stay at the top.
-export type VisualGroup = 'top' | 'sound' | 'touch' | 'voice' | 'cam' | 'clips';
+export type VisualGroup = 'top' | 'sound' | 'machines' | 'touch' | 'voice' | 'cam' | 'clips';
 export function visualGroup(visual: Visual): VisualGroup {
   if (visual.id === CODE_VISUAL || visual.id === AUTO_VISUAL || visual.id === 'ninguno') return 'top';
   if (visual.clips) return 'clips';
   if (visual.camera) return 'cam';
+  if (visual.id.startsWith('maq')) return 'machines';
   if (visual.id.startsWith('tacto')) return 'touch';
   if (visual.id.startsWith('voz')) return 'voice';
   return 'sound';
@@ -291,6 +293,39 @@ src(s1)
   .out()`,
   },
   {
+    id: 'maq-anillos',
+    name: { en: 'Rings (kick)', es: 'Anillos (bombo)', ca: 'Anells (bombo)' },
+    code: `rings(() => kickCount() * 0.37 + time * 0.08, () => kickHit(), () => hatHit())
+  .color(...tint(1))
+  .add(src(o0).scale(1.02), () => 0.35 + snareHit() * 0.3)
+  .out()`,
+  },
+  {
+    id: 'maq-rejilla',
+    name: { en: 'Grid (kick and snare)', es: 'Rejilla (bombo y caja)', ca: 'Reixa (bombo i caixa)' },
+    code: `gridFloor(() => time * 0.6, () => kickHit(), () => snareHit())
+  .color(...tint(1))
+  .add(shape(64, () => 0.12 + kickHit() * 0.08, 0.3).scrollY(-0.12).color(...tint(0.7)), () => 0.6 + snareHit() * 0.4)
+  .out()`,
+  },
+  {
+    id: 'maq-mosh',
+    name: { en: 'Melt (live datamosh)', es: 'Derretido (datamosh en vivo)', ca: 'Fos (datamosh en viu)' },
+    code: `src(o0)
+  .mosh(noise(3, 0.25).pixelate(32, 18), () => 0.003 + bass() * 0.006 + snareHit() * 0.02)
+  .blend(osc(24, 0.05, 0.9).kaleid(5).modulate(noise(2), 0.2).color(...tint(1.1)), () => (keyframe() ? 1 : 0.004))
+  .out()`,
+  },
+  {
+    id: 'cam-mosh',
+    name: { en: 'Webcam (live datamosh)', es: 'Webcam (datamosh en vivo)', ca: 'Webcam (datamosh en viu)' },
+    camera: true,
+    code: `src(o0)
+  .mosh(src(s0).diff(src(o0)).pixelate(40, 22), () => 0.008 + bass() * 0.01)
+  .blend(src(s0), () => (keyframe() ? 1 : 0.015))
+  .out()`,
+  },
+  {
     id: 'cam',
     name: { en: 'Webcam (warp)', es: 'Webcam (deformada)', ca: 'Webcam (deformada)' },
     camera: true,
@@ -426,6 +461,15 @@ src(s1)
     code: `src(s2)
   .modulate(noise(3, 0.2), () => bass() * 0.25)
   .scale(() => 1 + bass() * 0.12)
+  .out()`,
+  },
+  {
+    id: 'clips-mosh',
+    name: { en: 'Clips (live datamosh)', es: 'Clips (datamosh en vivo)', ca: 'Clips (datamosh en viu)' },
+    clips: true,
+    code: `src(o0)
+  .mosh(src(s2).diff(src(o0)).pixelate(40, 22), () => 0.006 + bass() * 0.008 + snareHit() * 0.02)
+  .blend(src(s2), () => (keyframe() ? 1 : 0.01))
   .out()`,
   },
   {
@@ -599,13 +643,11 @@ function spectrum() {
   return cached.data;
 }
 
-// Average energy of a frequency band, from 0 to 1
-function band(lowHz: number, highHz: number) {
-  const data = spectrum();
-  if (!data?.length || !g.getAudioContext) return 0;
-  const nyquist = g.getAudioContext().sampleRate / 2;
-  const from = Math.floor((lowHz / nyquist) * data.length);
-  const to = Math.max(from + 1, Math.floor((highHz / nyquist) * data.length));
+// Average energy of a frequency band of a spectrum in dB, from 0 to 1
+export function bandOf(data: ArrayLike<number> | undefined, nyquist: number, lowHz: number, highHz: number) {
+  if (!data?.length) return 0;
+  const from = Math.min(data.length - 1, Math.floor((lowHz / nyquist) * data.length));
+  const to = Math.min(data.length, Math.max(from + 1, Math.floor((highHz / nyquist) * data.length)));
   let sum = 0;
   for (let i = from; i < to; i++) {
     const db = Number.isFinite(data[i]) ? data[i] : -100;
@@ -614,11 +656,95 @@ function band(lowHz: number, highHz: number) {
   return sum / (to - from);
 }
 
+// Another thing to listen to besides the studio's own sound: the hardware on
+// an audio input (machines.ts). The louder of the two moves the visuals
+let extraBand: ((lowHz: number, highHz: number) => number) | undefined;
+export const setExtraBand = (read: typeof extraBand) => (extraBand = read);
+
+function band(lowHz: number, highHz: number) {
+  const data = spectrum();
+  const own = data?.length && g.getAudioContext ? bandOf(data, g.getAudioContext().sampleRate / 2, lowHz, highHz) : 0;
+  return extraBand ? Math.max(own, extraBand(lowHz, highHz)) : own;
+}
+
 // Available in Hydra code (the built-in visuals and your patterns)
 g.bass = () => band(20, 150);
 g.mid = () => band(150, 2000);
 g.high = () => band(2000, 10000);
 g.level = () => band(20, 10000);
+
+// Shaders of the studio's own, written in GLSL and added to Hydra as new
+// functions (also there for your code under "From the code"):
+// rings(phase, kick, sparkle) and gridFloor(scroll, bump, flash) draw;
+// .mosh(texture, amount) moves each pixel by what the texture says there, in
+// steps, which over src(o0) smears the picture in blocks like a video that
+// lost its keyframes (a datamosh), until something redraws it: the
+// texture's brightness picks one of eight directions and how far
+const SHADERS = [
+  {
+    name: 'rings',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'phase', default: 0 },
+      { type: 'float', name: 'kick', default: 0 },
+      { type: 'float', name: 'sparkle', default: 0 },
+    ],
+    glsl: `
+  vec2 p = _st - 0.5;
+  p.x *= resolution.x / resolution.y;
+  float r = length(p);
+  float a = atan(p.y, p.x);
+  float wobble = sin(a * 6.0 + phase * 6.2831) * 0.015 * (1.0 + kick * 4.0);
+  float wave = fract((r + wobble) * 7.0 - phase - kick * 0.35);
+  float ring = smoothstep(0.5, 0.42, abs(wave - 0.5) * (1.6 - kick));
+  float core = smoothstep(0.12 + kick * 0.2, 0.0, r);
+  float grain = fract(sin(dot(floor(_st * 220.0) + floor(time * 30.0), vec2(12.9898, 78.233))) * 43758.5453);
+  float v = ring * (0.35 + kick * 0.65) * smoothstep(0.95, 0.2, r) + core * kick + step(0.985, grain) * sparkle;
+  return vec4(vec3(v), 1.0);`,
+  },
+  {
+    name: 'gridFloor',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'scroll', default: 0 },
+      { type: 'float', name: 'bump', default: 0 },
+      { type: 'float', name: 'flash', default: 0 },
+    ],
+    glsl: `
+  vec2 p = _st - 0.5;
+  p.x *= resolution.x / resolution.y;
+  float horizon = 0.08 + bump * 0.04;
+  float y = horizon - p.y;
+  float depth = 0.35 / max(abs(y), 0.004);
+  vec2 g = vec2(p.x * depth * 1.4, depth + scroll * (y > 0.0 ? 1.0 : -1.0));
+  vec2 cell = abs(fract(g) - 0.5);
+  float line = smoothstep(0.46, 0.5, max(cell.x, cell.y));
+  float fade = smoothstep(0.0, 0.25, abs(y)) * (y > 0.0 ? 1.0 : 0.35);
+  float glow = exp(-abs(y) * (14.0 - flash * 9.0)) * (0.35 + flash);
+  return vec4(vec3(line * fade * (0.6 + bump * 0.6) + glow), 1.0);`,
+  },
+  {
+    name: 'mosh',
+    type: 'combineCoord',
+    inputs: [{ type: 'float', name: 'amount', default: 0.01 }],
+    glsl: `
+  float l = dot(_c0.rgb, vec3(0.3333));
+  float turn = floor(l * 8.0 + 0.5) * 0.7853982;
+  float push = min(abs(l) * 2.0, 1.0);
+  vec2 v = vec2(cos(turn), sin(turn)) * push;
+  return _st + v * amount;`,
+  },
+];
+// When a datamosh draws the picture whole again: on a kick, and every few
+// seconds anyway so it never melts to nothing with no drums around
+(globalThis as { keyframe?: () => boolean }).keyframe = () => kickHit() > 0.6 || (performance.now() / 1000) % 5 < 0.12;
+let shadersIn: unknown;
+function defineShaders(hydra: unknown) {
+  const setFunction = (globalThis as { setFunction?: (shader: unknown) => void }).setFunction;
+  if (shadersIn === hydra || !setFunction) return;
+  for (const shader of SHADERS) setFunction(shader);
+  shadersIn = hydra;
+}
 
 // Strudel loads Hydra from unpkg.com; this uses the copy bundled with the
 // studio instead, also for an initHydra() written in your patterns.
@@ -725,6 +851,7 @@ export async function applyVisual(id: string) {
   // hush() in a pattern resets both, so they are set again on every visual
   capFrameRate();
   attachAscii(hydra);
+  defineShaders(hydra);
   // The clips canvas is always s2, also for src(s2) in your own Hydra code
   attachClips();
   if (visual.id === CODE_VISUAL) return;

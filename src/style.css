@@ -1228,12 +1228,21 @@ select.control {
 }
 
 @media (max-width: 480px) {
-  #help-button {
+  #help-button,
+  #fullscreen {
     display: none;
   }
 
   .help-in-menu {
     display: block;
+  }
+}
+
+/* Full screen is in the bar where the bar has room on one row (a wide window,
+   or a phone on its side, where the bar is compact), else in More → View */
+@media (max-width: 1240px) and (min-height: 501px), (max-width: 1240px) and (orientation: portrait) {
+  #fullscreen {
+    display: none;
   }
 }
 
@@ -2060,6 +2069,58 @@ select.control {
 .vj-slider input {
   width: 100%;
   accent-color: var(--accent);
+}
+
+/* VJ → Machines: a bar per drum, as tall as its band is loud, lit on a hit */
+.machines-meters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.25rem;
+}
+
+.machines-meter {
+  --level: 0;
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.machines-meter i {
+  position: relative;
+  display: block;
+  height: 2.75rem;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.machines-meter i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  opacity: 0.55;
+  transform: scaleY(var(--level));
+  transform-origin: bottom;
+}
+
+.machines-meter.is-hit i::after {
+  opacity: 1;
+}
+
+.machines-meter.is-hit b {
+  color: var(--accent);
+}
+
+.machines-meter b {
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Listening to a live room: a bar under the top bar */

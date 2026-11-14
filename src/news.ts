@@ -12,6 +12,36 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-14-machines',
+    title: L('The visuals listen to your machines', 'Los visuales escuchan tus máquinas', 'Els visuals escolten les teves màquines'),
+    text: L(
+      'VJ → Machines: pick an audio input and the visuals move with your MPC or your Roland, with no sound from the studio. Kick, snare and hats can change the clips, and the tempo can follow the MIDI clock',
+      'VJ → Máquinas: elige una entrada de audio y los visuales se mueven con tu MPC o tu Roland, sin que el estudio suene. Bombo, caja y platos pueden cambiar los clips, y el tempo puede seguir el reloj MIDI',
+      "VJ → Màquines: tria una entrada d'àudio i els visuals es mouen amb la teva MPC o la teva Roland, sense que l'estudi soni. Bombo, caixa i plats poden canviar els clips, i el tempo pot seguir el rellotge MIDI",
+    ),
+    go: [{ click: '#toggle-vj' }, { click: '[aria-controls="vj-tab-machines"]' }],
+  },
+  {
+    id: '2026-11-14-shaders',
+    title: L('Shaders of its own and a live datamosh', 'Shaders propios y datamosh en vivo', 'Shaders propis i datamosh en viu'),
+    text: L(
+      'New visuals under Machines: rings on the kick, a grid floor and Melt, which smears the picture in blocks until a kick redraws it. The datamosh also comes for the webcam and for Clips',
+      'Visuales nuevos en Máquinas: anillos con el bombo, una rejilla y Derretido, que arrastra la imagen a bloques hasta que un bombo la redibuja. El datamosh llega también a la webcam y a Clips',
+      'Visuals nous a Màquines: anells amb el bombo, una reixa i Fos, que arrossega la imatge a blocs fins que un bombo la redibuixa. El datamosh arriba també a la webcam i a Clips',
+    ),
+    go: [{ value: ['#visual', 'maq-mosh'] }],
+  },
+  {
+    id: '2026-11-14-fullscreen',
+    title: L('Full screen, in the bar', 'Pantalla completa, en la barra', 'Pantalla completa, a la barra'),
+    text: L(
+      'A button next to the help (and Ctrl+Shift+F, and More → View) fills the screen with the studio',
+      'Un botón junto a la ayuda (y Ctrl+Mayús+F, y Más → Ver) llena la pantalla con el estudio',
+      "Un botó al costat de l'ajuda (i Ctrl+Maj+F, i Més → Veure) omple la pantalla amb l'estudi",
+    ),
+    go: [{ click: '#fullscreen' }],
+  },
+  {
     id: '2026-11-01-flip',
     title: L('The Miyoo Flip as a controller, anywhere', 'La Miyoo Flip como mando, desde donde sea', 'La Miyoo Flip com a comandament, des d\'on sigui'),
     text: L(

@@ -21,7 +21,9 @@ import { setupLearn } from './learn';
 import { setupLibrary } from './library';
 import { setupLiveSet } from './live-set';
 import { ensureLimiter } from './limiter';
+import { followsClock, setupMachines } from './machines';
 import { setupMenu } from './menu';
+import { setupFullscreen } from './fullscreen';
 import { setupDock } from './dock';
 import { setupBeat } from './beat';
 import { setupProjector } from './projector';
@@ -41,7 +43,7 @@ import { setupSequencer } from './sequencer';
 import { setupOverlay } from './overlay';
 import { setupScalePicker } from './scale';
 import { setupOffline } from './offline';
-import { PROGRAM_EVENT, TRANSPORT_EVENT, connectMidiIfAllowed, setupMidiPanel, type TransportDetail } from './midi';
+import { CLOCK_EVENT, PROGRAM_EVENT, TRANSPORT_EVENT, connectMidiIfAllowed, setupMidiPanel, type TransportDetail } from './midi';
 import { builtInPresets, translateIfBuiltIn } from './presets';
 import { stemsActive, stemsVersion } from './stems';
 import { setupRecorder } from './record';
@@ -354,6 +356,7 @@ setupMenu();
 setupDock();
 setupBeat();
 setupProjector();
+setupFullscreen();
 setupProject();
 setupFinder();
 setupShortcuts(editor);
@@ -363,7 +366,13 @@ setupCompose(editor);
 setupLearn({ editor, useCodeVisual });
 setupCheatsheet({ editor, useCodeVisual });
 setupHelp();
-setupTempo(editor);
+const tempo = setupTempo(editor);
+// A machine's MIDI clock sets the tempo (VJ → Machines), once it has moved
+// two tenths from the studio's: the clock's own jitter changes nothing
+window.addEventListener(CLOCK_EVENT, (event) => {
+  const bpm = (event as CustomEvent<number>).detail;
+  if (followsClock() && Math.abs(bpm - tempo.current()) >= 0.2) tempo.setBpm(bpm);
+});
 setupMidiPanel();
 setupFlip();
 setupKnobs();
@@ -383,6 +392,7 @@ setupKnobHud(() => ({
   vjKnobs: vjTakesKnobs(),
 }));
 setupVj({ redraw: runVisual });
+setupMachines();
 room = setupRoom({
   editor,
   currentVisual: () => visualSelect.value,

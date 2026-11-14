@@ -7,7 +7,7 @@ names = {
  'back':'arrow-left','next':'arrow-right','skip':'skip-forward','in':'arrow-left-to-line','out':'arrow-right-to-line',
  'all':'move-horizontal','code':'code-xml','film':'film','plus':'plus','upload':'upload','search':'search',
  'up':'arrow-up','down':'arrow-down','volume':'volume-2','mute':'volume-x','learn':'graduation-cap','compose':'music','cheats':'book-open','samples':'audio-waveform','sampler':'disc-3','tools':'wrench','midi':'piano','sp':'keyboard-music','remote':'smartphone','flip':'gamepad-2','mic':'mic','looper':'repeat','backing':'list-music','pump':'activity','react':'drum','vj':'sparkles','video':'film','set':'list-ordered','room':'radio','overlay-panel':'type','drop':'trending-up','frame':'rectangle-vertical','history':'history','save':'save','new':'file-plus','ascii':'binary','scope':'audio-lines','sequencer':'grid-3x3',
- 'projector':'projector',
+ 'projector':'projector','fullscreen':'maximize','fullscreen-exit':'minimize',
  'more':'ellipsis','apply':'refresh-cw','pause':'pause','layers':'layers','headphones':'headphones','check':'check','copy':'copy','download':'download',
 }
 lines = ['/* Icons: Lucide (lucide.dev, ISC licence), drawn as CSS masks so they take',

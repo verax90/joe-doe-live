@@ -77,6 +77,10 @@ export function isEcho(data: ArrayLike<number>, at: number) {
 // The Start and Stop the studio itself sends with "Send the tempo": if the
 // port loops back (Linux's Midi Through), they must not play or stop it again
 const sentTransport: number[] = [];
+// While the studio sends its clock, a clock coming in may be its own, looped
+// back: midi.ts does not follow it then
+let clockOut: () => boolean = () => false;
+export const sendsClock = () => clockOut();
 export function isTransportEcho(at: number) {
   while (sentTransport.length && sentTransport[0] < at - 2000) sentTransport.shift();
   return sentTransport.some((sent) => Math.abs(sent - at) < 60);
@@ -123,6 +127,7 @@ export function setupSp({ editor, addTrack }: { editor: StrudelMirror; addTrack:
   const save = () => writeStorage('jdl:sp', settings);
   let access: MIDIAccess | undefined;
   const output = () => (access && settings.port ? access.outputs.get(settings.port) : undefined);
+  clockOut = () => settings.clock && Boolean(output());
 
   // Scheduler time (the audio clock, seconds) to a Web MIDI timestamp. The
   // audio clock moves in steps (a block of samples at a time) while

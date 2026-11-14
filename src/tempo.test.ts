@@ -33,3 +33,10 @@ describe('tempo read from the code', () => {
     expect(tempoInCode('s("bd sd")')).toBeNull();
   });
 });
+
+describe('a tempo with a tenth (from a MIDI clock)', () => {
+  it('is kept in the code and read back', () => {
+    expect(withTempo('setcps(90 / 60 / 4)', 93.5)).toBe('setcps(93.5 / 60 / 4)');
+    expect(tempoInCode('setcps(93.5 / 60 / 4)')).toBe(93.5);
+  });
+});

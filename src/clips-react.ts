@@ -4,6 +4,7 @@
 // back to where the clip came in (a stutter) and, in the busiest mode, the
 // hi-hats flash a different clip on top for an instant.
 import { allClips, fire, pickFromPool, prepare, rewindLayer, type Clip, type Hit } from './clips';
+import { markHit } from './hits';
 import { readStorage, writeStorage } from './storage';
 
 export type ReactMode = 'off' | 'kick' | 'drums' | 'all';
@@ -83,6 +84,14 @@ function act(action: Action, at: number) {
   });
 }
 
+// A drum hit heard some other way than from Strudel's patterns: the hardware
+// on an audio input (machines.ts)
+export function hearRole(role: Role, at = performance.now()) {
+  markHit(role, at);
+  const action = reaction(role, mode);
+  if (action) act(action, at);
+}
+
 type Hap = { value: unknown; context?: { dominantTrigger?: boolean } };
 type Pattern = { onTrigger(fn: (hap: Hap, now: number, cps: number, target: number) => void, dominant?: boolean): Pattern };
 type Scheduler = { setPattern(pattern: unknown, autostart?: boolean): Promise<void> };
@@ -96,11 +105,14 @@ export function setupClipsReact(scheduler: Scheduler | undefined) {
     const heard =
       pattern && typeof (pattern as Pattern).onTrigger === 'function'
         ? (pattern as Pattern).onTrigger((hap, _now, _cps, target) => {
-            if (mode === 'off' || hap.context?.dominantTrigger) return; // .video() hits are clips already
-            const action = reaction(soundRole(hap.value), mode);
+            const role = soundRole(hap.value);
             const ctx = audio();
-            if (!action || !ctx) return;
-            act(action, performance.now() + (target - ctx.currentTime) * 1000);
+            if (!role || !ctx) return;
+            const at = performance.now() + (target - ctx.currentTime) * 1000;
+            markHit(role, at); // kickHit() and friends, for the visuals
+            if (mode === 'off' || hap.context?.dominantTrigger) return; // .video() hits are clips already
+            const action = reaction(role, mode);
+            if (action) act(action, at);
           }, false)
         : pattern;
     return setPattern(heard, autostart);
