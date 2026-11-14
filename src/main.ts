@@ -23,6 +23,7 @@ import { setupLiveSet } from './live-set';
 import { ensureLimiter } from './limiter';
 import { followsClock, setupMachines } from './machines';
 import { setupMenu } from './menu';
+import { setupPanelHelp } from './panel-help';
 import { setupMotion } from './motion';
 import { setupFullscreen } from './fullscreen';
 import { setupDock } from './dock';
@@ -355,6 +356,7 @@ const useCodeVisual = () => pickVisual('code');
 
 setupOffline();
 setupMenu();
+setupPanelHelp();
 setupDock();
 setupBeat();
 setupProjector();

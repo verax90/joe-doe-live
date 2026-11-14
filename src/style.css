@@ -1031,6 +1031,39 @@ select.control {
   line-height: 1.5;
 }
 
+/* A long explanation shows its first two lines, and "more" after it
+   (panel-help.ts) */
+.panel-help.is-folded {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.panel-help.has-toggle {
+  margin-bottom: 0.15rem;
+}
+
+.panel-help-toggle {
+  display: block;
+  margin: 0 0 0.9rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.panel-help-toggle:hover,
+.panel-help-toggle:focus-visible {
+  color: var(--accent);
+}
+
 .panel code {
   color: var(--accent);
 }
@@ -2245,6 +2278,29 @@ select.control {
 .vj-slider input {
   width: 100%;
   accent-color: var(--accent);
+}
+
+/* Clips with no clips yet: only the two ways to get some (and Find, in its
+   tab). Everything that acts on clips waits until there is one. By id where
+   the element has an icon ([data-icon] would show it again) */
+#video-tab-clips.is-empty #clips-show,
+#video-tab-clips.is-empty #clips-code,
+#video-tab-clips.is-empty .clips-react,
+#video-tab-clips.is-empty .clips-react-help,
+#video-tab-clips.is-empty .clips-mixer,
+#video-tab-clips.is-empty .clips-glitch,
+#video-tab-clips.is-empty .clips-rec,
+#video-tab-clips.is-empty > .set-option,
+#video-tab-clips.is-empty > .clips-how {
+  display: none;
+}
+
+/* and Fill is the way in: one press and there is something to play */
+#video-tab-clips.is-empty #clips-fill {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
 }
 
 /* VJ → Machines: listen and go live side by side; the fine print folded away */

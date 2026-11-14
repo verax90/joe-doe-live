@@ -165,6 +165,9 @@ export function setupClipsPanel({ showClips, addTrack }: Options) {
     const pools = counts();
     const seen = new Map<string, number>();
     empty.hidden = clips.length > 0;
+    // with no clips yet, only how to get some shows: the mixer, the scenes
+    // and the rest have nothing to act on (style.css hides them)
+    document.querySelector('#video-tab-clips')?.classList.toggle('is-empty', clips.length === 0);
     list.replaceChildren(
       ...clips.map((clip, index) => {
         const nth = seen.get(clip.name) ?? 0;
