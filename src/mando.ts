@@ -243,6 +243,15 @@ const showVisuals = (items: { id: string; name: string; group: string }[], curre
   look.value = current;
 };
 
+// the studio's palettes (VJ → Finish): the picture's colours, from here too
+const paletteSelect = document.querySelector<HTMLSelectElement>('#palette')!;
+paletteSelect.setAttribute('aria-label', say('Palette', 'Paleta', 'Paleta'));
+paletteSelect.addEventListener('change', () => send({ t: 'palette', id: paletteSelect.value }));
+const showPalettes = (items: { id: string; name: string }[], current: string) => {
+  paletteSelect.replaceChildren(...items.map((item) => new Option(item.name, item.id)));
+  paletteSelect.value = current;
+};
+
 const vjBox = document.querySelector<HTMLElement>('#vj')!;
 const vjReset = document.querySelector<HTMLButtonElement>('#vj-reset')!;
 vjReset.textContent = say('All neutral', 'Todo a neutro', 'Tot a neutre');
@@ -380,6 +389,11 @@ const fromStudio = (message: StudioMessage) => {
     showVisuals(message.items, message.current);
     showVj(message.vjNames, message.vj);
     showLooks(message.looks);
+    showPalettes(message.palettes, message.palette);
+    return;
+  }
+  if (message.t === 'palette') {
+    paletteSelect.value = message.id;
     return;
   }
   if (message.t === 'vj') {

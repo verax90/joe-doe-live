@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CC_EVENT, NOTE_EVENT } from './midi';
-import { applyRemote, remoteLink, REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, REMOTE_GLITCH_EVENT, REMOTE_LAYER_EVENT, REMOTE_HIT_EVENT, REMOTE_LOOK_EVENT, REMOTE_POINT_EVENT, REMOTE_TRANSPORT_EVENT, REMOTE_VISUAL_EVENT, REMOTE_VJ_EVENT } from './remote';
+import { applyRemote, remoteLink, REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, REMOTE_GLITCH_EVENT, REMOTE_LAYER_EVENT, REMOTE_HIT_EVENT, REMOTE_LOOK_EVENT, REMOTE_PALETTE_EVENT, REMOTE_POINT_EVENT, REMOTE_TRANSPORT_EVENT, REMOTE_VISUAL_EVENT, REMOTE_VJ_EVENT } from './remote';
 
 describe('phone as controller', () => {
   const heard = () => {
@@ -103,5 +103,14 @@ describe('phone as controller', () => {
     applyRemote({ t: 'look', i: 4 }, target);
     applyRemote({ t: 'look', i: -1 }, target);
     expect(got).toEqual([2]);
+  });
+
+  it('passes a palette on by its id', () => {
+    const target = new EventTarget();
+    const got: string[] = [];
+    target.addEventListener(REMOTE_PALETTE_EVENT, (e) => got.push((e as CustomEvent<string>).detail));
+    applyRemote({ t: 'palette', id: 'neon' }, target);
+    applyRemote({ t: 'palette', id: 'x'.repeat(40) }, target);
+    expect(got).toEqual(['neon']);
   });
 });

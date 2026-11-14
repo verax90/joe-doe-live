@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { applyColour, colourNow } from './finish';
 import { modSource, moved, movedValues, nextLook, setVjMod, vjMods, randomLook, recallLook, resetVj, savedLooks, saveLook, setVjControl, vj, VJ_CONTROLS, VJ_KNOBS, vjAngle, vjKnob, vjPositions, vjValues, withVj } from './vj';
 
 const neutral = Object.fromEntries(VJ_CONTROLS.map((c) => [c.id, c.neutral])) as Parameters<typeof vjValues>[0];
@@ -169,5 +170,18 @@ describe('looks taking turns', () => {
   });
   it('need at least two', () => {
     expect(nextLook([false, true, false, false], undefined)).toBeUndefined();
+  });
+});
+
+describe('a look keeps its palette', () => {
+  it('and brings it back, leaving the colour alone when it was saved without one', () => {
+    resetVj();
+    applyColour({ palette: 'fire', tone: 0.8, light: 0.6 });
+    saveLook(3);
+    applyColour({ palette: 'ice', tone: 1, light: 0.5 });
+    expect(recallLook(3)).toBe(true);
+    expect(colourNow()).toEqual({ palette: 'fire', tone: 0.8, light: 0.6 });
+    applyColour({ palette: 'none' });
+    resetVj();
   });
 });

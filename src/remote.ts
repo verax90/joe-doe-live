@@ -35,6 +35,7 @@ export type RemoteMessage =
   | { t: 'hit'; r: 'kick' | 'snare' | 'hat' }
   | { t: 'vj'; c?: string; v?: number }
   | { t: 'look'; i: number }
+  | { t: 'palette'; id: string }
   | { t: 'point'; x: number; y: number }
   | { t: 'pointup' };
 
@@ -48,9 +49,10 @@ export type StudioMessage =
   | { t: 'fader'; v: number }
   | { t: 'mix'; layer: number; glitch: number }
   | { t: 'pads'; names: string[] }
-  | { t: 'visuals'; items: VisualItem[]; current: string; vj: Record<string, number>; looks: boolean[]; vjNames: { id: string; name: Record<string, string> }[] }
+  | { t: 'visuals'; items: VisualItem[]; current: string; vj: Record<string, number>; looks: boolean[]; vjNames: { id: string; name: Record<string, string> }[]; palettes: { id: string; name: string }[]; palette: string }
   | { t: 'visual'; id: string }
   | { t: 'vj'; vj: Record<string, number>; looks: boolean[] }
+  | { t: 'palette'; id: string }
   | { t: 'beat'; b: number }
   | { t: 'transport'; playing: boolean; bpm: number };
 
@@ -68,6 +70,7 @@ export const REMOTE_HIT_EVENT = 'jdl:remote-hit'; // 'kick' | 'snare' | 'hat'
 export const REMOTE_VJ_EVENT = 'jdl:remote-vj'; // { c, v }, or null for all neutral
 export const REMOTE_POINT_EVENT = 'jdl:remote-point'; // { x, y }, or null when the finger lifts
 export const REMOTE_LOOK_EVENT = 'jdl:remote-look'; // which of the VJ's memories to recall
+export const REMOTE_PALETTE_EVENT = 'jdl:remote-palette'; // a palette's id
 const HITS = ['kick', 'snare', 'hat'];
 const VJ_IDS = ['zoom', 'hue', 'warp', 'pixels', 'trails', 'spin', 'punch', 'kaleid', 'glitch', 'split', 'invert', 'blocks', 'tunnel', 'fluid', 'dots'];
 
@@ -120,6 +123,8 @@ export function applyRemote(message: RemoteMessage, target: EventTarget = window
     target.dispatchEvent(new CustomEvent(REMOTE_VJ_EVENT, { detail: known ? { c: message.c, v: clamp(message.v ?? 0) } : null }));
   } else if (message.t === 'look' && Number.isInteger(message.i) && message.i >= 0 && message.i < 4) {
     target.dispatchEvent(new CustomEvent<number>(REMOTE_LOOK_EVENT, { detail: message.i }));
+  } else if (message.t === 'palette' && typeof message.id === 'string' && message.id.length < 24) {
+    target.dispatchEvent(new CustomEvent<string>(REMOTE_PALETTE_EVENT, { detail: message.id }));
   } else if (message.t === 'point') {
     target.dispatchEvent(new CustomEvent(REMOTE_POINT_EVENT, { detail: { x: clamp(message.x), y: clamp(message.y) } }));
   } else if (message.t === 'pointup') {

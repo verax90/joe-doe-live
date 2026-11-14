@@ -9,6 +9,7 @@
 import { keepingFocus } from './a11y';
 import type { Localized } from './i18n';
 import { onLangChange, pick, t } from './i18n';
+import { applyColour, colourNow, PALETTES, type Colour } from './finish';
 import { kickCount, kickHit } from './hits';
 import { readStorage, writeStorage } from './storage';
 
@@ -217,9 +218,12 @@ export const LOOKS = 4;
 const LOOKS_KEY = 'jdl:vj-looks';
 // p: where each slider is; m: what moves by itself. (Looks saved before
 // the movements existed are the positions alone)
-type Look = { p: Record<VjControl, number>; m?: Partial<Record<VjControl, VjMod>> } | Record<VjControl, number> | null;
+// c: the palette it was saved with (finish.ts); older looks have none and leave the colour alone
+type Look = { p: Record<VjControl, number>; m?: Partial<Record<VjControl, VjMod>>; c?: Colour } | Record<VjControl, number> | null;
 const lookParts = (look: NonNullable<Look>) =>
-  'p' in look ? { p: look.p as Record<VjControl, number>, m: (look.m ?? {}) as Partial<Record<VjControl, VjMod>> } : { p: look as Record<VjControl, number>, m: {} };
+  'p' in look
+    ? { p: look.p as Record<VjControl, number>, m: (look.m ?? {}) as Partial<Record<VjControl, VjMod>>, c: look.c as Colour | undefined }
+    : { p: look as Record<VjControl, number>, m: {}, c: undefined };
 const readLooks = () => {
   const stored = readStorage<Look[]>(LOOKS_KEY, []);
   return Array.from({ length: LOOKS }, (_, i) => stored[i] ?? null);
@@ -228,7 +232,7 @@ export const savedLooks = () => readLooks().map(Boolean);
 export function saveLook(slot: number) {
   const looks = readLooks();
   if (slot < 0 || slot >= LOOKS) return;
-  looks[slot] = { p: { ...positions }, m: { ...mods } };
+  looks[slot] = { p: { ...positions }, m: { ...mods }, c: colourNow() };
   writeStorage(LOOKS_KEY, looks);
 }
 let onRecall: (() => void) | undefined;
@@ -236,7 +240,8 @@ let onRecall: (() => void) | undefined;
 export function recallLook(slot: number, glideMs = 0) {
   const look = readLooks()[slot];
   if (!look) return false;
-  const { p, m } = lookParts(look);
+  const { p, m, c } = lookParts(look);
+  if (c) applyColour(c);
   for (const control of VJ_CONTROLS) mods[control.id] = VJ_MODS.includes(m[control.id] as VjMod) ? (m[control.id] as VjMod) : 'none';
   onMod?.();
   setAll(p, glideMs);
@@ -467,6 +472,8 @@ export function setupVj({ redraw, cycles = () => null }: Options) {
   // A look you did not choose: a few effects at once, the rest neutral
   document.querySelector('#vj-random')!.addEventListener('click', () => {
     setAll(randomLook(), GLIDE_MS);
+    // and a palette, any of them (the theme's own colour too)
+    applyColour({ palette: PALETTES[Math.floor(Math.random() * PALETTES.length)].id });
     turnOn();
   });
 

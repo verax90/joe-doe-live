@@ -4,12 +4,14 @@
 // drums do to the visuals and the clips, without a drum), move the VJ
 // effects, and drag the point the Motion visuals follow, with no webcam.
 import { hearRole, type Role } from './clips-react';
-import { onLangChange } from './i18n';
+import { applyColour, colourNow, onColour, PALETTES } from './finish';
+import { onLangChange, pick as inLanguage } from './i18n';
 import { holdMotionPoint } from './motion';
 import {
   addPhoneGreeting,
   REMOTE_HIT_EVENT,
   REMOTE_LOOK_EVENT,
+  REMOTE_PALETTE_EVENT,
   REMOTE_POINT_EVENT,
   REMOTE_VISUAL_EVENT,
   REMOTE_VJ_EVENT,
@@ -35,11 +37,26 @@ export function nextVisual(items: VisualItem[], current: string, random = Math.r
 
 export function setupRemoteVisual({ list, current, pick }: Options) {
   const vjNames = () => VJ_CONTROLS.map((control) => ({ id: control.id, name: control.name }));
-  const hello = (): StudioMessage => ({ t: 'visuals', items: list(), current: current(), vj: vjPositions(), looks: savedLooks(), vjNames: vjNames() });
+  const hello = (): StudioMessage => ({
+    t: 'visuals',
+    items: list(),
+    current: current(),
+    vj: vjPositions(),
+    looks: savedLooks(),
+    vjNames: vjNames(),
+    palettes: PALETTES.map((palette) => ({ id: palette.id, name: inLanguage(palette.name) })),
+    palette: colourNow().palette,
+  });
   addPhoneGreeting(hello);
   onLangChange(() => sendToPhones(hello()));
   // a look recalled or saved, Surprise me, All neutral: the phone's sliders and memories follow
   onVjLook(() => sendToPhones({ t: 'vj', vj: vjPositions(), looks: savedLooks() }));
+  // the palette from the phone, and the phone told when it changes here (a look, the dice)
+  window.addEventListener(REMOTE_PALETTE_EVENT, (event) => {
+    const id = (event as CustomEvent<string>).detail;
+    if (PALETTES.some((palette) => palette.id === id)) applyColour({ palette: id });
+  });
+  onColour(() => sendToPhones({ t: 'palette', id: colourNow().palette }));
   window.addEventListener(REMOTE_LOOK_EVENT, (event) => void recallLook((event as CustomEvent<number>).detail, GLIDE_MS));
   // picked on the studio, by a MIDI program change, by another phone
   const tell = () => sendToPhones({ t: 'visual', id: current() });

@@ -53,11 +53,11 @@ export const fin: Record<FinishControl, number> = {
 export const pal = { v: PALETTES[0].stops.flatMap(rgb), amount: 0, gain: 1.55 };
 // the Light slider (0-1) as that gain: ×0.6 to ×4, the middle about ×1.5
 export const gainOfLight = (slider: number) => 0.6 * (4 / 0.6) ** slider;
-let light = saved.light ?? 0.5;
-pal.gain = gainOfLight(light);
+pal.gain = gainOfLight(0.5);
 (globalThis as { pal?: typeof pal }).pal = pal;
 let paletteId = PALETTES.some((palette) => palette.id === saved.palette) ? saved.palette! : 'none';
 let tone = saved.tone ?? 1;
+let light = saved.light ?? 0.5;
 export function setPalette(id: string, amount = tone) {
   const palette = PALETTES.find((candidate) => candidate.id === id) ?? PALETTES[0];
   paletteId = palette.id;
@@ -66,7 +66,26 @@ export function setPalette(id: string, amount = tone) {
   pal.amount = palette.id === 'none' ? 0 : amount;
 }
 setPalette(paletteId);
+pal.gain = gainOfLight(light);
 export const currentPalette = () => paletteId;
+
+// The colour as a look keeps it (vj.ts) and as the phone sets it: the
+// palette, how much of it, and the light it is read with
+export type Colour = { palette: string; tone: number; light: number };
+export const colourNow = (): Colour => ({ palette: paletteId, tone, light });
+const colourListeners: (() => void)[] = [];
+export const onColour = (listener: () => void) => colourListeners.push(listener);
+let afterColour: ((wasOn: boolean) => void) | undefined;
+export function applyColour(next: Partial<Colour>) {
+  const wasOn = finishOn();
+  if (typeof next.light === 'number') {
+    light = Math.min(1, Math.max(0, next.light));
+    pal.gain = gainOfLight(light);
+  }
+  setPalette(next.palette ?? paletteId, typeof next.tone === 'number' ? Math.min(1, Math.max(0, next.tone)) : tone);
+  afterColour?.(wasOn);
+  for (const listener of colourListeners) listener();
+}
 
 let chosen: Quality = saved.quality === 'high' ? 'high' : 'light';
 let live = false; // Go live holds it high until it ends
@@ -161,10 +180,20 @@ export function setupFinish({ redraw, setQuality }: Options) {
     save();
     showPalette();
     if (was !== finishOn()) redrawVisual?.();
+    for (const listener of colourListeners) listener(); // the phones follow
   };
   listPalettes();
   showPalette();
   onLangChange(listPalettes);
+  // set from somewhere else (a look recalled, the phone): saved, shown, and
+  // the pass comes in or goes out if it has to
+  afterColour = (wasOn) => {
+    save();
+    paletteSelect.value = paletteId;
+    lightInput.value = String(light);
+    showPalette();
+    if (wasOn !== finishOn()) redrawVisual?.();
+  };
   paletteSelect.addEventListener('change', () => choosePalette(paletteSelect.value, tone));
   toneInput.addEventListener('input', () => choosePalette(paletteId, Number(toneInput.value)));
 

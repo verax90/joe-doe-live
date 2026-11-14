@@ -467,7 +467,8 @@ body {
 
 .looks {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  /* the visual, its palette, and Another */
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto;
   gap: 8px;
 }
 
