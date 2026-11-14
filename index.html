@@ -729,6 +729,7 @@
           <button class="panel-tab" type="button" role="tab" aria-selected="true" aria-controls="vj-tab-effects" data-i18n="vjTabEffects">Effects</button>
           <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="vj-tab-machines" data-i18n="machinesTitle">Machines</button>
           <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="vj-tab-motion" data-i18n="motionTitle">Motion</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="vj-tab-finish" data-i18n="finishTitle">Finish</button>
         </div>
         <section id="vj-tab-effects" class="panel-tabpanel" role="tabpanel">
           <label class="set-option"><input id="vj-on" type="checkbox" /> <span data-i18n="vjOn">VJ effects on the visual</span></label>
@@ -755,6 +756,20 @@
             <p class="panel-help" data-i18n="vjLooksHelp">The numbers are four memories of the effects.</p>
             <label class="set-option"><input id="vj-knobs" type="checkbox" /> <span data-i18n="vjKnobs">MPK knobs 1–6 move these</span></label>
           </details>
+        </section>
+        <section id="vj-tab-finish" class="panel-tabpanel" role="tabpanel" hidden>
+          <p class="panel-help" data-i18n="finishHelp">What makes the picture look done: a glow, a little grain and darker corners, over any visual.</p>
+          <div id="finish-sliders" class="vj-sliders"></div>
+          <button id="finish-reset" class="control" type="button" data-i18n="finishReset">As it came</button>
+          <label class="panel-field" for="finish-quality">
+            <span data-i18n="finishQuality">Quality</span>
+            <select id="finish-quality" class="control">
+              <option value="light" data-i18n="finishLight">Light: for making music</option>
+              <option value="high" data-i18n="finishHigh">High: for showing it</option>
+            </select>
+          </label>
+          <p id="finish-rate" class="panel-status" role="status"></p>
+          <p class="panel-help" data-i18n="finishQualityHelp">High draws every pixel sixty times a second.</p>
         </section>
         <section id="vj-tab-machines" class="panel-tabpanel" role="tabpanel" hidden>
           <p class="panel-help" data-i18n="machinesHelp">The visuals listen to your machines through an audio input. Nothing is played back.</p>

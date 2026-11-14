@@ -25,6 +25,7 @@ import { followsClock, setupMachines } from './machines';
 import { setupMenu } from './menu';
 import { setupPanelHelp } from './panel-help';
 import { setupMotion } from './motion';
+import { setupFinish } from './finish';
 import { setupFullscreen } from './fullscreen';
 import { setupDock } from './dock';
 import { setupBeat } from './beat';
@@ -77,7 +78,7 @@ import { setupVideo } from './video';
 import { setupClipPatterns } from './clips';
 import { setupClipsPanel } from './clips-panel';
 import { setupVj, vjTakesKnobs } from './vj';
-import { applyVisual, fitVisuals, setVisualClock, useBundledHydra, visualGroup, visuals, type VisualGroup } from './visuals';
+import { applyVisual, fitVisuals, setVisualClock, setVisualQuality, useBundledHydra, visualGroup, visuals, type VisualGroup } from './visuals';
 // A direct path: the package does not export dist/ by name
 import hydraUrl from '../node_modules/hydra-synth/dist/hydra-synth.js?url';
 
@@ -396,6 +397,7 @@ setupKnobHud(() => ({
   vjKnobs: vjTakesKnobs(),
 }));
 setupVj({ redraw: runVisual, cycles: () => (scheduler?.started && scheduler.now ? scheduler.now() : null) });
+setupFinish({ redraw: runVisual, setQuality: setVisualQuality });
 setupMachines();
 // The phone's Visual tab: every visual but "From the code" and the webcam ones
 setupRemoteVisual({

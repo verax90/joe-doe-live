@@ -6,6 +6,7 @@
 // for Strudel's own sounds (kick, snare and hats told apart by where in the
 // spectrum the hit lands). The tempo can follow the machine's MIDI clock.
 import { ensureAudio } from './audio';
+import { liveQuality } from './finish';
 import { hearRole, type Role } from './clips-react';
 import { onLangChange, t } from './i18n';
 import { micDeviceId } from './mic';
@@ -322,6 +323,7 @@ export function setupMachines() {
   // this panel out of the way, full screen. Leaving full screen (Esc) brings
   // the code back if this is what hid it
   let hidCode = false;
+  let wentLive = false;
   liveButton.addEventListener('click', async () => {
     if (!listening) {
       try {
@@ -340,10 +342,18 @@ export function setupMachines() {
       hidCode = true;
     }
     document.querySelector<HTMLButtonElement>('#vj .panel-close')?.click();
+    // the studio makes no sound of its own now: every pixel, sixty times a second
+    wentLive = true;
+    liveQuality(true);
     void document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => undefined);
   });
   document.addEventListener('fullscreenchange', () => {
-    if (document.fullscreenElement || !hidCode) return;
+    if (document.fullscreenElement) return;
+    if (wentLive) {
+      wentLive = false;
+      liveQuality(false);
+    }
+    if (!hidCode) return;
     hidCode = false;
     const codeToggle = document.querySelector<HTMLButtonElement>('#toggle-code')!;
     if (codeToggle.getAttribute('aria-pressed') === 'false') codeToggle.click();

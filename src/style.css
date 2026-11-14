@@ -2243,6 +2243,17 @@ select.control {
   padding-block: 0;
 }
 
+/* four tabs in the VJ panel: a little tighter so the row holds them */
+#vj .panel-tabs {
+  gap: 0.1rem;
+}
+
+#vj .panel-tab {
+  flex: 1 1 auto;
+  padding-inline: 0.35rem;
+  font-size: 12px;
+}
+
 /* VJ looks: four memories and the button that arms saving into one */
 .vj-looks {
   display: flex;

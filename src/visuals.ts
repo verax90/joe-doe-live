@@ -6,6 +6,7 @@ import { attachAscii } from './ascii';
 import { attachClips } from './clips';
 import { kickCount, kickHit } from './hits';
 import { stopRidges } from './ridges';
+import { finishCode, type Quality } from './finish';
 import { connectSource } from './video';
 import { withVj } from './vj';
 import type { Localized } from './i18n';
@@ -374,9 +375,11 @@ src(s1)
     id: 'cam-mosh',
     name: { en: 'Webcam (live datamosh)', es: 'Webcam (datamosh en vivo)', ca: 'Webcam (datamosh en viu)' },
     camera: true,
-    code: `src(o0)
-  .mosh(src(s0).diff(src(o0)).pixelate(40, 22), () => 0.008 + bass() * 0.01)
-  .blend(src(s0), () => (keyframe() ? 1 : 0.015))
+    // o3 keeps the camera's frame from before: the picture is pushed by how
+    // each block of it moved since then
+    code: `src(s0).out(o3)
+flowMosh(o0, s0, o3, () => 1 + bass() * 1.5)
+  .blend(src(s0), () => (keyframe() ? 1 : 0))
   .out()`,
   },
   {
@@ -518,12 +521,12 @@ src(s1)
   .out()`,
   },
   {
-    id: 'clips-mosh',
+    id: 'clips-mosh-vivo',
     name: { en: 'Clips (live datamosh)', es: 'Clips (datamosh en vivo)', ca: 'Clips (datamosh en viu)' },
     clips: true,
-    code: `src(o0)
-  .mosh(src(s2).diff(src(o0)).pixelate(40, 22), () => 0.006 + bass() * 0.008 + snareHit() * 0.02)
-  .blend(src(s2), () => (keyframe() ? 1 : 0.01))
+    code: `src(s2).out(o3)
+flowMosh(o0, s2, o3, () => 1 + bass() * 1.5 + snareHit())
+  .blend(src(s2), () => (keyframe() ? 1 : 0))
   .out()`,
   },
   {
@@ -833,6 +836,60 @@ const SHADERS = [
   return vec2(_st.x + (n - 0.5) * amount * 0.5 * torn, _st.y);`,
   },
   {
+    // The finish (finish.ts): the picture, a glow from what is bright around
+    // each point (sixteen looks at the picture, on two rings), darker
+    // corners and grain
+    name: 'finish',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'glow', default: 0 },
+      { type: 'float', name: 'grain', default: 0 },
+      { type: 'float', name: 'vignette', default: 0 },
+    ],
+    glsl: `
+  vec3 base = texture2D(tex, _st).rgb;
+  vec2 reach = vec2(resolution.y / resolution.x, 1.0) * 0.014;
+  vec3 halo = vec3(0.0);
+  for (int i = 0; i < 8; i++) {
+    float a = float(i) * 0.7853982;
+    vec2 d = vec2(cos(a), sin(a)) * reach;
+    halo += max(texture2D(tex, _st + d).rgb - 0.45, 0.0);
+    halo += max(texture2D(tex, _st + d * 2.4).rgb - 0.45, 0.0) * 0.6;
+  }
+  vec3 colour = base + halo * glow * 0.42;
+  colour *= 1.0 - vignette * smoothstep(0.3, 0.85, distance(_st, vec2(0.5)));
+  float speck = fract(sin(dot(floor(_st * resolution) + floor(time * 24.0) * 7.0, vec2(12.9898, 78.233))) * 43758.5453);
+  colour += (speck - 0.5) * grain * 0.22;
+  return vec4(colour, 1.0);`,
+  },
+  {
+    // A datamosh that follows the picture: for each block, how it moved
+    // between the frame before (last) and this one (now), from how its
+    // brightness changed against its slope there; what shows (shown) is
+    // pulled from where that block came from. Nothing new is drawn until a
+    // keyframe, so a face smears along its own movement
+    name: 'flowMosh',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'shown', default: NaN },
+      { type: 'sampler2D', name: 'now', default: NaN },
+      { type: 'sampler2D', name: 'last', default: NaN },
+      { type: 'float', name: 'amount', default: 1 },
+    ],
+    glsl: `
+  vec2 blocks = vec2(48.0, 27.0);
+  vec2 at = (floor(_st * blocks) + 0.5) / blocks;
+  vec2 e = 0.5 / blocks;
+  vec3 w = vec3(0.299, 0.587, 0.114);
+  float change = dot(texture2D(now, at).rgb - texture2D(last, at).rgb, w);
+  float gx = dot(texture2D(now, at + vec2(e.x, 0.0)).rgb - texture2D(now, at - vec2(e.x, 0.0)).rgb, w);
+  float gy = dot(texture2D(now, at + vec2(0.0, e.y)).rgb - texture2D(now, at - vec2(0.0, e.y)).rgb, w);
+  vec2 slope = vec2(gx, gy);
+  vec2 moved = clamp(-change * slope / (dot(slope, slope) + 0.004), -1.0, 1.0) * e * 2.0 * amount;
+  return texture2D(shown, fract(_st - moved));`,
+  },
+  {
     // the VJ's dots: how far each pixel is from the middle of its cell (the
     // cells pixelate() makes), and the picture kept only inside a dot whose
     // size is how bright that cell is
@@ -884,7 +941,9 @@ let shadersIn: unknown;
 function defineShaders(hydra: unknown) {
   const setFunction = (globalThis as { setFunction?: (shader: unknown) => void }).setFunction;
   if (shadersIn === hydra || !setFunction) return;
-  for (const shader of SHADERS) setFunction(shader);
+  // a copy each time: Hydra adds to the inputs of what it is given, and a
+  // second Hydra (it starts over after a hush or new options) would get them twice
+  for (const shader of SHADERS) setFunction({ ...shader, inputs: shader.inputs.map((input) => ({ ...input })) });
   shadersIn = hydra;
 }
 
@@ -896,8 +955,10 @@ export function useBundledHydra(src: string) {
   const original = g.initHydra as ((options?: Record<string, unknown>) => Promise<unknown>) | undefined;
   if (!original) return;
   g.initHydra = async (options: Record<string, unknown> = {}) => {
+    // always the same options: Strudel starts Hydra over when they change, and
+    // the size is set afterwards anyway (fitVisuals), whatever the quality
     const hydra = await original({ src, pixelRatio: 0.5, pixelated: false, ...options });
-    pixelRatio = typeof options.pixelRatio === 'number' ? options.pixelRatio : 0.5;
+    pixelRatio = typeof options.pixelRatio === 'number' ? options.pixelRatio : QUALITY[quality].ratio;
     capFrameRate();
     followWindowSize(hydra as { setResolution?: (width: number, height: number) => void });
     return hydra;
@@ -910,7 +971,19 @@ export function useBundledHydra(src: string) {
 // is what has to be set. A pattern can still ask for more with fps = 60
 function capFrameRate() {
   const globals = globalThis as { fps?: number };
-  if (!globals.fps) globals.fps = 30;
+  // unset, or still the other quality's: a pattern's own fps = … is left alone
+  if (!globals.fps || globals.fps === QUALITY.light.fps || globals.fps === QUALITY.high.fps) globals.fps = QUALITY[quality].fps;
+}
+
+// Light for making music (the notes come first), high for showing it
+// (finish.ts chooses; Go live takes high by itself)
+const QUALITY: Record<Quality, { ratio: number; fps: number }> = { light: { ratio: 0.5, fps: 30 }, high: { ratio: 1, fps: 60 } };
+let quality: Quality = 'light';
+export function setVisualQuality(next: Quality) {
+  quality = next;
+  pixelRatio = QUALITY[next].ratio;
+  capFrameRate();
+  fitVisuals();
 }
 
 // Hydra draws at its box on screen (the window, or the 9:16 column of the
@@ -918,7 +991,7 @@ function capFrameRate() {
 // window, so after a resize, or when the framing changes, Hydra is told the
 // size of its actual box, or it would draw stretched or in a corner
 let followed: { setResolution?: (width: number, height: number) => void } | undefined;
-let pixelRatio = 0.5;
+let pixelRatio = QUALITY.light.ratio;
 
 export function fitVisuals() {
   const canvas = document.getElementById('hydra-canvas') as HTMLCanvasElement | null;
@@ -991,6 +1064,17 @@ function startAuto() {
   }, 50);
 }
 
+// The last pass over the picture (finish.ts): drawn into o2 and shown from
+// there, or o0 shown as it is
+function showFinish(wanted: boolean) {
+  const code = wanted ? finishCode() : null;
+  try {
+    new Function(code ? `${code}\nrender(o2)` : 'render(o0)')();
+  } catch (error) {
+    console.warn('[finish]', error);
+  }
+}
+
 export async function applyVisual(id: string) {
   const visual = visuals.find((v) => v.id === id);
   if (!visual || !g.initHydra) return;
@@ -1003,7 +1087,9 @@ export async function applyVisual(id: string) {
   defineShaders(hydra);
   // The clips canvas is always s2, also for src(s2) in your own Hydra code
   attachClips();
-  if (visual.id === CODE_VISUAL) return;
+  // your own Hydra code is shown as you wrote it, with no finish over it
+  if (visual.id === CODE_VISUAL) return showFinish(false);
+  showFinish(true);
   if (visual.id === AUTO_VISUAL) {
     connectSource(false);
     // Already running (Ctrl+Enter runs the visual again): redraw the current

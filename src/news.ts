@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-finish',
+    title: L('Sharper visuals, with a finish', 'Visuales más nítidos y con acabado', 'Visuals més nítids i amb acabat'),
+    text: L(
+      'VJ → Finish: a glow around what is bright, grain and darker corners over any visual, and a High quality that draws every pixel sixty times a second (Go live takes it by itself). The webcam and clips datamosh now follows how the picture really moves',
+      'VJ → Acabado: resplandor alrededor de lo claro, grano y esquinas oscuras sobre cualquier visual, y una calidad Alta que dibuja todos los píxeles sesenta veces por segundo (Empezar el directo la pone solo). El datamosh de webcam y clips sigue ahora el movimiento real de la imagen',
+      "VJ → Acabat: resplendor al voltant del que és clar, gra i cantonades fosques sobre qualsevol visual, i una qualitat Alta que dibuixa tots els píxels seixanta cops per segon (Començar el directe la posa sol). El datamosh de webcam i clips segueix ara el moviment real de la imatge",
+    ),
+    go: [{ click: '#toggle-vj' }, { click: '[aria-controls="vj-tab-finish"]' }],
+  },
+  {
     id: '2026-11-15-vj-moves',
     title: L('The VJ effects move by themselves', 'Los efectos del VJ se mueven solos', 'Els efectes del VJ es mouen sols'),
     text: L(
