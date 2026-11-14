@@ -4,7 +4,7 @@
 
 import { attachAscii } from './ascii';
 import { attachClips } from './clips';
-import { kickHit } from './hits';
+import { kickCount, kickHit } from './hits';
 import { stopRidges } from './ridges';
 import { connectSource } from './video';
 import { withVj } from './vj';
@@ -835,6 +835,7 @@ function followWindowSize(hydra: { setResolution?: (width: number, height: numbe
 // one that stays dark without its controller
 const AUTO_BARS = 4;
 const AUTO_SECONDS = 8;
+const AUTO_KICKS = 16; // stopped, with hardware being heard (machines.ts): about four bars of four on the floor
 let clock: () => number | null = () => null;
 let autoTimer: number | undefined;
 let autoCurrent: Visual | undefined;
@@ -854,7 +855,10 @@ function startAuto() {
   const pool = visuals.filter((v) => v.code && !v.camera && !v.clips && !['ninguno', 'tacto', 'tacto-ondas', 'tacto-chispas', 'tacto-latido', 'voz', 'voz-formas'].includes(v.id) && !v.id.startsWith('mov'));
   const step = () => {
     const cycles = clock();
-    return cycles === null ? Math.floor(performance.now() / 1000 / AUTO_SECONDS) : Math.floor(cycles / AUTO_BARS);
+    if (cycles !== null) return `bar ${Math.floor(cycles / AUTO_BARS)}`;
+    // no music at all would freeze it on one visual: the kicks while they come, the seconds too
+    if (extraBand) return `kick ${Math.floor(kickCount() / AUTO_KICKS)} ${Math.floor(performance.now() / 1000 / (AUTO_SECONDS * 4))}`;
+    return `time ${Math.floor(performance.now() / 1000 / AUTO_SECONDS)}`;
   };
   const next = () => {
     const choices = pool.filter((v) => v !== autoCurrent);

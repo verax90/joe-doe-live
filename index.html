@@ -745,6 +745,9 @@
           <div class="vj-sliders">
             <label class="vj-slider"><span data-i18n="machinesGain">Sensitivity</span><input id="machines-gain" type="range" min="0" max="1" step="0.01" value="0.5" /></label>
           </div>
+          <label class="set-option"><input id="machines-auto" type="checkbox" checked /> <span data-i18n="machinesAuto">Sets itself to the level that comes in</span></label>
+          <button id="machines-live" class="control" type="button" data-icon="fullscreen" data-i18n="machinesLiveGo">Go live</button>
+          <p class="panel-help" data-i18n="machinesLiveHint">Listens, puts the Auto visual on, hides the code and fills the screen. Esc to come back.</p>
           <p class="panel-help" data-i18n="machinesClips">For the drums to change the clips: Video → Clips → Follow the music.</p>
           <label class="set-option"><input id="machines-clock" type="checkbox" /> <span data-i18n="machinesClock">The tempo follows the machine's MIDI clock</span></label>
           <p id="machines-clock-status" class="panel-status" role="status"></p>

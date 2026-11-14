@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createDrumSorter, createOnset, gainOf, ROLE_BANDS } from './machines';
+import { autoGainStep, createDrumSorter, createOnset, gainOf, ROLE_BANDS } from './machines';
 
 describe('hits heard on an audio input', () => {
   const feed = (onset: ReturnType<typeof createOnset>, levels: number[], stepMs = 16) =>
@@ -64,5 +64,14 @@ describe('hits heard on an audio input', () => {
     expect(sort(none, { kick: 0.8, snare: 0.2, hat: 0 }, 34)).toEqual(['kick']);
     expect(sort({ ...none, snare: true }, { kick: 0.7, snare: 0.3, hat: 0 }, 50)).toEqual([]);
     expect(sort(none, { kick: 0.6, snare: 0.1, hat: 0 }, 100)).toEqual([]);
+  });
+
+  it('the sensitivity sets itself: up when quiet, down when pinned, still in silence', () => {
+    expect(autoGainStep(0.5, 0.3)).toBeCloseTo(0.56);
+    expect(autoGainStep(0.5, 0.5)).toBeCloseTo(0.52);
+    expect(autoGainStep(0.5, 0.98)).toBeCloseTo(0.48);
+    expect(autoGainStep(0.5, 0.8)).toBe(0.5);
+    expect(autoGainStep(0.5, 0.01)).toBe(0.5); // nothing plugged in
+    expect(autoGainStep(1, 0.3)).toBe(1);
   });
 });

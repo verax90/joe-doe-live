@@ -50,6 +50,18 @@ export function createDrumSorter(waitMs = TELL_APART_MS) {
 // A line from a mixer is hot, a phone's mic across the room is not
 export const gainOf = (slider: number) => 2 ** ((slider - 0.5) * 5);
 
+// Automatic sensitivity: where the slider should go, from the loudest any
+// band got in the last few seconds. Too quiet to tell hits apart: up a step;
+// pinned at the top: down a step; silence (nothing plugged, a break in the
+// set) or a good level: stay
+export function autoGainStep(slider: number, loudest: number) {
+  if (loudest < 0.08) return slider;
+  if (loudest < 0.4) return Math.min(1, slider + 0.06); // far off: bigger steps
+  if (loudest < 0.62) return Math.min(1, slider + 0.02);
+  if (loudest > 0.93) return Math.max(0, slider - 0.02);
+  return slider;
+}
+
 // A hit is the band jumping above its own recent average: the average moves
 // slowly (so a loud passage raises the bar by itself), the band must be
 // rising, loud enough to matter, and a moment must have passed since the last
@@ -94,11 +106,24 @@ export function setupMachines() {
     ROLES.map((role) => [role, document.querySelector<HTMLElement>(`#machines-meters [data-role="${role}"]`)!]),
   ) as Record<Role, HTMLElement>;
 
+  const autoBox = document.querySelector<HTMLInputElement>('#machines-auto')!;
+  const liveButton = document.querySelector<HTMLButtonElement>('#machines-live')!;
+  const setGain = (slider: number) => {
+    gainInput.value = String(slider);
+    writeStorage('jdl:machines-gain', slider);
+    listening?.gain.gain.setTargetAtTime(gainOf(slider), listening.gain.context.currentTime, 0.05);
+  };
   gainInput.value = String(readStorage<number>('jdl:machines-gain', 0.5));
+  // moving it yourself means you want it there
   gainInput.addEventListener('input', () => {
-    writeStorage('jdl:machines-gain', Number(gainInput.value));
-    listening?.gain.gain.setTargetAtTime(gainOf(Number(gainInput.value)), listening.gain.context.currentTime, 0.02);
+    setGain(Number(gainInput.value));
+    if (autoBox.checked) {
+      autoBox.checked = false;
+      writeStorage('jdl:machines-auto', false);
+    }
   });
+  autoBox.checked = readStorage<boolean>('jdl:machines-auto', true);
+  autoBox.addEventListener('change', () => writeStorage('jdl:machines-auto', autoBox.checked));
 
   // Inputs, a USB interface or the SP first; the one used last time if it is there
   const listDevices = async () => {
@@ -158,6 +183,8 @@ export function setupMachines() {
     const onsets = Object.fromEntries(ROLES.map((role) => [role, createOnset()])) as Record<Role, ReturnType<typeof createOnset>>;
     const flashUntil: Record<Role, number> = { kick: 0, snare: 0, hat: 0 };
     const sort = createDrumSorter();
+    let loudest = 0;
+    let checkedAt = performance.now();
     const timer = window.setInterval(() => {
       const now = performance.now();
       fast.getFloatFrequencyData(fastData);
@@ -167,6 +194,15 @@ export function setupMachines() {
         energy[role] = bandOf(fastData, nyquist, ...ROLE_BANDS[role]);
         heard[role] = onsets[role](energy[role], now);
         meters[role].style.setProperty('--level', energy[role].toFixed(3));
+      }
+      loudest = Math.max(loudest, energy.kick, energy.snare, energy.hat);
+      if (now - checkedAt > 1000) {
+        if (autoBox.checked) {
+          const next = autoGainStep(Number(gainInput.value), loudest);
+          if (next !== Number(gainInput.value)) setGain(next);
+        }
+        loudest = 0;
+        checkedAt = now;
       }
       for (const role of sort(heard, energy, now)) {
         flashUntil[role] = now + 90;
@@ -200,6 +236,38 @@ export function setupMachines() {
     await start().catch(() => undefined);
   });
   document.querySelector('#toggle-vj')!.addEventListener('click', () => void listDevices().catch(() => undefined));
+
+  // Go live: one click for the gig. Listening on, the Auto visual (it moves
+  // on every sixteen kicks while the studio itself is stopped), the code and
+  // this panel out of the way, full screen. Leaving full screen (Esc) brings
+  // the code back if this is what hid it
+  let hidCode = false;
+  liveButton.addEventListener('click', async () => {
+    if (!listening) {
+      try {
+        await start();
+      } catch (error) {
+        status.textContent = t('micError', { error: error instanceof Error ? error.name : String(error) });
+        return;
+      }
+    }
+    const visual = document.querySelector<HTMLSelectElement>('#visual')!;
+    visual.value = 'auto';
+    visual.dispatchEvent(new Event('change', { bubbles: true }));
+    const codeToggle = document.querySelector<HTMLButtonElement>('#toggle-code')!;
+    if (codeToggle.getAttribute('aria-pressed') === 'true') {
+      codeToggle.click();
+      hidCode = true;
+    }
+    document.querySelector<HTMLButtonElement>('#vj .panel-close')?.click();
+    void document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => undefined);
+  });
+  document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement || !hidCode) return;
+    hidCode = false;
+    const codeToggle = document.querySelector<HTMLButtonElement>('#toggle-code')!;
+    if (codeToggle.getAttribute('aria-pressed') === 'false') codeToggle.click();
+  });
 
   // The tempo follows the machine's MIDI clock (midi.ts measures it, main.ts
   // sets it); ticking the box asks for MIDI if the studio has not yet
