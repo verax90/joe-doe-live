@@ -6,7 +6,7 @@ import { attachAscii } from './ascii';
 import { attachClips } from './clips';
 import { kickCount, kickHit } from './hits';
 import { stopRidges } from './ridges';
-import { finishCode, type Quality } from './finish';
+import { finishCode, visualComesIn, type Quality } from './finish';
 import { connectSource } from './video';
 import { withVj } from './vj';
 import type { Localized } from './i18n';
@@ -709,8 +709,13 @@ const g = globalThis as Global;
 // bare string and Hydra ignored it, so they never followed the bar. This H
 // parses the string first
 const barH = (pattern: unknown) => g.H!(typeof pattern === 'string' && g.mini ? g.mini(pattern) : pattern);
+let running = '';
 const run = (code: string) => {
   stopRidges(); // the Lines visual starts it again if it is the one running
+  // another visual fades in; the same one drawn again (a new Play, the VJ
+  // switched on) does not blink
+  visualComesIn(code, code !== running);
+  running = code;
   new Function('H', withVj(code))(barH);
 };
 
@@ -972,6 +977,7 @@ export const SHADERS = [
       { type: 'float', name: 'tone', default: 0 },
       ...['a', 'b', 'c', 'd'].flatMap((stop) => ['r', 'g', 'b'].map((part) => ({ type: 'float', name: `p${stop}${part}`, default: 0 }))),
       { type: 'float', name: 'lift', default: 1.5 },
+      { type: 'float', name: 'dim', default: 1 },
     ],
     glsl: `
   vec3 base = texture2D(tex, _st).rgb;
@@ -994,6 +1000,7 @@ export const SHADERS = [
   vec3 mapped = light < 0.3333 ? mix(pa, pb, light * 3.0) : light < 0.6667 ? mix(pb, pc, (light - 0.3333) * 3.0) : mix(pc, pd, (light - 0.6667) * 3.0);
   colour = mix(colour, mapped, tone);
   colour *= 1.0 - vignette * smoothstep(0.3, 0.85, distance(_st, vec2(0.5)));
+  colour *= dim;
   float speck = fract(sin(dot(floor(_st * resolution) + floor(time * 24.0) * 7.0, vec2(12.9898, 78.233))) * 43758.5453);
   colour += (speck - 0.5) * grain * 0.22;
   return vec4(colour, 1.0);`,

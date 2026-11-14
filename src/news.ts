@@ -12,6 +12,15 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-live-keys',
+    title: L('The VJ from the keyboard', 'El VJ desde el teclado', 'El VJ des del teclat'),
+    text: L(
+      'With the code hidden: 1 to 4 are the looks, 0 all neutral, D the dice, V another visual, P the next palette and Space a kick. Visuals now fade in, and a palette fits each one without touching Light',
+      'Con el código oculto: 1 a 4 son los aspectos, 0 todo a neutro, D el dado, V otro visual, P la paleta siguiente y Espacio un bombo. Los visuales entran con un fundido, y la paleta se ajusta a cada uno sin tocar Luz',
+      "Amb el codi amagat: 1 a 4 són els aspectes, 0 tot a neutre, D el dau, V un altre visual, P la paleta següent i Espai un bombo. Els visuals entren amb una fosa, i la paleta s'ajusta a cadascun sense tocar Llum",
+    ),
+  },
+  {
     id: '2026-11-15-generators',
     title: L('Four richer visuals', 'Cuatro visuales más ricos', 'Quatre visuals més rics'),
     text: L(

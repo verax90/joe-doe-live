@@ -50,7 +50,7 @@ export const fin: Record<FinishControl, number> = {
 // gain: how bright the picture is taken to be before it is placed along the
 // palette. Many visuals are drawn dim, to sit behind the code, and would
 // never leave the first colour; a bright one wants less
-export const pal = { v: PALETTES[0].stops.flatMap(rgb), amount: 0, gain: 1.55 };
+export const pal = { v: PALETTES[0].stops.flatMap(rgb), amount: 0, gain: 1.55, dim: () => 1 };
 // the Light slider (0-1) as that gain: ×0.6 to ×4, the middle about ×1.5
 export const gainOfLight = (slider: number) => 0.6 * (4 / 0.6) ** slider;
 pal.gain = gainOfLight(0.5);
@@ -66,7 +66,31 @@ export function setPalette(id: string, amount = tone) {
   pal.amount = palette.id === 'none' ? 0 : amount;
 }
 setPalette(paletteId);
-pal.gain = gainOfLight(light);
+
+// Each visual is drawn at its own brightness (the code says how much of the
+// theme's colour it takes: tint(0.3) is a dim one). The palette is read with
+// that undone, so a dim visual climbs it as far as a bright one and the
+// Light slider only has to be a taste
+export function lightOfVisual(code: string) {
+  const levels = [...code.matchAll(/tint\(\s*([\d.]+)\s*\)/g)].map((match) => Number(match[1])).filter((level) => level > 0);
+  if (!levels.length) return 1;
+  return Math.min(3, Math.max(1, 1 / Math.max(...levels)));
+}
+let visualLight = 1;
+const setGain = () => (pal.gain = gainOfLight(light) * visualLight);
+setGain();
+
+// A visual coming in: the picture rises from dark in a third of a second
+// instead of cutting, and the palette is read at this visual's brightness
+const FADE_MS = 350;
+let fadeAt = -Infinity;
+export const fadeLevel = (elapsedMs: number) => (elapsedMs >= FADE_MS ? 1 : 0.2 + 0.8 * Math.max(0, elapsedMs / FADE_MS) ** 2);
+pal.dim = () => fadeLevel(performance.now() - fadeAt);
+export function visualComesIn(code: string, fade = true) {
+  visualLight = lightOfVisual(code);
+  setGain();
+  if (fade) fadeAt = performance.now();
+}
 export const currentPalette = () => paletteId;
 
 // The colour as a look keeps it (vj.ts) and as the phone sets it: the
@@ -80,7 +104,7 @@ export function applyColour(next: Partial<Colour>) {
   const wasOn = finishOn();
   if (typeof next.light === 'number') {
     light = Math.min(1, Math.max(0, next.light));
-    pal.gain = gainOfLight(light);
+    setGain();
   }
   setPalette(next.palette ?? paletteId, typeof next.tone === 'number' ? Math.min(1, Math.max(0, next.tone)) : tone);
   afterColour?.(wasOn);
@@ -99,7 +123,7 @@ export const finishOn = (values: Record<FinishControl, number> = fin, palette = 
 export function finishCode(values: Record<FinishControl, number> = fin, palette = pal.amount) {
   if (!finishOn(values, palette)) return null;
   const colours = Array.from({ length: 12 }, (_, i) => `() => pal.v[${i}]`).join(', ');
-  return `finish(o0, () => fin.glow, () => fin.grain, () => fin.vignette, () => pal.amount, ${colours}, () => pal.gain).out(o2)`;
+  return `finish(o0, () => fin.glow, () => fin.grain, () => fin.vignette, () => pal.amount, ${colours}, () => pal.gain, () => pal.dim()).out(o2)`;
 }
 
 let applyQuality: ((quality: Quality) => void) | undefined;
@@ -158,7 +182,7 @@ export function setupFinish({ redraw, setQuality }: Options) {
   lightInput.value = String(light);
   lightInput.addEventListener('input', () => {
     light = Number(lightInput.value);
-    pal.gain = gainOfLight(light);
+    setGain();
     save();
   });
   const swatch = document.querySelector<HTMLElement>('#finish-swatch')!;
@@ -212,7 +236,7 @@ export function setupFinish({ redraw, setQuality }: Options) {
     for (const control of FINISH_CONTROLS) fin[control.id] = control.start;
     setPalette('none', 1);
     light = 0.5;
-    pal.gain = gainOfLight(light);
+    setGain();
     lightInput.value = String(light);
     paletteSelect.value = 'none';
     showPalette();

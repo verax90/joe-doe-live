@@ -22,6 +22,7 @@ import { setupLibrary } from './library';
 import { setupLiveSet } from './live-set';
 import { ensureLimiter } from './limiter';
 import { followsClock, setupMachines } from './machines';
+import { setupLiveKeys } from './live-keys';
 import { setupMenu } from './menu';
 import { setupPanelHelp } from './panel-help';
 import { setupMotion } from './motion';
@@ -33,7 +34,7 @@ import { setupProjector } from './projector';
 import { setupBacking } from './backing';
 import { setupMic } from './mic';
 import { setupRemote } from './remote';
-import { setupRemoteVisual } from './remote-visual';
+import { nextVisual, setupRemoteVisual } from './remote-visual';
 import { setupFlip } from './flip';
 import { setupTyping } from './typing';
 import { recordPlayed, setupHistory } from './history';
@@ -398,16 +399,27 @@ setupKnobHud(() => ({
 }));
 setupVj({ redraw: runVisual, cycles: () => (scheduler?.started && scheduler.now ? scheduler.now() : null) });
 setupFinish({ redraw: runVisual, setQuality: setVisualQuality });
+setupLiveKeys({
+  anotherVisual: () => {
+    const id = nextVisual(pickable(), visualSelect.value);
+    if (!id) return;
+    pickVisual(id);
+    runVisual();
+  },
+});
 setupMachines();
-// The phone's Visual tab: every visual but "From the code" and the webcam ones
-setupRemoteVisual({
-  list: () =>
+// What can be picked from somewhere else (the phone, the V key): every visual
+// but "From the code" and the webcam ones
+const pickable = () =>
     visuals
       .filter((visual) => visual.id !== 'code' && !visual.camera)
       .map((visual) => {
         const group = visualGroup(visual);
         return { id: visual.id, name: pick(visual.name), group: group === 'top' ? '' : t(`visualGroup_${group}` as Parameters<typeof t>[0]) };
-      }),
+      });
+// The phone's Visual tab
+setupRemoteVisual({
+  list: pickable,
   current: () => visualSelect.value,
   pick: (id) => {
     pickVisual(id);

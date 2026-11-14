@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FINISH_CONTROLS, PALETTES, gainOfLight, finishCode, finishOn, liveQuality, pal, quality, rgb, setPalette } from './finish';
+import { FINISH_CONTROLS, PALETTES, fadeLevel, gainOfLight, lightOfVisual, finishCode, finishOn, liveQuality, pal, quality, rgb, setPalette } from './finish';
 
 describe('the finish over the picture', () => {
   const off = { glow: 0, grain: 0, vignette: 0 };
@@ -66,5 +66,29 @@ describe('palettes', () => {
     expect(gainOfLight(1)).toBeCloseTo(4);
     expect(gainOfLight(0.5)).toBeGreaterThan(1.4);
     expect(gainOfLight(0.5)).toBeLessThan(1.7);
+  });
+});
+
+describe('each visual at its own brightness', () => {
+  it('a dim visual is read brighter, a full one as it is', () => {
+    expect(lightOfVisual('osc().color(...tint(0.4)).out()')).toBeCloseTo(2.5);
+    expect(lightOfVisual('osc().color(...tint(1)).out()')).toBe(1);
+    expect(lightOfVisual('osc().color(...tint(1.3)).out()')).toBe(1);
+  });
+  it('never more than three times, and the brightest tint counts', () => {
+    expect(lightOfVisual('osc().color(...tint(0.1)).out()')).toBe(3);
+    expect(lightOfVisual('a.color(...tint(0.3)).add(b.color(...tint(0.8)))')).toBeCloseTo(1.25);
+  });
+  it('a visual with no tint (the webcam, the clips) is left alone', () => {
+    expect(lightOfVisual('src(s0).out()')).toBe(1);
+  });
+});
+
+describe('a visual coming in', () => {
+  it('rises from dark and is whole after a third of a second', () => {
+    expect(fadeLevel(0)).toBeCloseTo(0.2);
+    expect(fadeLevel(175)).toBeLessThan(0.5);
+    expect(fadeLevel(350)).toBe(1);
+    expect(fadeLevel(5000)).toBe(1);
   });
 });
