@@ -12,36 +12,90 @@ import { CLOCK_EVENT, requestMidi } from './midi';
 import { readStorage, writeStorage } from './storage';
 import { bandOf, setExtraBand } from './visuals';
 
-// Where each drum shows: the kick's body, the snare's body and snap under
-// where hats live, the hats at the top
-export const ROLE_BANDS: Record<Role, [number, number]> = {
-  kick: [30, 130],
-  snare: [200, 2500],
-  hat: [7000, 14000],
-};
+// The spectrum in six parts. Which drum a hit was is read from how they
+// compare a moment after it lands, measured on the studio's own kits (its
+// default one, the TR-808, the TR-909 and the MPC60; machines.test.ts keeps
+// the numbers)
+export const BANDS = {
+  sub: [30, 100],
+  low: [100, 200],
+  lowmid: [200, 500],
+  mid: [500, 2000],
+  himid: [2000, 5000],
+  high: [7000, 14000],
+} as const;
+export type Band = keyof typeof BANDS;
+export type Energy = Record<Band, number>;
+const BAND_NAMES = Object.keys(BANDS) as Band[];
 const ROLES: Role[] = ['kick', 'snare', 'hat'];
 
-// The first instant of any drum is a crack that fills the whole spectrum:
-// a kick and a snare look the same there. A moment later they do not: the
-// kick's low end is still ringing with nothing above it, the snare's is gone
-// and its rattle goes on. So a hit waits this long to be told apart
-export const TELL_APART_MS = 34;
+// What each drum is made of
+export const lowEnd = (e: Energy) => Math.max(e.sub, e.low);
+export const body = (e: Energy) => Math.max(e.low, e.lowmid, e.mid);
+const upper = (e: Energy) => Math.max(e.mid, e.himid);
+// A kick: a sub that rings with little above it. A snare, a clap or a rim
+// has a sub too for an instant, but as much or more in the mids
+export const kickScore = (e: Energy) => e.sub - 0.5 * upper(e);
+export const KICK_SCORE = 0.6;
+// A snare (or clap, or rim) has a body well over its own highs; a hi-hat's
+// highs are as loud as anything under them, however much it rattles down there
+export const snareLike = (e: Energy) => body(e) >= 0.25 && body(e) - e.high >= 0.13;
+export const hatLike = (e: Energy) => e.high >= body(e) - 0.13;
 
-// Which drums a frame's hits make: hats at once, a kick or a snare once it
-// shows which it was, and one drum per hit
-type Bands = Record<Role, number>;
-export function createDrumSorter(waitMs = TELL_APART_MS) {
+// The first instant of any drum is a crack that fills the spectrum: a kick
+// and a snare look the same there. So a hit in the low end or the mids waits:
+// from LOOK_MS on it is a kick as soon as its score says so, and at DECIDE_MS
+// a snare if it looked like one on the way (a TR-909 kick, or any kick with
+// a hat on top, takes that long to show its sub: calling the snare sooner
+// got those wrong). What was neither (a hat with some thump) is dropped
+export const LOOK_MS = 30;
+export const DECIDE_MS = 62;
+
+// What rose since a frame from before the hit. The drum before is often
+// still ringing (a kick's tail under the next hat): judged on the levels
+// alone, that hat would have the kick's lows. The rise is the new hit's own
+const ZERO: Energy = { sub: 0, low: 0, lowmid: 0, mid: 0, himid: 0, high: 0 };
+export function rise(now: Energy, before: Energy): Energy {
+  const out = { ...ZERO };
+  for (const name of BAND_NAMES) out[name] = Math.max(0, now[name] - before[name]);
+  return out;
+}
+// A kick over the tail of another: the level says kick, and the sub rose
+const SUB_ROSE = 0.15;
+
+// Which drums a frame makes: hats at once, a kick or a snare once it shows
+// which it was, one drum per hit
+export type Onsets = { low: boolean; mid: boolean; high: boolean };
+export function createDrumSorter() {
   let since: number | undefined;
+  let base = ZERO; // the levels just before the hit being told apart
+  let snareSeen = false;
   let toldAt = -Infinity;
-  return (hits: Record<Role, boolean>, energy: Bands, at: number): Role[] => {
+  const past: Energy[] = []; // the last frames, oldest first
+  return (onsets: Onsets, e: Energy, at: number): Role[] => {
     const out: Role[] = [];
-    if ((hits.kick || hits.snare) && since === undefined && at - toldAt > waitMs * 2) since = at;
-    if (since !== undefined && at - since >= waitMs) {
-      since = undefined;
-      toldAt = at;
-      out.push(energy.kick > energy.snare + 0.12 ? 'kick' : 'snare');
+    // two frames back: the frame before may already hold a little of the hit
+    const before = past[0] ?? ZERO;
+    past.push({ ...e });
+    if (past.length > 2) past.shift();
+    if (onsets.high && hatLike(rise(e, before))) out.push('hat');
+    if ((onsets.low || onsets.mid) && since === undefined && at - toldAt > DECIDE_MS) {
+      since = at;
+      base = before;
+      snareSeen = false;
     }
-    if (hits.hat) out.push('hat');
+    if (since === undefined || at - since < LOOK_MS) return out;
+    const risen = rise(e, base);
+    const isKick = kickScore(e) >= KICK_SCORE && risen.sub >= SUB_ROSE;
+    snareSeen ||= snareLike(risen);
+    const late = at - since >= DECIDE_MS;
+    const told: Role | undefined | null = isKick ? 'kick' : !late ? undefined : snareSeen ? 'snare' : null;
+    if (told === undefined) return out; // not yet
+    since = undefined;
+    if (told) {
+      toldAt = at;
+      out.push(told);
+    }
     return out;
   };
 }
@@ -50,15 +104,16 @@ export function createDrumSorter(waitMs = TELL_APART_MS) {
 // A line from a mixer is hot, a phone's mic across the room is not
 export const gainOf = (slider: number) => 2 ** ((slider - 0.5) * 5);
 
-// Automatic sensitivity: where the slider should go, from the loudest any
-// band got in the last few seconds. Too quiet to tell hits apart: up a step;
-// pinned at the top: down a step; silence (nothing plugged, a break in the
-// set) or a good level: stay
-export function autoGainStep(slider: number, loudest: number) {
-  if (loudest < 0.08) return slider;
-  if (loudest < 0.4) return Math.min(1, slider + 0.06); // far off: bigger steps
-  if (loudest < 0.62) return Math.min(1, slider + 0.02);
-  if (loudest > 0.93) return Math.max(0, slider - 0.02);
+// Automatic sensitivity: where the slider should go, from the signal's peak
+// (after the gain) over the last second. The drums are told apart best at
+// the level the studio itself plays at, a peak of 0.8 or so: far under it,
+// up; over the top, down; silence (nothing plugged in, a break in the set)
+// or a good level, stay
+export function autoGainStep(slider: number, peak: number) {
+  if (peak < 0.01) return slider;
+  if (peak < 0.25) return Math.min(1, slider + 0.06); // far off: bigger steps
+  if (peak < 0.5) return Math.min(1, slider + 0.02);
+  if (peak > 1.2) return Math.max(0, slider - 0.02);
   return slider;
 }
 
@@ -170,6 +225,7 @@ export function setupMachines() {
 
     const smoothData = new Float32Array(smooth.frequencyBinCount);
     const fastData = new Float32Array(fast.frequencyBinCount);
+    const wave = new Float32Array(fast.fftSize);
     let smoothAt = -1;
     setExtraBand((lowHz, highHz) => {
       const now = performance.now();
@@ -180,22 +236,22 @@ export function setupMachines() {
       return bandOf(smoothData, nyquist, lowHz, highHz);
     });
 
-    const onsets = Object.fromEntries(ROLES.map((role) => [role, createOnset()])) as Record<Role, ReturnType<typeof createOnset>>;
+    const onsets = { low: createOnset(), mid: createOnset(), high: createOnset() };
     const flashUntil: Record<Role, number> = { kick: 0, snare: 0, hat: 0 };
     const sort = createDrumSorter();
     let loudest = 0;
     let checkedAt = performance.now();
+    const energy = Object.fromEntries(BAND_NAMES.map((name) => [name, 0])) as Energy;
     const timer = window.setInterval(() => {
       const now = performance.now();
       fast.getFloatFrequencyData(fastData);
-      const heard = { kick: false, snare: false, hat: false };
-      const energy = { kick: 0, snare: 0, hat: 0 };
-      for (const role of ROLES) {
-        energy[role] = bandOf(fastData, nyquist, ...ROLE_BANDS[role]);
-        heard[role] = onsets[role](energy[role], now);
-        meters[role].style.setProperty('--level', energy[role].toFixed(3));
-      }
-      loudest = Math.max(loudest, energy.kick, energy.snare, energy.hat);
+      for (const name of BAND_NAMES) energy[name] = bandOf(fastData, nyquist, BANDS[name][0], BANDS[name][1]);
+      // each meter shows what its drum is listened for in
+      const shown: Record<Role, number> = { kick: lowEnd(energy), snare: Math.max(energy.lowmid, energy.mid), hat: energy.high };
+      for (const role of ROLES) meters[role].style.setProperty('--level', shown[role].toFixed(3));
+      const heard = { low: onsets.low(shown.kick, now), mid: onsets.mid(energy.mid, now), high: onsets.high(energy.high, now) };
+      fast.getFloatTimeDomainData(wave);
+      for (const sample of wave) loudest = Math.max(loudest, Math.abs(sample));
       if (now - checkedAt > 1000) {
         if (autoBox.checked) {
           const next = autoGainStep(Number(gainInput.value), loudest);
