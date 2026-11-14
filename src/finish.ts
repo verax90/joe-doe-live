@@ -36,7 +36,7 @@ export const PALETTES: Palette[] = [
 export const rgb = (hex: string) => [1, 3, 5].map((at) => Math.round((parseInt(hex.slice(at, at + 2), 16) / 255) * 1000) / 1000);
 
 const KEY = 'jdl:finish';
-type Saved = Partial<Record<FinishControl, number>> & { quality?: Quality; palette?: string; tone?: number; light?: number };
+type Saved = Partial<Record<FinishControl, number>> & { quality?: Quality; palette?: string; tone?: number; light?: number; tame?: boolean };
 const saved = readStorage<Saved>(KEY, {});
 // what Hydra reads, live
 export const fin: Record<FinishControl, number> = {
@@ -50,7 +50,7 @@ export const fin: Record<FinishControl, number> = {
 // gain: how bright the picture is taken to be before it is placed along the
 // palette. Many visuals are drawn dim, to sit behind the code, and would
 // never leave the first colour; a bright one wants less
-export const pal = { v: PALETTES[0].stops.flatMap(rgb), amount: 0, gain: 1.55, dim: () => 1 };
+export const pal = { v: PALETTES[0].stops.flatMap(rgb), amount: 0, gain: 1.55, dim: () => 1, tame: () => 0 };
 // the Light slider (0-1) as that gain: ×0.6 to ×4, the middle about ×1.5
 export const gainOfLight = (slider: number) => 0.6 * (4 / 0.6) ** slider;
 pal.gain = gainOfLight(0.5);
@@ -79,6 +79,30 @@ export function lightOfVisual(code: string) {
 let visualLight = 1;
 const setGain = () => (pal.gain = gainOfLight(light) * visualLight);
 setGain();
+
+// Behind the code, what is bright is held back, so the code can be read over
+// a white blob or a pale palette. Not when the code is hidden, nor while the
+// picture is going somewhere it is the whole show: the projector, a recording
+export const TAME = 0.55;
+export const tameFor = (on: boolean, codeHidden: boolean, projecting: boolean, recording: boolean) =>
+  on && !codeHidden && !projecting && !recording ? TAME : 0;
+let tameOn = saved.tame ?? true;
+let tameNow = 0;
+let tameAt = -Infinity;
+pal.tame = () => {
+  const now = performance.now();
+  // looked up a few times a second, not on every frame
+  if (now - tameAt > 250 && typeof document !== 'undefined') {
+    tameAt = now;
+    tameNow = tameFor(
+      tameOn,
+      document.body.classList.contains('hide-code'),
+      document.querySelector('#toggle-projector')?.getAttribute('aria-pressed') === 'true',
+      Boolean(document.querySelector('#record.is-recording')),
+    );
+  }
+  return tameNow;
+};
 
 // A visual coming in: the picture rises from dark in a third of a second
 // instead of cutting, and the palette is read at this visual's brightness
@@ -123,7 +147,7 @@ export const finishOn = (values: Record<FinishControl, number> = fin, palette = 
 export function finishCode(values: Record<FinishControl, number> = fin, palette = pal.amount) {
   if (!finishOn(values, palette)) return null;
   const colours = Array.from({ length: 12 }, (_, i) => `() => pal.v[${i}]`).join(', ');
-  return `finish(o0, () => fin.glow, () => fin.grain, () => fin.vignette, () => pal.amount, ${colours}, () => pal.gain, () => pal.dim()).out(o2)`;
+  return `finish(o0, () => fin.glow, () => fin.grain, () => fin.vignette, () => pal.amount, ${colours}, () => pal.gain, () => pal.dim(), () => pal.tame()).out(o2)`;
 }
 
 let applyQuality: ((quality: Quality) => void) | undefined;
@@ -145,7 +169,7 @@ export function setupFinish({ redraw, setQuality }: Options) {
   const sliders = document.querySelector<HTMLElement>('#finish-sliders')!;
   const select = document.querySelector<HTMLSelectElement>('#finish-quality')!;
   const rate = document.querySelector<HTMLElement>('#finish-rate')!;
-  const save = () => writeStorage(KEY, { ...fin, quality: chosen, palette: paletteId, tone, light });
+  const save = () => writeStorage(KEY, { ...fin, quality: chosen, palette: paletteId, tone, light, tame: tameOn });
 
   const render = () => {
     sliders.replaceChildren(
@@ -174,6 +198,14 @@ export function setupFinish({ redraw, setQuality }: Options) {
   };
   render();
   onLangChange(render);
+
+  const tameBox = document.querySelector<HTMLInputElement>('#finish-tame')!;
+  tameBox.checked = tameOn;
+  tameBox.addEventListener('change', () => {
+    tameOn = tameBox.checked;
+    tameAt = -Infinity;
+    save();
+  });
 
   // The palette, and how much of it over the picture's own colours
   const paletteSelect = document.querySelector<HTMLSelectElement>('#finish-palette')!;

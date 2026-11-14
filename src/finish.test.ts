@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FINISH_CONTROLS, PALETTES, fadeLevel, gainOfLight, lightOfVisual, finishCode, finishOn, liveQuality, pal, quality, rgb, setPalette } from './finish';
+import { FINISH_CONTROLS, PALETTES, TAME, tameFor, fadeLevel, gainOfLight, lightOfVisual, finishCode, finishOn, liveQuality, pal, quality, rgb, setPalette } from './finish';
 
 describe('the finish over the picture', () => {
   const off = { glow: 0, grain: 0, vignette: 0 };
@@ -90,5 +90,17 @@ describe('a visual coming in', () => {
     expect(fadeLevel(175)).toBeLessThan(0.5);
     expect(fadeLevel(350)).toBe(1);
     expect(fadeLevel(5000)).toBe(1);
+  });
+});
+
+describe('what is bright behind the code', () => {
+  it('is held back while the code is in view', () => {
+    expect(tameFor(true, false, false, false)).toBe(TAME);
+  });
+  it('but never with the code hidden, on the projector, in a recording, or switched off', () => {
+    expect(tameFor(true, true, false, false)).toBe(0);
+    expect(tameFor(true, false, true, false)).toBe(0);
+    expect(tameFor(true, false, false, true)).toBe(0);
+    expect(tameFor(false, false, false, false)).toBe(0);
   });
 });

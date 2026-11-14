@@ -978,6 +978,7 @@ export const SHADERS = [
       ...['a', 'b', 'c', 'd'].flatMap((stop) => ['r', 'g', 'b'].map((part) => ({ type: 'float', name: `p${stop}${part}`, default: 0 }))),
       { type: 'float', name: 'lift', default: 1.5 },
       { type: 'float', name: 'dim', default: 1 },
+      { type: 'float', name: 'tame', default: 0 },
     ],
     glsl: `
   vec3 base = texture2D(tex, _st).rgb;
@@ -1001,6 +1002,7 @@ export const SHADERS = [
   colour = mix(colour, mapped, tone);
   colour *= 1.0 - vignette * smoothstep(0.3, 0.85, distance(_st, vec2(0.5)));
   colour *= dim;
+  colour *= 1.0 - tame * smoothstep(0.28, 0.8, dot(colour, vec3(0.299, 0.587, 0.114)));
   float speck = fract(sin(dot(floor(_st * resolution) + floor(time * 24.0) * 7.0, vec2(12.9898, 78.233))) * 43758.5453);
   colour += (speck - 0.5) * grain * 0.22;
   return vec4(colour, 1.0);`,
