@@ -60,6 +60,9 @@ function setControl(id: VjControl, value: number) {
   onMove?.(id, value);
 }
 
+// Something else playing a control: the movement in front of the webcam (motion.ts)
+export const setVjControl = (id: VjControl, value: number) => setControl(id, Math.min(1, Math.max(0, value)));
+
 // Knobs 1-6 while they belong to VJ; false leaves the knob to the sound
 export function vjKnob(cc: number, value: number) {
   const control = VJ_CONTROLS[cc - 1];

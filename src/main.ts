@@ -23,6 +23,7 @@ import { setupLiveSet } from './live-set';
 import { ensureLimiter } from './limiter';
 import { followsClock, setupMachines } from './machines';
 import { setupMenu } from './menu';
+import { setupMotion } from './motion';
 import { setupFullscreen } from './fullscreen';
 import { setupDock } from './dock';
 import { setupBeat } from './beat';
@@ -393,6 +394,7 @@ setupKnobHud(() => ({
 }));
 setupVj({ redraw: runVisual });
 setupMachines();
+setupMotion();
 room = setupRoom({
   editor,
   currentVisual: () => visualSelect.value,

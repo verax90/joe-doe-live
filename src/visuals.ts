@@ -20,12 +20,13 @@ export const AUTO_VISUAL = 'auto';
 
 // The Visual menu groups them, so 55 looks are not one long list. The ones
 // that are not looks (from the code, automatic, none) stay at the top.
-export type VisualGroup = 'top' | 'sound' | 'machines' | 'touch' | 'voice' | 'cam' | 'clips';
+export type VisualGroup = 'top' | 'sound' | 'machines' | 'motion' | 'touch' | 'voice' | 'cam' | 'clips';
 export function visualGroup(visual: Visual): VisualGroup {
   if (visual.id === CODE_VISUAL || visual.id === AUTO_VISUAL || visual.id === 'ninguno') return 'top';
   if (visual.clips) return 'clips';
   if (visual.camera) return 'cam';
   if (visual.id.startsWith('maq')) return 'machines';
+  if (visual.id.startsWith('mov')) return 'motion';
   if (visual.id.startsWith('tacto')) return 'touch';
   if (visual.id.startsWith('voz')) return 'voice';
   return 'sound';
@@ -313,6 +314,34 @@ src(s1)
     name: { en: 'Melt (live datamosh)', es: 'Derretido (datamosh en vivo)', ca: 'Fos (datamosh en viu)' },
     code: `src(o0)
   .mosh(noise(3, 0.25).pixelate(32, 18), () => 0.003 + bass() * 0.006 + snareHit() * 0.02)
+  .blend(osc(24, 0.05, 0.9).kaleid(5).modulate(noise(2), 0.2).color(...tint(1.1)), () => (keyframe() ? 1 : 0.004))
+  .out()`,
+  },
+  {
+    id: 'mov-luz',
+    name: { en: 'Light (follows you)', es: 'Luz (te sigue)', ca: 'Llum (et segueix)' },
+    code: `shape(64, () => 0.02 + motion() * 0.1, 0.25)
+  .scrollX(() => 0.5 - motionX())
+  .scrollY(() => 0.5 - motionY())
+  .color(...tint(0.5))
+  .add(src(o0).scale(1.012).modulate(noise(3, 0.2), 0.006).color(0.97, 0.97, 0.97), () => 0.72 + kickHit() * 0.15)
+  .out()`,
+  },
+  {
+    id: 'mov-anillos',
+    name: { en: 'Rings (around you)', es: 'Anillos (a tu alrededor)', ca: 'Anells (al teu voltant)' },
+    code: `rings(() => time * 0.15 + kickCount() * 0.37, () => Math.max(motion(), kickHit()), () => hatHit())
+  .scrollX(() => 0.5 - motionX())
+  .scrollY(() => 0.5 - motionY())
+  .color(...tint(1))
+  .add(src(o0).scale(1.02), 0.4)
+  .out()`,
+  },
+  {
+    id: 'mov-mosh',
+    name: { en: 'Melt (stirred by you)', es: 'Derretido (lo remueves tú)', ca: 'Fos (el remenes tu)' },
+    code: `src(o0)
+  .mosh(noise(3, 0.25).pixelate(32, 18).scrollX(() => motionX()).scrollY(() => motionY()), () => 0.002 + motion() * 0.03)
   .blend(osc(24, 0.05, 0.9).kaleid(5).modulate(noise(2), 0.2).color(...tint(1.1)), () => (keyframe() ? 1 : 0.004))
   .out()`,
   },
@@ -822,7 +851,7 @@ function stopAuto() {
 
 function startAuto() {
   // not the webcam ones, nor those that wait for a controller (Touch: the TouchMe)
-  const pool = visuals.filter((v) => v.code && !v.camera && !v.clips && !['ninguno', 'tacto', 'tacto-ondas', 'tacto-chispas', 'tacto-latido', 'voz', 'voz-formas'].includes(v.id));
+  const pool = visuals.filter((v) => v.code && !v.camera && !v.clips && !['ninguno', 'tacto', 'tacto-ondas', 'tacto-chispas', 'tacto-latido', 'voz', 'voz-formas'].includes(v.id) && !v.id.startsWith('mov'));
   const step = () => {
     const cycles = clock();
     return cycles === null ? Math.floor(performance.now() / 1000 / AUTO_SECONDS) : Math.floor(cycles / AUTO_BARS);

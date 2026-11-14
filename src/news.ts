@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-14-motion',
+    title: L('Move, and the visual follows', 'Muévete y el visual te sigue', 'Mou-te i el visual et segueix'),
+    text: L(
+      'VJ → Motion: the webcam finds where you move and the visuals under Motion follow it; it can also play the VJ effects. No recognition, nothing sent',
+      'VJ → Movimiento: la webcam encuentra dónde te mueves y los visuales de Movimiento lo siguen; también puede tocar los efectos del VJ. Sin reconocimiento, sin enviar nada',
+      'VJ → Moviment: la webcam troba on et mous i els visuals de Moviment ho segueixen; també pot tocar els efectes del VJ. Sense reconeixement, sense enviar res',
+    ),
+    go: [{ click: '#toggle-vj' }, { click: '[aria-controls="vj-tab-motion"]' }],
+  },
+  {
     id: '2026-11-14-machines',
     title: L('The visuals listen to your machines', 'Los visuales escuchan tus máquinas', 'Els visuals escolten les teves màquines'),
     text: L(

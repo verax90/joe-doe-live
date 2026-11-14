@@ -720,6 +720,7 @@
         <div class="panel-tabs" role="tablist" aria-label="VJ">
           <button class="panel-tab" type="button" role="tab" aria-selected="true" aria-controls="vj-tab-effects" data-i18n="vjTabEffects">Effects</button>
           <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="vj-tab-machines" data-i18n="machinesTitle">Machines</button>
+          <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="vj-tab-motion" data-i18n="motionTitle">Motion</button>
         </div>
         <section id="vj-tab-effects" class="panel-tabpanel" role="tabpanel">
           <p class="panel-help" data-i18n="vjHelp">Play the visuals: six effects over any built-in visual.</p>
@@ -747,6 +748,24 @@
           <p class="panel-help" data-i18n="machinesClips">For the drums to change the clips: Video → Clips → Follow the music.</p>
           <label class="set-option"><input id="machines-clock" type="checkbox" /> <span data-i18n="machinesClock">The tempo follows the machine's MIDI clock</span></label>
           <p id="machines-clock-status" class="panel-status" role="status"></p>
+        </section>
+        <section id="vj-tab-motion" class="panel-tabpanel" role="tabpanel" hidden>
+          <p class="panel-help" data-i18n="motionHelp">The webcam as a controller: where you move is a point the visuals follow.</p>
+          <label class="panel-field" for="motion-device">
+            <span data-i18n="motionDevice">Camera</span>
+            <select id="motion-device" class="control"></select>
+          </label>
+          <button id="motion-on" class="control control-accent" type="button" aria-pressed="false" data-i18n="motionOn">Follow the movement</button>
+          <div class="motion-view" aria-hidden="true">
+            <canvas id="motion-preview" width="48" height="27"></canvas>
+            <span id="motion-dot" class="motion-dot" hidden></span>
+          </div>
+          <p id="motion-status" class="panel-status" role="status"></p>
+          <div class="vj-sliders">
+            <label class="vj-slider"><span data-i18n="machinesGain">Sensitivity</span><input id="motion-gain" type="range" min="0" max="1" step="0.01" value="0.5" /></label>
+          </div>
+          <label class="set-option"><input id="motion-vj" type="checkbox" /> <span data-i18n="motionVj">The movement plays the VJ effects</span></label>
+          <p class="panel-help" data-i18n="motionVisuals">Visuals made for it: the Motion group in the visuals list.</p>
         </section>
       </aside>
 

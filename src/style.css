@@ -2123,6 +2123,41 @@ select.control {
   white-space: nowrap;
 }
 
+/* a device's name can be one long word */
+#machines-status,
+#motion-status {
+  overflow-wrap: anywhere;
+}
+
+/* VJ → Motion: what the camera sees move, and the point the visuals follow */
+.motion-view {
+  position: relative;
+  margin: 0.75rem 0 0.25rem;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.motion-view canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.motion-dot {
+  --size: 0.4;
+  position: absolute;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: -0.75rem 0 0 -0.75rem;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  transform: scale(var(--size));
+  pointer-events: none;
+}
+
 /* Listening to a live room: a bar under the top bar */
 .room-bar {
   position: fixed;
