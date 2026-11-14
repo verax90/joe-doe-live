@@ -69,7 +69,7 @@ export const REMOTE_VJ_EVENT = 'jdl:remote-vj'; // { c, v }, or null for all neu
 export const REMOTE_POINT_EVENT = 'jdl:remote-point'; // { x, y }, or null when the finger lifts
 export const REMOTE_LOOK_EVENT = 'jdl:remote-look'; // which of the VJ's memories to recall
 const HITS = ['kick', 'snare', 'hat'];
-const VJ_IDS = ['zoom', 'hue', 'warp', 'pixels', 'trails', 'spin', 'punch', 'kaleid', 'glitch', 'split', 'invert', 'blocks'];
+const VJ_IDS = ['zoom', 'hue', 'warp', 'pixels', 'trails', 'spin', 'punch', 'kaleid', 'glitch', 'split', 'invert', 'blocks', 'tunnel', 'fluid', 'dots'];
 
 const phones = new Set<DataConnection>();
 const greetings: (() => StudioMessage | undefined)[] = [];

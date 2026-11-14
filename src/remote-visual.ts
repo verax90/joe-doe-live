@@ -17,7 +17,7 @@ import {
   type StudioMessage,
   type VisualItem,
 } from './remote';
-import { VJ_CONTROLS, onVjLook, recallLook, resetVj, savedLooks, setVjControl, vjPositions, type VjControl } from './vj';
+import { GLIDE_MS, VJ_CONTROLS, onVjLook, recallLook, resetVj, savedLooks, setVjControl, vjPositions, type VjControl } from './vj';
 
 type Options = {
   // what the phone may pick, in the studio's language (no webcam visuals:
@@ -40,7 +40,7 @@ export function setupRemoteVisual({ list, current, pick }: Options) {
   onLangChange(() => sendToPhones(hello()));
   // a look recalled or saved, Surprise me, All neutral: the phone's sliders and memories follow
   onVjLook(() => sendToPhones({ t: 'vj', vj: vjPositions(), looks: savedLooks() }));
-  window.addEventListener(REMOTE_LOOK_EVENT, (event) => void recallLook((event as CustomEvent<number>).detail));
+  window.addEventListener(REMOTE_LOOK_EVENT, (event) => void recallLook((event as CustomEvent<number>).detail, GLIDE_MS));
   // picked on the studio, by a MIDI program change, by another phone
   const tell = () => sendToPhones({ t: 'visual', id: current() });
   document.querySelector('#visual')?.addEventListener('change', tell);

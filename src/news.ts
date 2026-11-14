@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-vj-moves',
+    title: L('The VJ effects move by themselves', 'Los efectos del VJ se mueven solos', 'Els efectes del VJ es mouen sols'),
+    text: L(
+      'The sign after each effect: a slow or a fast swing, a jump on every beat, or following the lows, the kick, the highs or the webcam. Three new effects (tunnel, fluid, dots), looks that fade into each other and can take turns every few kicks',
+      'El signo de cada efecto: un vaivén lento o rápido, un salto en cada pulso, o siguiendo los graves, el bombo, los agudos o la webcam. Tres efectos nuevos (túnel, fluido, puntos), aspectos que se funden uno en otro y pueden turnarse cada tantos bombos',
+      'El signe de cada efecte: un vaivé lent o ràpid, un salt a cada pols, o seguint els greus, el bombo, els aguts o la webcam. Tres efectes nous (túnel, fluid, punts), aspectes que es fonen l\'un en l\'altre i es poden tornar cada tants bombos',
+    ),
+    go: [{ click: '#toggle-vj' }, { click: '[aria-controls="vj-tab-effects"]' }],
+  },
+  {
     id: '2026-11-15-patterns',
     title: L('Ten new patterns', 'Diez patrones nuevos', 'Deu patrons nous'),
     text: L(

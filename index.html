@@ -729,18 +729,30 @@
           <button class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="vj-tab-motion" data-i18n="motionTitle">Motion</button>
         </div>
         <section id="vj-tab-effects" class="panel-tabpanel" role="tabpanel">
-          <p class="panel-help" data-i18n="vjHelp">Play the visuals: six effects over any built-in visual.</p>
           <label class="set-option"><input id="vj-on" type="checkbox" /> <span data-i18n="vjOn">VJ effects on the visual</span></label>
-          <label class="set-option"><input id="vj-knobs" type="checkbox" /> <span data-i18n="vjKnobs">MPK knobs 1–6 move these</span></label>
-          <div id="vj-sliders" class="vj-sliders"></div>
           <div id="vj-looks" class="vj-looks" role="group" aria-label="Looks" data-i18n-label="vjLooks">
             <button id="vj-look-save" class="control" type="button" aria-pressed="false" data-icon="save" data-i18n="vjLookSave" data-i18n-title="vjLookSaveHint">Save</button>
-          </div>
-          <p id="vj-looks-status" class="panel-status" role="status"></p>
-          <div class="machines-actions">
-            <button id="vj-random" class="control" type="button" data-icon="dice" data-i18n="vjRandom" data-i18n-title="vjRandomHint">Surprise me</button>
+            <button id="vj-random" class="control control-icon" type="button" data-icon="dice" aria-label="Surprise me" data-i18n-label="vjRandom" data-i18n-title="vjRandomHint"></button>
             <button id="vj-reset" class="control" type="button" data-i18n="vjReset">All neutral</button>
           </div>
+          <p id="vj-looks-status" class="panel-status" role="status"></p>
+          <label class="set-option vj-turns">
+            <input id="vj-turns" type="checkbox" /> <span data-i18n="vjTurns">The looks take turns every</span>
+            <select id="vj-turns-every" class="control" aria-label="Kicks" data-i18n-label="vjTurnsKicks">
+              <option value="8">8</option>
+              <option value="16" selected>16</option>
+              <option value="32">32</option>
+            </select>
+            <span data-i18n="vjTurnsKicks">kicks</span>
+          </label>
+          <div id="vj-sliders" class="vj-sliders"></div>
+          <details class="panel-more">
+            <summary data-i18n="machinesMore">What each thing does</summary>
+            <p class="panel-help" data-i18n="vjHelp">Play the visuals: effects over any built-in visual.</p>
+            <p class="panel-help" data-i18n="vjModLegend">The sign after each effect is what moves it by itself</p>
+            <p class="panel-help" data-i18n="vjLooksHelp">The numbers are four memories of the effects.</p>
+            <label class="set-option"><input id="vj-knobs" type="checkbox" /> <span data-i18n="vjKnobs">MPK knobs 1–6 move these</span></label>
+          </details>
         </section>
         <section id="vj-tab-machines" class="panel-tabpanel" role="tabpanel" hidden>
           <p class="panel-help" data-i18n="machinesHelp">The visuals listen to your machines through an audio input. Nothing is played back.</p>

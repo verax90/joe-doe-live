@@ -437,7 +437,7 @@ body {
   }
 
   .board-visual .vj .knobs {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
   }
 
   .board-visual .vj .knob span {

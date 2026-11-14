@@ -833,6 +833,27 @@ const SHADERS = [
   return vec2(_st.x + (n - 0.5) * amount * 0.5 * torn, _st.y);`,
   },
   {
+    // the VJ's dots: how far each pixel is from the middle of its cell (the
+    // cells pixelate() makes), and the picture kept only inside a dot whose
+    // size is how bright that cell is
+    name: 'dotField',
+    type: 'src',
+    inputs: [{ type: 'float', name: 'cells', default: 96 }],
+    glsl: `
+  vec2 local = fract(_st * vec2(cells, cells * 0.5625) + 0.5) - 0.5;
+  return vec4(vec3(length(local)), 1.0);`,
+  },
+  {
+    name: 'vjDots',
+    type: 'combine',
+    inputs: [{ type: 'float', name: 'amount', default: 0 }],
+    glsl: `
+  float bright = dot(_c0.rgb, vec3(0.299, 0.587, 0.114));
+  float radius = 0.12 + bright * 0.5;
+  float inside = 1.0 - smoothstep(radius, radius + 0.07, _c1.r);
+  return mix(_c0, vec4(_c0.rgb * inside * 1.25, _c0.a), step(0.001, amount));`,
+  },
+  {
     // the VJ's kaleidoscope: under two sides it leaves the picture alone
     name: 'vjKaleid',
     type: 'coord',

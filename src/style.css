@@ -2068,6 +2068,63 @@ select.control {
   font-size: 13px;
 }
 
+/* A slider and, after it, the button for what moves it by itself */
+.vj-sliders .vj-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1.6rem;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.vj-mod {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* the list itself covers the sign, unseen: a click anywhere opens it */
+.vj-mod select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.vj-mod:hover,
+.vj-mod:focus-within {
+  border-color: var(--accent);
+}
+
+.vj-mod.is-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.vj-legend {
+  margin: 0.25rem 0 0;
+  font-size: 12px;
+}
+
+.vj-turns {
+  flex-wrap: wrap;
+}
+
+.vj-turns select {
+  width: auto;
+  height: 1.6rem;
+  padding-block: 0;
+}
+
 /* VJ looks: four memories and the button that arms saving into one */
 .vj-looks {
   display: flex;

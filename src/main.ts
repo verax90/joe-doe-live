@@ -393,7 +393,7 @@ setupKnobHud(() => ({
   ascii: isAsciiOn(),
   vjKnobs: vjTakesKnobs(),
 }));
-setupVj({ redraw: runVisual });
+setupVj({ redraw: runVisual, cycles: () => (scheduler?.started && scheduler.now ? scheduler.now() : null) });
 setupMachines();
 // The phone's Visual tab: every visual but "From the code" and the webcam ones
 setupRemoteVisual({

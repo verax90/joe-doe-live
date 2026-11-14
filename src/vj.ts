@@ -9,9 +9,10 @@
 import { keepingFocus } from './a11y';
 import type { Localized } from './i18n';
 import { onLangChange, pick, t } from './i18n';
+import { kickCount, kickHit } from './hits';
 import { readStorage, writeStorage } from './storage';
 
-export type VjControl = 'zoom' | 'hue' | 'warp' | 'pixels' | 'trails' | 'spin' | 'punch' | 'kaleid' | 'glitch' | 'split' | 'invert' | 'blocks';
+export type VjControl = 'zoom' | 'hue' | 'warp' | 'pixels' | 'trails' | 'spin' | 'punch' | 'kaleid' | 'glitch' | 'split' | 'invert' | 'blocks' | 'tunnel' | 'fluid' | 'dots';
 // How many of them the MPK's knobs reach (7 is the volume, 8 the ASCII filter)
 export const VJ_KNOBS = 6;
 
@@ -30,6 +31,11 @@ export const VJ_CONTROLS: { id: VjControl; name: Localized; neutral: number }[] 
   { id: 'split', name: { en: 'RGB split', es: 'RGB partido', ca: 'RGB partit' }, neutral: 0 },
   { id: 'invert', name: { en: 'Negative', es: 'Negativo', ca: 'Negatiu' }, neutral: 0 },
   { id: 'blocks', name: { en: 'Blocks', es: 'Bloques', ca: 'Blocs' }, neutral: 0 },
+  // the picture fed back into itself: growing and turning (a tunnel), or pushed along a current (a liquid)
+  { id: 'tunnel', name: { en: 'Tunnel', es: 'Túnel', ca: 'Túnel' }, neutral: 0 },
+  { id: 'fluid', name: { en: 'Fluid', es: 'Fluido', ca: 'Fluid' }, neutral: 0 },
+  // the picture as a grid of dots, bigger where it is brighter
+  { id: 'dots', name: { en: 'Dots', es: 'Puntos', ca: 'Punts' }, neutral: 0 },
 ];
 
 const STORAGE_KEY = 'jdl:vj';
@@ -50,6 +56,11 @@ export const vj = {
   split: 0,
   invert: 0,
   blocks: 0,
+  tunnel: 0,
+  fluid: 0,
+  dots: 0,
+  dotCells: 96,
+  feedback: 0,
 };
 (globalThis as { vj?: typeof vj }).vj = vj;
 
@@ -69,11 +80,14 @@ export function vjAngle(now = performance.now()) {
 // 0-1 positions to what each effect needs; the middle of zoom and spin is
 // neutral, so a knob can go both ways
 export function vjValues(p: Record<VjControl, number>) {
+  const pixels = p.pixels < 0.02 ? 4000 : Math.round(400 * (1 - p.pixels) ** 2 + 12); // 4000 = none
+  // the dots need the picture in cells of their own size: 96 across down to 24
+  const dotCells = Math.round(96 - p.dots * 72);
   return {
     zoom: 2 ** ((p.zoom - 0.5) * 3), // ×0.35 to ×2.8
     hue: p.hue,
     warp: p.warp * 0.6,
-    pixels: p.pixels < 0.02 ? 4000 : Math.round(400 * (1 - p.pixels) ** 2 + 12), // 4000 = none
+    pixels: p.dots > 0 ? Math.min(pixels, dotCells) : pixels,
     trails: p.trails * 0.92,
     spin: (p.spin - 0.5) * 1.2, // radians per second, either way
     punch: p.punch,
@@ -82,7 +96,51 @@ export function vjValues(p: Record<VjControl, number>) {
     split: p.split * 0.04,
     invert: p.invert,
     blocks: p.blocks * 0.06,
+    tunnel: p.tunnel,
+    fluid: p.fluid,
+    dots: p.dots,
+    dotCells,
+    // how much of what shows is the frame before: the most any of the three asks for
+    feedback: Math.max(p.trails * 0.92, p.tunnel * 0.85, p.fluid * 0.93),
   };
+}
+
+// Movement: an effect can move by itself. A slow or a fast swing (four bars
+// and one beat while the studio plays, eight seconds and half a second while
+// it does not), a jump to somewhere else on every beat, or following
+// something: the lows, the kick, the highs, or how much moves in front of
+// the webcam (VJ → Motion). The slider is where it rests; the movement goes
+// from there
+export type VjMod = 'none' | 'slow' | 'fast' | 'jump' | 'bass' | 'kick' | 'high' | 'move';
+export const VJ_MODS: VjMod[] = ['none', 'slow', 'fast', 'jump', 'bass', 'kick', 'high', 'move'];
+export const MOD_GLYPH: Record<VjMod, string> = { none: '·', slow: '∿', fast: '≋', jump: '▚', bass: '▁', kick: '●', high: '▔', move: '◎' };
+const mods = Object.fromEntries(VJ_CONTROLS.map((c) => [c.id, 'none'])) as Record<VjControl, VjMod>;
+export const vjMods = (): Record<VjControl, VjMod> => ({ ...mods });
+const MOD_REACH = 0.6;
+
+// Where a control is with its movement on: source is how far along the
+// movement is (0 to 1). From the middle it swings both ways; from near an
+// end it goes towards the other, so a slider at zero is not stuck there
+export function moved(base: number, source: number, swings: boolean) {
+  const s = Math.min(1, Math.max(0, source));
+  const to = swings && base >= 0.3 && base <= 0.7 ? base + (s - 0.5) * MOD_REACH : base <= 0.5 ? base + s * MOD_REACH : base - s * MOD_REACH;
+  return Math.min(1, Math.max(0, to));
+}
+
+// How far along each movement is right now. cycles: bars since Play, or null
+export type Heard = { bass: number; kick: number; high: number; move: number };
+const SILENT: Heard = { bass: 0, kick: 0, high: 0, move: 0 };
+export function modSource(mod: VjMod, seconds: number, cycles: number | null, heard: Heard = SILENT) {
+  if (mod === 'slow') return 0.5 - 0.5 * Math.cos((cycles === null ? seconds / 8 : cycles / 4) * Math.PI * 2);
+  if (mod === 'fast') return 0.5 - 0.5 * Math.cos((cycles === null ? seconds / 0.5 : cycles * 4) * Math.PI * 2);
+  if (mod === 'jump') {
+    // the same place for the whole beat, another on the next (sample and hold)
+    const beat = Math.floor(cycles === null ? seconds * 2 : cycles * 4);
+    const hash = Math.sin(beat * 127.1 + 311.7) * 43758.5453;
+    return hash - Math.floor(hash);
+  }
+  if (mod === 'bass' || mod === 'kick' || mod === 'high' || mod === 'move') return heard[mod];
+  return 0;
 }
 
 let enabled = false;
@@ -97,24 +155,71 @@ function setControl(id: VjControl, value: number) {
   positions[id] = value;
   Object.assign(vj, vjValues(positions));
   onMove?.(id, value);
-  if (id === 'split' && enabled && value > 0 !== splitDrawn) redrawVisual?.();
+  if (id === 'split' && enabled && splitWanted() !== splitDrawn) redrawVisual?.();
+}
+const splitWanted = () => positions.split > 0 || mods.split !== 'none';
+
+let onMod: (() => void) | undefined;
+export function setVjMod(id: VjControl, mod: VjMod) {
+  mods[id] = mod;
+  // back to where the slider says, at once
+  if (mod === 'none') Object.assign(vj, vjValues(positions));
+  if (id === 'split' && enabled && splitWanted() !== splitDrawn) redrawVisual?.();
+  onMod?.();
+}
+
+// The values Hydra reads while something moves by itself (frame() below)
+export function movedValues(seconds: number, cycles: number | null, heard?: Heard) {
+  const now = { ...positions };
+  for (const control of VJ_CONTROLS) {
+    const mod = mods[control.id];
+    if (mod !== 'none') now[control.id] = moved(positions[control.id], modSource(mod, seconds, cycles, heard), mod === 'slow' || mod === 'fast' || mod === 'jump');
+  }
+  return vjValues(now);
 }
 
 // Several controls at once (a look recalled, Surprise me, All neutral): the
 // phones are told, so their sliders follow
 const bulkListeners: (() => void)[] = [];
 export const onVjLook = (listener: () => void) => bulkListeners.push(listener);
-function setAll(look: Partial<Record<VjControl, number>>) {
-  for (const control of VJ_CONTROLS) setControl(control.id, look[control.id] ?? control.neutral);
-  for (const listener of bulkListeners) listener();
+let glide: number | undefined;
+// glideMs: the sliders travel there instead of jumping (a look recalled live)
+function setAll(look: Partial<Record<VjControl, number>>, glideMs = 0) {
+  clearInterval(glide);
+  const from = { ...positions };
+  const to = Object.fromEntries(VJ_CONTROLS.map((c) => [c.id, look[c.id] ?? c.neutral])) as Record<VjControl, number>;
+  const arrive = () => {
+    for (const control of VJ_CONTROLS) setControl(control.id, to[control.id]);
+    for (const listener of bulkListeners) listener();
+  };
+  if (!glideMs) return arrive();
+  const started = performance.now();
+  glide = window.setInterval(() => {
+    const along = Math.min(1, (performance.now() - started) / glideMs);
+    if (along >= 1) {
+      clearInterval(glide);
+      return arrive();
+    }
+    const eased = along * along * (3 - 2 * along);
+    for (const control of VJ_CONTROLS) setControl(control.id, from[control.id] + (to[control.id] - from[control.id]) * eased);
+  }, 30);
 }
-export const resetVj = () => setAll({});
+export const resetVj = () => {
+  for (const control of VJ_CONTROLS) mods[control.id] = 'none';
+  onMod?.();
+  setAll({});
+};
+export const GLIDE_MS = 450;
 
 // Looks: four memories of where every effect is, to come back to in one
 // press while playing (the phone's Visual tab has them too)
 export const LOOKS = 4;
 const LOOKS_KEY = 'jdl:vj-looks';
-type Look = Record<VjControl, number> | null;
+// p: where each slider is; m: what moves by itself. (Looks saved before
+// the movements existed are the positions alone)
+type Look = { p: Record<VjControl, number>; m?: Partial<Record<VjControl, VjMod>> } | Record<VjControl, number> | null;
+const lookParts = (look: NonNullable<Look>) =>
+  'p' in look ? { p: look.p as Record<VjControl, number>, m: (look.m ?? {}) as Partial<Record<VjControl, VjMod>> } : { p: look as Record<VjControl, number>, m: {} };
 const readLooks = () => {
   const stored = readStorage<Look[]>(LOOKS_KEY, []);
   return Array.from({ length: LOOKS }, (_, i) => stored[i] ?? null);
@@ -123,17 +228,30 @@ export const savedLooks = () => readLooks().map(Boolean);
 export function saveLook(slot: number) {
   const looks = readLooks();
   if (slot < 0 || slot >= LOOKS) return;
-  looks[slot] = { ...positions };
+  looks[slot] = { p: { ...positions }, m: { ...mods } };
   writeStorage(LOOKS_KEY, looks);
 }
 let onRecall: (() => void) | undefined;
 // false when that memory is empty
-export function recallLook(slot: number) {
+export function recallLook(slot: number, glideMs = 0) {
   const look = readLooks()[slot];
   if (!look) return false;
-  setAll(look);
+  const { p, m } = lookParts(look);
+  for (const control of VJ_CONTROLS) mods[control.id] = VJ_MODS.includes(m[control.id] as VjMod) ? (m[control.id] as VjMod) : 'none';
+  onMod?.();
+  setAll(p, glideMs);
+  if (enabled && splitWanted() !== splitDrawn) redrawVisual?.();
   onRecall?.();
   return true;
+}
+
+// Which memory comes after this one when they take turns: the next one that
+// holds something, round and round; undefined with fewer than two
+export function nextLook(filled: boolean[], current: number | undefined) {
+  const slots = filled.map((on, slot) => (on ? slot : -1)).filter((slot) => slot >= 0);
+  if (slots.length < 2) return undefined;
+  const at = current === undefined ? -1 : slots.indexOf(current);
+  return slots[(at + 1) % slots.length];
 }
 
 // Where every control is (0-1), for the phone's sliders to start from
@@ -164,10 +282,11 @@ export function withVj(code: string) {
   .modulate(noise(3, 0.2), () => vj.warp)
   .mosh(noise(3, 0.25).pixelate(32, 18), () => vj.blocks)
   .tear(() => vj.glitch, () => time * 14)
-  .pixelate(() => vj.pixels, () => vj.pixels * 0.5625)`;
+  .pixelate(() => vj.pixels, () => vj.pixels * 0.5625)
+  .vjDots(dotField(() => vj.dotCells), () => vj.dots)`;
   // the second copy only while the split is in use: it is the whole chain
   // again for every pixel (setControl redraws when it comes in or goes out)
-  splitDrawn = positions.split > 0;
+  splitDrawn = splitWanted();
   const split = splitDrawn
     ? `
   .color(0, 1, 1)
@@ -180,7 +299,13 @@ ${moved}${split}
   .hue(() => vj.hue)
   .invert(() => vj.invert)
   .brightness(() => vj.punch * kickHit() * 0.25)
-  .blend(src(o0).scale(() => 1 + vj.trails * 0.015), () => vj.trails)
+  .blend(
+    src(o0)
+      .scale(() => 1 + vj.trails * 0.015 + vj.tunnel * 0.09)
+      .rotate(() => vj.tunnel * 0.07)
+      .modulate(noise(2.5, 0.15), () => vj.fluid * 0.03),
+    () => vj.feedback
+  )
   .out(o0)`;
 }
 
@@ -195,14 +320,15 @@ export function randomLook(random = Math.random): Record<VjControl, number> {
     const id = ids.splice(Math.floor(random() * ids.length), 1)[0];
     const value = random();
     look[id] =
-      id === 'trails' ? value * 0.7 : id === 'pixels' ? 0.2 + value * 0.5 : id === 'invert' ? 1 : id === 'zoom' || id === 'spin' ? 0.2 + value * 0.6 : 0.15 + value * 0.85;
+      id === 'trails' || id === 'tunnel' || id === 'fluid' ? value * 0.7 : id === 'pixels' ? 0.2 + value * 0.5 : id === 'invert' ? 1 : id === 'zoom' || id === 'spin' ? 0.2 + value * 0.6 : 0.15 + value * 0.85;
   }
   return look;
 }
 
-type Options = { redraw: () => void };
+// cycles: bars since Play, or null while stopped (for the movements in time)
+type Options = { redraw: () => void; cycles?: () => number | null };
 
-export function setupVj({ redraw }: Options) {
+export function setupVj({ redraw, cycles = () => null }: Options) {
   redrawVisual = redraw;
   const toggle = document.querySelector<HTMLInputElement>('#vj-on')!;
   const knobsToggle = document.querySelector<HTMLInputElement>('#vj-knobs')!;
@@ -211,7 +337,9 @@ export function setupVj({ redraw }: Options) {
 
   // drawn again, the keyboard focus stays where it was (a11y.ts)
   const render = () => keepingFocus(sliders, renderNow);
+  let modShows: (() => void)[] = [];
   const renderNow = () => {
+    modShows = [];
     sliders.replaceChildren(
       ...VJ_CONTROLS.map((control, i) => {
         const label = document.createElement('label');
@@ -228,10 +356,85 @@ export function setupVj({ redraw }: Options) {
         input.addEventListener('input', () => setControl(control.id, Number(input.value)));
         inputs.set(control.id, input);
         label.append(name, input);
-        return label;
+        // what moves it: its sign, and over it (unseen) the list to choose from
+        const mod = document.createElement('span');
+        mod.className = 'vj-mod';
+        const sign = document.createElement('span');
+        sign.setAttribute('aria-hidden', 'true');
+        const list = document.createElement('select');
+        for (const way of VJ_MODS) list.append(new Option(`${MOD_GLYPH[way]} ${t(`vjMod_${way}`)}`, way));
+        mod.append(sign, list);
+        const show = () => {
+          const now = mods[control.id];
+          list.value = now;
+          sign.textContent = MOD_GLYPH[now];
+          mod.classList.toggle('is-on', now !== 'none');
+          const text = `${pick(control.name)}: ${t(`vjMod_${now}`)}`;
+          list.title = text;
+          list.setAttribute('aria-label', text);
+        };
+        list.addEventListener('change', () => setVjMod(control.id, list.value as VjMod));
+        modShows.push(show);
+        show();
+        const row = document.createElement('div');
+        row.className = 'vj-row';
+        if (label.classList.contains('vj-slider-first-extra')) {
+          label.classList.remove('vj-slider-first-extra');
+          row.classList.add('vj-slider-first-extra');
+        }
+        row.append(label, mod);
+        return row;
       }),
     );
   };
+
+  // The movements: while any is on (or the looks take turns), a light loop
+  // gives Hydra the moving values; the sliders stay where you left them
+  const heardNow = () => {
+    const g = globalThis as { bass?: () => number; high?: () => number; motion?: () => number };
+    return { bass: g.bass?.() ?? 0, kick: kickHit(), high: Math.min(1, (g.high?.() ?? 0) * 1.6), move: g.motion?.() ?? 0 };
+  };
+  let loop: number | undefined;
+  let turnAt = kickCount();
+  let turnSlot: number | undefined;
+  const frame = () => {
+    if (Object.values(mods).some((mod) => mod !== 'none')) Object.assign(vj, movedValues(performance.now() / 1000, cycles(), heardNow()));
+    if (turnsBox.checked && kickCount() - turnAt >= Number(turnsEvery.value)) {
+      turnAt = kickCount();
+      const next = nextLook(savedLooks(), turnSlot);
+      if (next !== undefined) {
+        turnSlot = next;
+        recallLook(next, GLIDE_MS);
+      }
+    }
+  };
+  const syncLoop = () => {
+    const wanted = enabled && (turnsBox.checked || Object.values(mods).some((mod) => mod !== 'none'));
+    if (wanted && loop === undefined) loop = window.setInterval(frame, 33);
+    if (!wanted && loop !== undefined) {
+      clearInterval(loop);
+      loop = undefined;
+    }
+  };
+  onMod = () => {
+    for (const show of modShows) show();
+    syncLoop();
+  };
+  const turnsBox = document.querySelector<HTMLInputElement>('#vj-turns')!;
+  const turnsEvery = document.querySelector<HTMLSelectElement>('#vj-turns-every')!;
+  const turns = readStorage<{ on?: boolean; every?: string }>('jdl:vj-turns', {});
+  turnsBox.checked = Boolean(turns.on);
+  if (turns.every) turnsEvery.value = turns.every;
+  const saveTurns = () => {
+    writeStorage('jdl:vj-turns', { on: turnsBox.checked, every: turnsEvery.value });
+    turnAt = kickCount();
+    syncLoop();
+  };
+  turnsBox.addEventListener('change', () => {
+    saveTurns();
+    if (turnsBox.checked && nextLook(savedLooks(), undefined) === undefined) looksStatus.textContent = t('vjTurnsNeed');
+  });
+  turnsEvery.addEventListener('change', saveTurns);
 
   onMove = (id, value) => {
     const input = inputs.get(id);
@@ -249,6 +452,7 @@ export function setupVj({ redraw }: Options) {
     enabled = toggle.checked;
     save();
     redraw(); // the visual runs again, with or without the chain
+    syncLoop();
   });
   knobsToggle.addEventListener('change', () => {
     knobs = knobsToggle.checked;
@@ -262,7 +466,7 @@ export function setupVj({ redraw }: Options) {
   onRecall = turnOn;
   // A look you did not choose: a few effects at once, the rest neutral
   document.querySelector('#vj-random')!.addEventListener('click', () => {
-    setAll(randomLook());
+    setAll(randomLook(), GLIDE_MS);
     turnOn();
   });
 
@@ -283,7 +487,7 @@ export function setupVj({ redraw }: Options) {
         looksStatus.textContent = t('vjLookSaved', { n: slot + 1 });
         showLooks();
         for (const listener of bulkListeners) listener(); // the phones learn it exists
-      } else if (!recallLook(slot)) looksStatus.textContent = t('vjLookEmpty', { n: slot + 1 });
+      } else if (!recallLook(slot, GLIDE_MS)) looksStatus.textContent = t('vjLookEmpty', { n: slot + 1 });
       else looksStatus.textContent = '';
     });
     return button;
@@ -303,6 +507,7 @@ export function setupVj({ redraw }: Options) {
   });
   showLooks();
   onLangChange(showLooks);
+  syncLoop();
 
   render();
   onLangChange(render);
