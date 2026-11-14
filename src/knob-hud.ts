@@ -4,7 +4,7 @@
 // dead. The label follows what is playing.
 import { pick, type Localized } from './i18n';
 import { BEND_EVENT, CC_EVENT, type CcDetail } from './midi';
-import { VJ_CONTROLS } from './vj';
+import { VJ_CONTROLS, VJ_KNOBS } from './vj';
 
 type Context = { code: string; playing: boolean; visual: string; ascii: boolean; vjKnobs?: boolean };
 type Label = { name: Localized; hint?: Localized };
@@ -18,7 +18,7 @@ const FROM_CODE = L('pick the "From the code" visual to see it', 'elige el visua
 export function knobLabel(knob: number, context: Context): Label {
   const mpkPattern = context.playing && context.code.includes("'MPK Mini'");
   const ownPattern = context.playing && !mpkPattern && context.code.includes('midin(');
-  if (context.vjKnobs && knob <= VJ_CONTROLS.length) {
+  if (context.vjKnobs && knob <= VJ_KNOBS) {
     const control = VJ_CONTROLS[knob - 1];
     return { name: { en: `VJ · ${control.name.en}`, es: `VJ · ${control.name.es}`, ca: `VJ · ${control.name.ca}` } };
   }

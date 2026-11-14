@@ -437,7 +437,13 @@ body {
   }
 
   .board-visual .vj .knobs {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .board-visual .vj .knob span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

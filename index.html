@@ -733,7 +733,10 @@
           <label class="set-option"><input id="vj-on" type="checkbox" /> <span data-i18n="vjOn">VJ effects on the visual</span></label>
           <label class="set-option"><input id="vj-knobs" type="checkbox" /> <span data-i18n="vjKnobs">MPK knobs 1–6 move these</span></label>
           <div id="vj-sliders" class="vj-sliders"></div>
-          <button id="vj-reset" class="control" type="button" data-i18n="vjReset">All neutral</button>
+          <div class="machines-actions">
+            <button id="vj-random" class="control" type="button" data-icon="dice" data-i18n="vjRandom" data-i18n-title="vjRandomHint">Surprise me</button>
+            <button id="vj-reset" class="control" type="button" data-i18n="vjReset">All neutral</button>
+          </div>
         </section>
         <section id="vj-tab-machines" class="panel-tabpanel" role="tabpanel" hidden>
           <p class="panel-help" data-i18n="machinesHelp">The visuals listen to your machines through an audio input. Nothing is played back.</p>

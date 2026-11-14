@@ -833,6 +833,18 @@ const SHADERS = [
   return vec2(_st.x + (n - 0.5) * amount * 0.5 * torn, _st.y);`,
   },
   {
+    // the VJ's kaleidoscope: under two sides it leaves the picture alone
+    name: 'vjKaleid',
+    type: 'coord',
+    inputs: [{ type: 'float', name: 'sides', default: 1 }],
+    glsl: `
+  if (sides < 1.5) return _st;
+  vec2 p = _st - 0.5;
+  float slice = 6.2831853 / floor(sides + 0.5);
+  float a = abs(mod(atan(p.y, p.x), slice) - slice * 0.5);
+  return vec2(cos(a), sin(a)) * length(p) + 0.5;`,
+  },
+  {
     name: 'mosh',
     type: 'combineCoord',
     inputs: [{ type: 'float', name: 'amount', default: 0.01 }],

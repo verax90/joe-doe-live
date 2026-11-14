@@ -1,14 +1,19 @@
-// VJ: play the visuals like an instrument. Six controls act on any built-in
-// visual: zoom, hue, warp, pixels, trails and spin. The visual draws into
+// VJ: play the visuals like an instrument. Twelve controls act on any
+// built-in visual. The first six (zoom, hue, warp, pixels, trails, spin) are
+// the ones the MPK's knobs 1-6 move when "MPK knobs" is on; six more (punch,
+// kaleidoscope, glitch, RGB split, negative, blocks) are for the sliders, the
+// phone and the movement in front of the webcam. The visual draws into
 // Hydra's o1 and this chain draws o1 into o0 (what shows), reading the values
 // live, so nothing has to be run again while you move them. Neutral values
-// leave the picture as it was. With "MPK knobs" on, knobs 1-6 move them.
+// leave the picture as it was.
 import { keepingFocus } from './a11y';
 import type { Localized } from './i18n';
 import { onLangChange, pick } from './i18n';
 import { readStorage, writeStorage } from './storage';
 
-export type VjControl = 'zoom' | 'hue' | 'warp' | 'pixels' | 'trails' | 'spin';
+export type VjControl = 'zoom' | 'hue' | 'warp' | 'pixels' | 'trails' | 'spin' | 'punch' | 'kaleid' | 'glitch' | 'split' | 'invert' | 'blocks';
+// How many of them the MPK's knobs reach (7 is the volume, 8 the ASCII filter)
+export const VJ_KNOBS = 6;
 
 // Each control from 0 to 1 as a slider or knob sees it, and what it means
 export const VJ_CONTROLS: { id: VjControl; name: Localized; neutral: number }[] = [
@@ -18,6 +23,13 @@ export const VJ_CONTROLS: { id: VjControl; name: Localized; neutral: number }[] 
   { id: 'pixels', name: { en: 'Pixels', es: 'Píxeles', ca: 'Píxels' }, neutral: 0 },
   { id: 'trails', name: { en: 'Trails', es: 'Estela', ca: 'Estela' }, neutral: 0 },
   { id: 'spin', name: { en: 'Spin', es: 'Giro', ca: 'Gir' }, neutral: 0.5 },
+  // the kick (heard in the pattern, on the machines or hit on the phone) bumps the zoom and flashes
+  { id: 'punch', name: { en: 'Punch', es: 'Golpe', ca: 'Cop' }, neutral: 0 },
+  { id: 'kaleid', name: { en: 'Kaleidoscope', es: 'Caleidoscopio', ca: 'Calidoscopi' }, neutral: 0 },
+  { id: 'glitch', name: { en: 'Glitch', es: 'Glitch', ca: 'Glitch' }, neutral: 0 },
+  { id: 'split', name: { en: 'RGB split', es: 'RGB partido', ca: 'RGB partit' }, neutral: 0 },
+  { id: 'invert', name: { en: 'Negative', es: 'Negativo', ca: 'Negatiu' }, neutral: 0 },
+  { id: 'blocks', name: { en: 'Blocks', es: 'Bloques', ca: 'Blocs' }, neutral: 0 },
 ];
 
 const STORAGE_KEY = 'jdl:vj';
@@ -32,8 +44,27 @@ export const vj = {
   pixels: 4000,
   trails: 0,
   spin: 0,
+  punch: 0,
+  kaleid: 1,
+  glitch: 0,
+  split: 0,
+  invert: 0,
+  blocks: 0,
 };
 (globalThis as { vj?: typeof vj }).vj = vj;
+
+// The turn so far. Hydra's own rotate(0, speed) is time × speed, so moving
+// the speed made the picture jump to another angle; this adds up instead,
+// and slowing down just slows down
+let angle = 0;
+let angleAt = 0;
+export function vjAngle(now = performance.now()) {
+  const elapsed = Math.min(0.25, Math.max(0, (now - angleAt) / 1000)); // a pause (hidden tab) is not a spin
+  angleAt = now;
+  angle = (angle + vj.spin * elapsed) % (Math.PI * 2);
+  return angle;
+}
+(globalThis as { vjAngle?: () => number }).vjAngle = () => vjAngle();
 
 // 0-1 positions to what each effect needs; the middle of zoom and spin is
 // neutral, so a knob can go both ways
@@ -44,7 +75,13 @@ export function vjValues(p: Record<VjControl, number>) {
     warp: p.warp * 0.6,
     pixels: p.pixels < 0.02 ? 4000 : Math.round(400 * (1 - p.pixels) ** 2 + 12), // 4000 = none
     trails: p.trails * 0.92,
-    spin: (p.spin - 0.5) * 0.6, // turns per second, either way
+    spin: (p.spin - 0.5) * 1.2, // radians per second, either way
+    punch: p.punch,
+    kaleid: p.kaleid < 0.04 ? 1 : Math.round(2 + p.kaleid * 10), // mirrors: 2 to 12, 1 = none
+    glitch: p.glitch * 0.9,
+    split: p.split * 0.04,
+    invert: p.invert,
+    blocks: p.blocks * 0.06,
   };
 }
 
@@ -68,7 +105,7 @@ export const setVjControl = (id: VjControl, value: number) => setControl(id, Mat
 
 // Knobs 1-6 while they belong to VJ; false leaves the knob to the sound
 export function vjKnob(cc: number, value: number) {
-  const control = VJ_CONTROLS[cc - 1];
+  const control = cc <= VJ_KNOBS ? VJ_CONTROLS[cc - 1] : undefined;
   if (!vjTakesKnobs() || !control) return false;
   setControl(control.id, value);
   return true;
@@ -79,15 +116,43 @@ export function vjKnob(cc: number, value: number) {
 export function withVj(code: string) {
   if (!enabled) return code;
   const drawn = code.replace(/\.out\(\s*\)\s*$/, '.out(o1)');
-  return `${drawn}
-src(o1)
-  .scale(() => vj.zoom)
-  .rotate(0, () => vj.spin)
+  // everything that moves the picture around, on the visual as drawn in o1.
+  // Twice: the RGB split is the same picture again, a little to the side
+  const moved = `src(o1)
+  .scale(() => vj.zoom * (1 + vj.punch * kickHit() * 0.35))
+  .rotate(() => vjAngle())
+  .vjKaleid(() => vj.kaleid)
   .modulate(noise(3, 0.2), () => vj.warp)
-  .pixelate(() => vj.pixels, () => vj.pixels * 0.5625)
+  .mosh(noise(3, 0.25).pixelate(32, 18), () => vj.blocks)
+  .tear(() => vj.glitch, () => time * 14)
+  .pixelate(() => vj.pixels, () => vj.pixels * 0.5625)`;
+  return `${drawn}
+${moved}
+  .color(0, 1, 1)
+  .add(${moved}
+  .scrollX(() => vj.split)
+  .color(1, 0, 0))
   .hue(() => vj.hue)
-  .blend(src(o0), () => vj.trails)
+  .invert(() => vj.invert)
+  .brightness(() => vj.punch * kickHit() * 0.25)
+  .blend(src(o0).scale(() => 1 + vj.trails * 0.015), () => vj.trails)
   .out(o0)`;
+}
+
+// Two to four effects somewhere in their range, everything else neutral.
+// Kept watchable: the trails never so long that the picture freezes, the
+// pixels never so big that nothing is left, the negative all or nothing
+export function randomLook(random = Math.random): Record<VjControl, number> {
+  const look = Object.fromEntries(VJ_CONTROLS.map((c) => [c.id, c.neutral])) as Record<VjControl, number>;
+  const ids = VJ_CONTROLS.map((c) => c.id);
+  const count = 2 + Math.floor(random() * 3);
+  for (let i = 0; i < count; i++) {
+    const id = ids.splice(Math.floor(random() * ids.length), 1)[0];
+    const value = random();
+    look[id] =
+      id === 'trails' ? value * 0.7 : id === 'pixels' ? 0.2 + value * 0.5 : id === 'invert' ? 1 : id === 'zoom' || id === 'spin' ? 0.2 + value * 0.6 : 0.15 + value * 0.85;
+  }
+  return look;
 }
 
 type Options = { redraw: () => void };
@@ -106,7 +171,8 @@ export function setupVj({ redraw }: Options) {
         const label = document.createElement('label');
         label.className = 'vj-slider';
         const name = document.createElement('span');
-        name.textContent = `K${i + 1} · ${pick(control.name)}`;
+        name.textContent = i < VJ_KNOBS ? `K${i + 1} · ${pick(control.name)}` : pick(control.name);
+        if (i === VJ_KNOBS) label.classList.add('vj-slider-first-extra');
         const input = document.createElement('input');
         input.type = 'range';
         input.min = '0';
@@ -144,6 +210,12 @@ export function setupVj({ redraw }: Options) {
   });
   document.querySelector('#vj-reset')!.addEventListener('click', () => {
     for (const control of VJ_CONTROLS) setControl(control.id, control.neutral);
+  });
+  // A look you did not choose: a few effects at once, the rest neutral
+  document.querySelector('#vj-random')!.addEventListener('click', () => {
+    const next = randomLook();
+    for (const control of VJ_CONTROLS) setControl(control.id, next[control.id]);
+    if (!enabled) toggle.click();
   });
 
   render();

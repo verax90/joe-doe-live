@@ -66,7 +66,7 @@ export const REMOTE_HIT_EVENT = 'jdl:remote-hit'; // 'kick' | 'snare' | 'hat'
 export const REMOTE_VJ_EVENT = 'jdl:remote-vj'; // { c, v }, or null for all neutral
 export const REMOTE_POINT_EVENT = 'jdl:remote-point'; // { x, y }, or null when the finger lifts
 const HITS = ['kick', 'snare', 'hat'];
-const VJ_IDS = ['zoom', 'hue', 'warp', 'pixels', 'trails', 'spin'];
+const VJ_IDS = ['zoom', 'hue', 'warp', 'pixels', 'trails', 'spin', 'punch', 'kaleid', 'glitch', 'split', 'invert', 'blocks'];
 
 const phones = new Set<DataConnection>();
 const greetings: (() => StudioMessage | undefined)[] = [];

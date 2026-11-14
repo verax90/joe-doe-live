@@ -788,6 +788,309 @@ stack(
     },
   },
   {
+    id: 'techno-909',
+    name: { en: 'Techno 132', es: 'Techno 132', ca: 'Techno 132' },
+    code: {
+      en: `// Techno 132: a 909 that does not let go, a rumble under it and one stab
+setcps(132 / 60 / 4)
+
+stack(
+  // four on the floor, pushed a little into the red
+  s("bd*4").bank("RolandTR909").gain(1).shape(0.3),
+  // the rumble: a low thud on every off-beat, where the kick is not
+  note("~ e1 ~ e1 ~ e1 ~ e1").s("sine").decay(0.18).sustain(0).gain(0.8).lpf(120),
+  s("~ cp ~ cp").bank("RolandTR909").gain(0.45).room(0.3),
+  // open hat on the off-beat, sixteenths under it
+  s("~ oh ~ oh ~ oh ~ oh").bank("RolandTR909").gain(0.3).hpf(6000),
+  s("hh*16").bank("RolandTR909").gain("0.22 0.1 0.16 0.1"),
+  // one minor stab; its filter opens and closes over eight bars
+  chord("Em7").voicing().s("sawtooth").struct("~ ~ x ~ ~ x ~ ~ ~ ~ x ~ ~ ~ x ~")
+    .decay(0.12).sustain(0).lpf(sine.range(400, 3000).slow(8)).gain(0.3).delay(0.4).room(0.3)
+).analyze(1)`,
+      es: `// Techno 132: una 909 que no afloja, un rumor por debajo y un solo acorde
+setcps(132 / 60 / 4)
+
+stack(
+  // bombo a negras, un poco pasado de vueltas
+  s("bd*4").bank("RolandTR909").gain(1).shape(0.3),
+  // el rumor: un golpe grave en cada contratiempo, donde no está el bombo
+  note("~ e1 ~ e1 ~ e1 ~ e1").s("sine").decay(0.18).sustain(0).gain(0.8).lpf(120),
+  s("~ cp ~ cp").bank("RolandTR909").gain(0.45).room(0.3),
+  // charles abierto a contratiempo, semicorcheas por debajo
+  s("~ oh ~ oh ~ oh ~ oh").bank("RolandTR909").gain(0.3).hpf(6000),
+  s("hh*16").bank("RolandTR909").gain("0.22 0.1 0.16 0.1"),
+  // un acorde menor a golpes; su filtro se abre y se cierra en ocho compases
+  chord("Em7").voicing().s("sawtooth").struct("~ ~ x ~ ~ x ~ ~ ~ ~ x ~ ~ ~ x ~")
+    .decay(0.12).sustain(0).lpf(sine.range(400, 3000).slow(8)).gain(0.3).delay(0.4).room(0.3)
+).analyze(1)`,
+      ca: `// Techno 132: una 909 que no afluixa, una remor per sota i un sol acord
+setcps(132 / 60 / 4)
+
+stack(
+  // bombo a negres, una mica passat de voltes
+  s("bd*4").bank("RolandTR909").gain(1).shape(0.3),
+  // la remor: un cop greu a cada contratemps, on no hi ha el bombo
+  note("~ e1 ~ e1 ~ e1 ~ e1").s("sine").decay(0.18).sustain(0).gain(0.8).lpf(120),
+  s("~ cp ~ cp").bank("RolandTR909").gain(0.45).room(0.3),
+  // hi-hat obert a contratemps, semicorxeres per sota
+  s("~ oh ~ oh ~ oh ~ oh").bank("RolandTR909").gain(0.3).hpf(6000),
+  s("hh*16").bank("RolandTR909").gain("0.22 0.1 0.16 0.1"),
+  // un acord menor a cops; el seu filtre s'obre i es tanca en vuit compassos
+  chord("Em7").voicing().s("sawtooth").struct("~ ~ x ~ ~ x ~ ~ ~ ~ x ~ ~ ~ x ~")
+    .decay(0.12).sustain(0).lpf(sine.range(400, 3000).slow(8)).gain(0.3).delay(0.4).room(0.3)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'acid-303',
+    name: { en: 'Acid 126', es: 'Acid 126', ca: 'Acid 126' },
+    code: {
+      en: `// Acid 126: an 808 and a 303 line that squelches
+setcps(126 / 60 / 4)
+
+stack(
+  s("bd*4").bank("RolandTR808").gain(0.9),
+  s("~ cp ~ cp").bank("RolandTR808").gain(0.5),
+  s("hh*8").bank("RolandTR808").gain("0.15 0.3"),
+  // the 303: one saw, sixteen notes, some an octave up
+  note("a1 a1 a2 a1 c2 a1 a2 g1 a1 a1 e2 a1 a2 a1 g1 g2")
+    .s("sawtooth").decay(0.14).sustain(0)
+    // the acid is this: a filter that rings (lpq) and never stays still. Try lpq(4) and lpq(24)
+    .lpf(sine.range(300, 2800).slow(6)).lpq(16)
+    .shape(0.35).gain(0.4)
+).analyze(1)`,
+      es: `// Acid 126: una 808 y una línea de 303 que chirría
+setcps(126 / 60 / 4)
+
+stack(
+  s("bd*4").bank("RolandTR808").gain(0.9),
+  s("~ cp ~ cp").bank("RolandTR808").gain(0.5),
+  s("hh*8").bank("RolandTR808").gain("0.15 0.3"),
+  // la 303: una sierra, dieciséis notas, algunas una octava arriba
+  note("a1 a1 a2 a1 c2 a1 a2 g1 a1 a1 e2 a1 a2 a1 g1 g2")
+    .s("sawtooth").decay(0.14).sustain(0)
+    // el ácido es esto: un filtro que resuena (lpq) y no para quieto. Prueba lpq(4) y lpq(24)
+    .lpf(sine.range(300, 2800).slow(6)).lpq(16)
+    .shape(0.35).gain(0.4)
+).analyze(1)`,
+      ca: `// Acid 126: una 808 i una línia de 303 que grinyola
+setcps(126 / 60 / 4)
+
+stack(
+  s("bd*4").bank("RolandTR808").gain(0.9),
+  s("~ cp ~ cp").bank("RolandTR808").gain(0.5),
+  s("hh*8").bank("RolandTR808").gain("0.15 0.3"),
+  // la 303: una serra, setze notes, algunes una octava amunt
+  note("a1 a1 a2 a1 c2 a1 a2 g1 a1 a1 e2 a1 a2 a1 g1 g2")
+    .s("sawtooth").decay(0.14).sustain(0)
+    // l'àcid és això: un filtre que ressona (lpq) i no para quiet. Prova lpq(4) i lpq(24)
+    .lpf(sine.range(300, 2800).slow(6)).lpq(16)
+    .shape(0.35).gain(0.4)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'uk-garage',
+    name: { en: 'UK garage 132', es: 'UK garage 132', ca: 'UK garage 132' },
+    code: {
+      en: `// UK garage 132: two-step, shuffled hats, electric piano and a round bass
+setcps(132 / 60 / 4)
+
+stack(
+  // two-step: the kick skips beats 2 and 4 and leaves them to the snare
+  s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR909").gain(0.9),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("RolandTR909").gain(0.7),
+  // the shuffle is the swing on the sixteenths: without .swing(8) it is another genre
+  s("hh*16").bank("RolandTR909").gain("0.25 0.08 0.18 0.12").swing(8),
+  s("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ oh ~").bank("RolandTR909").gain(0.3),
+  // chords off the beat
+  chord("<Fm9 Fm9 Db^7 Eb7>").voicing().s("gm_epiano1").struct("~ x ~ ~ x ~ ~ x").gain(0.4).room(0.4),
+  // the bass answers the kick
+  note("<f1 f1 db1 eb1>").struct("x ~ ~ x ~ ~ x ~").s("triangle").lpf(300).gain(0.8)
+).analyze(1)`,
+      es: `// UK garage 132: two-step, charles con shuffle, piano eléctrico y un bajo redondo
+setcps(132 / 60 / 4)
+
+stack(
+  // two-step: el bombo se salta los tiempos 2 y 4 y se los deja a la caja
+  s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR909").gain(0.9),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("RolandTR909").gain(0.7),
+  // el shuffle es el swing en las semicorcheas: sin .swing(8) es otro género
+  s("hh*16").bank("RolandTR909").gain("0.25 0.08 0.18 0.12").swing(8),
+  s("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ oh ~").bank("RolandTR909").gain(0.3),
+  // acordes fuera del tiempo
+  chord("<Fm9 Fm9 Db^7 Eb7>").voicing().s("gm_epiano1").struct("~ x ~ ~ x ~ ~ x").gain(0.4).room(0.4),
+  // el bajo le contesta al bombo
+  note("<f1 f1 db1 eb1>").struct("x ~ ~ x ~ ~ x ~").s("triangle").lpf(300).gain(0.8)
+).analyze(1)`,
+      ca: `// UK garage 132: two-step, hi-hat amb shuffle, piano elèctric i un baix rodó
+setcps(132 / 60 / 4)
+
+stack(
+  // two-step: el bombo se salta els temps 2 i 4 i els deixa a la caixa
+  s("bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR909").gain(0.9),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("RolandTR909").gain(0.7),
+  // el shuffle és el swing a les semicorxeres: sense .swing(8) és un altre gènere
+  s("hh*16").bank("RolandTR909").gain("0.25 0.08 0.18 0.12").swing(8),
+  s("~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ oh ~").bank("RolandTR909").gain(0.3),
+  // acords fora del temps
+  chord("<Fm9 Fm9 Db^7 Eb7>").voicing().s("gm_epiano1").struct("~ x ~ ~ x ~ ~ x").gain(0.4).room(0.4),
+  // el baix li contesta al bombo
+  note("<f1 f1 db1 eb1>").struct("x ~ ~ x ~ ~ x ~").s("triangle").lpf(300).gain(0.8)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'dub-techno',
+    name: { en: 'Dub techno 118', es: 'Dub techno 118', ca: 'Dub techno 118' },
+    code: {
+      en: `// Dub techno 118: a soft kick, one chord and a lot of echo
+setcps(118 / 60 / 4)
+
+stack(
+  // the kick with its top filtered off: it pushes, it does not hit
+  s("bd*4").bank("RolandTR909").gain(0.8).lpf(900),
+  s("~ hh ~ hh ~ hh ~ hh").bank("RolandTR909").gain(0.18).room(0.4),
+  // the whole genre: a short chord drowned in delay and reverb, the filter breathing over sixteen bars
+  chord("<Cm9 Cm9 Ab^7 Bb7>").voicing().s("sawtooth").struct("~ x ~ ~ ~ ~ x ~")
+    .decay(0.15).sustain(0).lpf(sine.range(500, 2200).slow(16))
+    .gain(0.3).delay(0.7).room(0.8),
+  note("<c2 c2 ab1 bb1>").struct("x ~ ~ x ~ ~ ~ ~").s("sine").gain(0.7),
+  // tape hiss
+  s("pink").gain(0.015).hpf(5000)
+).analyze(1)`,
+      es: `// Dub techno 118: un bombo blando, un acorde y mucho eco
+setcps(118 / 60 / 4)
+
+stack(
+  // el bombo sin agudos: empuja, no pega
+  s("bd*4").bank("RolandTR909").gain(0.8).lpf(900),
+  s("~ hh ~ hh ~ hh ~ hh").bank("RolandTR909").gain(0.18).room(0.4),
+  // el género entero: un acorde corto ahogado en eco y reverb, con el filtro respirando en dieciséis compases
+  chord("<Cm9 Cm9 Ab^7 Bb7>").voicing().s("sawtooth").struct("~ x ~ ~ ~ ~ x ~")
+    .decay(0.15).sustain(0).lpf(sine.range(500, 2200).slow(16))
+    .gain(0.3).delay(0.7).room(0.8),
+  note("<c2 c2 ab1 bb1>").struct("x ~ ~ x ~ ~ ~ ~").s("sine").gain(0.7),
+  // soplido de cinta
+  s("pink").gain(0.015).hpf(5000)
+).analyze(1)`,
+      ca: `// Dub techno 118: un bombo tou, un acord i molt d'eco
+setcps(118 / 60 / 4)
+
+stack(
+  // el bombo sense aguts: empeny, no pica
+  s("bd*4").bank("RolandTR909").gain(0.8).lpf(900),
+  s("~ hh ~ hh ~ hh ~ hh").bank("RolandTR909").gain(0.18).room(0.4),
+  // el gènere sencer: un acord curt ofegat en eco i reverb, amb el filtre respirant en setze compassos
+  chord("<Cm9 Cm9 Ab^7 Bb7>").voicing().s("sawtooth").struct("~ x ~ ~ ~ ~ x ~")
+    .decay(0.15).sustain(0).lpf(sine.range(500, 2200).slow(16))
+    .gain(0.3).delay(0.7).room(0.8),
+  note("<c2 c2 ab1 bb1>").struct("x ~ ~ x ~ ~ ~ ~").s("sine").gain(0.7),
+  // buf de cinta
+  s("pink").gain(0.015).hpf(5000)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'electro-808',
+    name: { en: 'Electro 125', es: 'Electro 125', ca: 'Electro 125' },
+    code: {
+      en: `// Electro 125: a broken 808 beat, a robot bass and four notes from space
+setcps(125 / 60 / 4)
+
+stack(
+  // the electro kick: syncopated, never four on the floor
+  s("bd ~ ~ bd ~ ~ bd ~ ~ ~ bd ~ ~ bd ~ ~").bank("RolandTR808").gain(1),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("RolandTR808").gain(0.7),
+  s("hh*16").bank("RolandTR808").gain("0.3 0.12 0.2 0.12"),
+  // the 808's cowbell, where you do not expect it
+  s("~ ~ ~ ~ ~ ~ cb ~ ~ cb ~ ~ ~ ~ cb ~").bank("RolandTR808").gain(0.25),
+  // the bass: short notes, octave jumps, like a machine talking
+  note("e2 ~ e2 e3 ~ e2 ~ g2 e2 ~ e2 d3 ~ e2 ~ b1").s("sawtooth").decay(0.1).sustain(0).lpf(1200).gain(0.45),
+  // the melody: a square wave and echo
+  note("<[e4 g4 b4 d5] [d4 g4 b4 e5]>").s("square").decay(0.2).sustain(0).lpf(2500).gain(0.2).delay(0.5)
+).analyze(1)`,
+      es: `// Electro 125: una 808 a ritmo roto, un bajo robot y cuatro notas del espacio
+setcps(125 / 60 / 4)
+
+stack(
+  // el bombo del electro: sincopado, nunca a negras
+  s("bd ~ ~ bd ~ ~ bd ~ ~ ~ bd ~ ~ bd ~ ~").bank("RolandTR808").gain(1),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("RolandTR808").gain(0.7),
+  s("hh*16").bank("RolandTR808").gain("0.3 0.12 0.2 0.12"),
+  // el cencerro de la 808, donde no lo esperas
+  s("~ ~ ~ ~ ~ ~ cb ~ ~ cb ~ ~ ~ ~ cb ~").bank("RolandTR808").gain(0.25),
+  // el bajo: notas cortas, saltos de octava, como una máquina hablando
+  note("e2 ~ e2 e3 ~ e2 ~ g2 e2 ~ e2 d3 ~ e2 ~ b1").s("sawtooth").decay(0.1).sustain(0).lpf(1200).gain(0.45),
+  // la melodía: una onda cuadrada y eco
+  note("<[e4 g4 b4 d5] [d4 g4 b4 e5]>").s("square").decay(0.2).sustain(0).lpf(2500).gain(0.2).delay(0.5)
+).analyze(1)`,
+      ca: `// Electro 125: una 808 a ritme trencat, un baix robot i quatre notes de l'espai
+setcps(125 / 60 / 4)
+
+stack(
+  // el bombo de l'electro: sincopat, mai a negres
+  s("bd ~ ~ bd ~ ~ bd ~ ~ ~ bd ~ ~ bd ~ ~").bank("RolandTR808").gain(1),
+  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~").bank("RolandTR808").gain(0.7),
+  s("hh*16").bank("RolandTR808").gain("0.3 0.12 0.2 0.12"),
+  // l'esquellot de la 808, on no te l'esperes
+  s("~ ~ ~ ~ ~ ~ cb ~ ~ cb ~ ~ ~ ~ cb ~").bank("RolandTR808").gain(0.25),
+  // el baix: notes curtes, salts d'octava, com una màquina parlant
+  note("e2 ~ e2 e3 ~ e2 ~ g2 e2 ~ e2 d3 ~ e2 ~ b1").s("sawtooth").decay(0.1).sustain(0).lpf(1200).gain(0.45),
+  // la melodia: una ona quadrada i eco
+  note("<[e4 g4 b4 d5] [d4 g4 b4 e5]>").s("square").decay(0.2).sustain(0).lpf(2500).gain(0.2).delay(0.5)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'synthwave',
+    name: { en: 'Synthwave 100', es: 'Synthwave 100', ca: 'Synthwave 100' },
+    code: {
+      en: `// Synthwave 100: LinnDrum, a bass in eighths, an arpeggio and a pad
+setcps(100 / 60 / 4)
+
+stack(
+  // the LinnDrum, with the snare in a big room
+  s("bd ~ ~ ~ sd ~ ~ ~ bd ~ bd ~ sd ~ ~ ~").bank("LinnDrum").gain(0.9).room(0.3),
+  s("hh*8").bank("LinnDrum").gain("0.25 0.12"),
+  // the bass does not rest: eight notes a bar
+  note("<a1 f1 c2 g1>*8").s("sawtooth").decay(0.15).sustain(0.2).lpf(700).gain(0.5),
+  // the arpeggio: each chord's notes, one after another, four times a bar
+  note("<[a3 c4 e4 a4]*4 [f3 a3 c4 f4]*4 [c4 e4 g4 c5]*4 [g3 b3 d4 g4]*4>")
+    .s("triangle").decay(0.12).sustain(0).gain(0.35).delay(0.4),
+  chord("<Am F C G>").voicing().s("gm_pad_poly").gain(0.3).room(0.7)
+).analyze(1)`,
+      es: `// Synthwave 100: LinnDrum, un bajo en corcheas, un arpegio y un pad
+setcps(100 / 60 / 4)
+
+stack(
+  // la LinnDrum, con la caja en una sala grande
+  s("bd ~ ~ ~ sd ~ ~ ~ bd ~ bd ~ sd ~ ~ ~").bank("LinnDrum").gain(0.9).room(0.3),
+  s("hh*8").bank("LinnDrum").gain("0.25 0.12"),
+  // el bajo no descansa: ocho notas por compás
+  note("<a1 f1 c2 g1>*8").s("sawtooth").decay(0.15).sustain(0.2).lpf(700).gain(0.5),
+  // el arpegio: las notas de cada acorde, una detrás de otra, cuatro veces por compás
+  note("<[a3 c4 e4 a4]*4 [f3 a3 c4 f4]*4 [c4 e4 g4 c5]*4 [g3 b3 d4 g4]*4>")
+    .s("triangle").decay(0.12).sustain(0).gain(0.35).delay(0.4),
+  chord("<Am F C G>").voicing().s("gm_pad_poly").gain(0.3).room(0.7)
+).analyze(1)`,
+      ca: `// Synthwave 100: LinnDrum, un baix en corxeres, un arpegi i un pad
+setcps(100 / 60 / 4)
+
+stack(
+  // la LinnDrum, amb la caixa en una sala gran
+  s("bd ~ ~ ~ sd ~ ~ ~ bd ~ bd ~ sd ~ ~ ~").bank("LinnDrum").gain(0.9).room(0.3),
+  s("hh*8").bank("LinnDrum").gain("0.25 0.12"),
+  // el baix no descansa: vuit notes per compàs
+  note("<a1 f1 c2 g1>*8").s("sawtooth").decay(0.15).sustain(0.2).lpf(700).gain(0.5),
+  // l'arpegi: les notes de cada acord, una darrere l'altra, quatre cops per compàs
+  note("<[a3 c4 e4 a4]*4 [f3 a3 c4 f4]*4 [c4 e4 g4 c5]*4 [g3 b3 d4 g4]*4>")
+    .s("triangle").decay(0.12).sustain(0).gain(0.35).delay(0.4),
+  chord("<Am F C G>").voicing().s("gm_pad_poly").gain(0.3).room(0.7)
+).analyze(1)`,
+    },
+  },
+  {
     id: 'hola',
     name: { en: 'Hello Strudel', es: 'Hola Strudel', ca: 'Hola Strudel' },
     code: {
