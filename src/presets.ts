@@ -1091,6 +1091,201 @@ stack(
     },
   },
   {
+    id: 'jungle',
+    name: { en: 'Jungle 165', es: 'Jungle 165', ca: 'Jungle 165' },
+    code: {
+      en: `// Jungle 165: a chopped break, a sub you feel more than hear, and a pad
+setcps(165 / 60 / 4)
+
+stack(
+  // the break, written out: kick and snare trading places, the quiet snares are the ghost notes
+  s("bd ~ bd ~ sd ~ ~ sd ~ sd bd bd sd ~ ~ sd").bank("EmuSP12").gain("1 1 0.9 1 1 1 1 0.5 1 0.6 0.9 0.8 1 1 1 0.5").crush(10),
+  s("hh*8").bank("EmuSP12").gain("0.3 0.15").hpf(5000),
+  // the sub: one long note a bar, nothing above 200 Hz
+  note("<e1 e1 g1 a1>").s("sine").gain(0.9).lpf(200),
+  // the pad moves at half the speed of everything else
+  chord("<Em9 Em9 Gm9 Am9>").voicing().s("gm_pad_warm").gain(0.25).room(0.8),
+  // a stab every four bars, left to echo
+  chord("<Em7 ~ ~ ~>").voicing().s("gm_epiano1").struct("x ~ ~ x ~ ~ ~ ~").gain(0.3).delay(0.6).room(0.5)
+).analyze(1)`,
+      es: `// Jungle 165: un break troceado, un sub que se nota más que se oye, y un pad
+setcps(165 / 60 / 4)
+
+stack(
+  // el break, escrito nota a nota: bombo y caja cambiándose el sitio; las cajas flojas son las notas fantasma
+  s("bd ~ bd ~ sd ~ ~ sd ~ sd bd bd sd ~ ~ sd").bank("EmuSP12").gain("1 1 0.9 1 1 1 1 0.5 1 0.6 0.9 0.8 1 1 1 0.5").crush(10),
+  s("hh*8").bank("EmuSP12").gain("0.3 0.15").hpf(5000),
+  // el sub: una nota larga por compás, nada por encima de 200 Hz
+  note("<e1 e1 g1 a1>").s("sine").gain(0.9).lpf(200),
+  // el pad va a la mitad de velocidad que todo lo demás
+  chord("<Em9 Em9 Gm9 Am9>").voicing().s("gm_pad_warm").gain(0.25).room(0.8),
+  // un acorde cada cuatro compases, que se queda en el eco
+  chord("<Em7 ~ ~ ~>").voicing().s("gm_epiano1").struct("x ~ ~ x ~ ~ ~ ~").gain(0.3).delay(0.6).room(0.5)
+).analyze(1)`,
+      ca: `// Jungle 165: un break trossejat, un sub que es nota més que se sent, i un pad
+setcps(165 / 60 / 4)
+
+stack(
+  // el break, escrit nota a nota: bombo i caixa canviant-se el lloc; les caixes fluixes són les notes fantasma
+  s("bd ~ bd ~ sd ~ ~ sd ~ sd bd bd sd ~ ~ sd").bank("EmuSP12").gain("1 1 0.9 1 1 1 1 0.5 1 0.6 0.9 0.8 1 1 1 0.5").crush(10),
+  s("hh*8").bank("EmuSP12").gain("0.3 0.15").hpf(5000),
+  // el sub: una nota llarga per compàs, res per sobre de 200 Hz
+  note("<e1 e1 g1 a1>").s("sine").gain(0.9).lpf(200),
+  // el pad va a la meitat de velocitat que tota la resta
+  chord("<Em9 Em9 Gm9 Am9>").voicing().s("gm_pad_warm").gain(0.25).room(0.8),
+  // un acord cada quatre compassos, que es queda a l'eco
+  chord("<Em7 ~ ~ ~>").voicing().s("gm_epiano1").struct("x ~ ~ x ~ ~ ~ ~").gain(0.3).delay(0.6).room(0.5)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'jersey-club',
+    name: { en: 'Jersey club 140', es: 'Jersey club 140', ca: 'Jersey club 140' },
+    code: {
+      en: `// Jersey club 140: the five-kick bounce, claps and soft chords
+setcps(140 / 60 / 4)
+
+stack(
+  // the bounce: three kicks straight, then two that trip (the last two are the genre)
+  s("bd ~ ~ ~ bd ~ ~ ~ bd ~ ~ bd ~ ~ bd ~").bank("RolandTR808").gain(1).shape(0.2),
+  s("~ ~ ~ ~ cp ~ ~ ~ ~ ~ ~ ~ cp ~ ~ ~").bank("RolandTR808").gain(0.6),
+  // hats accented in threes over the fours
+  s("hh*16").bank("RolandTR808").gain("0.3 0.1 0.1 0.25 0.1 0.1 0.3 0.1").hpf(7000),
+  // chords and a sub that hits with every kick
+  chord("<Fm9 Db^7 Ab^7 Eb7>").voicing().s("gm_epiano1").struct("x ~ ~ x ~ ~ x ~").gain(0.4).room(0.4),
+  note("<f1 db1 ab1 eb1>").struct("x ~ ~ ~ x ~ ~ ~ x ~ ~ x ~ ~ x ~").s("sine").decay(0.25).sustain(0).gain(0.9)
+).analyze(1)`,
+      es: `// Jersey club 140: el rebote de cinco bombos, palmas y acordes suaves
+setcps(140 / 60 / 4)
+
+stack(
+  // el rebote: tres bombos rectos y luego dos que tropiezan (los dos últimos son el género)
+  s("bd ~ ~ ~ bd ~ ~ ~ bd ~ ~ bd ~ ~ bd ~").bank("RolandTR808").gain(1).shape(0.2),
+  s("~ ~ ~ ~ cp ~ ~ ~ ~ ~ ~ ~ cp ~ ~ ~").bank("RolandTR808").gain(0.6),
+  // charles acentuados de tres en tres sobre el cuatro por cuatro
+  s("hh*16").bank("RolandTR808").gain("0.3 0.1 0.1 0.25 0.1 0.1 0.3 0.1").hpf(7000),
+  // acordes y un sub que pega con cada bombo
+  chord("<Fm9 Db^7 Ab^7 Eb7>").voicing().s("gm_epiano1").struct("x ~ ~ x ~ ~ x ~").gain(0.4).room(0.4),
+  note("<f1 db1 ab1 eb1>").struct("x ~ ~ ~ x ~ ~ ~ x ~ ~ x ~ ~ x ~").s("sine").decay(0.25).sustain(0).gain(0.9)
+).analyze(1)`,
+      ca: `// Jersey club 140: el rebot de cinc bombos, palmes i acords suaus
+setcps(140 / 60 / 4)
+
+stack(
+  // el rebot: tres bombos rectes i després dos que ensopeguen (els dos últims són el gènere)
+  s("bd ~ ~ ~ bd ~ ~ ~ bd ~ ~ bd ~ ~ bd ~").bank("RolandTR808").gain(1).shape(0.2),
+  s("~ ~ ~ ~ cp ~ ~ ~ ~ ~ ~ ~ cp ~ ~ ~").bank("RolandTR808").gain(0.6),
+  // hi-hat accentuat de tres en tres sobre el quatre per quatre
+  s("hh*16").bank("RolandTR808").gain("0.3 0.1 0.1 0.25 0.1 0.1 0.3 0.1").hpf(7000),
+  // acords i un sub que pica amb cada bombo
+  chord("<Fm9 Db^7 Ab^7 Eb7>").voicing().s("gm_epiano1").struct("x ~ ~ x ~ ~ x ~").gain(0.4).room(0.4),
+  note("<f1 db1 ab1 eb1>").struct("x ~ ~ ~ x ~ ~ ~ x ~ ~ x ~ ~ x ~").s("sine").decay(0.25).sustain(0).gain(0.9)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'afrobeats',
+    name: { en: 'Afrobeats 104', es: 'Afrobeats 104', ca: 'Afrobeats 104' },
+    code: {
+      en: `// Afrobeats 104: the 3-3-2 kick, rimshots, a log-drum bass and a guitar line
+setcps(104 / 60 / 4)
+
+stack(
+  // 3-3-2: the kick never lands where a four-on-the-floor would, and the rim answers it
+  s("bd ~ ~ bd ~ ~ bd ~ bd ~ ~ bd ~ ~ bd ~").bank("RolandTR909").gain(0.9),
+  s("~ ~ ~ rim ~ ~ rim ~ ~ ~ ~ rim ~ ~ rim ~").bank("RolandTR909").gain(0.5).room(0.2),
+  // the shaker: soft sixteenths with swing
+  s("hh*16").bank("RolandTR909").gain("0.2 0.08 0.14 0.08").swing(8).hpf(7000),
+  // the bass plays the kick's rhythm, one note a bar
+  note("<a1 a1 f1 g1>").struct("x ~ ~ x ~ ~ x ~ ~ ~ x ~ ~ x ~ ~").s("sine").decay(0.3).sustain(0).gain(0.9),
+  // the guitar: the chord's notes going round, with a hole at the end to breathe
+  note("<[a3 c4 e4 c4 a3 e4 c4 ~] [a3 c4 e4 c4 a3 e4 c4 ~] [f3 a3 c4 a3 f3 c4 a3 ~] [g3 b3 d4 b3 g3 d4 b3 ~]>")
+    .s("triangle").decay(0.15).sustain(0).gain(0.35).delay(0.3),
+  chord("<Am7 Am7 F^7 G7>").voicing().s("gm_epiano1").struct("~ ~ x ~ ~ ~ x ~").gain(0.3).room(0.5)
+).analyze(1)`,
+      es: `// Afrobeats 104: el bombo en 3-3-2, aros, un bajo tipo log drum y una línea de guitarra
+setcps(104 / 60 / 4)
+
+stack(
+  // 3-3-2: el bombo nunca cae donde caería a negras, y el aro le contesta
+  s("bd ~ ~ bd ~ ~ bd ~ bd ~ ~ bd ~ ~ bd ~").bank("RolandTR909").gain(0.9),
+  s("~ ~ ~ rim ~ ~ rim ~ ~ ~ ~ rim ~ ~ rim ~").bank("RolandTR909").gain(0.5).room(0.2),
+  // el shaker: semicorcheas flojas con swing
+  s("hh*16").bank("RolandTR909").gain("0.2 0.08 0.14 0.08").swing(8).hpf(7000),
+  // el bajo toca el ritmo del bombo, una nota por compás
+  note("<a1 a1 f1 g1>").struct("x ~ ~ x ~ ~ x ~ ~ ~ x ~ ~ x ~ ~").s("sine").decay(0.3).sustain(0).gain(0.9),
+  // la guitarra: las notas del acorde dando vueltas, con un hueco al final para respirar
+  note("<[a3 c4 e4 c4 a3 e4 c4 ~] [a3 c4 e4 c4 a3 e4 c4 ~] [f3 a3 c4 a3 f3 c4 a3 ~] [g3 b3 d4 b3 g3 d4 b3 ~]>")
+    .s("triangle").decay(0.15).sustain(0).gain(0.35).delay(0.3),
+  chord("<Am7 Am7 F^7 G7>").voicing().s("gm_epiano1").struct("~ ~ x ~ ~ ~ x ~").gain(0.3).room(0.5)
+).analyze(1)`,
+      ca: `// Afrobeats 104: el bombo en 3-3-2, cèrcols, un baix tipus log drum i una línia de guitarra
+setcps(104 / 60 / 4)
+
+stack(
+  // 3-3-2: el bombo mai cau on cauria a negres, i el cèrcol li contesta
+  s("bd ~ ~ bd ~ ~ bd ~ bd ~ ~ bd ~ ~ bd ~").bank("RolandTR909").gain(0.9),
+  s("~ ~ ~ rim ~ ~ rim ~ ~ ~ ~ rim ~ ~ rim ~").bank("RolandTR909").gain(0.5).room(0.2),
+  // el shaker: semicorxeres fluixes amb swing
+  s("hh*16").bank("RolandTR909").gain("0.2 0.08 0.14 0.08").swing(8).hpf(7000),
+  // el baix toca el ritme del bombo, una nota per compàs
+  note("<a1 a1 f1 g1>").struct("x ~ ~ x ~ ~ x ~ ~ ~ x ~ ~ x ~ ~").s("sine").decay(0.3).sustain(0).gain(0.9),
+  // la guitarra: les notes de l'acord donant voltes, amb un forat al final per respirar
+  note("<[a3 c4 e4 c4 a3 e4 c4 ~] [a3 c4 e4 c4 a3 e4 c4 ~] [f3 a3 c4 a3 f3 c4 a3 ~] [g3 b3 d4 b3 g3 d4 b3 ~]>")
+    .s("triangle").decay(0.15).sustain(0).gain(0.35).delay(0.3),
+  chord("<Am7 Am7 F^7 G7>").voicing().s("gm_epiano1").struct("~ ~ x ~ ~ ~ x ~").gain(0.3).room(0.5)
+).analyze(1)`,
+    },
+  },
+  {
+    id: 'ambient',
+    name: { en: 'Ambient 72', es: 'Ambient 72', ca: 'Ambient 72' },
+    code: {
+      en: `// Ambient 72: no drums. A pad, four notes that echo, a bass and air
+setcps(72 / 60 / 4)
+
+stack(
+  // the pad: its filter opens and closes over sixteen bars
+  chord("<D^7 Bm9 G^7 A7>").voicing().s("gm_pad_warm").gain(0.4).room(0.9).lpf(sine.range(600, 2400).slow(16)),
+  // four notes a bar; the echo and the reverb do the rest
+  note("<[d4 a4 fs5 a4] [d4 b4 fs5 b4] [d4 b4 g5 b4] [e4 a4 g5 a4]>").s("triangle")
+    .decay(0.4).sustain(0).gain(0.25).delay(0.7).room(0.9),
+  // one bass note a bar, a plain sine
+  note("<d2 b1 g1 a1>").s("sine").gain(0.6),
+  // air: noise that brightens and dulls like wind
+  s("pink").gain(0.02).hpf(3000).lpf(sine.range(4000, 9000).slow(8))
+).analyze(1)`,
+      es: `// Ambient 72: sin batería. Un pad, cuatro notas con eco, un bajo y aire
+setcps(72 / 60 / 4)
+
+stack(
+  // el pad: su filtro se abre y se cierra en dieciséis compases
+  chord("<D^7 Bm9 G^7 A7>").voicing().s("gm_pad_warm").gain(0.4).room(0.9).lpf(sine.range(600, 2400).slow(16)),
+  // cuatro notas por compás; el eco y la reverb hacen el resto
+  note("<[d4 a4 fs5 a4] [d4 b4 fs5 b4] [d4 b4 g5 b4] [e4 a4 g5 a4]>").s("triangle")
+    .decay(0.4).sustain(0).gain(0.25).delay(0.7).room(0.9),
+  // una nota de bajo por compás, una onda seno sin más
+  note("<d2 b1 g1 a1>").s("sine").gain(0.6),
+  // aire: ruido que se aclara y se apaga como el viento
+  s("pink").gain(0.02).hpf(3000).lpf(sine.range(4000, 9000).slow(8))
+).analyze(1)`,
+      ca: `// Ambient 72: sense bateria. Un pad, quatre notes amb eco, un baix i aire
+setcps(72 / 60 / 4)
+
+stack(
+  // el pad: el seu filtre s'obre i es tanca en setze compassos
+  chord("<D^7 Bm9 G^7 A7>").voicing().s("gm_pad_warm").gain(0.4).room(0.9).lpf(sine.range(600, 2400).slow(16)),
+  // quatre notes per compàs; l'eco i la reverb fan la resta
+  note("<[d4 a4 fs5 a4] [d4 b4 fs5 b4] [d4 b4 g5 b4] [e4 a4 g5 a4]>").s("triangle")
+    .decay(0.4).sustain(0).gain(0.25).delay(0.7).room(0.9),
+  // una nota de baix per compàs, una ona sinus i prou
+  note("<d2 b1 g1 a1>").s("sine").gain(0.6),
+  // aire: soroll que s'aclareix i s'apaga com el vent
+  s("pink").gain(0.02).hpf(3000).lpf(sine.range(4000, 9000).slow(8))
+).analyze(1)`,
+    },
+  },
+  {
     id: 'hola',
     name: { en: 'Hello Strudel', es: 'Hola Strudel', ca: 'Hola Strudel' },
     code: {

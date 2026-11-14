@@ -13,11 +13,11 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 export const NEWS: News[] = [
   {
     id: '2026-11-15-patterns',
-    title: L('Six new patterns', 'Seis patrones nuevos', 'Sis patrons nous'),
+    title: L('Ten new patterns', 'Diez patrones nuevos', 'Deu patrons nous'),
     text: L(
-      'Techno 132, Acid 126, UK garage 132, Dub techno 118, Electro 125 and Synthwave 100, each with its comments on what makes the genre',
-      'Techno 132, Acid 126, UK garage 132, Dub techno 118, Electro 125 y Synthwave 100, cada uno con sus comentarios sobre qué hace al género',
-      'Techno 132, Acid 126, UK garage 132, Dub techno 118, Electro 125 i Synthwave 100, cadascun amb els seus comentaris sobre què fa el gènere',
+      'Techno, Acid, UK garage, Dub techno, Electro, Synthwave, Jungle, Jersey club, Afrobeats and Ambient, each with its comments on what makes the genre',
+      'Techno, Acid, UK garage, Dub techno, Electro, Synthwave, Jungle, Jersey club, Afrobeats y Ambient, cada uno con sus comentarios sobre qué hace al género',
+      'Techno, Acid, UK garage, Dub techno, Electro, Synthwave, Jungle, Jersey club, Afrobeats i Ambient, cadascun amb els seus comentaris sobre què fa el gènere',
     ),
     go: [{ value: ['#preset', 'acid-303'] }],
   },
@@ -25,9 +25,9 @@ export const NEWS: News[] = [
     id: '2026-11-15-vj-effects',
     title: L('Six more VJ effects', 'Seis efectos más en el VJ', 'Sis efectes més al VJ'),
     text: L(
-      'Punch (the kick bumps the picture), kaleidoscope, glitch, RGB split, negative and blocks, and Surprise me to get a look you did not choose. The spin no longer jumps when you change its speed',
-      'Golpe (el bombo empuja la imagen), caleidoscopio, glitch, RGB partido, negativo y bloques, y Sorpréndeme para un aspecto que no has elegido. El giro ya no salta al cambiarle la velocidad',
-      "Cop (el bombo empeny la imatge), calidoscopi, glitch, RGB partit, negatiu i blocs, i Sorprèn-me per a un aspecte que no has triat. El gir ja no salta en canviar-li la velocitat",
+      'Punch (the kick bumps the picture), kaleidoscope, glitch, RGB split, negative and blocks; Surprise me for a look you did not choose, and four memories to save a look and come back to it, from the phone too',
+      'Golpe (el bombo empuja la imagen), caleidoscopio, glitch, RGB partido, negativo y bloques; Sorpréndeme para un aspecto que no has elegido, y cuatro memorias para guardar un aspecto y volver a él, también desde el móvil',
+      "Cop (el bombo empeny la imatge), calidoscopi, glitch, RGB partit, negatiu i blocs; Sorprèn-me per a un aspecte que no has triat, i quatre memòries per desar un aspecte i tornar-hi, també des del mòbil",
     ),
     go: [{ click: '#toggle-vj' }, { click: '[aria-controls="vj-tab-effects"]' }],
   },

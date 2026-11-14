@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CC_EVENT, NOTE_EVENT } from './midi';
-import { applyRemote, remoteLink, REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, REMOTE_GLITCH_EVENT, REMOTE_LAYER_EVENT, REMOTE_HIT_EVENT, REMOTE_POINT_EVENT, REMOTE_TRANSPORT_EVENT, REMOTE_VISUAL_EVENT, REMOTE_VJ_EVENT } from './remote';
+import { applyRemote, remoteLink, REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, REMOTE_GLITCH_EVENT, REMOTE_LAYER_EVENT, REMOTE_HIT_EVENT, REMOTE_LOOK_EVENT, REMOTE_POINT_EVENT, REMOTE_TRANSPORT_EVENT, REMOTE_VISUAL_EVENT, REMOTE_VJ_EVENT } from './remote';
 
 describe('phone as controller', () => {
   const heard = () => {
@@ -93,5 +93,15 @@ describe('phone as controller', () => {
     applyRemote({ t: 'hit', r: 'cowbell' } as never, target);
     applyRemote({ t: 'vj', c: 'explode', v: 1 }, target);
     expect(count).toBe(0);
+  });
+
+  it('recalls one of the four VJ looks, and no other', () => {
+    const target = new EventTarget();
+    const got: number[] = [];
+    target.addEventListener(REMOTE_LOOK_EVENT, (e) => got.push((e as CustomEvent<number>).detail));
+    applyRemote({ t: 'look', i: 2 }, target);
+    applyRemote({ t: 'look', i: 4 }, target);
+    applyRemote({ t: 'look', i: -1 }, target);
+    expect(got).toEqual([2]);
   });
 });

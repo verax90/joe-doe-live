@@ -269,6 +269,27 @@ const showVj = (names: { id: string; name: Record<string, string> }[], values: R
     }),
   );
 };
+// The studio's four VJ memories: a press recalls one (saving is done there)
+const looksBox = document.querySelector<HTMLElement>('#vj-looks')!;
+const lookButtons = [0, 1, 2, 3].map((i) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'layer';
+  button.textContent = String(i + 1);
+  button.disabled = true;
+  button.setAttribute('aria-label', say(`Look ${i + 1}`, `Aspecto ${i + 1}`, `Aspecte ${i + 1}`));
+  button.addEventListener('click', () => {
+    send({ t: 'look', i });
+    navigator.vibrate?.(8);
+  });
+  return button;
+});
+looksBox.append(...lookButtons);
+const showLooks = (filled: boolean[]) => lookButtons.forEach((button, i) => (button.disabled = !filled[i]));
+const showVjValues = (values: Record<string, number>) => {
+  for (const [id, input] of vjInputs) if (values[id] !== undefined) input.value = String(values[id]);
+};
+
 // zoom and spin rest in the middle, the others at zero
 vjNeutral = { zoom: 0.5, spin: 0.5 };
 vjReset.addEventListener('click', () => {
@@ -358,6 +379,12 @@ const fromStudio = (message: StudioMessage) => {
   if (message.t === 'visuals') {
     showVisuals(message.items, message.current);
     showVj(message.vjNames, message.vj);
+    showLooks(message.looks);
+    return;
+  }
+  if (message.t === 'vj') {
+    showVjValues(message.vj);
+    showLooks(message.looks);
     return;
   }
   if (message.t === 'visual') {

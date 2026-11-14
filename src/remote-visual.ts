@@ -9,6 +9,7 @@ import { holdMotionPoint } from './motion';
 import {
   addPhoneGreeting,
   REMOTE_HIT_EVENT,
+  REMOTE_LOOK_EVENT,
   REMOTE_POINT_EVENT,
   REMOTE_VISUAL_EVENT,
   REMOTE_VJ_EVENT,
@@ -16,7 +17,7 @@ import {
   type StudioMessage,
   type VisualItem,
 } from './remote';
-import { VJ_CONTROLS, setVjControl, vjPositions, type VjControl } from './vj';
+import { VJ_CONTROLS, onVjLook, recallLook, resetVj, savedLooks, setVjControl, vjPositions, type VjControl } from './vj';
 
 type Options = {
   // what the phone may pick, in the studio's language (no webcam visuals:
@@ -34,9 +35,12 @@ export function nextVisual(items: VisualItem[], current: string, random = Math.r
 
 export function setupRemoteVisual({ list, current, pick }: Options) {
   const vjNames = () => VJ_CONTROLS.map((control) => ({ id: control.id, name: control.name }));
-  const hello = (): StudioMessage => ({ t: 'visuals', items: list(), current: current(), vj: vjPositions(), vjNames: vjNames() });
+  const hello = (): StudioMessage => ({ t: 'visuals', items: list(), current: current(), vj: vjPositions(), looks: savedLooks(), vjNames: vjNames() });
   addPhoneGreeting(hello);
   onLangChange(() => sendToPhones(hello()));
+  // a look recalled or saved, Surprise me, All neutral: the phone's sliders and memories follow
+  onVjLook(() => sendToPhones({ t: 'vj', vj: vjPositions(), looks: savedLooks() }));
+  window.addEventListener(REMOTE_LOOK_EVENT, (event) => void recallLook((event as CustomEvent<number>).detail));
   // picked on the studio, by a MIDI program change, by another phone
   const tell = () => sendToPhones({ t: 'visual', id: current() });
   document.querySelector('#visual')?.addEventListener('change', tell);
@@ -56,6 +60,6 @@ export function setupRemoteVisual({ list, current, pick }: Options) {
     const toggle = document.querySelector<HTMLInputElement>('#vj-on');
     if (detail && toggle && !toggle.checked) toggle.click();
     if (detail) setVjControl(detail.c, detail.v);
-    else for (const control of VJ_CONTROLS) setVjControl(control.id, control.neutral);
+    else resetVj();
   });
 }

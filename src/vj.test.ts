@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { randomLook, vj, VJ_CONTROLS, VJ_KNOBS, vjAngle, vjKnob, vjValues, withVj } from './vj';
+import { randomLook, recallLook, resetVj, savedLooks, saveLook, setVjControl, vj, VJ_CONTROLS, VJ_KNOBS, vjAngle, vjKnob, vjPositions, vjValues, withVj } from './vj';
 
 const neutral = Object.fromEntries(VJ_CONTROLS.map((c) => [c.id, c.neutral])) as Parameters<typeof vjValues>[0];
 
@@ -58,5 +58,28 @@ describe('Surprise me', () => {
 describe('withVj', () => {
   it('does nothing while VJ is off', () => {
     expect(withVj('osc().out()')).toBe('osc().out()');
+  });
+});
+
+describe('looks: four memories of the effects', () => {
+  it('start empty, and an empty one changes nothing', () => {
+    expect(savedLooks()).toEqual([false, false, false, false]);
+    setVjControl('kaleid', 0.5);
+    expect(recallLook(2)).toBe(false);
+    expect(vjPositions().kaleid).toBe(0.5);
+  });
+
+  it('keep where everything is and bring it back', () => {
+    setVjControl('kaleid', 0.5);
+    setVjControl('invert', 1);
+    saveLook(1);
+    expect(savedLooks()).toEqual([false, true, false, false]);
+    resetVj();
+    expect(vjPositions().kaleid).toBe(0);
+    expect(recallLook(1)).toBe(true);
+    expect(vjPositions().kaleid).toBe(0.5);
+    expect(vjPositions().invert).toBe(1);
+    expect(vj.kaleid).toBe(7);
+    resetVj();
   });
 });

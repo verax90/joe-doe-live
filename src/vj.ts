@@ -8,7 +8,7 @@
 // leave the picture as it was.
 import { keepingFocus } from './a11y';
 import type { Localized } from './i18n';
-import { onLangChange, pick } from './i18n';
+import { onLangChange, pick, t } from './i18n';
 import { readStorage, writeStorage } from './storage';
 
 export type VjControl = 'zoom' | 'hue' | 'warp' | 'pixels' | 'trails' | 'spin' | 'punch' | 'kaleid' | 'glitch' | 'split' | 'invert' | 'blocks';
@@ -91,10 +91,49 @@ export const vjTakesKnobs = () => enabled && knobs;
 
 // Moves one control; the panel's slider follows through onMove
 let onMove: ((id: VjControl, value: number) => void) | undefined;
+let splitDrawn = false; // whether the chain running now has the RGB split's second copy
+let redrawVisual: (() => void) | undefined;
 function setControl(id: VjControl, value: number) {
   positions[id] = value;
   Object.assign(vj, vjValues(positions));
   onMove?.(id, value);
+  if (id === 'split' && enabled && value > 0 !== splitDrawn) redrawVisual?.();
+}
+
+// Several controls at once (a look recalled, Surprise me, All neutral): the
+// phones are told, so their sliders follow
+const bulkListeners: (() => void)[] = [];
+export const onVjLook = (listener: () => void) => bulkListeners.push(listener);
+function setAll(look: Partial<Record<VjControl, number>>) {
+  for (const control of VJ_CONTROLS) setControl(control.id, look[control.id] ?? control.neutral);
+  for (const listener of bulkListeners) listener();
+}
+export const resetVj = () => setAll({});
+
+// Looks: four memories of where every effect is, to come back to in one
+// press while playing (the phone's Visual tab has them too)
+export const LOOKS = 4;
+const LOOKS_KEY = 'jdl:vj-looks';
+type Look = Record<VjControl, number> | null;
+const readLooks = () => {
+  const stored = readStorage<Look[]>(LOOKS_KEY, []);
+  return Array.from({ length: LOOKS }, (_, i) => stored[i] ?? null);
+};
+export const savedLooks = () => readLooks().map(Boolean);
+export function saveLook(slot: number) {
+  const looks = readLooks();
+  if (slot < 0 || slot >= LOOKS) return;
+  looks[slot] = { ...positions };
+  writeStorage(LOOKS_KEY, looks);
+}
+let onRecall: (() => void) | undefined;
+// false when that memory is empty
+export function recallLook(slot: number) {
+  const look = readLooks()[slot];
+  if (!look) return false;
+  setAll(look);
+  onRecall?.();
+  return true;
 }
 
 // Where every control is (0-1), for the phone's sliders to start from
@@ -126,12 +165,18 @@ export function withVj(code: string) {
   .mosh(noise(3, 0.25).pixelate(32, 18), () => vj.blocks)
   .tear(() => vj.glitch, () => time * 14)
   .pixelate(() => vj.pixels, () => vj.pixels * 0.5625)`;
-  return `${drawn}
-${moved}
+  // the second copy only while the split is in use: it is the whole chain
+  // again for every pixel (setControl redraws when it comes in or goes out)
+  splitDrawn = positions.split > 0;
+  const split = splitDrawn
+    ? `
   .color(0, 1, 1)
   .add(${moved}
   .scrollX(() => vj.split)
-  .color(1, 0, 0))
+  .color(1, 0, 0))`
+    : '';
+  return `${drawn}
+${moved}${split}
   .hue(() => vj.hue)
   .invert(() => vj.invert)
   .brightness(() => vj.punch * kickHit() * 0.25)
@@ -158,6 +203,7 @@ export function randomLook(random = Math.random): Record<VjControl, number> {
 type Options = { redraw: () => void };
 
 export function setupVj({ redraw }: Options) {
+  redrawVisual = redraw;
   const toggle = document.querySelector<HTMLInputElement>('#vj-on')!;
   const knobsToggle = document.querySelector<HTMLInputElement>('#vj-knobs')!;
   const sliders = document.querySelector<HTMLElement>('#vj-sliders')!;
@@ -208,15 +254,55 @@ export function setupVj({ redraw }: Options) {
     knobs = knobsToggle.checked;
     save();
   });
-  document.querySelector('#vj-reset')!.addEventListener('click', () => {
-    for (const control of VJ_CONTROLS) setControl(control.id, control.neutral);
-  });
+  document.querySelector('#vj-reset')!.addEventListener('click', resetVj);
+  // the effects only show with VJ on: a look turns it on
+  const turnOn = () => {
+    if (!enabled) toggle.click();
+  };
+  onRecall = turnOn;
   // A look you did not choose: a few effects at once, the rest neutral
   document.querySelector('#vj-random')!.addEventListener('click', () => {
-    const next = randomLook();
-    for (const control of VJ_CONTROLS) setControl(control.id, next[control.id]);
-    if (!enabled) toggle.click();
+    setAll(randomLook());
+    turnOn();
   });
+
+  // The four memories: a press recalls; with Save armed, the next press keeps
+  // what is on screen there instead
+  const looksBox = document.querySelector<HTMLElement>('#vj-looks')!;
+  const saveButton = document.querySelector<HTMLButtonElement>('#vj-look-save')!;
+  const looksStatus = document.querySelector<HTMLElement>('#vj-looks-status')!;
+  const lookButtons = Array.from({ length: LOOKS }, (_, slot) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'control vj-look';
+    button.textContent = String(slot + 1);
+    button.addEventListener('click', () => {
+      if (saveButton.getAttribute('aria-pressed') === 'true') {
+        saveLook(slot);
+        saveButton.setAttribute('aria-pressed', 'false');
+        looksStatus.textContent = t('vjLookSaved', { n: slot + 1 });
+        showLooks();
+        for (const listener of bulkListeners) listener(); // the phones learn it exists
+      } else if (!recallLook(slot)) looksStatus.textContent = t('vjLookEmpty', { n: slot + 1 });
+      else looksStatus.textContent = '';
+    });
+    return button;
+  });
+  looksBox.prepend(...lookButtons);
+  const showLooks = () => {
+    const filled = savedLooks();
+    lookButtons.forEach((button, slot) => {
+      button.classList.toggle('is-filled', filled[slot]);
+      button.setAttribute('aria-label', t(filled[slot] ? 'vjLookRecall' : 'vjLookEmptyLabel', { n: slot + 1 }));
+    });
+  };
+  saveButton.addEventListener('click', () => {
+    const armed = saveButton.getAttribute('aria-pressed') !== 'true';
+    saveButton.setAttribute('aria-pressed', String(armed));
+    looksStatus.textContent = armed ? t('vjLookPick') : '';
+  });
+  showLooks();
+  onLangChange(showLooks);
 
   render();
   onLangChange(render);

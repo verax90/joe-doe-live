@@ -501,3 +501,27 @@ body {
   height: 36px;
   color: var(--muted);
 }
+
+/* the studio's VJ memories next to All neutral; an empty one cannot be pressed */
+.vj-row {
+  display: flex;
+  gap: 8px;
+}
+
+.vj-row .vj-looks {
+  display: flex;
+  gap: 6px;
+}
+
+.vj-row .look-next {
+  flex: 1;
+}
+
+.vj-looks .layer:disabled {
+  opacity: 0.35;
+}
+
+.vj-row .vj-looks .layer {
+  width: 40px;
+  height: 36px;
+}
