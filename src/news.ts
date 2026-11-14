@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-generators',
+    title: L('Four richer visuals', 'Cuatro visuales más ricos', 'Quatre visuals més rics'),
+    text: L(
+      'Under Machines: Liquid (a marbled plasma the kick stirs), Star jump (streaks at you, stretched by the kick), Blobs (they merge and swell) and Ripples. Try them with a palette from VJ → Finish',
+      'En Máquinas: Líquido (un plasma jaspeado que el bombo remueve), Salto de estrellas (estelas hacia ti que el bombo estira), Metabolas (se funden y se hinchan) y Ondas. Pruébalos con una paleta de VJ → Acabado',
+      'A Màquines: Líquid (un plasma jaspiat que el bombo remena), Salt d\'estrelles (esteles cap a tu que el bombo estira), Metaboles (es fonen i s\'inflen) i Ones. Prova\'ls amb una paleta de VJ → Acabat',
+    ),
+    go: [{ value: ['#visual', 'maq-plasma'] }],
+  },
+  {
     id: '2026-11-15-finish',
     title: L('Sharper visuals, with a finish and palettes', 'Visuales más nítidos, con acabado y paletas', 'Visuals més nítids, amb acabat i paletes'),
     text: L(

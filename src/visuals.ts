@@ -344,6 +344,35 @@ src(s1)
   .out()`,
   },
   {
+    id: 'maq-plasma',
+    name: { en: 'Liquid (the kick stirs it)', es: 'Líquido (el bombo lo remueve)', ca: 'Líquid (el bombo el remena)' },
+    code: `plasma(() => time * 0.1 + kickCount() * 0.11, () => kickHit(), () => bass())
+  .color(...tint(1))
+  .out()`,
+  },
+  {
+    id: 'maq-estrellas',
+    name: { en: 'Star jump (kick)', es: 'Salto de estrellas (bombo)', ca: "Salt d'estrelles (bombo)" },
+    code: `starfield(() => time * 0.25 + kickCount() * 0.3, () => kickHit(), () => snareHit())
+  .color(...tint(1.3))
+  .add(src(o0).scale(1.04), () => 0.3 + kickHit() * 0.4)
+  .out()`,
+  },
+  {
+    id: 'maq-metabolas',
+    name: { en: 'Blobs (they swell on the kick)', es: 'Metabolas (se hinchan con el bombo)', ca: 'Metaboles (s’inflen amb el bombo)' },
+    code: `metaballs(() => time * 0.5 + kickCount() * 0.2, () => kickHit())
+  .color(...tint(1))
+  .out()`,
+  },
+  {
+    id: 'maq-ondas',
+    name: { en: 'Ripples (lows and hats)', es: 'Ondas (graves y platos)', ca: 'Ones (greus i plats)' },
+    code: `ripples(() => time * 0.6 + kickCount() * 0.5, () => bass(), () => hatHit())
+  .color(...tint(1))
+  .out()`,
+  },
+  {
     id: 'mov-luz',
     name: { en: 'Light (follows you)', es: 'Luz (te sigue)', ca: 'Llum (et segueix)' },
     code: `shape(64, () => 0.02 + motion() * 0.1, 0.25)
@@ -739,6 +768,8 @@ const SPEC_EDGES = [30, 80, 160, 320, 640, 1280, 2500, 5000, 12000];
 // Shaders of the studio's own, written in GLSL and added to Hydra as new
 // functions (also there for your code under "From the code"):
 // rings(phase, kick, sparkle), gridFloor(scroll, bump, flash),
+// plasma(flow, push, detail), starfield(travel, streak, flash),
+// metaballs(drift, swell), ripples(phase, tight, glint),
 // tunnel(travel, twist, pulse) and spectrumBars(eight levels) draw;
 // .tear(amount, seed) shifts some scanlines sideways, like a bad signal;
 // .mosh(texture, amount) moves each pixel by what the texture says there, in
@@ -834,6 +865,97 @@ export const SHADERS = [
   float n = fract(sin(line * 91.7 + floor(seed) * 13.3) * 43758.5453);
   float torn = step(1.0 - amount, n);
   return vec2(_st.x + (n - 0.5) * amount * 0.5 * torn, _st.y);`,
+  },
+  {
+    // A liquid: noise bent by noise bent by noise, with contour lines on it
+    name: 'plasma',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'flow', default: 0 },
+      { type: 'float', name: 'push', default: 0 },
+      { type: 'float', name: 'detail', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0) * 2.2;
+  vec2 q = vec2(_noise(vec3(p, flow)), _noise(vec3(p + 5.2, flow)));
+  vec2 w = vec2(_noise(vec3(p + 2.6 * q + 1.7, flow * 1.3)), _noise(vec3(p + 2.6 * q + 9.2, flow * 1.3)));
+  float v = 0.5 + 0.5 * _noise(vec3(p + (2.2 + push * 1.8) * w, flow * 0.7));
+  v = v * v * (3.0 - 2.0 * v);
+  float lines = pow(1.0 - abs(sin(v * 12.566 * (0.6 + detail))), 7.0);
+  return vec4(vec3(v * 0.6 + lines * 0.4 + push * 0.12), 1.0);`,
+  },
+  {
+    // Stars coming at you along a tunnel: three layers of them, each star a
+    // cell of angle and depth, stretched into a streak by the kick
+    name: 'starfield',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'travel', default: 0 },
+      { type: 'float', name: 'streak', default: 0 },
+      { type: 'float', name: 'flash', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0);
+  float r = length(p);
+  float a = atan(p.y, p.x) / 6.2831853;
+  float v = 0.0;
+  for (int i = 0; i < 3; i++) {
+    float fi = float(i);
+    float n = 44.0 + fi * 28.0;
+    vec2 g = vec2(a * n, 0.5 / max(r, 0.01) * (1.0 + fi * 0.45) + travel * (1.0 + fi * 0.6));
+    vec2 id = floor(g);
+    vec2 f = fract(g) - 0.5;
+    float rnd = fract(sin(dot(id + fi * 7.0, vec2(127.1, 311.7))) * 43758.5453);
+    f.y /= 1.0 + streak * 7.0;
+    v += step(0.84, rnd) * smoothstep(0.32, 0.0, length(f)) * smoothstep(0.03, 0.3, r) * (0.5 + rnd * 0.5);
+  }
+  return vec4(vec3(v * (0.8 + streak * 0.6) + flash * 0.25 * smoothstep(0.45, 0.0, r)), 1.0);`,
+  },
+  {
+    // Seven blobs that merge where they meet, each on its own slow path
+    name: 'metaballs',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'drift', default: 0 },
+      { type: 'float', name: 'swell', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0) * 2.0;
+  float f = 0.0;
+  for (int i = 0; i < 7; i++) {
+    float fi = float(i);
+    vec2 c = vec2(sin(drift * (0.7 + fi * 0.13) + fi * 2.1), cos(drift * (0.5 + fi * 0.17) + fi * 1.3)) * (0.55 + 0.12 * sin(fi * 1.9));
+    float size = 0.17 + 0.05 * sin(fi * 3.0) + swell * 0.08;
+    vec2 d = p - c;
+    f += size * size / max(dot(d, d), 0.0005);
+  }
+  float body = smoothstep(0.92, 1.08, f);
+  float inside = clamp((f - 1.0) * 0.45, 0.0, 1.0);
+  float halo = clamp(f * 0.3, 0.0, 1.0) * (1.0 - body);
+  float rim = smoothstep(1.0, 1.2, f) - smoothstep(1.2, 1.8, f);
+  return vec4(vec3(body * (0.45 + 0.55 * inside) + halo * 0.3 + rim * 0.35), 1.0);`,
+  },
+  {
+    // Rings spreading from four points that wander, crossing each other
+    name: 'ripples',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'phase', default: 0 },
+      { type: 'float', name: 'tight', default: 0 },
+      { type: 'float', name: 'glint', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0) * 2.0;
+  float v = 0.0;
+  for (int i = 0; i < 4; i++) {
+    float fi = float(i);
+    vec2 c = 0.65 * vec2(sin(fi * 2.4 + phase * 0.13), cos(fi * 1.7 + phase * 0.11));
+    float d = length(p - c);
+    v += sin(d * (26.0 + tight * 16.0) - phase * 3.0) / (1.0 + d * 2.2);
+  }
+  v *= 0.45;
+  float crest = pow(clamp(v, 0.0, 1.0), 2.5 - glint * 1.5);
+  return vec4(vec3(0.22 + 0.25 * v + crest * (0.9 + glint * 0.6)), 1.0);`,
   },
   {
     // The finish (finish.ts): the picture, a glow from what is bright around
