@@ -323,8 +323,9 @@ select.control {
 /* Four groups side by side; two on tablets, one on phones */
 .menu-columns {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.25rem 0.75rem;
+  /* six groups of three to six things, three a row: nothing to scan past */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem 0.75rem;
   padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--line);
 }
@@ -2071,6 +2072,27 @@ select.control {
   accent-color: var(--accent);
 }
 
+/* VJ → Machines: listen and go live side by side; the fine print folded away */
+.machines-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.panel-more {
+  margin-top: 0.5rem;
+  font-size: 13px;
+}
+
+.panel-more summary {
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.panel-more summary:hover {
+  color: var(--accent);
+}
+
 /* VJ → Machines: a bar per drum, as tall as its band is loud, lit on a hit */
 .machines-meters {
   display: grid;
@@ -3300,6 +3322,11 @@ body:not(.is-playing) .beat {
   min-width: 0;
 }
 
+.dock-title {
+  flex: none;
+  white-space: nowrap;
+}
+
 .dock-list {
   display: flex;
   gap: 0.3rem;
@@ -3337,8 +3364,19 @@ body:not(.is-playing) .beat {
   color: var(--accent-ink);
 }
 
+/* the shortcuts shrink (to an ellipsis) before a tool at hand is cut */
 .foot > .shortcuts-text {
+  flex: 0 1000 auto;
+  min-width: 0;
   margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.foot > a {
+  flex: none;
+  white-space: nowrap;
 }
 
 /* the shortcuts give way first when the foot gets tight */

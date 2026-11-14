@@ -242,16 +242,29 @@ export function setupMachines() {
     let loudest = 0;
     let checkedAt = performance.now();
     const energy = Object.fromEntries(BAND_NAMES.map((name) => [name, 0])) as Energy;
+    let onScreen = true;
+    let lookedAt = 0;
+    let frame = 0;
     const timer = window.setInterval(() => {
       const now = performance.now();
       fast.getFloatFrequencyData(fastData);
       for (const name of BAND_NAMES) energy[name] = bandOf(fastData, nyquist, BANDS[name][0], BANDS[name][1]);
       // each meter shows what its drum is listened for in
       const shown: Record<Role, number> = { kick: lowEnd(energy), snare: Math.max(energy.lowmid, energy.mid), hat: energy.high };
-      for (const role of ROLES) meters[role].style.setProperty('--level', shown[role].toFixed(3));
+      // the meters only while someone can see them (the panel open on this
+      // tab): on stage, with everything hidden, this loop only listens
+      if (now - lookedAt > 300) {
+        lookedAt = now;
+        onScreen = meters.kick.offsetParent !== null;
+      }
+      if (onScreen) for (const role of ROLES) meters[role].style.setProperty('--level', shown[role].toFixed(3));
       const heard = { low: onsets.low(shown.kick, now), mid: onsets.mid(energy.mid, now), high: onsets.high(energy.high, now) };
-      fast.getFloatTimeDomainData(wave);
-      for (const sample of wave) loudest = Math.max(loudest, Math.abs(sample));
+      // the peak, for the automatic sensitivity: the buffer holds 43 ms, so
+      // every other frame misses nothing
+      if (frame++ % 2 === 0) {
+        fast.getFloatTimeDomainData(wave);
+        for (const sample of wave) loudest = Math.max(loudest, Math.abs(sample));
+      }
       if (now - checkedAt > 1000) {
         if (autoBox.checked) {
           const next = autoGainStep(Number(gainInput.value), loudest);
@@ -264,7 +277,7 @@ export function setupMachines() {
         flashUntil[role] = now + 90;
         hearRole(role, now);
       }
-      for (const role of ROLES) meters[role].classList.toggle('is-hit', now < flashUntil[role]);
+      if (onScreen) for (const role of ROLES) meters[role].classList.toggle('is-hit', now < flashUntil[role]);
     }, 16);
 
     listening = { stream, source, gain, smooth, fast, nyquist, timer };

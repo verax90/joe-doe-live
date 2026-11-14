@@ -104,26 +104,32 @@
               <button id="toggle-tools" class="menu-item" type="button" aria-pressed="false" data-icon="tools" data-panel="tools" data-i18n="tools">Tools</button>
             </div>
             <div class="menu-group">
-              <h3 class="menu-group-title" data-i18n="menuPlay">Play</h3>
+              <h3 class="menu-group-title" data-i18n="menuControllers">Controllers</h3>
               <button id="toggle-midi" class="menu-item" type="button" aria-pressed="false" data-icon="midi" data-panel="midi">MIDI <span id="midi-dot" class="dot" aria-hidden="true"></span></button>
               <button id="toggle-sp" class="menu-item" type="button" aria-pressed="false" data-icon="sp" data-panel="sp" data-i18n="spTitle">SP-404 / MIDI out</button>
               <button id="toggle-remote" class="menu-item" type="button" aria-pressed="false" data-icon="remote" data-panel="remote" data-i18n="remoteTitle">Phone as controller</button>
               <button id="toggle-flip" class="menu-item" type="button" aria-pressed="false" data-icon="flip" data-panel="flip">Miyoo Flip <span id="flip-dot" class="dot" aria-hidden="true"></span></button>
+            </div>
+            <div class="menu-group">
+              <h3 class="menu-group-title" data-i18n="menuSound">Sound</h3>
               <button id="toggle-mic" class="menu-item" type="button" aria-pressed="false" data-icon="mic" data-panel="mic" data-i18n="micTitle">Mic</button>
               <button id="toggle-looper" class="menu-item" type="button" aria-pressed="false" data-icon="looper" data-panel="looper" data-i18n="looperTitle">Looper</button>
               <button id="toggle-backing" class="menu-item" type="button" aria-pressed="false" data-icon="backing" data-panel="backing" data-i18n="backingTitle">Backing track</button>
               <button id="toggle-pump" class="menu-item" type="button" aria-pressed="false" data-icon="pump" data-panel="pump" data-i18n="pumpTitle">Pump</button>
+            </div>
+            <div class="menu-group">
+              <h3 class="menu-group-title" data-i18n="menuPicture">Picture</h3>
               <button id="toggle-vj" class="menu-item" type="button" aria-pressed="false" data-icon="vj" data-panel="vj" data-i18n="vjTitle">VJ</button>
               <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-icon="video" data-panel="video" data-i18n="video">Video</button>
+              <button id="toggle-projector" class="menu-item" type="button" aria-pressed="false" data-icon="projector" data-i18n="projectorTitle">Projector (second screen)</button>
+              <button id="toggle-overlay" class="menu-item" type="button" aria-pressed="false" data-icon="overlay-panel" data-panel="overlay-panel" data-i18n="overlayTitle">Caption</button>
+              <button id="toggle-frame" class="menu-item" data-icon="frame" type="button" aria-pressed="false" data-i18n="verticalFrame">Vertical framing (9:16 streams)</button>
             </div>
             <div class="menu-group">
               <h3 class="menu-group-title" data-i18n="menuLive">Perform</h3>
-              <button id="toggle-projector" class="menu-item" type="button" aria-pressed="false" data-icon="projector" data-i18n="projectorTitle">Projector (second screen)</button>
               <button id="toggle-set" class="menu-item" type="button" aria-pressed="false" data-icon="set" data-panel="set" data-i18n="liveSet">Live set</button>
               <button id="toggle-room" class="menu-item" type="button" aria-pressed="false" data-icon="room" data-panel="room" data-i18n="roomTitle">Live room</button>
-              <button id="toggle-overlay" class="menu-item" type="button" aria-pressed="false" data-icon="overlay-panel" data-panel="overlay-panel" data-i18n="overlayTitle">Caption</button>
               <button id="toggle-drop" class="menu-item" type="button" aria-pressed="false" data-icon="drop" data-panel="drop" data-i18n="dropTitle">Build-up</button>
-              <button id="toggle-frame" class="menu-item" data-icon="frame" type="button" aria-pressed="false" data-i18n="verticalFrame">Vertical framing (9:16 streams)</button>
               <label class="menu-field">
                 <span data-i18n="recordMode">What to record</span>
                 <select id="record-mode" class="control">
@@ -735,7 +741,10 @@
             <span data-i18n="micDevice">Input</span>
             <select id="machines-device" class="control"></select>
           </label>
-          <button id="machines-on" class="control control-accent" type="button" aria-pressed="false" data-i18n="machinesOn">Listen to the machines</button>
+          <div class="machines-actions">
+            <button id="machines-on" class="control control-accent" type="button" aria-pressed="false" data-i18n="machinesOn">Listen to the machines</button>
+            <button id="machines-live" class="control" type="button" data-icon="fullscreen" data-i18n="machinesLiveGo" data-i18n-title="machinesLiveHint">Go live</button>
+          </div>
           <div id="machines-meters" class="machines-meters" aria-hidden="true">
             <span class="machines-meter" data-role="kick"><i></i><b data-i18n="machinesKick">Kick</b></span>
             <span class="machines-meter" data-role="snare"><i></i><b data-i18n="machinesSnare">Snare</b></span>
@@ -746,11 +755,13 @@
             <label class="vj-slider"><span data-i18n="machinesGain">Sensitivity</span><input id="machines-gain" type="range" min="0" max="1" step="0.01" value="0.5" /></label>
           </div>
           <label class="set-option"><input id="machines-auto" type="checkbox" checked /> <span data-i18n="machinesAuto">Sets itself to the level that comes in</span></label>
-          <button id="machines-live" class="control" type="button" data-icon="fullscreen" data-i18n="machinesLiveGo">Go live</button>
-          <p class="panel-help" data-i18n="machinesLiveHint">Listens, puts the Auto visual on, hides the code and fills the screen. Esc to come back.</p>
-          <p class="panel-help" data-i18n="machinesClips">For the drums to change the clips: Video → Clips → Follow the music.</p>
           <label class="set-option"><input id="machines-clock" type="checkbox" /> <span data-i18n="machinesClock">The tempo follows the machine's MIDI clock</span></label>
           <p id="machines-clock-status" class="panel-status" role="status"></p>
+          <details class="panel-more">
+            <summary data-i18n="machinesMore">What each thing does</summary>
+            <p class="panel-help" data-i18n="machinesLiveHint">One click for the gig.</p>
+            <p class="panel-help" data-i18n="machinesClips">For the drums to change the clips: Video → Clips → Follow the music.</p>
+          </details>
         </section>
         <section id="vj-tab-motion" class="panel-tabpanel" role="tabpanel" hidden>
           <p class="panel-help" data-i18n="motionHelp">The webcam as a controller: where you move is a point the visuals follow.</p>

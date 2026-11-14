@@ -142,6 +142,8 @@ export function setupMotion() {
     let before = new Uint8Array(width * height);
     let now = new Uint8Array(width * height);
     let first = true;
+    let onScreen = true;
+    let lookedAt = 0;
     const picture = shown.createImageData(width, height);
 
     const timer = window.setInterval(() => {
@@ -149,20 +151,27 @@ export function setupMotion() {
       pen.drawImage(video, 0, 0, width, height);
       toGrey(pen.getImageData(0, 0, width, height).data, now);
       const found = first ? null : findMotion(before, now, width, height);
-      // what moved, lit, in the preview (mirrored like the point)
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const from = y * width + x;
-          const to = (y * width + (width - 1 - x)) * 4;
-          const lit = !first && Math.abs(now[from] - before[from]) >= 22;
-          const grey = now[from] * 0.35;
-          picture.data[to] = lit ? 215 : grey;
-          picture.data[to + 1] = lit ? 255 : grey;
-          picture.data[to + 2] = lit ? 60 : grey;
-          picture.data[to + 3] = 255;
-        }
+      // the preview only while it can be seen: on stage this loop only tracks
+      if (performance.now() - lookedAt > 300) {
+        lookedAt = performance.now();
+        onScreen = preview.offsetParent !== null;
       }
-      shown.putImageData(picture, 0, 0);
+      if (onScreen) {
+        // what moved, lit, in the preview (mirrored like the point)
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const from = y * width + x;
+            const to = (y * width + (width - 1 - x)) * 4;
+            const lit = !first && Math.abs(now[from] - before[from]) >= 22;
+            const grey = now[from] * 0.35;
+            picture.data[to] = lit ? 215 : grey;
+            picture.data[to + 1] = lit ? 255 : grey;
+            picture.data[to + 2] = lit ? 60 : grey;
+            picture.data[to + 3] = 255;
+          }
+        }
+        shown.putImageData(picture, 0, 0);
+      }
       first = false;
       [before, now] = [now, before];
 
@@ -173,10 +182,12 @@ export function setupMotion() {
         state.targetY = found.y;
       }
       state.targetAmount = found ? Math.min(1, found.amount / fullAt(Number(gainInput.value))) : 0;
-      dot.hidden = false;
-      dot.style.left = `${state.x * 100}%`;
-      dot.style.top = `${state.y * 100}%`;
-      dot.style.setProperty('--size', String(0.4 + state.amount * 1.6));
+      if (onScreen) {
+        dot.hidden = false;
+        dot.style.left = `${state.x * 100}%`;
+        dot.style.top = `${state.y * 100}%`;
+        dot.style.setProperty('--size', String(0.4 + state.amount * 1.6));
+      }
       if (vjBox.checked) for (const [control, value] of VJ_MAP) setVjControl(control, value());
     }, 40);
 
