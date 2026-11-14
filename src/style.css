@@ -2243,6 +2243,18 @@ select.control {
   padding-block: 0;
 }
 
+/* the palette chosen, as the strip of colours it is */
+.finish-swatch {
+  height: 0.9rem;
+  margin: -0.5rem 0 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+}
+
+#finish-reset {
+  margin-bottom: 1rem;
+}
+
 /* four tabs in the VJ panel: a little tighter so the row holds them */
 #vj .panel-tabs {
   gap: 0.1rem;

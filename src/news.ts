@@ -13,11 +13,11 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 export const NEWS: News[] = [
   {
     id: '2026-11-15-finish',
-    title: L('Sharper visuals, with a finish', 'Visuales más nítidos y con acabado', 'Visuals més nítids i amb acabat'),
+    title: L('Sharper visuals, with a finish and palettes', 'Visuales más nítidos, con acabado y paletas', 'Visuals més nítids, amb acabat i paletes'),
     text: L(
-      'VJ → Finish: a glow around what is bright, grain and darker corners over any visual, and a High quality that draws every pixel sixty times a second (Go live takes it by itself). The webcam and clips datamosh now follows how the picture really moves',
-      'VJ → Acabado: resplandor alrededor de lo claro, grano y esquinas oscuras sobre cualquier visual, y una calidad Alta que dibuja todos los píxeles sesenta veces por segundo (Empezar el directo la pone solo). El datamosh de webcam y clips sigue ahora el movimiento real de la imagen',
-      "VJ → Acabat: resplendor al voltant del que és clar, gra i cantonades fosques sobre qualsevol visual, i una qualitat Alta que dibuixa tots els píxels seixanta cops per segon (Començar el directe la posa sol). El datamosh de webcam i clips segueix ara el moviment real de la imatge",
+      'VJ → Finish: a glow around what is bright, grain and darker corners over any visual, nine palettes (Sunset, Neon, Fire…) in place of the theme\'s one colour, and a High quality that draws every pixel sixty times a second (Go live takes it by itself). The webcam and clips datamosh now follows how the picture really moves',
+      'VJ → Acabado: resplandor alrededor de lo claro, grano y esquinas oscuras sobre cualquier visual, nueve paletas (Atardecer, Neón, Fuego…) en vez del único color del tema, y una calidad Alta que dibuja todos los píxeles sesenta veces por segundo (Empezar el directo la pone solo). El datamosh de webcam y clips sigue ahora el movimiento real de la imagen',
+      "VJ → Acabat: resplendor al voltant del que és clar, gra i cantonades fosques sobre qualsevol visual, nou paletes (Capvespre, Neó, Foc…) en lloc de l'únic color del tema, i una qualitat Alta que dibuixa tots els píxels seixanta cops per segon (Començar el directe la posa sol). El datamosh de webcam i clips segueix ara el moviment real de la imatge",
     ),
     go: [{ click: '#toggle-vj' }, { click: '[aria-controls="vj-tab-finish"]' }],
   },

@@ -745,7 +745,7 @@ const SPEC_EDGES = [30, 80, 160, 320, 640, 1280, 2500, 5000, 12000];
 // steps, which over src(o0) smears the picture in blocks like a video that
 // lost its keyframes (a datamosh), until something redraws it: the
 // texture's brightness picks one of eight directions and how far
-const SHADERS = [
+export const SHADERS = [
   {
     name: 'rings',
     type: 'src',
@@ -846,6 +846,10 @@ const SHADERS = [
       { type: 'float', name: 'glow', default: 0 },
       { type: 'float', name: 'grain', default: 0 },
       { type: 'float', name: 'vignette', default: 0 },
+      // the palette: how much of it, and its four colours from dark to light
+      { type: 'float', name: 'tone', default: 0 },
+      ...['a', 'b', 'c', 'd'].flatMap((stop) => ['r', 'g', 'b'].map((part) => ({ type: 'float', name: `p${stop}${part}`, default: 0 }))),
+      { type: 'float', name: 'lift', default: 1.5 },
     ],
     glsl: `
   vec3 base = texture2D(tex, _st).rgb;
@@ -858,6 +862,15 @@ const SHADERS = [
     halo += max(texture2D(tex, _st + d * 2.4).rgb - 0.45, 0.0) * 0.6;
   }
   vec3 colour = base + halo * glow * 0.42;
+  // how bright it is, taken further by the Light slider (many visuals are
+  // drawn dim, to sit behind the code) and with its low end lifted
+  float light = pow(clamp(dot(colour, vec3(0.299, 0.587, 0.114)) * lift, 0.0, 1.0), 0.6);
+  vec3 pa = vec3(par, pag, pab);
+  vec3 pb = vec3(pbr, pbg, pbb);
+  vec3 pc = vec3(pcr, pcg, pcb);
+  vec3 pd = vec3(pdr, pdg, pdb);
+  vec3 mapped = light < 0.3333 ? mix(pa, pb, light * 3.0) : light < 0.6667 ? mix(pb, pc, (light - 0.3333) * 3.0) : mix(pc, pd, (light - 0.6667) * 3.0);
+  colour = mix(colour, mapped, tone);
   colour *= 1.0 - vignette * smoothstep(0.3, 0.85, distance(_st, vec2(0.5)));
   float speck = fract(sin(dot(floor(_st * resolution) + floor(time * 24.0) * 7.0, vec2(12.9898, 78.233))) * 43758.5453);
   colour += (speck - 0.5) * grain * 0.22;

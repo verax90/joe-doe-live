@@ -760,6 +760,15 @@
         <section id="vj-tab-finish" class="panel-tabpanel" role="tabpanel" hidden>
           <p class="panel-help" data-i18n="finishHelp">What makes the picture look done: a glow, a little grain and darker corners, over any visual.</p>
           <div id="finish-sliders" class="vj-sliders"></div>
+          <label class="panel-field" for="finish-palette">
+            <span data-i18n="finishPalette">Palette</span>
+            <select id="finish-palette" class="control"></select>
+          </label>
+          <div id="finish-swatch" class="finish-swatch" aria-hidden="true" hidden></div>
+          <div class="vj-sliders">
+            <label class="vj-slider"><span data-i18n="finishTone">How much</span><input id="finish-tone" type="range" min="0" max="1" step="0.01" value="1" /></label>
+            <label class="vj-slider" data-i18n-title="finishLightHint"><span data-i18n="finishLight2">Light</span><input id="finish-light" type="range" min="0" max="1" step="0.01" value="0.5" /></label>
+          </div>
           <button id="finish-reset" class="control" type="button" data-i18n="finishReset">As it came</button>
           <label class="panel-field" for="finish-quality">
             <span data-i18n="finishQuality">Quality</span>
