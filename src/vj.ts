@@ -60,6 +60,9 @@ function setControl(id: VjControl, value: number) {
   onMove?.(id, value);
 }
 
+// Where every control is (0-1), for the phone's sliders to start from
+export const vjPositions = (): Record<VjControl, number> => ({ ...positions });
+
 // Something else playing a control: the movement in front of the webcam (motion.ts)
 export const setVjControl = (id: VjControl, value: number) => setControl(id, Math.min(1, Math.max(0, value)));
 

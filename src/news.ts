@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-14-phone-visual',
+    title: L('A friend plays the visuals from their phone', 'Un colega toca los visuales desde su móvil', 'Un col·lega toca els visuals des del mòbil'),
+    text: L(
+      'The phone as controller has a Visual tab: pads for a kick, a snare and the hats, a square that moves the point of the Motion visuals, the list of visuals and the VJ effects',
+      'El móvil como mando tiene una pestaña Visual: pads de bombo, caja y platos, un cuadro que mueve el punto de los visuales de Movimiento, la lista de visuales y los efectos del VJ',
+      'El mòbil com a comandament té una pestanya Visual: pads de bombo, caixa i plats, un quadre que mou el punt dels visuals de Moviment, la llista de visuals i els efectes del VJ',
+    ),
+    go: [{ click: '#toggle-remote' }],
+  },
+  {
     id: '2026-11-14-motion',
     title: L('Move, and the visual follows', 'Muévete y el visual te sigue', 'Mou-te i el visual et segueix'),
     text: L(

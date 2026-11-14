@@ -142,15 +142,20 @@ body {
   accent-color: var(--accent);
 }
 
-/* Music / Video: the video tab appears when the studio has clips */
+/* Music / Visual / Video: the video tab appears when the studio has clips */
 .tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: 6px;
   margin-bottom: 10px;
 }
 
 .tabs[hidden] {
+  display: none;
+}
+
+.tab[hidden] {
   display: none;
 }
 
@@ -180,6 +185,7 @@ body {
 }
 
 .board-video[hidden],
+.board-visual[hidden],
 .board[hidden] {
   display: none;
 }
@@ -394,4 +400,98 @@ body {
 .t-tap small {
   color: var(--muted);
   font-size: 10px;
+}
+
+/* Visual: the drum hits on top, the point's square taking what is left, the
+   visual and the VJ effects under it; side by side when the phone is turned */
+.board-visual {
+  display: grid;
+  flex: 1;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 12px;
+  min-height: 0;
+  padding-bottom: 12px;
+}
+
+@media (orientation: landscape) {
+  .board-visual {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto 1fr;
+    column-gap: 12px;
+  }
+
+  .board-visual .xy {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+  }
+
+  .board-visual .hits,
+  .board-visual .looks,
+  .board-visual .vj {
+    grid-column: 2;
+  }
+
+  /* a phone on its side is short: lower pads, the effects three across */
+  .board-visual .pad.hit {
+    height: 44px;
+  }
+
+  .board-visual .vj .knobs {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.hits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.pad.hit {
+  aspect-ratio: auto;
+  height: 64px;
+  max-height: none;
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.pad.hit.is-on {
+  color: var(--accent-ink);
+}
+
+.looks {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.look,
+.look-next {
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--fg);
+  font: inherit;
+}
+
+.look {
+  min-width: 0;
+  touch-action: manipulation;
+}
+
+.look-next:active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.vj {
+  display: grid;
+  gap: 8px;
+}
+
+.vj .look-next {
+  height: 36px;
+  color: var(--muted);
 }

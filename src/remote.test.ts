@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CC_EVENT, NOTE_EVENT } from './midi';
-import { applyRemote, remoteLink, REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, REMOTE_GLITCH_EVENT, REMOTE_LAYER_EVENT, REMOTE_TRANSPORT_EVENT } from './remote';
+import { applyRemote, remoteLink, REMOTE_CLIP_EVENT, REMOTE_FADER_EVENT, REMOTE_GLITCH_EVENT, REMOTE_LAYER_EVENT, REMOTE_HIT_EVENT, REMOTE_POINT_EVENT, REMOTE_TRANSPORT_EVENT, REMOTE_VISUAL_EVENT, REMOTE_VJ_EVENT } from './remote';
 
 describe('phone as controller', () => {
   const heard = () => {
@@ -60,5 +60,38 @@ describe('phone as controller', () => {
     target.addEventListener(REMOTE_TRANSPORT_EVENT, (e) => got.push((e as CustomEvent).detail));
     for (const t of ['play', 'stop', 'tap'] as const) applyRemote({ t }, target);
     expect(got).toEqual(['play', 'stop', 'tap']);
+  });
+
+  it('passes the Visual tab on: a visual or another one, hits, VJ effects, the point', () => {
+    const target = new EventTarget();
+    const got: unknown[] = [];
+    for (const type of [REMOTE_VISUAL_EVENT, REMOTE_HIT_EVENT, REMOTE_VJ_EVENT, REMOTE_POINT_EVENT]) {
+      target.addEventListener(type, (e) => got.push([type, (e as CustomEvent).detail]));
+    }
+    applyRemote({ t: 'visual', id: 'maq-mosh' }, target);
+    applyRemote({ t: 'visual' }, target);
+    applyRemote({ t: 'hit', r: 'kick' }, target);
+    applyRemote({ t: 'vj', c: 'zoom', v: 3 }, target);
+    applyRemote({ t: 'vj' }, target);
+    applyRemote({ t: 'point', x: 0.25, y: -1 }, target);
+    applyRemote({ t: 'pointup' }, target);
+    expect(got).toEqual([
+      [REMOTE_VISUAL_EVENT, 'maq-mosh'],
+      [REMOTE_VISUAL_EVENT, null],
+      [REMOTE_HIT_EVENT, 'kick'],
+      [REMOTE_VJ_EVENT, { c: 'zoom', v: 1 }],
+      [REMOTE_VJ_EVENT, null],
+      [REMOTE_POINT_EVENT, { x: 0.25, y: 0 }],
+      [REMOTE_POINT_EVENT, null],
+    ]);
+  });
+
+  it('ignores a hit or an effect that does not exist', () => {
+    const target = new EventTarget();
+    let count = 0;
+    for (const type of [REMOTE_HIT_EVENT, REMOTE_VJ_EVENT]) target.addEventListener(type, () => count++);
+    applyRemote({ t: 'hit', r: 'cowbell' } as never, target);
+    applyRemote({ t: 'vj', c: 'explode', v: 1 }, target);
+    expect(count).toBe(0);
   });
 });

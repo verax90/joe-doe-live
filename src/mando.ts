@@ -119,29 +119,166 @@ KNOBS.forEach((name, i) => {
 
 // Video: the studio sends its clips; each is a pad with its picture, lit
 // while it is on screen, and the A/B crossfader of the scenes. The tab only
-// shows once the studio has clips.
-const tabs = document.querySelector<HTMLElement>('#tabs')!;
-const tabMusic = document.querySelector<HTMLButtonElement>('#tab-music')!;
-const tabVideo = document.querySelector<HTMLButtonElement>('#tab-video')!;
-const music = document.querySelector<HTMLElement>('#music')!;
-const video = document.querySelector<HTMLElement>('#video')!;
+// shows once the studio has clips. Visual is always there.
+const tabButtons = {
+  music: document.querySelector<HTMLButtonElement>('#tab-music')!,
+  visual: document.querySelector<HTMLButtonElement>('#tab-visual')!,
+  video: document.querySelector<HTMLButtonElement>('#tab-video')!,
+};
+const boards = {
+  music: document.querySelector<HTMLElement>('#music')!,
+  visual: document.querySelector<HTMLElement>('#visual')!,
+  video: document.querySelector<HTMLElement>('#video')!,
+};
+type Tab = keyof typeof boards;
 const clips = document.querySelector<HTMLElement>('#clips')!;
 const fader = document.querySelector<HTMLInputElement>('#fader')!;
-tabMusic.textContent = say('Music', 'Música', 'Música');
-tabVideo.textContent = say('Video', 'Vídeo', 'Vídeo');
-const showTab = (onVideo: boolean) => {
-  music.hidden = onVideo;
-  video.hidden = !onVideo;
-  tabMusic.setAttribute('aria-pressed', String(!onVideo));
-  tabVideo.setAttribute('aria-pressed', String(onVideo));
+tabButtons.music.textContent = say('Music', 'Música', 'Música');
+tabButtons.visual.textContent = say('Visual', 'Visual', 'Visual');
+tabButtons.video.textContent = say('Video', 'Vídeo', 'Vídeo');
+let shown: Tab = 'music';
+const showTab = (tab: Tab) => {
+  shown = tab;
+  for (const name of Object.keys(boards) as Tab[]) {
+    boards[name].hidden = name !== tab;
+    tabButtons[name].setAttribute('aria-pressed', String(name === tab));
+  }
+  // the one you were on comes back after a reload (the phone slept)
+  try {
+    sessionStorage.setItem('jdl:mando-tab', tab);
+  } catch {
+    // private mode: it starts on Music
+  }
 };
-tabMusic.addEventListener('click', () => showTab(false));
-tabVideo.addEventListener('click', () => showTab(true));
+for (const name of Object.keys(boards) as Tab[]) tabButtons[name].addEventListener('click', () => showTab(name));
 fader.addEventListener('input', () => send({ t: 'fader', v: Number(fader.value) }));
 
+// Visual: for whoever plays the picture. Three pads hit a kick, a snare or
+// the hats by hand (what a drum does to the visuals and the clips), a
+// square moves the point the Motion visuals follow, a list picks the visual
+// and six sliders are the VJ effects.
+const HITS = [
+  ['kick', say('Kick', 'Bombo', 'Bombo')],
+  ['snare', say('Snare', 'Caja', 'Caixa')],
+  ['hat', say('Hats', 'Platos', 'Plats')],
+] as const;
+const hits = document.querySelector<HTMLElement>('#hits')!;
+for (const [r, name] of HITS) {
+  const pad = document.createElement('button');
+  pad.type = 'button';
+  pad.className = 'pad hit';
+  pad.textContent = name;
+  pad.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    pad.classList.add('is-on');
+    send({ t: 'hit', r });
+    navigator.vibrate?.(8);
+  });
+  for (const type of ['pointerup', 'pointerleave', 'pointercancel']) pad.addEventListener(type, () => pad.classList.remove('is-on'));
+  hits.append(pad);
+}
+
+// x left to right, y top to bottom: the point is where the finger is
+const point = document.querySelector<HTMLElement>('#point')!;
+const pointDot = document.querySelector<HTMLElement>('#point-dot')!;
+let pointPending: { x: number; y: number } | undefined;
+const movePoint = (event: PointerEvent) => {
+  const box = point.getBoundingClientRect();
+  const x = Math.min(1, Math.max(0, (event.clientX - box.left) / box.width));
+  const y = Math.min(1, Math.max(0, (event.clientY - box.top) / box.height));
+  pointDot.style.left = `${x * 100}%`;
+  pointDot.style.top = `${y * 100}%`;
+  if (!pointPending) requestAnimationFrame(() => {
+    if (pointPending) send({ t: 'point', ...pointPending });
+    pointPending = undefined;
+  });
+  pointPending = { x, y };
+};
+point.addEventListener('pointerdown', (event) => {
+  capture(point, event.pointerId);
+  point.classList.add('is-on');
+  movePoint(event);
+});
+point.addEventListener('pointermove', (event) => {
+  if (point.hasPointerCapture(event.pointerId)) movePoint(event);
+});
+const releasePoint = () => {
+  if (!point.classList.contains('is-on')) return;
+  point.classList.remove('is-on');
+  send({ t: 'pointup' });
+};
+point.addEventListener('pointerup', releasePoint);
+point.addEventListener('pointercancel', releasePoint);
+document.querySelector('#point-hint')!.textContent = say(
+  'The Motion visuals follow your finger',
+  'Los visuales de Movimiento siguen tu dedo',
+  'Els visuals de Moviment segueixen el teu dit',
+);
+
+const look = document.querySelector<HTMLSelectElement>('#look')!;
+const lookNext = document.querySelector<HTMLButtonElement>('#look-next')!;
+lookNext.textContent = say('Another ↻', 'Otro ↻', 'Un altre ↻');
+look.addEventListener('change', () => send({ t: 'visual', id: look.value }));
+lookNext.addEventListener('click', () => {
+  send({ t: 'visual' });
+  navigator.vibrate?.(8);
+});
+const showVisuals = (items: { id: string; name: string; group: string }[], current: string) => {
+  const groups = new Map<string, HTMLOptGroupElement>();
+  look.replaceChildren();
+  for (const item of items) {
+    const option = new Option(item.name, item.id);
+    if (!item.group) {
+      look.append(option);
+      continue;
+    }
+    if (!groups.has(item.group)) {
+      const group = document.createElement('optgroup');
+      group.label = item.group;
+      groups.set(item.group, group);
+    }
+    groups.get(item.group)!.append(option);
+  }
+  look.append(...groups.values());
+  look.value = current;
+};
+
+const vjBox = document.querySelector<HTMLElement>('#vj')!;
+const vjReset = document.querySelector<HTMLButtonElement>('#vj-reset')!;
+vjReset.textContent = say('All neutral', 'Todo a neutro', 'Tot a neutre');
+const vjInputs = new Map<string, HTMLInputElement>();
+let vjNeutral: Record<string, number> = {};
+const showVj = (names: { id: string; name: Record<string, string> }[], values: Record<string, number>) => {
+  vjInputs.clear();
+  vjBox.replaceChildren(
+    ...names.map((control) => {
+      const label = document.createElement('label');
+      label.className = 'knob';
+      const text = document.createElement('span');
+      text.textContent = control.name[lang] ?? control.name.en;
+      const input = document.createElement('input');
+      input.type = 'range';
+      input.min = '0';
+      input.max = '1';
+      input.step = '0.01';
+      input.value = String(values[control.id] ?? 0);
+      input.addEventListener('input', () => send({ t: 'vj', c: control.id, v: Number(input.value) }));
+      vjInputs.set(control.id, input);
+      label.append(text, input);
+      return label;
+    }),
+  );
+};
+// zoom and spin rest in the middle, the others at zero
+vjNeutral = { zoom: 0.5, spin: 0.5 };
+vjReset.addEventListener('click', () => {
+  send({ t: 'vj' });
+  for (const [id, input] of vjInputs) input.value = String(vjNeutral[id] ?? 0);
+});
+
 const showClips = (items: { name: string; thumb?: string }[]) => {
-  tabs.hidden = !items.length;
-  if (!items.length) showTab(false);
+  tabButtons.video.hidden = !items.length;
+  if (!items.length && shown === 'video') showTab('music');
   clips.replaceChildren(
     ...items.map((item, i) => {
       const pad = document.createElement('button');
@@ -218,6 +355,15 @@ const fromStudio = (message: StudioMessage) => {
     tBpm.textContent = message.bpm ? String(Math.round(message.bpm)) : '–';
     return;
   }
+  if (message.t === 'visuals') {
+    showVisuals(message.items, message.current);
+    showVj(message.vjNames, message.vj);
+    return;
+  }
+  if (message.t === 'visual') {
+    look.value = message.id;
+    return;
+  }
   if (message.t === 'clips') {
     showClips(message.items);
     fader.value = String(message.fader);
@@ -262,5 +408,12 @@ async function connect() {
     connection.on('close', retry);
   });
   peer.on('error', retry);
+}
+// back on the tab it was on (Video only shows again once the clips arrive)
+try {
+  const saved = sessionStorage.getItem('jdl:mando-tab');
+  if (saved === 'visual') showTab('visual');
+} catch {
+  // private mode
 }
 void connect();

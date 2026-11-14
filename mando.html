@@ -17,14 +17,27 @@
       <button id="t-stop" class="t-button" type="button"></button>
       <button id="t-tap" class="t-button t-tap" type="button"><span id="t-bpm">–</span> <small>BPM · Tap</small></button>
     </nav>
-    <nav id="tabs" class="tabs" hidden>
+    <nav id="tabs" class="tabs">
       <button id="tab-music" class="tab" type="button" aria-pressed="true"></button>
-      <button id="tab-video" class="tab" type="button" aria-pressed="false"></button>
+      <button id="tab-visual" class="tab" type="button" aria-pressed="false"></button>
+      <button id="tab-video" class="tab" type="button" aria-pressed="false" hidden></button>
     </nav>
     <main id="music" class="board">
       <section id="xy" class="xy" aria-label="XY"><span id="xy-dot" class="xy-dot"></span><span id="xy-hint" class="xy-hint"></span></section>
       <section id="pads" class="pads"></section>
       <section id="knobs" class="knobs"></section>
+    </main>
+    <main id="visual" class="board-visual" hidden>
+      <section id="hits" class="hits"></section>
+      <section id="point" class="xy" aria-label="XY"><span id="point-dot" class="xy-dot"></span><span id="point-hint" class="xy-hint"></span></section>
+      <div class="looks">
+        <select id="look" class="look" aria-label="Visual"></select>
+        <button id="look-next" class="look-next" type="button"></button>
+      </div>
+      <section class="vj">
+        <div id="vj" class="knobs"></div>
+        <button id="vj-reset" class="look-next" type="button"></button>
+      </section>
     </main>
     <main id="video" class="board-video" hidden>
       <section id="clips" class="clips"></section>

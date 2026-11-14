@@ -49,7 +49,7 @@ export const fullAt = (slider: number) => 0.3 * 0.08 ** slider; // 30 % down to 
 const ease = (value: number, target: number, elapsedMs: number, tauMs: number) =>
   value + (target - value) * (1 - Math.exp(-Math.max(0, elapsedMs) / tauMs));
 
-const state = { x: 0.5, y: 0.5, amount: 0, targetX: 0.5, targetY: 0.5, targetAmount: 0, at: 0 };
+const state = { x: 0.5, y: 0.5, amount: 0, targetX: 0.5, targetY: 0.5, targetAmount: 0, at: 0, held: false };
 function read() {
   const now = performance.now();
   const elapsed = now - state.at;
@@ -64,6 +64,15 @@ export const motionX = () => read().x;
 export const motionY = () => read().y;
 export const motion = () => read().amount;
 Object.assign(globalThis, { motionX, motionY, motion });
+
+// A finger on the phone's Visual tab is the point while it is down (x and y
+// as on the screen, y from the top), webcam or not; null when it lifts
+export function holdMotionPoint(point: { x: number; y: number } | null) {
+  read();
+  state.held = Boolean(point);
+  if (point) Object.assign(state, { targetX: point.x, targetY: point.y, targetAmount: 0.7 });
+  else state.targetAmount = 0;
+}
 
 // What the movement plays on the VJ: side to side the colour, up and down
 // the zoom, how much the warp
@@ -158,6 +167,7 @@ export function setupMotion() {
       [before, now] = [now, before];
 
       read(); // ease up to this moment before the targets move
+      if (state.held) return; // a finger on the phone has the point
       if (found) {
         state.targetX = 1 - found.x; // a mirror
         state.targetY = found.y;

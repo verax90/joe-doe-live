@@ -31,6 +31,7 @@ import { setupProjector } from './projector';
 import { setupBacking } from './backing';
 import { setupMic } from './mic';
 import { setupRemote } from './remote';
+import { setupRemoteVisual } from './remote-visual';
 import { setupFlip } from './flip';
 import { setupTyping } from './typing';
 import { recordPlayed, setupHistory } from './history';
@@ -394,6 +395,21 @@ setupKnobHud(() => ({
 }));
 setupVj({ redraw: runVisual });
 setupMachines();
+// The phone's Visual tab: every visual but "From the code" and the webcam ones
+setupRemoteVisual({
+  list: () =>
+    visuals
+      .filter((visual) => visual.id !== 'code' && !visual.camera)
+      .map((visual) => {
+        const group = visualGroup(visual);
+        return { id: visual.id, name: pick(visual.name), group: group === 'top' ? '' : t(`visualGroup_${group}` as Parameters<typeof t>[0]) };
+      }),
+  current: () => visualSelect.value,
+  pick: (id) => {
+    pickVisual(id);
+    runVisual();
+  },
+});
 setupMotion();
 room = setupRoom({
   editor,
