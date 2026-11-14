@@ -715,6 +715,7 @@ const run = (code: string) => {
   // another visual fades in; the same one drawn again (a new Play, the VJ
   // switched on) does not blink
   visualComesIn(code, code !== running);
+  if (code !== running) cameInAt = performance.now();
   running = code;
   new Function('H', withVj(code))(barH);
 };
@@ -1080,7 +1081,11 @@ export const SHADERS = [
 ];
 // When a datamosh draws the picture whole again: on a kick, and every few
 // seconds anyway so it never melts to nothing with no drums around
-(globalThis as { keyframe?: () => boolean }).keyframe = () => kickHit() > 0.6 || (performance.now() / 1000) % 5 < 0.12;
+// and for the first moment of a visual, so it opens on its own picture and
+// not on what the one before left
+let cameInAt = -Infinity;
+(globalThis as { keyframe?: () => boolean }).keyframe = () =>
+  kickHit() > 0.6 || (performance.now() / 1000) % 5 < 0.12 || performance.now() - cameInAt < 250;
 let shadersIn: unknown;
 function defineShaders(hydra: unknown) {
   const setFunction = (globalThis as { setFunction?: (shader: unknown) => void }).setFunction;

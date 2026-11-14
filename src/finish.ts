@@ -50,7 +50,7 @@ export const fin: Record<FinishControl, number> = {
 // gain: how bright the picture is taken to be before it is placed along the
 // palette. Many visuals are drawn dim, to sit behind the code, and would
 // never leave the first colour; a bright one wants less
-export const pal = { v: PALETTES[0].stops.flatMap(rgb), amount: 0, gain: 1.55, dim: () => 1, tame: () => 0 };
+export const pal = { v: PALETTES[0].stops.flatMap(rgb), amount: 0, gain: 1.55, dim: () => 1, tame: () => 0, glow: () => 0 };
 // the Light slider (0-1) as that gain: ×0.6 to ×4, the middle about ×1.5
 export const gainOfLight = (slider: number) => 0.6 * (4 / 0.6) ** slider;
 pal.gain = gainOfLight(0.5);
@@ -77,7 +77,13 @@ export function lightOfVisual(code: string) {
   return Math.min(3, Math.max(1, 1 / Math.max(...levels)));
 }
 let visualLight = 1;
+// A camera or a clip is bright all over, and the glow turned it to haze:
+// footage gets a third of it
+export const glowOfVisual = (code: string) => (/\bs[0-3]\b/.test(code) ? 0.35 : 1);
+let visualGlow = 1;
+export const glowNow = () => fin.glow * visualGlow;
 const setGain = () => (pal.gain = gainOfLight(light) * visualLight);
+pal.glow = glowNow;
 setGain();
 
 // Behind the code, what is bright is held back, so the code can be read over
@@ -112,6 +118,7 @@ export const fadeLevel = (elapsedMs: number) => (elapsedMs >= FADE_MS ? 1 : 0.2 
 pal.dim = () => fadeLevel(performance.now() - fadeAt);
 export function visualComesIn(code: string, fade = true) {
   visualLight = lightOfVisual(code);
+  visualGlow = glowOfVisual(code);
   setGain();
   if (fade) fadeAt = performance.now();
 }
@@ -147,7 +154,7 @@ export const finishOn = (values: Record<FinishControl, number> = fin, palette = 
 export function finishCode(values: Record<FinishControl, number> = fin, palette = pal.amount) {
   if (!finishOn(values, palette)) return null;
   const colours = Array.from({ length: 12 }, (_, i) => `() => pal.v[${i}]`).join(', ');
-  return `finish(o0, () => fin.glow, () => fin.grain, () => fin.vignette, () => pal.amount, ${colours}, () => pal.gain, () => pal.dim(), () => pal.tame()).out(o2)`;
+  return `finish(o0, () => pal.glow(), () => fin.grain, () => fin.vignette, () => pal.amount, ${colours}, () => pal.gain, () => pal.dim(), () => pal.tame()).out(o2)`;
 }
 
 let applyQuality: ((quality: Quality) => void) | undefined;

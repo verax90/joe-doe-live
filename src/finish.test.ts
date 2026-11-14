@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FINISH_CONTROLS, PALETTES, TAME, tameFor, fadeLevel, gainOfLight, lightOfVisual, finishCode, finishOn, liveQuality, pal, quality, rgb, setPalette } from './finish';
+import { FINISH_CONTROLS, PALETTES, TAME, glowOfVisual, tameFor, fadeLevel, gainOfLight, lightOfVisual, finishCode, finishOn, liveQuality, pal, quality, rgb, setPalette } from './finish';
 
 describe('the finish over the picture', () => {
   const off = { glow: 0, grain: 0, vignette: 0 };
@@ -102,5 +102,14 @@ describe('what is bright behind the code', () => {
     expect(tameFor(true, false, true, false)).toBe(0);
     expect(tameFor(true, false, false, true)).toBe(0);
     expect(tameFor(false, false, false, false)).toBe(0);
+  });
+});
+
+describe('the glow on footage', () => {
+  it('is a third on the webcam and the clips, whole on what is drawn', () => {
+    expect(glowOfVisual('src(s0).out()')).toBe(0.35);
+    expect(glowOfVisual('flowMosh(o0, s2, o3, 1).out()')).toBe(0.35);
+    expect(glowOfVisual('osc(10).out()')).toBe(1);
+    expect(glowOfVisual('src(o0).scale(1.01).out()')).toBe(1);
   });
 });
