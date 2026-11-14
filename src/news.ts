@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-14-more-shaders',
+    title: L('A spectrum, a tunnel and a broken signal', 'Un espectro, un túnel y una señal rota', 'Un espectre, un túnel i un senyal trencat'),
+    text: L(
+      'Three more visuals under Machines: the sound as eight bars of lamps, a tunnel each kick pushes you down, and a picture the snare tears like a bad aerial',
+      'Tres visuales más en Máquinas: el sonido en ocho barras de luces, un túnel por el que te empuja cada bombo, y una imagen que la caja rasga como una antena mal puesta',
+      'Tres visuals més a Màquines: el so en vuit barres de llums, un túnel pel qual t\'empeny cada bombo, i una imatge que la caixa esquinça com una antena mal posada',
+    ),
+    go: [{ value: ['#visual', 'maq-espectro'] }],
+  },
+  {
     id: '2026-11-14-phone-visual',
     title: L('A friend plays the visuals from their phone', 'Un colega toca los visuales desde su móvil', 'Un col·lega toca els visuals des del mòbil'),
     text: L(

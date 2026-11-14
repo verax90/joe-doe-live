@@ -318,6 +318,31 @@ src(s1)
   .out()`,
   },
   {
+    id: 'maq-espectro',
+    name: { en: 'Spectrum (bars)', es: 'Espectro (barras)', ca: 'Espectre (barres)' },
+    code: `spectrumBars(() => spec(0), () => spec(1), () => spec(2), () => spec(3), () => spec(4), () => spec(5), () => spec(6), () => spec(7))
+  .color(...tint(1.1))
+  .add(src(o0).scale(1.01).color(0.9, 0.9, 0.9), () => 0.45 + kickHit() * 0.25)
+  .out()`,
+  },
+  {
+    id: 'maq-tunel',
+    name: { en: 'Tunnel (the kick pushes)', es: 'Túnel (el bombo empuja)', ca: 'Túnel (el bombo empeny)' },
+    code: `tunnel(() => time * 0.35 + kickCount() * 0.25, () => snareHit() * 1.5, () => kickHit())
+  .color(...tint(1))
+  .add(src(o0).scale(1.03), () => 0.25 + hatHit() * 0.2)
+  .out()`,
+  },
+  {
+    id: 'maq-senal',
+    name: { en: 'Broken signal (snare)', es: 'Señal rota (caja)', ca: 'Senyal trencat (caixa)' },
+    code: `rings(() => time * 0.1 + kickCount() * 0.37, () => kickHit(), () => hatHit())
+  .color(...tint(1))
+  .tear(() => 0.04 + snareHit() * 0.9, () => time * 12)
+  .add(src(o0).scrollX(() => 0.004 + hatHit() * 0.02).color(1, 0.2, 0.6), 0.3)
+  .out()`,
+  },
+  {
     id: 'mov-luz',
     name: { en: 'Light (follows you)', es: 'Luz (te sigue)', ca: 'Llum (et segueix)' },
     code: `shape(64, () => 0.02 + motion() * 0.1, 0.25)
@@ -701,10 +726,18 @@ g.bass = () => band(20, 150);
 g.mid = () => band(150, 2000);
 g.high = () => band(2000, 10000);
 g.level = () => band(20, 10000);
+// The spectrum in eight steps, low to high (0 to 7), for bars: spec(0) is the sub
+const SPEC_EDGES = [30, 80, 160, 320, 640, 1280, 2500, 5000, 12000];
+(g as { spec?: (step: number) => number }).spec = (step) => {
+  const i = Math.min(7, Math.max(0, Math.floor(step)));
+  return band(SPEC_EDGES[i], SPEC_EDGES[i + 1]);
+};
 
 // Shaders of the studio's own, written in GLSL and added to Hydra as new
 // functions (also there for your code under "From the code"):
-// rings(phase, kick, sparkle) and gridFloor(scroll, bump, flash) draw;
+// rings(phase, kick, sparkle), gridFloor(scroll, bump, flash),
+// tunnel(travel, twist, pulse) and spectrumBars(eight levels) draw;
+// .tear(amount, seed) shifts some scanlines sideways, like a bad signal;
 // .mosh(texture, amount) moves each pixel by what the texture says there, in
 // steps, which over src(o0) smears the picture in blocks like a video that
 // lost its keyframes (a datamosh), until something redraws it: the
@@ -751,6 +784,53 @@ const SHADERS = [
   float fade = smoothstep(0.0, 0.25, abs(y)) * (y > 0.0 ? 1.0 : 0.35);
   float glow = exp(-abs(y) * (14.0 - flash * 9.0)) * (0.35 + flash);
   return vec4(vec3(line * fade * (0.6 + bump * 0.6) + glow), 1.0);`,
+  },
+  {
+    name: 'spectrumBars',
+    type: 'src',
+    inputs: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ type: 'float', name: `b${i}`, default: 0 })),
+    glsl: `
+  float n = 8.0;
+  float i = floor(_st.x * n);
+  float x = fract(_st.x * n);
+  float v = i < 1.0 ? b0 : i < 2.0 ? b1 : i < 3.0 ? b2 : i < 4.0 ? b3 : i < 5.0 ? b4 : i < 6.0 ? b5 : i < 7.0 ? b6 : b7;
+  v = min(v * 1.6, 1.0); // a beat seldom fills the scale: taller
+  float h = 1.0 - _st.y;
+  float lamp = step(0.2, fract(h * 22.0)) * step(0.1, x) * step(x, 0.9);
+  float lit = step(h, v * 0.92 + 0.02);
+  float top = step(abs(h - (v * 0.92 + 0.02)), 0.02);
+  return vec4(vec3(lamp * (lit * (0.35 + 0.65 * h) + top) + lamp * 0.03), 1.0);`,
+  },
+  {
+    name: 'tunnel',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'travel', default: 0 },
+      { type: 'float', name: 'twist', default: 0 },
+      { type: 'float', name: 'pulse', default: 0 },
+    ],
+    glsl: `
+  vec2 p = _st - 0.5;
+  p.x *= resolution.x / resolution.y;
+  float r = length(p);
+  float depth = 0.25 / max(r, 0.02) + travel;
+  float around = atan(p.y, p.x) / 6.2831853 * 8.0 + twist * sin(depth * 2.0);
+  float tile = abs(step(0.5, fract(depth * 2.0)) - step(0.5, fract(around)));
+  float fog = smoothstep(0.02, 0.45, r);
+  return vec4(vec3(tile * fog * (0.45 + pulse * 0.55) + smoothstep(0.18, 0.0, r) * pulse), 1.0);`,
+  },
+  {
+    name: 'tear',
+    type: 'coord',
+    inputs: [
+      { type: 'float', name: 'amount', default: 0.1 },
+      { type: 'float', name: 'seed', default: 0 },
+    ],
+    glsl: `
+  float line = floor(_st.y * 28.0);
+  float n = fract(sin(line * 91.7 + floor(seed) * 13.3) * 43758.5453);
+  float torn = step(1.0 - amount, n);
+  return vec2(_st.x + (n - 0.5) * amount * 0.5 * torn, _st.y);`,
   },
   {
     name: 'mosh',
@@ -861,7 +941,10 @@ function startAuto() {
     return `time ${Math.floor(performance.now() / 1000 / AUTO_SECONDS)}`;
   };
   const next = () => {
-    const choices = pool.filter((v) => v !== autoCurrent);
+    // with the studio stopped and hardware heard, only what moves with the
+    // sound: a visual that waits for the bar (H) would stand still
+    const jam = clock() === null && Boolean(extraBand);
+    const choices = pool.filter((v) => v !== autoCurrent && !(jam && v.code.includes('H(')));
     autoCurrent = choices[Math.floor(Math.random() * choices.length)];
     run(autoCurrent.code);
   };
