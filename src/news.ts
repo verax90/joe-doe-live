@@ -1,6 +1,6 @@
 // What's new: the latest things in the studio, newest first, each with a
 // button that takes you there (opens its panel, its tab, picks its visual).
-// The help shows them as its first section, and the ? button carries a dot
+// The help shows them as its first section, and More (and Help in it) carries a dot
 // while there is something you have not seen yet.
 import type { Localized } from './i18n';
 import { readStorage, writeStorage } from './storage';
@@ -95,9 +95,9 @@ export const NEWS: News[] = [
     id: '2026-11-14-fullscreen',
     title: L('Full screen, in the bar', 'Pantalla completa, en la barra', 'Pantalla completa, a la barra'),
     text: L(
-      'A button next to the help (and Ctrl+Shift+F, and More → View) fills the screen with the studio',
-      'Un botón junto a la ayuda (y Ctrl+Mayús+F, y Más → Ver) llena la pantalla con el estudio',
-      "Un botó al costat de l'ajuda (i Ctrl+Maj+F, i Més → Veure) omple la pantalla amb l'estudi",
+      'An icon in the bar (and Ctrl+Shift+F) fills the screen with the studio. The help moved into More',
+      'Un icono en la barra (y Ctrl+Mayús+F) llena la pantalla con el estudio. La ayuda pasa a estar dentro de Más',
+      "Una icona a la barra (i Ctrl+Maj+F) omple la pantalla amb l'estudi. L'ajuda passa a ser dins de Més",
     ),
     go: [{ click: '#fullscreen' }],
   },

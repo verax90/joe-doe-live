@@ -281,7 +281,7 @@ const sections: Section[] = [
   },
 ];
 
-// The help opens in its own window over the studio: the ? button, the ? key.
+// The help opens in its own window over the studio: More → Help, or the ? key.
 // With something new not seen yet, it opens on What's new
 let showNews: (() => void) | undefined;
 export function openHelp() {
@@ -294,8 +294,7 @@ export function openHelp() {
 export function setupHelp() {
   const container = document.querySelector<HTMLElement>('#help-content')!;
   const dialog = document.querySelector<HTMLDialogElement>('#help')!;
-  document.querySelector('#help-button')!.addEventListener('click', openHelp);
-  // On phones the ? button leaves the bar (no room) and lives in the menu
+  // In More → View, so the bar keeps to what you reach for while playing
   document.querySelector('#help-menu')!.addEventListener('click', openHelp);
   document.querySelector('#help-close')!.addEventListener('click', () => dialog.close());
   // A click on the dimmed backdrop (outside the box) closes it too
@@ -415,7 +414,7 @@ export function setupHelp() {
 
   // A dot on ? (and on Help in the phone menu) while there is news
   const dot = () => {
-    for (const id of ['help-button', 'help-menu']) document.getElementById(id)?.classList.toggle('has-news', hasUnseen());
+    for (const id of ['menu-toggle', 'help-menu']) document.getElementById(id)?.classList.toggle('has-news', hasUnseen());
   };
   showNews = () => {
     current = 0;

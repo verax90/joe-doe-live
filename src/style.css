@@ -644,6 +644,76 @@ select.control {
   font-size: 0.7em;
 }
 
+/* The deck: Play, Stop and Record as one block of keys, signs only (their
+   names are in the tooltip and for screen readers). Play still tells its
+   state: filled when stopped, outlined while it plays, the apply sign
+   breathing when the code has changes; Record shows the time while it runs */
+.deck {
+  display: inline-flex;
+}
+
+.deck .control {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 2.9rem;
+  min-width: 0;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Play is the one you hit most: a little wider (over the widths the bar
+   gave it when it carried a word) */
+.deck #play {
+  width: 3.6rem;
+  min-width: 0;
+}
+
+.deck .control + .control {
+  margin-left: -1px;
+}
+
+.deck .control:first-child {
+  border-radius: 0.4rem 0 0 0.4rem;
+}
+
+.deck .control:last-child {
+  border-radius: 0 0.4rem 0.4rem 0;
+}
+
+/* the key under the pointer or the keyboard shows its whole border */
+.deck .control:hover,
+.deck .control:focus-visible,
+.deck #play,
+.deck .control-record.is-recording {
+  z-index: 1;
+}
+
+.deck [data-icon]::before {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+.deck .btn-text {
+  display: none;
+}
+
+.deck .record-dot {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* recording: the key widens for the timer */
+.deck .control-record.is-recording {
+  display: inline-flex;
+  width: auto;
+  padding: 0 0.7rem;
+}
+
+.deck .control-record.is-recording .record-label {
+  display: inline;
+}
+
 /* Record: a red dot that pulses while recording */
 .control-record {
   display: inline-flex;
@@ -1223,31 +1293,25 @@ select.control {
   text-transform: uppercase;
 }
 
-/* Help sits in the bar, or in the menu on phones where the bar is full */
-.help-in-menu {
+/* Help is in More → View (and the ? key). Full screen is an icon in the bar,
+   except on phones, where the bar is full and it goes to More → View too. By
+   id: the icons' own rule ([data-icon] is inline-flex) would otherwise show
+   the hidden one again */
+#fullscreen-menu {
   display: none;
 }
 
 @media (max-width: 480px) {
-  #help-button,
   #fullscreen {
     display: none;
   }
 
-  .help-in-menu {
-    display: block;
+  #fullscreen-menu {
+    display: inline-flex;
   }
 }
 
-/* Full screen is in the bar where the bar has room on one row (a wide window,
-   or a phone on its side, where the bar is compact), else in More → View */
-@media (max-width: 1240px) and (min-height: 501px), (max-width: 1240px) and (orientation: portrait) {
-  #fullscreen {
-    display: none;
-  }
-}
-
-/* Square buttons with one symbol: ? in the bar, ✕ in the help */
+/* Square buttons with one symbol: full screen in the bar, ✕ in the help */
 .control-icon {
   display: inline-grid;
   place-items: center;
@@ -2489,7 +2553,7 @@ select.control {
   flex: none;
 }
 
-/* ? with news not seen yet */
+/* Help, and More while it is closed, with news not seen yet */
 .has-news {
   position: relative;
 }

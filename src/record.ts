@@ -218,6 +218,7 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
     button.setAttribute('aria-pressed', 'false');
     label.textContent = t('record');
     button.setAttribute('aria-label', t('record'));
+    button.title = t('record');
     modeSelect.disabled = false;
     markButton.hidden = true;
     clearInterval(timer);
@@ -230,8 +231,11 @@ export function setupRecorder(getCode: () => string, playCode?: (code: string) =
     startedAt = performance.now();
     const tick = () => {
       const seconds = Math.floor((performance.now() - startedAt) / 1000);
-      label.textContent = `${t('stopRecording')} ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-      button.setAttribute('aria-label', label.textContent);
+      // the key shows the time; what a press does is in its name
+      const time = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+      label.textContent = time;
+      button.setAttribute('aria-label', `${t('stopRecording')} ${time}`);
+      button.title = t('stopRecording');
     };
     tick();
     timer = window.setInterval(tick, 500);

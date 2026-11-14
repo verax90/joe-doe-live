@@ -65,19 +65,21 @@
       </div>
 
       <div class="bar-group">
-        <button id="play" class="control control-accent" type="button" aria-label="Play" aria-keyshortcuts="Control+Enter" data-icon="play"><span class="btn-text">Play</span></button>
-        <button id="stop" class="control" type="button" aria-label="Stop" title="Stop (Ctrl+.)" aria-keyshortcuts="Control+." data-icon="stop"><span class="btn-text">Stop</span></button>
+        <!-- A tape deck: three signs everyone knows, no words -->
+        <div class="deck" role="group" aria-label="Transport" data-i18n-label="deckLabel">
+          <button id="play" class="control control-accent" type="button" aria-label="Play" aria-keyshortcuts="Control+Enter" data-icon="play"><span class="btn-text">Play</span></button>
+          <button id="stop" class="control" type="button" aria-label="Stop" title="Stop (Ctrl+.)" aria-keyshortcuts="Control+." data-icon="stop"><span class="btn-text">Stop</span></button>
+          <button id="record" class="control control-record" type="button" aria-pressed="false" aria-label="Record" data-i18n-label="record" data-i18n-title="record">
+            <span class="record-dot" aria-hidden="true"></span><span class="record-label btn-text" data-i18n="record">Record</span>
+          </button>
+        </div>
         <button id="undo" class="control control-icon" type="button" aria-label="Undo" title="Undo (Ctrl+Z)" data-i18n-label="undo" data-i18n-title="undoTitle" data-icon="undo"></button>
         <button id="redo" class="control control-icon" type="button" aria-label="Redo" title="Redo (Ctrl+Shift+Z)" data-i18n-label="redo" data-i18n-title="redoTitle" data-icon="redo"></button>
-        <button id="record" class="control control-record" type="button" aria-pressed="false" aria-label="Record" data-i18n-label="record" data-i18n-title="record">
-          <span class="record-dot" aria-hidden="true"></span><span class="record-label btn-text" data-i18n="record">Record</span>
-        </button>
         <button id="record-mark" class="control control-icon" type="button" hidden aria-keyshortcuts="Alt+M" aria-label="Mark this moment" title="Mark this moment (Alt+M)" data-i18n-label="sessionMarkLabel" data-i18n-title="sessionMarkTitle" data-icon="mark"></button>
         <span id="record-status" class="record-status" role="status"></span>
       </div>
 
       <button id="fullscreen" class="control control-icon" type="button" aria-pressed="false" aria-keyshortcuts="Control+Shift+F" aria-label="Full screen" title="Full screen (Ctrl+Shift+F)" data-i18n-label="fullscreen" data-i18n-title="fullscreenTitle" data-icon="fullscreen"></button>
-      <button id="help-button" class="control control-icon" type="button" aria-haspopup="dialog" aria-keyshortcuts="?" aria-label="Help" data-i18n-label="help" title="?" data-icon="help"></button>
 
       <div class="menu">
         <button id="menu-toggle" class="control menu-toggle" type="button" aria-expanded="false" aria-controls="menu">
@@ -146,7 +148,7 @@
           </div>
           <div class="menu-footer">
             <span class="menu-group-title" data-i18n="menuView">View</span>
-            <button id="help-menu" class="menu-item help-in-menu" data-icon="help" type="button" data-i18n="help">Help</button>
+            <button id="help-menu" class="menu-item" data-icon="help" type="button" aria-haspopup="dialog" aria-keyshortcuts="?" data-i18n="help">Help</button>
             <button id="fullscreen-menu" class="menu-item" data-icon="fullscreen" type="button" aria-pressed="false" aria-keyshortcuts="Control+Shift+F" data-i18n="fullscreen">Full screen</button>
             <button id="toggle-code" class="menu-item" data-icon="code" type="button" aria-pressed="true" aria-keyshortcuts="Control+Shift+H" data-i18n="code">Code</button>
             <button id="toggle-ascii" class="menu-item" data-icon="ascii" type="button" aria-pressed="false" data-i18n="asciiFilter">ASCII filter</button>
