@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-webcam',
+    title: L('A Matrix that looks like it, and six more webcam visuals', 'Un Matrix que lo parece, y seis visuales de webcam más', 'Un Matrix que ho sembla, i sis visuals de webcam més'),
+    text: L(
+      'Matrix is now a rain of characters, alone or made of what the webcam sees. New with the webcam: neon outlines, thermal camera, slit scan, dots, ghost (only what moves) and comic',
+      'Matrix es ahora una lluvia de caracteres, sola o hecha con lo que ve la webcam. Nuevos con la webcam: contornos de neón, cámara térmica, barrido, puntos, fantasma (solo lo que se mueve) y cómic',
+      'Matrix és ara una pluja de caràcters, sola o feta amb el que veu la webcam. Nous amb la webcam: contorns de neó, càmera tèrmica, escombrat, punts, fantasma (només el que es mou) i còmic',
+    ),
+    go: [{ value: ['#visual', 'matrix'] }],
+  },
+  {
     id: '2026-11-15-live-keys',
     title: L('The VJ from the keyboard', 'El VJ desde el teclado', 'El VJ des del teclat'),
     text: L(

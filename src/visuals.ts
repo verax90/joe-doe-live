@@ -175,13 +175,7 @@ export const visuals: Visual[] = [
     id: 'matrix',
     name: { en: 'Matrix (rain)', es: 'Matrix (lluvia)', ca: 'Matrix (pluja)' },
     // Green on purpose, whatever the theme: that is the look
-    code: `noise(80, 0.05)
-  .pixelate(64, 64)
-  .thresh(0.62, 0.02)
-  .scale(1, 1, 6)
-  .scrollY(0, -0.12)
-  .color(0.2, 1, 0.35)
-  .blend(src(o0).scrollY(-0.004), 0.85)
+    code: `matrixRain(o0, 1, 0, () => kickHit())
   .out()`,
   },
   {
@@ -480,14 +474,65 @@ flowMosh(o0, s0, o3, () => 1 + bass() * 1.5)
   .out()`,
   },
   {
+    id: 'cam-contornos',
+    name: { en: 'Webcam (neon outlines)', es: 'Webcam (contornos de neón)', ca: 'Webcam (contorns de neó)' },
+    camera: true,
+    code: `edges(s0, () => 2.2 + bass() * 3)
+  .color(...tint(1.3))
+  .add(src(o0).scale(1.012), () => 0.3 + kickHit() * 0.3)
+  .out()`,
+  },
+  {
+    id: 'cam-termica',
+    name: { en: 'Webcam (thermal camera)', es: 'Webcam (cámara térmica)', ca: 'Webcam (càmera tèrmica)' },
+    camera: true,
+    code: `thermal(s0, () => bass() * 0.2 + kickHit() * 0.15)
+  .out()`,
+  },
+  {
+    id: 'cam-barrido',
+    name: { en: 'Webcam (slit scan)', es: 'Webcam (barrido)', ca: 'Webcam (escombrat)' },
+    camera: true,
+    // one column of the camera at a time, laid side by side: what moves in
+    // front of it is stretched or squeezed by how fast it goes
+    code: `slitScan(o0, s0, 0.004)
+  .out()`,
+  },
+  {
+    id: 'cam-puntos',
+    name: { en: 'Webcam (dots)', es: 'Webcam (puntos)', ca: 'Webcam (punts)' },
+    camera: true,
+    code: `src(s0)
+  .pixelate(64, 36)
+  .vjDots(dotField(64), 1)
+  .saturate(0)
+  .color(...tint(1.3))
+  .out()`,
+  },
+  {
+    id: 'cam-fantasma',
+    name: { en: 'Webcam (ghost: only what moves)', es: 'Webcam (fantasma: solo lo que se mueve)', ca: 'Webcam (fantasma: només el que es mou)' },
+    camera: true,
+    code: `src(s0).out(o3)
+motionOnly(s0, o3, () => 3 + bass() * 4)
+  .color(...tint(1.3))
+  .add(src(o0).scale(1.006).color(0.86, 0.86, 0.86), 1)
+  .out()`,
+  },
+  {
+    id: 'cam-comic',
+    name: { en: 'Webcam (comic)', es: 'Webcam (cómic)', ca: 'Webcam (còmic)' },
+    camera: true,
+    code: `comic(s0, 4)
+  .saturate(1.5)
+  .out()`,
+  },
+  {
     id: 'cam-matrix',
     name: { en: 'Webcam (Matrix)', es: 'Webcam (Matrix)', ca: 'Webcam (Matrix)' },
     camera: true,
-    code: `src(s0)
-  .saturate(0)
-  .contrast(1.6)
-  .color(0.1, 1, 0.3)
-  .add(noise(80, 0.05).pixelate(64, 64).thresh(0.8, 0.02).scale(1, 1, 6).scrollY(0, -0.1).color(0, 0.6, 0.1))
+    // you, made of falling characters: the camera decides which ones are lit
+    code: `matrixRain(s0, 1, 0.9, () => kickHit())
   .out()`,
   },
   {
@@ -962,6 +1007,134 @@ export const SHADERS = [
   v *= 0.45;
   float crest = pow(clamp(v, 0.0, 1.0), 2.5 - glint * 1.5);
   return vec4(vec3(0.22 + 0.25 * v + crest * (0.9 + glint * 0.6)), 1.0);`,
+  },
+  {
+    // The digital rain: columns of characters, each column with a bright
+    // head falling at its own pace and a tail fading behind it. A character
+    // is a 5×7 pattern, mirrored so it reads as a sign and not as noise, and
+    // changes now and then. With see above zero the picture given (the
+    // webcam) lights the characters where it is bright, so it shows through
+    // them; green whatever the theme, that being the look
+    name: 'matrixRain',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'pace', default: 1 },
+      { type: 'float', name: 'see', default: 0 },
+      { type: 'float', name: 'pulse', default: 0 },
+    ],
+    glsl: `
+  vec2 cells = vec2(72.0, 72.0 * resolution.y / resolution.x * 0.6);
+  vec2 g = _st * cells;
+  vec2 id = floor(g);
+  vec2 f = fract(g);
+  // with more contrast than the camera gives: a face against a wall has to stand out
+  float shown = smoothstep(0.18, 0.8, dot(texture2D(tex, (id + 0.5) / cells).rgb, vec3(0.299, 0.587, 0.114))) * see;
+  float r1 = fract(sin(id.x * 91.345) * 43758.5453);
+  float r2 = fract(sin(id.x * 17.77 + 3.1) * 24634.6345);
+  float y = id.y / cells.y;
+  float head = time * pace * (0.12 + r1 * 0.22) + r2 * 7.0;
+  float behind = fract(head - y);
+  float behind2 = fract(head * 0.63 + r1 * 3.0 - y);
+  float tail = exp(-behind * 7.0) + exp(-behind2 * 11.0) * 0.6;
+  float tip = smoothstep(0.035, 0.0, behind) + smoothstep(0.03, 0.0, behind2) * 0.6;
+  float turn = floor(time * (1.5 + r2 * 5.0) + r1 * 9.0 + id.y * 0.37);
+  vec2 dot5 = floor(f * vec2(5.0, 7.0));
+  dot5.x = min(dot5.x, 4.0 - dot5.x);
+  float sign = step(0.52, fract(sin(dot(dot5 + id * 13.1 + turn * 7.7, vec2(127.1, 311.7))) * 43758.5453));
+  sign *= step(0.12, f.x) * step(f.x, 0.88) * step(0.08, f.y) * step(f.y, 0.92);
+  float lit = clamp(tail * (1.0 - see * 0.55) + shown * (0.5 + tail * 0.9) + pulse * 0.15 * tail, 0.0, 1.0);
+  vec3 colour = vec3(0.08, 1.0, 0.32) * lit * sign + vec3(0.75, 1.0, 0.85) * tip * sign * (0.8 + pulse * 0.4);
+  return vec4(colour, 1.0);`,
+  },
+  {
+    // Outlines: how sharply the brightness changes around each point (the
+    // difference across it, sideways and up and down, from eight looks)
+    name: 'edges',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'strength', default: 2 },
+    ],
+    glsl: `
+  vec2 px = 1.6 / resolution;
+  vec3 w = vec3(0.299, 0.587, 0.114);
+  float tl = dot(texture2D(tex, _st + px * vec2(-1.0, -1.0)).rgb, w);
+  float tc = dot(texture2D(tex, _st + px * vec2(0.0, -1.0)).rgb, w);
+  float tr = dot(texture2D(tex, _st + px * vec2(1.0, -1.0)).rgb, w);
+  float ml = dot(texture2D(tex, _st + px * vec2(-1.0, 0.0)).rgb, w);
+  float mr = dot(texture2D(tex, _st + px * vec2(1.0, 0.0)).rgb, w);
+  float bl = dot(texture2D(tex, _st + px * vec2(-1.0, 1.0)).rgb, w);
+  float bc = dot(texture2D(tex, _st + px * vec2(0.0, 1.0)).rgb, w);
+  float br = dot(texture2D(tex, _st + px * vec2(1.0, 1.0)).rgb, w);
+  float gx = tr + 2.0 * mr + br - tl - 2.0 * ml - bl;
+  float gy = bl + 2.0 * bc + br - tl - 2.0 * tc - tr;
+  return vec4(vec3(smoothstep(0.1, 0.6, length(vec2(gx, gy)) * strength)), 1.0);`,
+  },
+  {
+    // A thermal camera: brightness as heat, from cold blue through purple and
+    // red to a yellow that is almost white
+    name: 'thermal',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'heat', default: 0 },
+    ],
+    glsl: `
+  float t = clamp(dot(texture2D(tex, _st).rgb, vec3(0.299, 0.587, 0.114)) * 1.15 + heat, 0.0, 1.0);
+  vec3 c0 = vec3(0.0, 0.0, 0.18);
+  vec3 c1 = vec3(0.45, 0.0, 0.65);
+  vec3 c2 = vec3(1.0, 0.1, 0.05);
+  vec3 c3 = vec3(1.0, 0.65, 0.0);
+  vec3 c4 = vec3(1.0, 1.0, 0.75);
+  vec3 colour = t < 0.25 ? mix(c0, c1, t * 4.0) : t < 0.5 ? mix(c1, c2, (t - 0.25) * 4.0) : t < 0.75 ? mix(c2, c3, (t - 0.5) * 4.0) : mix(c3, c4, (t - 0.75) * 4.0);
+  return vec4(colour, 1.0);`,
+  },
+  {
+    // Slit scan: the left edge is the middle column of the camera right now;
+    // the rest is what was there, moved along by one step
+    name: 'slitScan',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'shown', default: NaN },
+      { type: 'sampler2D', name: 'now', default: NaN },
+      { type: 'float', name: 'shift', default: 0.004 },
+    ],
+    glsl: `
+  if (_st.x < shift) return texture2D(now, vec2(0.5, _st.y));
+  return texture2D(shown, _st - vec2(shift, 0.0));`,
+  },
+  {
+    // Only what moved between the frame before (last) and this one (now)
+    name: 'motionOnly',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'now', default: NaN },
+      { type: 'sampler2D', name: 'last', default: NaN },
+      { type: 'float', name: 'gain', default: 3 },
+    ],
+    glsl: `
+  vec3 change = abs(texture2D(now, _st).rgb - texture2D(last, _st).rgb);
+  return vec4(vec3(smoothstep(0.05, 0.4, dot(change, vec3(0.3333)) * gain)), 1.0);`,
+  },
+  {
+    // A comic: the colours in a few flat steps, and black ink where there is an outline
+    name: 'comic',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'steps', default: 4 },
+    ],
+    glsl: `
+  vec2 px = 1.8 / resolution;
+  vec3 w = vec3(0.299, 0.587, 0.114);
+  vec3 flat3 = floor(texture2D(tex, _st).rgb * steps + 0.5) / steps;
+  float l = dot(texture2D(tex, _st - vec2(px.x, 0.0)).rgb, w);
+  float r = dot(texture2D(tex, _st + vec2(px.x, 0.0)).rgb, w);
+  float u = dot(texture2D(tex, _st - vec2(0.0, px.y)).rgb, w);
+  float d = dot(texture2D(tex, _st + vec2(0.0, px.y)).rgb, w);
+  float ink = smoothstep(0.08, 0.3, length(vec2(r - l, d - u)) * 2.5);
+  return vec4(flat3 * (1.0 - ink), 1.0);`,
   },
   {
     // The finish (finish.ts): the picture, a glow from what is bright around
