@@ -367,6 +367,50 @@ src(o3)
   .out()`,
   },
   {
+    id: 'maq-aurora',
+    name: { en: 'Aurora (mids)', es: 'Aurora boreal (medios)', ca: 'Aurora boreal (mitjos)' },
+    code: `aurora(() => time * 0.15, () => mid() * 1.3, () => hatHit())
+  .color(...tint(1.1))
+  .out()`,
+  },
+  {
+    id: 'maq-rayos',
+    name: { en: 'Lightning (snare)', es: 'Rayos (caja)', ca: 'Llamps (caixa)' },
+    code: `lightning(() => Math.floor(time * 9), () => Math.max(snareHit(), kickHit() * 0.35))
+  .color(...tint(1.3))
+  .blend(src(o0), 0.35)
+  .out()`,
+  },
+  {
+    id: 'maq-fuegos',
+    name: { en: 'Fireworks (kick)', es: 'Fuegos artificiales (bombo)', ca: 'Focs artificials (bombo)' },
+    code: `firework(() => sinceHit(kickHit(), 220), () => kickCount())
+  .color(...tint(3))
+  .blend(src(o0).scrollY(-0.0015), 0.86)
+  .out()`,
+  },
+  {
+    id: 'maq-sol',
+    name: { en: 'Retro sun (lows)', es: 'Sol retro (graves)', ca: 'Sol retro (greus)' },
+    code: `retroSun(() => bass(), () => time * 0.6 + kickCount() * 0.15)
+  .color(...tint(1.1))
+  .out()`,
+  },
+  {
+    id: 'maq-julia',
+    name: { en: 'Fractal (lows)', es: 'Fractal (graves)', ca: 'Fractal (greus)' },
+    code: `julia(() => time * 0.07 + kickCount() * 0.03, () => bass())
+  .color(...tint(1))
+  .out()`,
+  },
+  {
+    id: 'maq-panal',
+    name: { en: 'Hex equaliser (spectrum)', es: 'Panal ecualizador (espectro)', ca: 'Bresca equalitzador (espectre)' },
+    code: `hexBars(() => spec(0), () => spec(1), () => spec(2), () => spec(3), () => spec(4), () => spec(5), () => spec(6), () => spec(7), () => kickHit())
+  .color(...tint(1.1))
+  .out()`,
+  },
+  {
     id: 'mov-luz',
     name: { en: 'Light (follows you)', es: 'Luz (te sigue)', ca: 'Llum (et segueix)' },
     code: `shape(64, () => 0.02 + motion() * 0.1, 0.25)
@@ -1505,6 +1549,181 @@ export const SHADERS = [
   vec2 small = abs(fract(_st * vec2(80.0, 45.0)) - 0.5);
   float v = step(0.47, max(big.x, big.y)) * 0.12 + step(0.44, max(small.x, small.y)) * 0.035;
   return vec4(vec3(v), 1.0);`,
+  },
+  {
+    // Northern lights: four curtains hanging at different heights, bright at
+    // their lower edge and fading upwards, combed into rays that drift; a few
+    // stars above. glow is how bright, shimmer makes the rays flicker
+    name: 'aurora',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'glow', default: 0.4 },
+      { type: 'float', name: 'shimmer', default: 0 },
+    ],
+    glsl: `
+  float up = 1.0 - _st.y;
+  float v = 0.0;
+  for (int i = 0; i < 4; i++) {
+    float fi = float(i);
+    float base = 0.22 + fi * 0.07 + 0.07 * sin(_st.x * 3.0 + clock * (1.0 + fi * 0.3) + fi * 2.0) + 0.05 * _noise(vec3(_st.x * 2.0, fi * 3.0, clock * 0.5));
+    float above = up - base;
+    float curtain = above > 0.0 ? exp(-above * (2.6 + fi * 1.1)) : exp(above * 40.0);
+    float rays = 0.55 + 0.45 * _noise(vec3(_st.x * 26.0 + fi * 7.0, clock * 2.0 + shimmer * 3.0, fi));
+    v += curtain * rays * (0.3 + glow * 0.6) * (1.0 - fi * 0.17);
+  }
+  float star = step(0.9965, fract(sin(dot(floor(_st * resolution * 0.5), vec2(12.9898, 78.233))) * 43758.5453)) * smoothstep(0.5, 0.9, up);
+  return vec4(vec3(clamp(v + star * 0.6, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // A bolt of lightning from the top to the bottom, jagged at five scales,
+    // with a fainter second one; seed picks its path, power how bright it is
+    // and how much the sky around it lights up
+    name: 'lightning',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'seed', default: 0 },
+      { type: 'float', name: 'power', default: 0 },
+    ],
+    glsl: `
+  float y = _st.y;
+  float v = 0.0;
+  for (int bolt = 0; bolt < 2; bolt++) {
+    float s = seed + float(bolt) * 31.7;
+    float x = 0.3 + 0.4 * fract(sin(s * 91.3) * 4375.5453);
+    float amp = 0.16;
+    float fr = 3.0;
+    for (int k = 0; k < 5; k++) {
+      float t = y * fr + float(k) * 7.0;
+      float i = floor(t);
+      float f = fract(t);
+      float a = fract(sin(i * 127.1 + s * 3.7) * 43758.5453);
+      float b = fract(sin((i + 1.0) * 127.1 + s * 3.7) * 43758.5453);
+      x += (mix(a, b, f) - 0.5) * amp;
+      amp *= 0.5;
+      fr *= 2.0;
+    }
+    float d = abs(_st.x - x) * resolution.x / resolution.y;
+    float strength = bolt == 0 ? 1.0 : 0.45;
+    v += (0.0022 / (d + 0.0022) + smoothstep(0.0035, 0.0, d) + exp(-d * 9.0) * 0.35) * strength;
+  }
+  return vec4(vec3(clamp(v * power + power * 0.07, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // A firework: forty-eight sparks thrown out from a point (seed chooses
+    // where), slowing as they spread and falling as they burn out; age is
+    // the seconds since it went off
+    name: 'firework',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'age', default: 9 },
+      { type: 'float', name: 'seed', default: 0 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = (_st - 0.5) * aspect;
+  vec2 c = vec2((fract(sin(seed * 12.9898) * 43758.5453) - 0.5) * 0.9, (fract(sin(seed * 78.233) * 24634.6345) - 0.5) * 0.45 - 0.08);
+  float v = 0.0;
+  for (int i = 0; i < 48; i++) {
+    float fi = float(i);
+    float h = fract(sin(fi * 37.7 + seed * 5.1) * 43758.5453);
+    float ang = fi / 48.0 * 6.2831853 + h * 0.25;
+    float speed = 0.22 + 0.2 * fract(h * 13.7);
+    vec2 at = c + vec2(cos(ang), sin(ang)) * speed * (1.0 - exp(-age * 3.2)) + vec2(0.0, age * age * 0.12);
+    vec2 to = p - at;
+    v += 0.000025 / (dot(to, to) + 0.000018) * exp(-age * 2.0) * (0.55 + 0.45 * h);
+  }
+  vec2 tc = p - c;
+  v += exp(-age * 14.0) * 0.012 / (dot(tc, tc) + 0.006);
+  return vec4(vec3(clamp(v, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // The synthwave sunset: a big sun cut by bars that widen towards the
+    // horizon, a ridge of mountains, and a grid floor running at you
+    name: 'retroSun',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'low', default: 0 },
+      { type: 'float', name: 'scroll', default: 0 },
+    ],
+    glsl: `
+  vec2 q = vec2((_st.x - 0.5) * resolution.x / resolution.y, 0.5 - _st.y);
+  float horizon = -0.08;
+  float v;
+  if (q.y > horizon) {
+    v = 0.06 + 0.32 * exp(-(q.y - horizon) * 3.5);
+    vec2 c = vec2(0.0, 0.1);
+    float r = 0.27 + low * 0.03;
+    float d = length(q - c);
+    float sun = smoothstep(r, r - 0.006, d);
+    float below = c.y - q.y + r * 0.2;
+    if (below > 0.0) sun *= step(below * 1.6, fract(below * 22.0));
+    v += 0.012 / (max(d - r, 0.0) + 0.04) * (0.4 + low * 0.6);
+    v = max(v, sun * (0.65 + 0.35 * clamp((q.y - c.y + r) / (2.0 * r), 0.0, 1.0)));
+    float ridge = horizon + 0.05 + 0.045 * abs(sin(q.x * 4.3 + 1.0)) + 0.025 * abs(sin(q.x * 11.0 + 2.0)) + 0.012 * sin(q.x * 31.0);
+    if (q.y < ridge) v = 0.035 + smoothstep(0.006, 0.0, ridge - q.y) * 0.5;
+  } else {
+    float depth = 0.25 / (horizon - q.y + 0.002);
+    vec2 g = vec2(q.x * depth, depth + scroll);
+    vec2 cell = abs(fract(g) - 0.5);
+    float line = smoothstep(0.42 - min(depth * 0.004, 0.2), 0.5, max(cell.x, cell.y));
+    float fade = smoothstep(0.0, 0.25, horizon - q.y);
+    v = 0.03 + line * fade * (0.6 + low * 0.5) + exp(-(horizon - q.y) * 25.0) * 0.4;
+  }
+  return vec4(vec3(clamp(v, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // A Julia set: z → z² + c until it runs away, c going round a circle so
+    // the shape keeps changing; smooth bands by how quickly each point escapes
+    name: 'julia',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'angle', default: 0 },
+      { type: 'float', name: 'low', default: 0 },
+    ],
+    glsl: `
+  vec2 z = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0) * 2.8 / (1.0 + low * 0.35);
+  vec2 c = vec2(cos(angle), sin(angle)) * 0.7885;
+  float n = 0.0;
+  float m = 0.0;
+  for (int i = 0; i < 72; i++) {
+    z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
+    m = dot(z, z);
+    if (m > 16.0) break;
+    n += 1.0;
+  }
+  if (n >= 71.0) return vec4(vec3(0.02), 1.0);
+  float smooth1 = n - log2(log2(m)) + 4.0;
+  float v = pow(clamp(smooth1 / 40.0, 0.0, 1.0), 0.55) * (0.85 + 0.15 * sin(smooth1 * 0.8));
+  return vec4(vec3(v), 1.0);`,
+  },
+  {
+    // An equaliser made of hexagons: eight columns of the spectrum, each lit
+    // from the bottom up as far as its band is loud
+    name: 'hexBars',
+    type: 'src',
+    inputs: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ type: 'float', name: `h${i}`, default: 0 })).concat([{ type: 'float', name: 'pulse', default: 0 }]),
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = _st * aspect * 11.0;
+  vec2 r = vec2(1.0, 1.7320508);
+  vec2 hh = r * 0.5;
+  vec2 a = mod(p, r) - hh;
+  vec2 b = mod(p - hh, r) - hh;
+  vec2 g = dot(a, a) < dot(b, b) ? a : b;
+  vec2 id = p - g;
+  vec2 q = abs(g);
+  float hex = max(dot(q, vec2(0.5, 0.8660254)), q.x);
+  float x = id.x / (aspect.x * 11.0);
+  float upward = 1.0 - id.y / 11.0;
+  float col = floor(clamp(x, 0.0, 0.999) * 8.0);
+  float level = col < 1.0 ? h0 : col < 2.0 ? h1 : col < 3.0 ? h2 : col < 4.0 ? h3 : col < 5.0 ? h4 : col < 6.0 ? h5 : col < 7.0 ? h6 : h7;
+  level = min(level * 1.6, 1.0);
+  float lit = step(upward, level);
+  float fill = smoothstep(0.47, 0.43, hex);
+  float rim = smoothstep(0.03, 0.0, abs(hex - 0.45));
+  float v = fill * (0.06 + lit * (0.45 + 0.55 * upward) + lit * pulse * 0.25) + rim * (0.12 + lit * 0.3);
+  return vec4(vec3(clamp(v, 0.0, 1.0)), 1.0);`,
   },
   {
     // The finish (finish.ts): the picture, a glow from what is bright around

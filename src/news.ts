@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-six-more',
+    title: L('Six more visuals', 'Seis visuales más', 'Sis visuals més'),
+    text: L(
+      'Under Machines: Aurora (mids), Lightning (snare), Fireworks (kick), Retro sun (lows), Fractal (lows) and a Hex equaliser',
+      'En Máquinas: Aurora boreal (medios), Rayos (caja), Fuegos artificiales (bombo), Sol retro (graves), Fractal (graves) y un Panal ecualizador',
+      'A Màquines: Aurora boreal (mitjos), Llamps (caixa), Focs artificials (bombo), Sol retro (greus), Fractal (greus) i una Bresca equalitzador',
+    ),
+    go: [{ value: ['#visual', 'maq-sol'] }],
+  },
+  {
     id: '2026-11-15-redrawn',
     title: L('Old visuals, drawn again', 'Visuales de siempre, vueltos a dibujar', 'Visuals de sempre, tornats a dibuixar'),
     text: L(
