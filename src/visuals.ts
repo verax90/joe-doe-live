@@ -84,11 +84,14 @@ export const visuals: Visual[] = [
   {
     id: 'glitch',
     name: { en: 'Glitch (highs)', es: 'Glitch (agudos)', ca: 'Glitch (aguts)' },
-    code: `osc(40, 0.1, 1.2)
-  .color(...tint(0.4))
-  .modulate(noise(3).pixelate(8, 8), () => high() * 0.6)
-  .posterize(3, 0.6)
-  .scrollX(() => (Math.random() - 0.5) * high() * 0.08)
+    // a clean signal (bars and a ring) kept in o3, and what shows is that
+    // signal breaking: the highs say how badly, every hat breaks it another way
+    code: `osc(5, 0.03, 1.4)
+  .posterize(5, 0.7)
+  .color(...tint(0.75))
+  .add(shape(64, 0.32, 0.01).sub(shape(64, 0.26, 0.01)).color(...tint(1)).rotate(0, 0.05))
+  .out(o3)
+glitchOf(o3, () => 0.1 + high() * 1.5 + hatHit() * 0.6, () => time * 13 + kickCount() * 5)
   .out()`,
   },
   {
@@ -469,6 +472,13 @@ flowMosh(o0, s0, o3, () => 1 + bass() * 1.5)
     code: `src(s0)
   .thresh(() => 0.45 + mid() * 0.2, 0.04)
   .color(...tint(1))
+  .out()`,
+  },
+  {
+    id: 'cam-glitch',
+    name: { en: 'Webcam (glitch)', es: 'Webcam (glitch)', ca: 'Webcam (glitch)' },
+    camera: true,
+    code: `glitchOf(s0, () => 0.12 + high() * 1.4 + hatHit() * 0.6 + kickHit() * 0.3, () => time * 13 + kickCount() * 5)
   .out()`,
   },
   {
@@ -1181,6 +1191,39 @@ export const SHADERS = [
   float relief = 1.0 - smoothstep(0.0, 0.75, f1);
   float face = (0.1 + 0.22 * own + on * 0.75) * (0.35 + 0.65 * relief);
   return vec4(vec3(face * (1.0 - seam) + seam * (0.55 + pulse * 0.45 + on * 0.2)), 1.0);`,
+  },
+  {
+    // A picture breaking up, the way a bad signal or a corrupt file does.
+    // Some rows of it jump sideways; some blocks are moved, crushed to a few
+    // colours or turned negative; red and blue come apart; the rows that
+    // jumped fill with static. amount says how much of all that, and every
+    // whole step of seed breaks it somewhere else
+    name: 'glitchOf',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'amount', default: 0.3 },
+      { type: 'float', name: 'seed', default: 0 },
+    ],
+    glsl: `
+  vec2 uv = _st;
+  float t = floor(seed);
+  float band = floor(uv.y * 30.0);
+  float rb = fract(sin(band * 91.7 + t * 13.3) * 43758.5453);
+  float jump = (rb - 0.5) * step(1.0 - amount * 0.5, rb) * 0.4;
+  vec2 blk = floor(uv * vec2(14.0, 9.0));
+  float rk = fract(sin(dot(blk + t * 3.7, vec2(127.1, 311.7))) * 43758.5453);
+  float hit = step(1.0 - amount * 0.28, rk);
+  uv.x += jump;
+  uv += (vec2(fract(rk * 17.3), fract(rk * 71.9)) - 0.5) * 0.25 * hit;
+  float apart = amount * 0.018 + abs(jump) * 0.2;
+  vec3 colour = vec3(texture2D(tex, fract(uv + vec2(apart, 0.0))).r, texture2D(tex, fract(uv)).g, texture2D(tex, fract(uv - vec2(apart, 0.0))).b);
+  colour = mix(colour, floor(colour * 3.0 + 0.5) / 3.0, hit);
+  colour = mix(colour, 1.0 - colour, hit * step(0.88, fract(rk * 5.3)));
+  float snow = fract(sin(dot(floor(_st * resolution * 0.5) + t, vec2(12.9898, 78.233))) * 43758.5453);
+  colour += (snow - 0.5) * 0.6 * step(0.001, abs(jump));
+  colour *= 0.86 + 0.14 * sin(_st.y * resolution.y * 1.6);
+  return vec4(colour, 1.0);`,
   },
   {
     // The finish (finish.ts): the picture, a glow from what is bright around
