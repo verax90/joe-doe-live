@@ -67,10 +67,9 @@ export const visuals: Visual[] = [
   {
     id: 'celdas',
     name: { en: 'Cells (volume)', es: 'Celdas (volumen)', ca: 'Cel·les (volum)' },
-    code: `voronoi(6, 0.3, 0.2)
-  .color(...tint(0.3))
-  .modulate(osc(3, 0.05), () => mid() * 0.6)
-  .brightness(() => level() * 0.3 - 0.1)
+    code: `cells(() => time * 0.35, () => level() * 1.5, () => kickHit(), 5)
+  .color(...tint(0.6))
+  .modulate(noise(2, 0.1), () => mid() * 0.08)
   .out()`,
   },
   {
@@ -95,9 +94,8 @@ export const visuals: Visual[] = [
   {
     id: 'plasma',
     name: { en: 'Plasma (bar)', es: 'Plasma (compás)', ca: 'Plasma (compàs)' },
-    code: `voronoi(8, 0.4, 0.3)
-  .modulateScale(osc(6, 0.05), 0.6)
-  .color(...tint(0.42))
+    code: `plasma(() => time * 0.07, 0, H("<0.15 0.5 0.15 0.9>"))
+  .color(...tint(0.5))
   .hue(H("<0 0.05 0 0.95>"))
   .out()`,
   },
@@ -209,8 +207,8 @@ export const visuals: Visual[] = [
   {
     id: 'terremoto',
     name: { en: 'Quake (kick)', es: 'Terremoto (bombo)', ca: 'Terratrèmol (bombo)' },
-    code: `voronoi(12, 0.2, 0.1)
-  .color(...tint(0.55))
+    code: `cells(() => time * 0.2, () => bass() * 1.3, () => kickHit(), 9)
+  .color(...tint(0.6))
   .scrollX(() => (Math.random() - 0.5) * bass() * 0.08)
   .scrollY(() => (Math.random() - 0.5) * bass() * 0.08)
   .scale(() => 1 + bass() * 0.15)
@@ -820,6 +818,7 @@ const SPEC_EDGES = [30, 80, 160, 320, 640, 1280, 2500, 5000, 12000];
 // functions (also there for your code under "From the code"):
 // rings(phase, kick, sparkle), gridFloor(scroll, bump, flash),
 // plasma(flow, push, detail), starfield(travel, streak, flash),
+// cells(drift, loud, pulse, count),
 // metaballs(drift, swell), ripples(phase, tight, glint),
 // tunnel(travel, twist, pulse) and spectrumBars(eight levels) draw;
 // .tear(amount, seed) shifts some scanlines sideways, like a bad signal;
@@ -1135,6 +1134,53 @@ export const SHADERS = [
   float d = dot(texture2D(tex, _st + vec2(0.0, px.y)).rgb, w);
   float ink = smoothstep(0.08, 0.3, length(vec2(r - l, d - u)) * 2.5);
   return vec4(flat3 * (1.0 - ink), 1.0);`,
+  },
+  {
+    // Cells that fit each other like a honeycomb that will not keep still:
+    // each point belongs to the nearest of a set of wandering centres. The
+    // border is where the nearest and the next one are as near, drawn as a
+    // bright seam; each cell is shaded darker towards its edge, and the
+    // louder it gets the more of them light up (each has its own threshold)
+    name: 'cells',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'drift', default: 0 },
+      { type: 'float', name: 'loud', default: 0 },
+      { type: 'float', name: 'pulse', default: 0 },
+      { type: 'float', name: 'count', default: 5 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0) * count;
+  vec2 ip = floor(p);
+  vec2 fp = fract(p);
+  float f1 = 8.0;
+  float f2 = 8.0;
+  vec2 owner = ip;
+  for (int j = -1; j <= 1; j++) {
+    for (int i = -1; i <= 1; i++) {
+      vec2 g = vec2(float(i), float(j));
+      vec2 q = ip + g;
+      vec2 o = vec2(fract(sin(dot(q, vec2(127.1, 311.7))) * 43758.5453), fract(sin(dot(q, vec2(269.5, 183.3))) * 43758.5453));
+      o = 0.5 + 0.42 * sin(drift + 6.2831853 * o);
+      vec2 r = g + o - fp;
+      float d = dot(r, r);
+      if (d < f1) {
+        f2 = f1;
+        f1 = d;
+        owner = q;
+      } else if (d < f2) {
+        f2 = d;
+      }
+    }
+  }
+  f1 = sqrt(f1);
+  f2 = sqrt(f2);
+  float seam = 1.0 - smoothstep(0.0, 0.06 + pulse * 0.05, f2 - f1);
+  float own = fract(sin(dot(owner, vec2(41.3, 289.1))) * 43758.5453);
+  float on = smoothstep(1.02 - loud, 1.1 - loud, own);
+  float relief = 1.0 - smoothstep(0.0, 0.75, f1);
+  float face = (0.1 + 0.22 * own + on * 0.75) * (0.35 + 0.65 * relief);
+  return vec4(vec3(face * (1.0 - seam) + seam * (0.55 + pulse * 0.45 + on * 0.2)), 1.0);`,
   },
   {
     // The finish (finish.ts): the picture, a glow from what is bright around
