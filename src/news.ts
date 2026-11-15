@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-voice',
+    title: L('More visuals for your voice', 'Más visuales para tu voz', 'Més visuals per a la teva veu'),
+    text: L(
+      'Turn the mic on and sing: an orb that swells with petals by note, your melody drawn like a score, the voice\'s spectrum in bars, ripples that tighten as you go up, and flames as tall as you are loud. All in the colour of the note',
+      'Enciende el micro y canta: un orbe que se hincha con pétalos según la nota, tu melodía dibujada como una partitura, el espectro de la voz en barras, ondas que se aprietan al subir y llamas tan altas como cantes de fuerte. Todo en el color de la nota',
+      "Encén el micro i canta: un orbe que s'infla amb pètals segons la nota, la teva melodia dibuixada com una partitura, l'espectre de la veu en barres, ones que s'estrenyen en pujar i flames tan altes com cantis de fort. Tot en el color de la nota",
+    ),
+    go: [{ value: ['#visual', 'voz-formas'] }],
+  },
+  {
     id: '2026-11-15-compose-styles',
     title: L('Compose beyond hip hop', 'Componer más allá del hip hop', 'Compondre més enllà del hip hop'),
     text: L(

@@ -208,6 +208,34 @@ type Chain = {
 };
 
 let chain: Chain | undefined;
+
+// The voice's spectrum for the visuals: voiceSpec(0) to voiceSpec(11), the
+// mic (with its effects) from 90 Hz to 8 kHz in twelve steps, 0 to 1; all 0
+// while the mic is off. Read once a frame, whoever asks
+const SPEC_EDGES = Array.from({ length: 13 }, (_, i) => 90 * (8000 / 90) ** (i / 12));
+let specData: Float32Array<ArrayBuffer> | undefined;
+let specAt = -1;
+export function voiceSpec(step: number) {
+  if (!chain) return 0;
+  const now = performance.now();
+  if (now - specAt > 12) {
+    specData ??= new Float32Array(chain.analyser.frequencyBinCount);
+    if (specData.length !== chain.analyser.frequencyBinCount) specData = new Float32Array(chain.analyser.frequencyBinCount);
+    chain.analyser.getFloatFrequencyData(specData);
+    specAt = now;
+  }
+  const i = Math.min(11, Math.max(0, Math.floor(step)));
+  const nyquist = chain.context.sampleRate / 2;
+  const from = Math.floor((SPEC_EDGES[i] / nyquist) * specData!.length);
+  const to = Math.max(from + 1, Math.floor((SPEC_EDGES[i + 1] / nyquist) * specData!.length));
+  let sum = 0;
+  for (let k = from; k < to; k++) {
+    const db = Number.isFinite(specData![k]) ? specData![k] : -100;
+    sum += Math.min(1, Math.max(0, (db + 85) / 55));
+  }
+  return sum / (to - from);
+}
+(globalThis as { voiceSpec?: typeof voiceSpec }).voiceSpec = voiceSpec;
 let monitoring = false;
 let monitoredInto: AudioNode | undefined;
 

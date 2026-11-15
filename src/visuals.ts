@@ -268,24 +268,43 @@ src(o3)
   {
     id: 'voz',
     name: { en: 'Voice (colour by note)', es: 'Voz (color por nota)', ca: 'Veu (color per nota)' },
-    code: `osc(10, 0.03, 0)
-  .kaleid(5)
+    // a glowing orb that swells as you sing, its edge in as many petals as
+    // the note asks, ripples running off it, in the colour of the note
+    code: `voiceOrb(() => voiceLevel(), () => 3 + Math.round((voiceHeld() % 12) / 2), () => time)
   .color(() => voiceColor(0), () => voiceColor(1), () => voiceColor(2))
-  .scale(() => 1.3 - voiceLevel() * 0.6)
-  .modulate(noise(2.5), () => 0.05 + voiceLevel() * 0.4)
-  .brightness(() => voiceLevel() * 0.3 - 0.15)
+  .blend(src(o0).scale(1.012), 0.45)
   .out()`,
   },
   {
     id: 'voz-formas',
-    name: { en: 'Voice (shapes by pitch)', es: 'Voz (formas por altura)', ca: 'Veu (formes per altura)' },
-    code: `shape(() => 3 + Math.round((voiceHeld() % 24) / 4), 0.28, 0.01)
-  .repeat(2, 2)
-  .rotate(() => voiceHeld() / 12, 0.05)
-  .scale(() => 0.7 + voiceLevel() * 0.9)
+    name: { en: 'Voice (your melody, drawn)', es: 'Voz (tu melodía, dibujada)', ca: 'Veu (la teva melodia, dibuixada)' },
+    // what you sing drawn as it goes, the higher the note the higher the
+    // line, in the note's colour, scrolling off to the left like a score
+    code: `melodyPen(o0, () => (voiceNote() ? 1 - (voiceNote() - 36) / 48 : -1), () => 0.005 + voiceLevel() * 0.018, () => voiceColor(0), () => voiceColor(1), () => voiceColor(2), () => justCameIn())
+  .out()`,
+  },
+  {
+    id: 'voz-barras',
+    name: { en: 'Voice (spectrum bars)', es: 'Voz (barras del espectro)', ca: 'Veu (barres de l’espectre)' },
+    code: `voiceBars(() => voiceSpec(0), () => voiceSpec(1), () => voiceSpec(2), () => voiceSpec(3), () => voiceSpec(4), () => voiceSpec(5), () => voiceSpec(6), () => voiceSpec(7), () => voiceSpec(8), () => voiceSpec(9), () => voiceSpec(10), () => voiceSpec(11))
+  .color(() => 0.35 + voiceColor(0) * 0.65, () => 0.35 + voiceColor(1) * 0.65, () => 0.35 + voiceColor(2) * 0.65)
+  .out()`,
+  },
+  {
+    id: 'voz-ondas',
+    name: { en: 'Voice (ripples by pitch)', es: 'Voz (ondas por altura)', ca: 'Veu (ones per altura)' },
+    // rings running out from the middle: tighter the higher you sing,
+    // stronger the louder
+    code: `voiceRipples(() => voiceLevel(), () => voiceHeld(), () => time)
   .color(() => voiceColor(0), () => voiceColor(1), () => voiceColor(2))
-  .modulateScale(osc(4, 0.1), () => voiceLevel() * 0.5)
-  .blend(src(o0).scale(1.015).rotate(0.004), 0.82)
+  .out()`,
+  },
+  {
+    id: 'voz-fuego',
+    name: { en: 'Voice (flames)', es: 'Voz (llamas)', ca: 'Veu (flames)' },
+    // a fire that rises as high as you are loud
+    code: `flame(() => voiceLevel(), () => time)
+  .color(() => 0.6 + voiceColor(0) * 0.4, () => 0.45 + voiceColor(1) * 0.4, () => 0.25 + voiceColor(2) * 0.4)
   .out()`,
   },
   {
@@ -1726,6 +1745,112 @@ export const SHADERS = [
   return vec4(vec3(clamp(v, 0.0, 1.0)), 1.0);`,
   },
   {
+    // An orb that swells with level: its edge waves in petals, it glows,
+    // and rings run off it while it sounds
+    name: 'voiceOrb',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'level', default: 0 },
+      { type: 'float', name: 'petals', default: 5 },
+      { type: 'float', name: 'clock', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0);
+  float r = length(p);
+  float a = atan(p.y, p.x);
+  float edge = 0.08 + level * 0.24 + 0.025 * sin(a * floor(petals) + clock * 1.5) * (0.4 + level);
+  float body = smoothstep(edge, edge - 0.015, r) * (0.35 + 0.65 * (1.0 - r / max(edge, 0.001)));
+  float rim = 0.012 / (abs(r - edge) + 0.012) * (0.25 + level * 0.75);
+  float out1 = max(r - edge, 0.0);
+  float rings = (0.5 + 0.5 * sin(out1 * 55.0 - clock * 7.0)) * exp(-out1 * 7.0) * level * 0.7 * step(edge, r);
+  return vec4(vec3(clamp(body + rim * 0.6 + rings, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // A pen at the right that writes the note sung (y, from the top, below 0
+    // when silent) in its colour; what was written scrolls off to the left
+    // and fades, over faint lines for each octave
+    name: 'melodyPen',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'before', default: NaN },
+      { type: 'float', name: 'y', default: -1 },
+      { type: 'float', name: 'size', default: 0.01 },
+      { type: 'float', name: 'cr', default: 1 },
+      { type: 'float', name: 'cg', default: 1 },
+      { type: 'float', name: 'cb', default: 1 },
+      { type: 'float', name: 'fresh', default: 0 },
+    ],
+    glsl: `
+  vec3 old = texture2D(before, _st + vec2(0.0035, 0.0)).rgb * 0.994 * (1.0 - fresh);
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 d = (_st - vec2(0.82, y)) * aspect;
+  // a short dash as long as one frame's scroll, so the frames join into a line
+  d.x = max(abs(d.x) - 0.0035 * aspect.x, 0.0);
+  float pen = step(0.0, y) * (smoothstep(size, size * 0.4, length(d)) + 0.0006 / (dot(d, d) + 0.0012) * 0.4);
+  float octave = smoothstep(0.003, 0.0, abs(fract(_st.y * 4.0) - 0.0)) * 0.05;
+  vec3 colour = max(old, vec3(cr, cg, cb) * clamp(pen, 0.0, 1.0));
+  return vec4(max(colour, vec3(octave)), 1.0);`,
+  },
+  {
+    // Twelve bars of the voice's spectrum, low on the left, growing up and
+    // down from the middle line, with a glow at their tips
+    name: 'voiceBars',
+    type: 'src',
+    inputs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => ({ type: 'float', name: `v${i}`, default: 0 })),
+    glsl: `
+  float n = 12.0;
+  float i = floor(_st.x * n);
+  float f = fract(_st.x * n);
+  float lv = i < 1.0 ? v0 : i < 2.0 ? v1 : i < 3.0 ? v2 : i < 4.0 ? v3 : i < 5.0 ? v4 : i < 6.0 ? v5 : i < 7.0 ? v6 : i < 8.0 ? v7 : i < 9.0 ? v8 : i < 10.0 ? v9 : i < 11.0 ? v10 : v11;
+  float h = 0.008 + min(lv * 1.3, 1.0) * 0.4;
+  float y = abs(_st.y - 0.5);
+  float column = smoothstep(0.36, 0.3, abs(f - 0.5));
+  float bar = column * smoothstep(h + 0.004, h, y) * (0.45 + 0.55 * (1.0 - y / max(h, 0.01)));
+  float tip = column * exp(-abs(y - h) * 70.0) * (0.3 + lv);
+  float line = smoothstep(0.002, 0.0, abs(_st.y - 0.5)) * 0.12;
+  return vec4(vec3(clamp(bar + tip * 0.5 + line, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // Rings from the middle: the note sets how close together they are, the
+    // level how strong; a little calm swell when nothing is sung
+    name: 'voiceRipples',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'level', default: 0 },
+      { type: 'float', name: 'note', default: 60 },
+      { type: 'float', name: 'clock', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0);
+  float r = length(p);
+  float tight = 18.0 + clamp(note - 36.0, 0.0, 48.0) * 0.9;
+  float wave = 0.5 + 0.5 * sin(r * tight - clock * (3.0 + level * 6.0));
+  float crest = pow(wave, 6.0 - level * 4.0);
+  float reach = exp(-r * (4.5 - level * 3.0));
+  return vec4(vec3(clamp(crest * reach * (0.12 + level * 1.1) + exp(-r * 18.0) * level * 0.6, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // Fire: noise rising and thinning out, as tall as level, widest in the
+    // middle, hottest at its root
+    name: 'flame',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'level', default: 0 },
+      { type: 'float', name: 'clock', default: 0 },
+    ],
+    glsl: `
+  float up = 1.0 - _st.y;
+  float x = (_st.x - 0.5) * resolution.x / resolution.y;
+  vec3 q = vec3(x * 3.0, up * 3.0 - clock * 2.2, clock * 0.3);
+  float n = _noise(q) * 0.5 + _noise(q * 2.1) * 0.25 + _noise(q * 4.3) * 0.125;
+  float height = 0.12 + level * 0.8;
+  float body = up / height + abs(x) * 1.6 - n * 0.65;
+  float v = clamp(1.0 - body, 0.0, 1.0);
+  v = v * v * (3.0 - 2.0 * v);
+  float core = clamp(1.0 - (up / (height * 0.45) + abs(x) * 4.0 - n * 0.4), 0.0, 1.0);
+  return vec4(vec3(clamp(v * 0.75 + core * 0.5, 0.0, 1.0)), 1.0);`,
+  },
+  {
     // The finish (finish.ts): the picture, a glow from what is bright around
     // each point (sixteen looks at the picture, on two rings), darker
     // corners and grain
@@ -1880,6 +2005,8 @@ export function heartbeatShape(ms: number) {
 // 9 when there has been none for a while
 (globalThis as { sinceHit?: (pulse: number, fadeMs: number) => number }).sinceHit = (pulse, fadeMs) =>
   pulse > 0.0002 ? (-Math.log(pulse) * fadeMs) / 1000 : 9;
+// The first moment of a visual: one that draws over its own past starts clean
+(globalThis as { justCameIn?: () => number }).justCameIn = () => (performance.now() - cameInAt < 200 ? 1 : 0);
 (globalThis as { keyframe?: () => boolean }).keyframe = () =>
   kickHit() > 0.6 || (performance.now() / 1000) % 5 < 0.12 || performance.now() - cameInAt < 250;
 let shadersIn: unknown;
@@ -1983,7 +2110,7 @@ function stopAuto() {
 
 function startAuto() {
   // not the webcam ones, nor those that wait for a controller (Touch: the TouchMe)
-  const pool = visuals.filter((v) => v.code && !v.camera && !v.clips && !['ninguno', 'tacto', 'tacto-ondas', 'tacto-chispas', 'tacto-latido', 'voz', 'voz-formas'].includes(v.id) && !v.id.startsWith('mov'));
+  const pool = visuals.filter((v) => v.code && !v.camera && !v.clips && !['ninguno', 'tacto', 'tacto-ondas', 'tacto-chispas', 'tacto-latido'].includes(v.id) && !v.id.startsWith('voz') && !v.id.startsWith('mov'));
   const step = () => {
     const cycles = clock();
     if (cycles !== null) return `bar ${Math.floor(cycles / AUTO_BARS)}`;
