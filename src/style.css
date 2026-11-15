@@ -2969,11 +2969,12 @@ select.control {
   display: none;
 }
 
-/* with a side panel open, the caption moves left of it (on phones the
-   panel covers the screen: it stays where it is) */
-@media (min-width: 701px) {
+/* with a side panel open, overlay.ts moves the caption left of it */
+
+/* on phones the panel covers the screen: the caption would sit on its text */
+@media (max-width: 700px) {
   body:has(.stage > .panel:not([hidden])) .overlay {
-    right: calc(min(22rem, 90vw) + 1rem);
+    display: none;
   }
 }
 

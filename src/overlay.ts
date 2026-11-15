@@ -39,9 +39,17 @@ export function setupOverlay() {
   titleInput.value = settings.title;
   autoBox.checked = settings.auto;
 
+  // with a side panel open, the caption sits left of its real edge (panels
+  // are not all the same width; on phones the panel covers the screen)
+  const dodgePanel = () => {
+    const panel = document.querySelector<HTMLElement>('.stage > .panel:not([hidden])');
+    const left = panel && innerWidth > 700 ? panel.getBoundingClientRect().left : 0;
+    box.style.right = left > 0 ? `${document.documentElement.clientWidth - left + 16}px` : '';
+  };
   const render = () => {
     const text = overlayText();
     box.hidden = !text;
+    dodgePanel();
     titleInput.disabled = settings.auto;
     if (!text) return;
     artistView.textContent = text.artist;
@@ -56,5 +64,6 @@ export function setupOverlay() {
   for (const input of [onBox, artistInput, titleInput, autoBox]) input.addEventListener('input', save);
   // the song or pattern changes on its own
   setInterval(render, 500);
+  addEventListener('resize', dodgePanel);
   render();
 }
