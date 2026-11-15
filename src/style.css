@@ -2859,6 +2859,18 @@ select.control {
   overflow-y: auto;
 }
 
+/* Only the list gives way: the rest keeps its height, or a three-line
+   notice ("Added as a new track…") shrank to one and spilled over the tabs */
+#cheats > :not(#cheat-list),
+#tools > :not(#tool-list),
+#samples > :not(#sample-list) {
+  flex-shrink: 0;
+}
+
+#cheat-status:not(:empty) {
+  margin-bottom: 0.6rem;
+}
+
 /* Compose: layer rows a little tighter, so all six fit */
 .compose-layers li {
   padding-block: 0.2rem;
