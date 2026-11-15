@@ -15,9 +15,9 @@ export const NEWS: News[] = [
     id: '2026-11-15-redrawn',
     title: L('Old visuals, drawn again', 'Visuales de siempre, vueltos a dibujar', 'Visuals de sempre, tornats a dibuixar'),
     text: L(
-      'Cells, Quake, Glitch, Pulse, Trails, Sparks, Vortex and Plasma keep their names and what moves them, but are new: a honeycomb that lights up, ground that cracks on the kick, a signal that breaks, sequencer pads, comets, a grinder\'s sparks and a spiral',
-      'Celdas, Terremoto, Glitch, Pulso, Estela, Chispas, Vórtice y Plasma conservan su nombre y lo que los mueve, pero son nuevos: un panal que se enciende, suelo que se agrieta con el bombo, una señal que se rompe, pads de secuenciador, cometas, chispas de radial y una espiral',
-      'Cel·les, Terratrèmol, Glitch, Pols, Estela, Espurnes, Vòrtex i Plasma conserven el nom i el que els mou, però són nous: una bresca que s\'encén, terra que s\'esquerda amb el bombo, un senyal que es trenca, pads de seqüenciador, cometes, espurnes de radial i una espiral',
+      'Cells, Quake, Glitch, Pulse, Trails, Sparks, Vortex, Plasma, Waves, Flash and Rings (now Shock rings) are drawn again, and so are Touch (ripples), a pond, and Touch (heartbeat), a heart monitor',
+      'Celdas, Terremoto, Glitch, Pulso, Estela, Chispas, Vórtice, Plasma, Ondas, Destello y Anillos (ahora Ondas de choque) están dibujados de nuevo, y también Tacto (ondas), un estanque, y Tacto (latido), un monitor cardíaco',
+      'Cel·les, Terratrèmol, Glitch, Pols, Estela, Espurnes, Vòrtex, Plasma, Ones, Llampada i Anells (ara Ones de xoc) estan dibuixats de nou, i també Tacte (ones), un estany, i Tacte (batec), un monitor cardíac',
     ),
     go: [{ value: ['#visual', 'terremoto'] }],
   },

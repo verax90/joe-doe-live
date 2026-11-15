@@ -105,13 +105,12 @@ glitchOf(o3, () => 0.1 + high() * 1.5 + hatHit() * 0.6, () => time * 13 + kickCo
   { id: AUTO_VISUAL, name: { en: 'Auto', es: 'Automático', ca: 'Automàtic' }, code: '' },
   {
     id: 'anillos',
-    name: { en: 'Rings (kick)', es: 'Anillos (bombo)', ca: 'Anells (bombo)' },
-    code: `shape(64, 0.42, 0.01)
-  .diff(shape(64, 0.3, 0.01))
-  .repeat(2, 2)
-  .scale(() => 0.9 + bass() * 0.5)
-  .color(...tint(0.6))
-  .modulateRotate(osc(1, 0.05), 0.2)
+    name: { en: 'Shock rings (kick)', es: 'Ondas de choque (bombo)', ca: 'Ones de xoc (bombo)' },
+    // each kick lets out a ring of light; the picture before grows every
+    // frame, so the rings already out keep travelling and fading
+    code: `kickRing(() => sinceHit(kickHit(), 220), () => sinceHit(snareHit(), 160))
+  .color(...tint(1.6))
+  .add(src(o0).scale(1.008).color(0.72, 0.72, 0.72), 1)
   .out()`,
   },
   {
@@ -164,9 +163,11 @@ glitchOf(o3, () => 0.1 + high() * 1.5 + hatHit() * 0.6, () => time * 13 + kickCo
     id: 'flash',
     name: { en: 'Flash (beat)', es: 'Destello (pulso)', ca: 'Llampada (pols)' },
     // On the beat, not on the bass: a long 808 keeps bass() high between kicks
-    code: `solid(...tint(0.7))
-  .mult(shape(4, H("[1.4 0 0 0]*4"), 0.5))
-  .blend(src(o0).scale(1.03), 0.75)
+    // a burst of light on each hit: rays from the middle, a hot core and a
+    // streak across, as a lens catches a strobe
+    code: `burst(() => Math.max(kickHit(), snareHit() * 0.7), () => time * 0.15)
+  .color(...tint(1.2))
+  .blend(src(o0).scale(1.02), 0.35)
   .out()`,
   },
   {
@@ -198,10 +199,11 @@ glitchOf(o3, () => 0.1 + high() * 1.5 + hatHit() * 0.6, () => time * 13 + kickCo
   {
     id: 'ondas',
     name: { en: 'Waves (mids)', es: 'Ondas (medios)', ca: 'Ones (mitjos)' },
-    code: `osc(40, 0.02, 0)
-  .thresh(0.5, 0.02)
-  .modulate(osc(3, 0.1).rotate(Math.PI / 2), () => 0.1 + mid() * 0.4)
-  .color(...tint(0.5))
+    // threads of light waving across like strings that ring: the mids open
+    // them up, the snare shakes them
+    code: `strings(() => time * 0.8, () => 0.15 + mid() * 1.4, () => snareHit())
+  .color(...tint(1.1))
+  .blend(src(o0), 0.55)
   .out()`,
   },
   {
@@ -234,12 +236,10 @@ src(s1)
   {
     id: 'tacto-ondas',
     name: { en: 'Touch (ripples)', es: 'Tacto (ondas)', ca: 'Tacte (ones)' },
-    code: `osc(() => 12 + touch() * 48, () => 0.04 + touch() * 0.3, 0)
-  .kaleid(64)
-  .color(...tint(1))
-  .mask(shape(64, () => 0.25 + touch() * 0.75, 0.25))
-  .scale(() => 1 + touchPulse() * 0.25)
-  .brightness(() => touchPulse() * 0.35 + touch() * 0.15 - 0.15)
+    // a pond: still dark water, and each touch drops a ring that runs out,
+    // the harder the touch the stronger the swell behind it
+    code: `pond(() => time, () => touch(), () => touchPulse())
+  .color(...tint(1.1))
   .out()`,
   },
   {
@@ -254,11 +254,15 @@ src(s1)
   {
     id: 'tacto-latido',
     name: { en: 'Touch (heartbeat)', es: 'Tacto (latido)', ca: 'Tacte (batec)' },
-    code: `shape(64, () => 0.16 + touch() * 0.22 + touchPulse() * 0.14, () => 0.02 + touch() * 0.18)
-  .color(...tint(1))
-  .modulate(osc(6, 0.1), () => touch() * 0.12)
-  .blend(src(o0).scale(() => 1.03 + touchPulse() * 0.06), 0.55)
-  .brightness(() => touchPulse() * 0.2 - 0.05)
+    // a heart monitor: the trace sweeps across and each touch is a beat,
+    // its spike as tall as the touch is strong
+    // the trace is drawn in o3, grey, and only coloured on its way to the
+    // screen: tinting it inside the loop would brighten it every frame
+    code: `heartTrace(o3, () => ecg().x0, () => ecg().y0, () => ecg().x1, () => ecg().y1)
+  .out(o3)
+src(o3)
+  .color(...tint(1.3))
+  .add(monitorGrid().color(...tint(0.5)))
   .out()`,
   },
   {
@@ -1370,6 +1374,139 @@ export const SHADERS = [
   return vec4(vec3(arm * bands * (0.2 + 0.8 * far) + eye * (0.5 + pull * 0.6)), 1.0);`,
   },
   {
+    // Threads of light across the screen, eighteen of them, each a sum of
+    // three waves with its own phase, fading where the wave is quiet at its
+    // ends. open is how wide they swing; shake adds a fast shiver
+    name: 'strings',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'phase', default: 0 },
+      { type: 'float', name: 'open', default: 0.3 },
+      { type: 'float', name: 'shake', default: 0 },
+    ],
+    glsl: `
+  vec2 p = vec2((_st.x - 0.5) * resolution.x / resolution.y, 0.5 - _st.y);
+  float edge = smoothstep(0.0, 0.25, _st.x) * smoothstep(1.0, 0.75, _st.x);
+  float v = 0.0;
+  for (int i = 0; i < 18; i++) {
+    float fi = float(i);
+    float k = fi / 17.0;
+    float y = sin(p.x * (2.2 + k * 1.3) + phase * (1.0 + k * 0.6) + fi * 0.7) * 0.6
+            + sin(p.x * (5.1 - k * 2.0) - phase * 1.3 + fi * 1.9) * 0.3
+            + sin(p.x * 23.0 + phase * 9.0 + fi) * 0.08 * shake;
+    y *= open * edge * (0.25 + 0.75 * sin(k * 3.14159));
+    y += (k - 0.5) * 0.06;
+    float d = abs(p.y - y);
+    v += (0.0016 + k * 0.0006) / (d + 0.004) * (0.35 + 0.65 * edge);
+  }
+  return vec4(vec3(clamp(v * 0.3, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // Water seen from above: the surface swells in rings from the middle
+    // (stronger with level), a bright wave front runs out on each pulse, and
+    // the light catches where the surface tilts. Calm, it still breathes
+    name: 'pond',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'level', default: 0 },
+      { type: 'float', name: 'pulse', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0);
+  float r = length(p);
+  float front = (1.0 - pulse) * 0.95;
+  float near = exp(-abs(r - front) * 18.0) * pulse;
+  float swell = (0.25 + level * 0.75) * exp(-r * 1.8);
+  float phase = r * 38.0 - clock * 3.0;
+  float h = sin(phase) * swell + sin(r * 64.0 - front * 64.0) * near;
+  float slope = cos(phase) * swell + cos(r * 64.0 - front * 64.0) * near * 1.6;
+  float glint = pow(clamp(0.5 + 0.5 * slope, 0.0, 1.0), 6.0) * (0.35 + level * 0.65 + near);
+  float drift = sin(p.x * 6.0 + clock * 0.4) * sin(p.y * 5.0 - clock * 0.3) * 0.04;
+  float body = 0.06 + 0.1 * exp(-r * 1.5) + level * 0.1;
+  return vec4(vec3(body + (h + drift) * 0.12 + glint * 0.9 + near * 0.25), 1.0);`,
+  },
+  {
+    // One ring of light in the middle, there as long as the hit lasts; the
+    // snare makes it ring double
+    name: 'kickRing',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'kick', default: 9 },
+      { type: 'float', name: 'snare', default: 9 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0);
+  float r = length(p);
+  float v = 0.0;
+  // the kick's ring runs out to the corners in a second and fades as it goes;
+  // the snare's is quicker and thinner
+  float rk = 0.03 + kick * 0.9;
+  v += 0.004 / (abs(r - rk) + 0.004) * exp(-kick * 2.2) * step(kick, 2.0);
+  v += 0.0025 / (abs(r - rk * 0.72) + 0.004) * exp(-kick * 3.0) * step(kick, 2.0) * 0.6;
+  float rs = 0.02 + snare * 1.3;
+  v += 0.002 / (abs(r - rs) + 0.003) * exp(-snare * 4.0) * step(snare, 1.5);
+  return vec4(vec3(clamp(v, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // A burst: rays out of the middle that turn slowly, a hot core and a
+    // streak across the picture, all as strong as the hit, and nothing
+    // between hits but a faint glow
+    name: 'burst',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'power', default: 0 },
+      { type: 'float', name: 'turn', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0);
+  float r = length(p);
+  float a = atan(p.y, p.x);
+  float rays = pow(0.5 + 0.5 * sin(a * 14.0 + turn * 6.2831853), 6.0) * 0.6 + pow(0.5 + 0.5 * sin(a * 5.0 - turn * 4.0), 10.0) * 0.6;
+  rays *= exp(-r * (2.6 - power * 1.3));
+  float core = 0.012 / (r * r + 0.012);
+  float streak = exp(-abs(p.y) * 60.0) * exp(-abs(p.x) * (2.8 - power * 1.6));
+  float v = (rays + core * 0.8 + streak * 0.9) * power + 0.04 * exp(-r * 4.0);
+  return vec4(vec3(clamp(v, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // A monitor's screen: the frame before, fading, with a gap just ahead of
+    // the pen, a faint grid, and the stretch the pen drew this frame
+    name: 'heartTrace',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'before', default: NaN },
+      { type: 'float', name: 'ax', default: 0 },
+      { type: 'float', name: 'ay', default: 0.5 },
+      { type: 'float', name: 'bx', default: 0 },
+      { type: 'float', name: 'by', default: 0.5 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = _st * aspect;
+  vec2 a = vec2(ax, ay) * aspect;
+  vec2 b = vec2(bx, by) * aspect;
+  vec2 ab = b - a;
+  float h = clamp(dot(p - a, ab) / max(dot(ab, ab), 1e-6), 0.0, 1.0);
+  float d = length(p - a - ab * h);
+  float line = smoothstep(0.005, 0.0, d) + 0.0004 / (d + 0.003);
+  float ahead = _st.x - bx;
+  float erase = step(0.0, ahead) * step(ahead, 0.05);
+  float old = texture2D(before, _st).r * 0.992 * (1.0 - erase);
+  return vec4(vec3(clamp(max(old, line), 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // A monitor's faint grid, big squares and small ones
+    name: 'monitorGrid',
+    type: 'src',
+    inputs: [],
+    glsl: `
+  vec2 big = abs(fract(_st * vec2(16.0, 9.0)) - 0.5);
+  vec2 small = abs(fract(_st * vec2(80.0, 45.0)) - 0.5);
+  float v = step(0.47, max(big.x, big.y)) * 0.12 + step(0.44, max(small.x, small.y)) * 0.035;
+  return vec4(vec3(v), 1.0);`,
+  },
+  {
     // The finish (finish.ts): the picture, a glow from what is bright around
     // each point (sixteen looks at the picture, on two rings), darker
     // corners and grain
@@ -1490,6 +1627,40 @@ export const SHADERS = [
 // and for the first moment of a visual, so it opens on its own picture and
 // not on what the one before left
 let cameInAt = -Infinity;
+// The heart monitor's pen (Touch (heartbeat)): where it was a frame ago and
+// where it is now. It sweeps across every four seconds; since the last
+// touch it draws a heartbeat's shape (a small bump, the spike down and up,
+// the slow wave after), scaled by how strong the touch is
+const pen = { at: -1, x0: 0, y0: 0.5, x1: 0, y1: 0.5 };
+export function heartbeatShape(ms: number) {
+  if (ms < 0 || ms > 420) return 0;
+  if (ms < 60) return Math.sin((ms / 60) * Math.PI) * 0.06;
+  if (ms < 85) return -((ms - 60) / 25) * 0.08;
+  if (ms < 115) return -0.08 + ((ms - 85) / 30) * 0.5;
+  if (ms < 150) return 0.42 - ((ms - 115) / 35) * 0.55;
+  if (ms < 175) return -0.13 + ((ms - 150) / 25) * 0.13;
+  if (ms < 420) return Math.sin(((ms - 230) / 190) * Math.PI) * 0.08 * Number(ms > 230);
+  return 0;
+}
+(globalThis as { ecg?: () => typeof pen }).ecg = () => {
+  const now = performance.now();
+  if (now - pen.at < 4) return pen; // once a frame, whatever asks
+  const g = globalThis as { touchPulse?: () => number; touch?: () => number };
+  const pulse = g.touchPulse?.() ?? 0;
+  const since = pulse > 0.0005 ? -Math.log(pulse) * 250 : 9999;
+  const strength = 0.4 + (g.touch?.() ?? 0) * 0.9;
+  const x = ((now / 1000) % 4) / 4;
+  pen.x0 = pen.at < 0 || x < pen.x1 ? x : pen.x1;
+  pen.y0 = pen.at < 0 || x < pen.x1 ? 0.5 : pen.y1;
+  pen.x1 = x;
+  pen.y1 = 0.5 - heartbeatShape(since) * strength;
+  pen.at = now;
+  return pen;
+};
+// Seconds since a hit, from its pulse (1 on the hit, fading over fadeMs);
+// 9 when there has been none for a while
+(globalThis as { sinceHit?: (pulse: number, fadeMs: number) => number }).sinceHit = (pulse, fadeMs) =>
+  pulse > 0.0002 ? (-Math.log(pulse) * fadeMs) / 1000 : 9;
 (globalThis as { keyframe?: () => boolean }).keyframe = () =>
   kickHit() > 0.6 || (performance.now() / 1000) % 5 < 0.12 || performance.now() - cameInAt < 250;
 let shadersIn: unknown;
