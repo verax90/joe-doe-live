@@ -587,43 +587,57 @@
 
       <aside class="panel" id="drop" hidden>
         <h2 data-i18n="dropTitle">Build-up</h2>
-        <p class="panel-help" data-i18n="dropHelp">A few bars that build up, and the drop on the one.</p>
-        <div class="set-add">
-          <label class="panel-field" for="drop-bars">
-            <span data-i18n="dropBars">Bars</span>
-            <select id="drop-bars" class="control">
-              <option value="2">2</option>
-              <option value="4">4</option>
-              <option value="8">8</option>
-            </select>
-          </label>
+        <p class="panel-help" data-i18n="dropShort">A few bars that build up from the next one, and the drop on the one.</p>
+        <div class="drop-kinds" role="group" aria-label="Kind" data-i18n-label="dropKind">
+          <button class="drop-kind" type="button" data-kind="classic" aria-pressed="false"><b data-i18n="dropClassic">Classic</b><small data-i18n="dropClassicHint">Snare roll, noise up</small></button>
+          <button class="drop-kind" type="button" data-kind="techno" aria-pressed="false"><b data-i18n="dropTechno">Techno</b><small data-i18n="dropTechnoHint">The kick speeds up</small></button>
+          <button class="drop-kind" type="button" data-kind="rise" aria-pressed="false"><b data-i18n="dropRise">Siren</b><small data-i18n="dropRiseHint">Claps and a climbing tone</small></button>
+          <button class="drop-kind" type="button" data-kind="blackout" aria-pressed="false"><b data-i18n="dropBlackout">Blackout</b><small data-i18n="dropBlackoutHint">Everything goes dark</small></button>
         </div>
-        <div class="drop-options">
-          <label class="set-option"><input id="drop-roll" type="checkbox" /> <span data-i18n="dropRoll">Snare roll</span></label>
-          <label class="set-option"><input id="drop-riser" type="checkbox" /> <span data-i18n="dropRiser">Noise riser</span></label>
-          <label class="set-option"><input id="drop-filter" type="checkbox" /> <span data-i18n="dropFilter">Bass away</span></label>
-          <label class="set-option"><input id="drop-gap" type="checkbox" /> <span data-i18n="dropGap">Silence before</span></label>
-          <label class="set-option"><input id="drop-impact" type="checkbox" /> <span data-i18n="dropImpact">Impact</span></label>
-          <label class="set-option"><input id="drop-glass" type="checkbox" /> <span data-i18n="dropGlass">Broken glass on screen</span></label>
+        <div class="drop-bars" role="group" aria-labelledby="drop-bars-label">
+          <span id="drop-bars-label" class="drop-bars-label" data-i18n="dropBars">Bars</span>
+          <button class="drop-bar" type="button" data-bars="2" aria-pressed="false">2</button>
+          <button class="drop-bar" type="button" data-bars="4" aria-pressed="false">4</button>
+          <button class="drop-bar" type="button" data-bars="8" aria-pressed="false">8</button>
         </div>
-        <button id="drop-go" class="control control-accent drop-go" type="button" data-i18n="dropGo">▲ Build-up</button>
+        <button id="drop-go" class="control control-accent drop-go" type="button" data-icon="drop"><span data-i18n="dropGo">Build up</span></button>
+        <div id="drop-progress" class="drop-progress" aria-hidden="true"><i></i></div>
         <p id="drop-status" class="panel-status" role="status"></p>
+        <details class="panel-more drop-more">
+          <summary data-i18n="dropByHand">By hand</summary>
+          <div class="drop-options">
+            <label class="set-option"><input id="drop-roll" type="checkbox" /> <span data-i18n="dropRoll">Roll</span></label>
+            <label class="set-option"><input id="drop-riser" type="checkbox" /> <span data-i18n="dropRiser">Riser</span></label>
+            <label class="set-option"><input id="drop-filter" type="checkbox" /> <span data-i18n="dropFilter">Filter</span></label>
+            <label class="set-option"><input id="drop-gap" type="checkbox" /> <span data-i18n="dropGap">Silence before</span></label>
+            <label class="set-option"><input id="drop-impact" type="checkbox" /> <span data-i18n="dropImpact">Impact</span></label>
+            <label class="set-option"><input id="drop-glass" type="checkbox" /> <span data-i18n="dropGlass">Broken glass on screen</span></label>
+          </div>
+        </details>
       </aside>
 
       <aside class="panel" id="pump" hidden>
         <h2 data-i18n="pumpTitle">Pump</h2>
-        <p class="panel-help" data-i18n="pumpHelp">Every kick pushes the rest down for a moment and lets it swell back.</p>
-        <label class="set-option"><input id="pump-on" type="checkbox" /> <span data-i18n="pumpOn">Pump</span></label>
-        <label class="vj-slider" data-i18n-title="pumpDepthHint">
-          <span data-i18n="pumpDepth">Amount</span>
+        <p class="panel-help" data-i18n="pumpShort">Every kick pushes the rest down and lets it swell back: the breathing of house.</p>
+        <button id="pump-on" class="control pump-toggle" type="button" aria-pressed="false" data-icon="pump"><span data-i18n="pumpTurnOn">Pump the mix</span></button>
+        <canvas id="pump-curve" class="pump-curve" width="560" height="200" role="img" aria-label="How the volume dips and comes back" data-i18n-label="pumpCurveLabel"></canvas>
+        <p id="pump-status" class="pump-status" role="status"></p>
+        <div class="pump-presets" role="group" aria-label="Presets" data-i18n-label="pumpPresets">
+          <button class="pump-preset" type="button" data-depth="0.35" data-release="0.75" data-i18n="pumpSoft">Soft</button>
+          <button class="pump-preset" type="button" data-depth="0.6" data-release="0.5" data-i18n="pumpHouse">House</button>
+          <button class="pump-preset" type="button" data-depth="0.95" data-release="0.3" data-i18n="pumpHard">Extreme</button>
+        </div>
+        <label class="pump-slider" data-i18n-title="pumpDepthHint">
+          <span class="pump-slider-name" data-i18n="pumpDepth">How far it dips</span>
+          <output id="pump-depth-value" class="pump-value"></output>
           <input id="pump-depth" type="range" min="0.1" max="1" step="0.01" />
         </label>
-        <label class="vj-slider" data-i18n-title="pumpReleaseHint">
-          <span data-i18n="pumpRelease">Swell back</span>
+        <label class="pump-slider" data-i18n-title="pumpReleaseHint">
+          <span class="pump-slider-name" data-i18n="pumpRelease">How long to come back</span>
+          <output id="pump-release-value" class="pump-value"></output>
           <input id="pump-release" type="range" min="0.1" max="1" step="0.05" />
         </label>
-        <button id="pump-example" class="control" type="button" data-i18n="pumpExample">Add an example</button>
-        <p id="pump-status" class="panel-status" role="status"></p>
+        <button id="pump-example" class="control" type="button" data-icon="play" data-i18n="pumpExample">Try it on an example</button>
       </aside>
 
       <aside class="panel" id="remote" hidden>

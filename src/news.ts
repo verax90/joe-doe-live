@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-buildups',
+    title: L('Four kinds of build-up', 'Cuatro tipos de subidón', 'Quatre tipus de pujada'),
+    text: L(
+      'Classic (snare roll and noise), Techno (the kick speeds up), Siren (claps and a climbing tone) and Blackout (everything goes dark and comes back on the one), with a bar that fills up to the drop. Pump got a curve that shows what it does',
+      'Clásico (redoble y ruido), Techno (el bombo se acelera), Sirena (palmas y un tono que sube) y Apagón (todo se oscurece y vuelve en el uno), con una barra que se llena hasta el drop. El Bombeo enseña ahora una curva con lo que hace',
+      "Clàssic (redoblament i soroll), Techno (el bombo s'accelera), Sirena (palmes i un to que puja) i Apagada (tot s'enfosqueix i torna a l'u), amb una barra que s'omple fins al drop. El Bombeig ensenya ara una corba amb el que fa",
+    ),
+    go: [{ click: '#toggle-drop' }],
+  },
+  {
     id: '2026-11-15-ascii',
     title: L('ASCII, teletext and a terminal', 'ASCII, teletexto y un terminal', 'ASCII, teletext i un terminal'),
     text: L(

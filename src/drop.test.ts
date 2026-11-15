@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rollHits } from './drop';
+import { DROP_KINDS, kindOf, rollHits } from './drop';
 
 describe('build-up', () => {
   it('speeds the roll up in four stages over four bars', () => {
@@ -23,5 +23,15 @@ describe('build-up', () => {
   it('takes eight bars two by two', () => {
     const perBar = Array.from({ length: 8 }, (_, bar) => rollHits(8, 1, false).filter((h) => h.at >= bar && h.at < bar + 1).length);
     expect(perBar).toEqual([4, 4, 8, 8, 16, 16, 32, 32]);
+  });
+
+  it('a whole beat of silence ends the roll a beat early', () => {
+    expect(rollHits(2, 2, true, 1).at(-1)!.at).toBeLessThan(4 - 0.5);
+  });
+
+  it('four kinds, each recognised from the settings it sets', () => {
+    const base = { bars: 4, roll: true, riser: true, filter: true, gap: true, impact: true, glass: true, rollSound: 'sd', riserKind: 'noise', filterKind: 'high', gapBeats: 0.5 } as const;
+    for (const kind of DROP_KINDS) expect(kindOf({ ...base, ...kind.settings })).toBe(kind.id);
+    expect(kindOf({ ...base, rollSound: 'cp', riserKind: 'noise' })).toBeUndefined();
   });
 });

@@ -471,13 +471,6 @@ select.control {
   margin: 0.4rem 0 0.75rem;
 }
 
-.drop-go {
-  width: 100%;
-  padding-block: 0.7rem;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
 /* Save and share (project.ts): the name and Save on top, then a list */
 /* fit-content: a modal dialog is pinned top and bottom, auto would stretch it */
 #project[open] {
@@ -2336,6 +2329,207 @@ select.control {
   flex: 1 1 auto;
   padding-inline: 0.35rem;
   font-size: 12px;
+}
+
+/* Caption: the title written by the studio shows greyed; typing makes it yours */
+#overlay-title.is-auto {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Build-up: four kinds as cards, the bars as a segmented control, the big
+   button, and a bar that fills up to the drop */
+.drop-kinds {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.drop-kind {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.55rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.drop-kind b {
+  font-size: 13px;
+}
+
+.drop-kind small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.drop-kind:hover,
+.drop-kind:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.drop-kind[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.drop-kind[aria-pressed='true'] b {
+  color: var(--accent);
+}
+
+.drop-bars {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+}
+
+.drop-bars-label {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.drop-bar {
+  width: 2.6rem;
+  height: 1.9rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+}
+
+.drop-bar[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.drop-go {
+  width: 100%;
+  height: 2.8rem;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.drop-go.is-running {
+  border-color: var(--line);
+  background: var(--bg-elevated);
+  color: var(--fg);
+}
+
+.drop-progress {
+  --done: 0;
+  height: 4px;
+  margin-top: 0.5rem;
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.drop-progress i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleX(var(--done));
+  transform-origin: left;
+}
+
+.drop-more .drop-options {
+  margin-top: 0.5rem;
+}
+
+/* Pump: a big switch, the curve of what it does, presets and two sliders
+   that say their value in words */
+.pump-toggle {
+  width: 100%;
+  height: 2.6rem;
+  font-weight: 600;
+}
+
+.pump-toggle[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.pump-curve {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0.75rem 0 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+.pump-status {
+  min-height: 1.3em;
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pump-status.is-on {
+  color: var(--ok);
+}
+
+.pump-presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+}
+
+.pump-preset {
+  height: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pump-preset:hover,
+.pump-preset:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.pump-preset[aria-pressed='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pump-slider {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.2rem 0.5rem;
+  margin-bottom: 0.8rem;
+  font-size: 13px;
+}
+
+.pump-slider input {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.pump-value {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
 /* VJ looks: four memories and the button that arms saving into one */

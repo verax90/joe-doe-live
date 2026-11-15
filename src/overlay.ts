@@ -3,6 +3,7 @@
 // The title can follow what plays: the live set's song, or else the picked
 // pattern's name. OBS captures it with the screen; the vertical recording
 // draws it into its frames (overlayText).
+import { t } from './i18n';
 import { liveSetSong } from './live-set';
 import { readStorage, writeStorage } from './storage';
 
@@ -50,18 +51,34 @@ export function setupOverlay() {
     const text = overlayText();
     box.hidden = !text;
     dodgePanel();
-    titleInput.disabled = settings.auto;
+    // with the title automatic, the field shows what it says now (greyed);
+    // it is never locked: typing in it makes the title yours (below)
+    titleInput.classList.toggle('is-auto', settings.auto);
+    titleInput.title = settings.auto ? t('overlayAutoHint') : '';
+    if (settings.auto && document.activeElement !== titleInput) titleInput.value = overlayTitle(settings, liveSetSong(), patternName()) ?? '';
     if (!text) return;
     artistView.textContent = text.artist;
     titleView.textContent = text.title;
     titleView.hidden = !text.title;
   };
   const save = () => {
-    settings = { on: onBox.checked, artist: artistInput.value, title: titleInput.value, auto: autoBox.checked };
+    // while automatic, the field shows the studio's title: your own stays kept
+    settings = { on: onBox.checked, artist: artistInput.value, title: autoBox.checked ? settings.title : titleInput.value, auto: autoBox.checked };
     writeStorage('jdl:overlay', settings);
     render();
   };
   for (const input of [onBox, artistInput, titleInput, autoBox]) input.addEventListener('input', save);
+  // clicking into the title to write it: no longer automatic, starting from what it said
+  titleInput.addEventListener('focus', () => {
+    if (!autoBox.checked) return;
+    autoBox.checked = false;
+    save();
+    titleInput.select();
+  });
+  // back to automatic: the field shows the studio's title again
+  autoBox.addEventListener('change', () => {
+    if (autoBox.checked) titleInput.value = overlayTitle({ ...settings, auto: true }, liveSetSong(), patternName()) ?? '';
+  });
   // the song or pattern changes on its own
   setInterval(render, 500);
   addEventListener('resize', dodgePanel);

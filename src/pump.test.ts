@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { KICK_ORBIT, PUMP_DEFAULTS, pumpValue } from './pump';
+import { KICK_ORBIT, PUMP_DEFAULTS, pumpLevel, pumpValue, releaseWords } from './pump';
 
 const on = { ...PUMP_DEFAULTS, on: true, depth: 0.7, release: 0.5 };
 const always = () => true;
@@ -39,5 +39,20 @@ describe('pump', () => {
     const own = { s: 'bd', duckorbit: 2 };
     expect(pumpValue(own, on, 0.5, new Set([1]), always)).toEqual(own); // not a kick for us: counts as the rest
     expect(pumpValue(1, on, 0.5, new Set(), always)).toBe(1);
+  });
+});
+
+describe('the curve in the panel', () => {
+  it('drops at the kick and is back after the release', () => {
+    expect(pumpLevel(0, 0.6, 0.5)).toBeCloseTo(0.4);
+    expect(pumpLevel(0.25, 0.6, 0.5)).toBeCloseTo(0.85);
+    expect(pumpLevel(0.5, 0.6, 0.5)).toBe(1);
+    expect(pumpLevel(-0.1, 0.6, 0.5)).toBe(1);
+  });
+  it('says the release in parts of a beat', () => {
+    expect(releaseWords(0.5)).toBe('½');
+    expect(releaseWords(0.75)).toBe('¾');
+    expect(releaseWords(0.3)).toBe('¼');
+    expect(releaseWords(1)).toBeNull();
   });
 });
