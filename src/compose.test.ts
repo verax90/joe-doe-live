@@ -66,3 +66,15 @@ describe('arrangement', () => {
     expect(code).toContain('mine');
   });
 });
+
+describe('styles', () => {
+  it('reach past hip hop: drum and bass, house, techno, garage, synthwave, ambient', () => {
+    const ids = STYLES.map((style) => style.id);
+    for (const id of ['dnb', 'house', 'techno', 'ukgarage', 'synthwave', 'ambient']) expect(ids).toContain(id);
+    expect(STYLES.find((style) => style.id === 'dnb')!.bpm).toBe(174);
+  });
+  it('a style can shape its own bass, and the others keep theirs', () => {
+    expect(layerCode('bass', { ...song, style: 'dnb' }, state)).toContain('lpq(4)');
+    expect(layerCode('bass', song, state)).toContain('.lpf(1200).gain(0.8)');
+  });
+});

@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-compose-styles',
+    title: L('Compose beyond hip hop', 'Componer más allá del hip hop', 'Compondre més enllà del hip hop'),
+    text: L(
+      'Six more styles in Compose, each with its own drums, bass and chords: drum and bass (with a reese bass and a jungle break), house, techno (with an acid line), UK garage, synthwave and ambient',
+      'Seis estilos más en Componer, cada uno con su batería, bajo y acordes: drum and bass (con bajo reese y un break de jungle), house, techno (con línea ácida), UK garage, synthwave y ambient',
+      'Sis estils més a Compondre, cadascun amb la seva bateria, baix i acords: drum and bass (amb baix reese i un break de jungle), house, techno (amb línia àcida), UK garage, synthwave i ambient',
+    ),
+    go: [{ click: '#toggle-compose' }, { click: '[aria-controls="compose-tab-song"]' }],
+  },
+  {
     id: '2026-11-15-six-more',
     title: L('Six more visuals', 'Seis visuales más', 'Sis visuals més'),
     text: L(

@@ -45,7 +45,8 @@ type Style = {
   bpm: number;
   drums: string[];
   hats: string[];
-  bass: { sound: string; rhythms: string[] };
+  // tone: how the bass is shaped, when the style wants its own (a reese, an acid line)
+  bass: { sound: string; rhythms: string[]; tone?: string };
   chords: { sound: string; rhythms: string[] };
   melody: string[];
   pad: string;
@@ -130,6 +131,137 @@ export const STYLES: Style[] = [
     melody: ['gm_string_ensemble_1', 'piano', 'gm_choir_aahs'],
     pad: 'gm_choir_aahs',
   },
+  {
+    id: 'dnb',
+    name: { en: 'Drum and bass', es: 'Drum and bass', ca: 'Drum and bass' },
+    bpm: 174,
+    drums: [
+      // two-step: the kick on 1 and the "and" of 3, the snare on 2 and 4
+      boom('bd ~ ~ ~ ~ ~ ~ ~ ~ ~ bd ~ ~ ~ ~ ~, ~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~', 'EmuSP12', '.gain(1.05)'),
+      // with ghost snares between
+      boom('bd ~ ~ ~ ~ ~ ~ ~ ~ ~ bd ~ ~ ~ ~ ~, ~ ~ ~ ~ sd ~ ~ sd? ~ sd? ~ ~ sd ~ ~ sd?', 'EmuSP12', '.gain("1 0.9")'),
+      // a chopped break, jungle style
+      boom('bd ~ bd ~ sd ~ ~ sd ~ sd bd bd sd ~ ~ sd', 'EmuSP12', '.crush(10)'),
+    ],
+    hats: [
+      boom('hh*8', 'EmuSP12', '.gain("0.4 0.25")'),
+      boom('hh*16', 'EmuSP12', '.gain("0.35 0.15 0.25 0.15")'),
+      boom('[~ oh]*4, hh*8?', 'RolandTR909', '.gain(0.3)'),
+    ],
+    // a reese: a saw with its filter opening and closing over eight bars
+    bass: {
+      sound: 'sawtooth',
+      rhythms: ['x', 'x ~ ~ ~ ~ ~ ~ ~ ~ ~ x ~ ~ ~ ~ ~', 'x ~ ~ x ~ ~ x ~ ~ ~ x ~ ~ ~ ~ ~'],
+      tone: '.lpf(sine.range(220, 950).slow(8)).lpq(4).gain(0.42)',
+    },
+    chords: { sound: 'gm_pad_warm', rhythms: ['x', 'x ~ ~ ~ ~ ~ ~ ~ x ~ ~ ~ ~ ~ ~ ~', '~ x ~ ~ ~ ~ ~ ~'] },
+    melody: ['gm_epiano1', 'gm_vibraphone', 'gm_choir_aahs'],
+    pad: 'gm_pad_choir',
+  },
+  {
+    id: 'house',
+    name: { en: 'House', es: 'House', ca: 'House' },
+    bpm: 124,
+    drums: [
+      boom('bd*4, ~ cp ~ cp', 'RolandTR909', '.gain("0.95 0.7")'),
+      boom('bd*4, ~ cp ~ [cp cp?]', 'RolandTR909', '.gain("0.95 0.7")'),
+      boom('bd*4, ~ ~ ~ ~ cp ~ ~ ~ ~ ~ ~ ~ cp ~ ~ cp?', 'RolandTR909', '.gain("0.95 0.65")'),
+    ],
+    hats: [
+      boom('[~ oh]*4, hh*16', 'RolandTR909', '.gain("0.35 0.15")'),
+      boom('[~ oh]*4', 'RolandTR909', '.gain(0.35)'),
+      boom('hh*16', 'RolandTR909', '.gain("0.3 0.12 0.2 0.12").swing(8)'),
+    ],
+    // the bass on the off-beat, where the kick is not
+    bass: { sound: 'gm_synth_bass_1', rhythms: ['~ x ~ x ~ x ~ x', '[~ x]*4', 'x ~ ~ x ~ ~ x ~'], tone: '.lpf(900).gain(0.75)' },
+    chords: { sound: 'gm_drawbar_organ', rhythms: ['~ x ~ ~ ~ x ~ ~', 'x ~ ~ x ~ ~ x ~', '~ x ~ x ~ x ~ x'] },
+    melody: ['piano', 'gm_epiano1', 'gm_vibraphone'],
+    pad: 'gm_pad_warm',
+  },
+  {
+    id: 'techno',
+    name: { en: 'Techno', es: 'Techno', ca: 'Techno' },
+    bpm: 132,
+    drums: [
+      boom('bd*4, ~ cp ~ cp', 'RolandTR909', '.gain("1 0.45").shape(0.25)'),
+      boom('bd*4, ~ ~ ~ ~ ~ ~ ~ rim ~ ~ ~ ~ ~ ~ rim ~', 'RolandTR909', '.gain("1 0.5").shape(0.25)'),
+      boom('bd*4, [~ cp]*2, ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ bd?', 'RolandTR909', '.gain("1 0.4").shape(0.3)'),
+    ],
+    hats: [
+      boom('[~ oh]*4, hh*16', 'RolandTR909', '.gain("0.3 0.12").hpf(6000)'),
+      boom('hh*16', 'RolandTR909', '.gain("0.25 0.1 0.18 0.1")'),
+      boom('[~ hh]*8', 'RolandTR909', '.gain(0.25).hpf(7000)'),
+    ],
+    // an acid line: short saw notes and a filter that rings
+    bass: {
+      sound: 'sawtooth',
+      rhythms: ['x x ~ x x ~ x ~ x x ~ x ~ x x ~', '[~ x]*8', 'x ~ x x ~ x x ~'],
+      tone: '.decay(0.12).sustain(0).lpf(sine.range(300, 2200).slow(6)).lpq(14).gain(0.38)',
+    },
+    chords: { sound: 'gm_pad_poly', rhythms: ['~ ~ x ~ ~ x ~ ~', 'x', '~ x ~ ~ ~ ~ ~ ~'] },
+    melody: ['square', 'triangle', 'gm_vibraphone'],
+    pad: 'gm_pad_warm',
+  },
+  {
+    id: 'ukgarage',
+    name: { en: 'UK garage', es: 'UK garage', ca: 'UK garage' },
+    bpm: 132,
+    drums: [
+      // two-step: the kick skips beats 2 and 4
+      boom('bd ~ ~ ~ ~ ~ ~ bd ~ ~ bd ~ ~ ~ ~ ~, ~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~', 'RolandTR909', '.gain(0.9)'),
+      boom('bd ~ ~ ~ ~ ~ ~ ~ ~ ~ bd ~ ~ ~ ~ bd?, ~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~', 'RolandTR909', '.gain(0.9)'),
+      boom('bd ~ ~ bd ~ ~ ~ ~ ~ ~ bd ~ ~ ~ ~ ~, ~ ~ ~ ~ [sd,rim] ~ ~ ~ ~ ~ ~ ~ sd ~ ~ ~', 'RolandTR909', '.gain(0.9)'),
+    ],
+    hats: [
+      boom('hh*16', 'RolandTR909', '.gain("0.25 0.08 0.18 0.12").swing(8)'),
+      boom('hh*16, ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ oh ~', 'RolandTR909', '.gain("0.25 0.1").swing(8)'),
+      boom('[~ hh]*8', 'RolandTR909', '.gain(0.25).swing(8)'),
+    ],
+    bass: { sound: 'gm_synth_bass_1', rhythms: ['x ~ ~ x ~ ~ x ~', 'x ~ ~ ~ x ~ ~ x', '~ x ~ ~ x ~ ~ x'], tone: '.lpf(700).gain(0.8)' },
+    chords: { sound: 'gm_epiano1', rhythms: ['~ x ~ ~ x ~ ~ x', 'x ~ ~ x ~ ~ x ~', '~ x ~ ~ ~ x ~ ~'] },
+    melody: ['gm_vibraphone', 'gm_epiano1', 'gm_choir_aahs'],
+    pad: 'gm_pad_warm',
+  },
+  {
+    id: 'synthwave',
+    name: { en: 'Synthwave', es: 'Synthwave', ca: 'Synthwave' },
+    bpm: 100,
+    drums: [
+      boom('bd ~ ~ ~ sd ~ ~ ~ bd ~ bd ~ sd ~ ~ ~', 'LinnDrum', '.room(0.3)'),
+      boom('bd ~ ~ ~ sd ~ ~ ~ bd ~ ~ ~ sd ~ ~ ~', 'LinnDrum', '.room(0.4)'),
+      boom('bd ~ ~ bd sd ~ ~ ~ bd ~ bd ~ sd ~ sd? ~', 'LinnDrum', '.room(0.3)'),
+    ],
+    hats: [
+      boom('hh*8', 'LinnDrum', '.gain("0.3 0.15")'),
+      boom('hh*16', 'LinnDrum', '.gain("0.22 0.1")'),
+      boom('[~ hh]*4', 'LinnDrum', '.gain(0.3)'),
+    ],
+    // a bass that does not rest: eighths
+    bass: { sound: 'sawtooth', rhythms: ['x*8', 'x ~ x x ~ x x ~', 'x*16'], tone: '.decay(0.15).sustain(0.2).lpf(700).gain(0.45)' },
+    chords: { sound: 'gm_pad_poly', rhythms: ['x', 'x ~ ~ ~ x ~ ~ ~', '~ ~ x ~ ~ ~ x ~'] },
+    melody: ['triangle', 'square', 'gm_vibraphone'],
+    pad: 'gm_synth_strings_1',
+  },
+  {
+    id: 'ambient',
+    name: { en: 'Ambient', es: 'Ambient', ca: 'Ambient' },
+    bpm: 72,
+    drums: [
+      // barely there: a soft kick now and then
+      boom('bd ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~', 'RolandTR808', '.gain(0.5).lpf(600).room(0.6)'),
+      boom('bd ~ ~ ~ ~ ~ ~ ~ ~ ~ bd? ~ ~ ~ ~ ~, ~ ~ ~ ~ ~ ~ ~ ~ rim ~ ~ ~ ~ ~ ~ ~', 'RolandTR808', '.gain(0.45).lpf(900).room(0.7)'),
+      's("~")',
+    ],
+    hats: [
+      's("pink").gain(0.018).hpf(3000).lpf(sine.range(4000, 9000).slow(8))',
+      boom('hh*4?', 'RolandTR808', '.gain(0.12).room(0.8)'),
+      's("crackle*2").gain(0.12)',
+    ],
+    bass: { sound: 'sine', rhythms: ['x', 'x ~ ~ ~ ~ ~ ~ ~', 'x ~ ~ ~ x ~ ~ ~'], tone: '.gain(0.55).room(0.4)' },
+    chords: { sound: 'gm_pad_warm', rhythms: ['x', 'x', '~ x'] },
+    melody: ['gm_vibraphone', 'gm_kalimba', 'gm_music_box'],
+    pad: 'gm_pad_choir',
+  },
 ];
 
 export const LAYERS = ['drums', 'hats', 'bass', 'chords', 'melody', 'pad'] as const;
@@ -168,7 +300,7 @@ export function layerCode(layer: Layer, song: Song, state: LayerState) {
       return pick(style.hats);
     case 'bass': {
       const sound = style.bass.sound;
-      const tone = sound === 'sine' ? '.decay(0.8).sustain(0).shape(0.35).lpf(500).gain(0.9)' : '.lpf(1200).gain(0.8)';
+      const tone = style.bass.tone ?? (sound === 'sine' ? '.decay(0.8).sustain(0).shape(0.35).lpf(500).gain(0.9)' : '.lpf(1200).gain(0.8)');
       return `note(${quoted(bassNotes(song))}).struct("${pick(style.bass.rhythms)}").s("${sound}")${tone}`;
     }
     case 'chords':

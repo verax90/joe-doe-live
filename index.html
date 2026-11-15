@@ -327,22 +327,23 @@
             </label>
           </div>
           <p id="compose-progression" class="compose-progression"></p>
-          <div class="compose-buttons">
-            <button id="compose-new" class="control control-accent" type="button" data-i18n="composeNew">From scratch</button>
-            <button id="compose-surprise" class="control" type="button" data-i18n="composeSurprise">Surprise me</button>
-            <button id="compose-chords" class="control" type="button" data-i18n="composeChords">Other chords</button>
+          <div class="compose-buttons compose-actions">
+            <button id="compose-new" class="control control-accent" type="button" data-icon="new" data-i18n="composeNew">From scratch</button>
+            <button id="compose-surprise" class="control" type="button" data-icon="dice" data-i18n="composeSurprise">Surprise me</button>
+            <button id="compose-chords" class="control" type="button" data-icon="apply" data-i18n="composeChords">Other chords</button>
           </div>
           <ul id="compose-layers" class="panel-list compose-layers"></ul>
         </section>
         <section id="compose-arrangement" class="panel-tabpanel compose-arrangement" role="tabpanel" hidden>
           <p class="panel-help" data-i18n="arrangementHelp">When each layer plays, in parts of 4 bars.</p>
           <div id="compose-grid" class="arrange-grid"></div>
-          <div class="compose-buttons">
-            <button id="arrange-typical" class="control" type="button" data-i18n="arrangeTypical">Typical song</button>
-            <button id="arrange-all" class="control" type="button" data-i18n="arrangeAll">All on</button>
-            <button id="compose-save" class="control" type="button" data-i18n="composeSave">Save as pattern</button>
+          <div class="arrange-presets" role="group" aria-labelledby="arrange-presets-label">
+            <span id="arrange-presets-label" class="arrange-presets-label" data-i18n="arrangeFill">Fill in</span>
+            <button id="arrange-typical" class="arrange-preset" type="button" data-icon="drop" data-i18n="arrangeTypical" data-i18n-title="arrangeTypicalHint">Typical song</button>
+            <button id="arrange-all" class="arrange-preset" type="button" data-icon="all" data-i18n="arrangeAll" data-i18n-title="arrangeAllHint">All on</button>
           </div>
         </section>
+        <button id="compose-save" class="control compose-save" type="button" data-icon="save" data-i18n="composeSave">Save as pattern</button>
 
         <p id="compose-status" class="panel-status" role="status"></p>
       </aside>

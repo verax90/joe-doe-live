@@ -2164,6 +2164,77 @@ select.control {
   box-shadow: 0 0 0 2px var(--fg);
 }
 
+/* Compose → Song: starting from scratch across the panel, the other two
+   side by side under it, each on one line */
+.compose-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.compose-actions > .control {
+  min-width: 0;
+  padding-inline: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compose-actions > .control-accent {
+  grid-column: 1 / -1;
+}
+
+/* Under the grid, the two ways to fill it in: small, side by side, as one
+   control; what saves the song stands apart, below both tabs */
+.arrange-presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.arrange-presets-label {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.arrange-preset {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.arrange-preset {
+  height: 1.8rem;
+  padding: 0 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.arrange-preset:hover,
+.arrange-preset:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  outline: none;
+}
+
+.compose-save {
+  width: 100%;
+  margin-top: 0.75rem;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.compose-save:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
 /* VJ panel: a slider per effect */
 .vj-sliders {
   display: grid;
@@ -2793,21 +2864,6 @@ select.control {
   padding-block: 0.2rem;
 }
 
-/* Compose's three song buttons: three equal columns in one row; a label
-   too long for its column (in any language) takes two lines, never the
-   panel wider */
-#compose-tab-song .compose-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-#compose-tab-song .compose-buttons .control {
-  height: auto;
-  min-height: 2.1rem;
-  padding: 0.3rem 0.4rem;
-  line-height: 1.15;
-  white-space: normal;
-}
 
 /* Phone as controller: the QR code, on white so any camera reads it */
 .remote-qr {
