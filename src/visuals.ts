@@ -47,11 +47,10 @@ export const visuals: Visual[] = [
   {
     id: 'corcheas',
     name: { en: 'Pulse (eighths)', es: 'Pulso (corcheas)', ca: 'Pols (corxeres)' },
-    code: `shape(4, 0.35, 0.02)
-  .repeat(3, 3)
-  .scale(H("1.25 1 1 1.1 1 1.25 1 1"))
-  .color(...tint(0.4))
-  .modulateRotate(osc(2, 0.1), 0.3)
+    // a step sequencer's pads, eight across: the eighth that sounds is lit
+    // and the ones before it fade behind it
+    code: `pulseGrid(H("0 1 2 3 4 5 6 7"), () => kickHit())
+  .color(...tint(0.85))
   .out()`,
   },
   {
@@ -118,10 +117,10 @@ glitchOf(o3, () => 0.1 + high() * 1.5 + hatHit() * 0.6, () => time * 13 + kickCo
   {
     id: 'estela',
     name: { en: 'Trails (bar)', es: 'Estela (compás)', ca: 'Estela (compàs)' },
-    code: `shape(H("<3 4 6 8>"), 0.2, 0.01)
-  .rotate(0, 0.2)
-  .color(...tint(0.4))
-  .blend(src(o0).scale(1.02).rotate(0.01), 0.85)
+    // lights going round, each leaving its trail; another number of them every bar
+    code: `orbs(H("<3 4 6 8>"), () => time * 1.7, () => kickHit())
+  .color(...tint(5))
+  .blend(src(o0).scale(1.004), 0.9)
   .out()`,
   },
   {
@@ -137,21 +136,19 @@ glitchOf(o3, () => 0.1 + high() * 1.5 + hatHit() * 0.6, () => time * 13 + kickCo
   {
     id: 'chispas',
     name: { en: 'Sparks (highs)', es: 'Chispas (agudos)', ca: 'Espurnes (aguts)' },
-    code: `noise(300, 0.1)
-  .thresh(() => 0.55 - high() * 0.3, 0.02)
-  .color(...tint(1))
-  .scrollY(0, -0.05)
-  .blend(src(o0).scale(1.01), 0.6)
+    // sparks thrown up from the bottom, like a grinder's: the more highs,
+    // the more of them, and each one falls back as it burns out
+    code: `sparks(() => time * 0.9, () => 0.45 + high() * 1.6 + hatHit() * 0.4, () => snareHit())
+  .color(...tint(4))
+  .blend(src(o0), 0.82)
   .out()`,
   },
   {
     id: 'vortice',
     name: { en: 'Vortex (bar)', es: 'Vórtice (compás)', ca: 'Vòrtex (compàs)' },
-    code: `osc(12, 0.05, 0)
-  .modulateKaleid(voronoi(6, 0.5, 0.3), 8)
-  .rotate(0, H("<0.1 0.25>"))
-  .contrast(1.4)
-  .color(...tint(0.7))
+    // spiral arms turning into a bright middle; three arms one bar, five the next
+    code: `vortex(() => time * 1.1 + kickCount() * 0.4, H("<3 5>"), () => kickHit())
+  .color(...tint(0.85))
   .out()`,
   },
   {
@@ -210,11 +207,9 @@ glitchOf(o3, () => 0.1 + high() * 1.5 + hatHit() * 0.6, () => time * 13 + kickCo
   {
     id: 'terremoto',
     name: { en: 'Quake (kick)', es: 'Terremoto (bombo)', ca: 'Terratrèmol (bombo)' },
-    code: `cells(() => time * 0.2, () => bass() * 1.3, () => kickHit(), 9)
-  .color(...tint(0.6))
-  .scrollX(() => (Math.random() - 0.5) * bass() * 0.08)
-  .scrollY(() => (Math.random() - 0.5) * bass() * 0.08)
-  .scale(() => 1 + bass() * 0.15)
+    code: `quake(() => time * 0.12, () => kickHit(), () => bass())
+  .color(...tint(1))
+  .add(src(o0).scale(1.015), () => kickHit() * 0.3)
   .out()`,
   },
   {
@@ -1224,6 +1219,155 @@ export const SHADERS = [
   colour += (snow - 0.5) * 0.6 * step(0.001, abs(jump));
   colour *= 0.86 + 0.14 * sin(_st.y * resolution.y * 1.6);
   return vec4(colour, 1.0);`,
+  },
+  {
+    // The ground in an earthquake: plates (cells) that a jolt shakes and
+    // pulls apart, the cracks between them glowing hotter the harder it
+    // hits, and a shock wave running out from the middle as the jolt dies
+    name: 'quake',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'drift', default: 0 },
+      { type: 'float', name: 'jolt', default: 0 },
+      { type: 'float', name: 'low', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0);
+  p += vec2(sin(time * 61.0), cos(time * 53.0)) * jolt * 0.035;
+  float away = length(p);
+  float wave = smoothstep(0.07, 0.0, abs(away - (1.0 - jolt) * 1.15)) * jolt;
+  p *= 1.0 - wave * 0.12;
+  vec2 q = p * 6.5;
+  vec2 ip = floor(q);
+  vec2 fp = fract(q);
+  float f1 = 8.0;
+  float f2 = 8.0;
+  vec2 owner = ip;
+  for (int j = -1; j <= 1; j++) {
+    for (int i = -1; i <= 1; i++) {
+      vec2 g = vec2(float(i), float(j));
+      vec2 c = ip + g;
+      vec2 o = vec2(fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5453), fract(sin(dot(c, vec2(269.5, 183.3))) * 43758.5453));
+      o = 0.5 + 0.4 * sin(drift + 6.2831853 * o);
+      vec2 to = g + o - fp;
+      float far = dot(to, to);
+      if (far < f1) {
+        f2 = f1;
+        f1 = far;
+        owner = c;
+      } else if (far < f2) {
+        f2 = far;
+      }
+    }
+  }
+  f1 = sqrt(f1);
+  f2 = sqrt(f2);
+  float gap = 0.025 + jolt * 0.11 + low * 0.04;
+  float crack = 1.0 - smoothstep(0.0, gap, f2 - f1);
+  float heat = exp(-(f2 - f1) * (10.0 - jolt * 6.0));
+  float own = fract(sin(dot(owner, vec2(41.3, 289.1))) * 43758.5453);
+  float plate = (0.07 + 0.1 * own) * (1.0 - crack) * (0.6 + 0.4 * (1.0 - f1));
+  float v = plate + heat * (0.18 + low * 0.45 + jolt * 0.7) + crack * (0.45 + jolt * 0.55) + wave * 0.7;
+  return vec4(vec3(v), 1.0);`,
+  },
+  {
+    // The pads of a step sequencer: eight across, square, with rounded
+    // corners. step is the one that sounds: it is lit and a little bigger,
+    // and the three or four before it fade away behind it
+    name: 'pulseGrid',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'beat', default: 0 },
+      { type: 'float', name: 'punch', default: 0 },
+    ],
+    glsl: `
+  vec2 cells = vec2(8.0, max(1.0, floor(8.0 * resolution.y / resolution.x + 0.5)));
+  vec2 id = floor(_st * cells);
+  vec2 f = fract(_st * cells) - 0.5;
+  float behind = mod(beat - id.x + 8.0, 8.0);
+  float on = exp(-behind * 0.85);
+  float size = 0.27 + 0.11 * on + punch * 0.06 * on;
+  vec2 d = abs(f) - size + 0.09;
+  float box = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - 0.09;
+  float pad = 1.0 - smoothstep(0.0, 0.025, box);
+  float rim = smoothstep(0.035, 0.0, abs(box)) * (0.25 + 0.75 * on);
+  float inner = 1.0 - smoothstep(0.0, 0.42, length(f));
+  float row = 0.7 + 0.3 * sin(id.y * 1.9 + beat * 0.785);
+  return vec4(vec3(pad * (0.05 + on * row * (0.45 + 0.4 * inner)) + rim * 0.55), 1.0);`,
+  },
+  {
+    // Up to eight lights going round the middle, each on its own ring
+    name: 'orbs',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'count', default: 4 },
+      { type: 'float', name: 'turn', default: 0 },
+      { type: 'float', name: 'pulse', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0) * 2.0;
+  float v = 0.0;
+  for (int i = 0; i < 8; i++) {
+    float fi = float(i);
+    float on = step(fi + 0.5, count);
+    float a = turn * (1.0 + fi * 0.07) + fi * 6.2831853 / max(count, 1.0);
+    float ring = 0.55 + 0.2 * sin(turn * 0.7 + fi * 2.3);
+    vec2 c = vec2(cos(a), sin(a)) * ring;
+    float away = dot(p - c, p - c);
+    v += on * (0.00045 + pulse * 0.0007) / (away + 0.0007);
+  }
+  return vec4(vec3(clamp(v, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // Sparks: each one leaves the bottom at its own angle and speed, slows,
+    // falls and burns out, then starts again. amount is how many of the
+    // twenty-eight are flying; flare lights the place they come from
+    name: 'sparks',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'amount', default: 0.4 },
+      { type: 'float', name: 'flare', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0);
+  p.y = -p.y;
+  vec2 from = vec2(0.0, -0.46);
+  float v = 0.0;
+  for (int i = 0; i < 28; i++) {
+    float fi = float(i);
+    float r1 = fract(sin(fi * 12.9898 + 1.0) * 43758.5453);
+    float r2 = fract(sin(fi * 78.233 + 2.0) * 24634.6345);
+    float r3 = fract(sin(fi * 39.425 + 3.0) * 13758.1123);
+    float life = fract(clock * (0.3 + r3 * 0.45) + r1);
+    float angle = 1.5708 + (r2 - 0.5) * 2.4;
+    vec2 at = from + vec2(cos(angle), sin(angle)) * (0.55 + r1 * 0.85) * life - vec2(0.0, 1.05 * life * life);
+    float away = dot(p - at, p - at);
+    v += step(r3, amount) * (1.0 - life) * (1.0 - life) * smoothstep(0.02, 0.3, life) * 0.00022 / (away + 0.00003);
+  }
+  float glow = exp(-length(p - from) * 22.0) * (0.08 + flare * 0.5);
+  return vec4(vec3(clamp(v + glow, 0.0, 1.0)), 1.0);`,
+  },
+  {
+    // A vortex: spiral arms winding into the middle, banded by depth, with
+    // the eye lighting up on pull. arms has to be a whole number
+    name: 'vortex',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'turn', default: 0 },
+      { type: 'float', name: 'arms', default: 3 },
+      { type: 'float', name: 'pull', default: 0 },
+    ],
+    glsl: `
+  vec2 p = (_st - 0.5) * vec2(resolution.x / resolution.y, 1.0);
+  float away = length(p);
+  float a = atan(p.y, p.x);
+  float depth = log(away + 0.015);
+  float arm = smoothstep(0.3, 0.7, 0.5 + 0.5 * sin(a * floor(arms + 0.5) + depth * (5.5 + pull * 2.0) - turn));
+  float bands = 0.6 + 0.4 * sin(depth * 13.0 - turn * 1.7);
+  float far = smoothstep(0.0, 0.55, away);
+  float eye = exp(-away * (11.0 - pull * 5.0));
+  return vec4(vec3(arm * bands * (0.2 + 0.8 * far) + eye * (0.5 + pull * 0.6)), 1.0);`,
   },
   {
     // The finish (finish.ts): the picture, a glow from what is bright around

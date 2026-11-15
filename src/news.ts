@@ -12,6 +12,16 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-redrawn',
+    title: L('Old visuals, drawn again', 'Visuales de siempre, vueltos a dibujar', 'Visuals de sempre, tornats a dibuixar'),
+    text: L(
+      'Cells, Quake, Glitch, Pulse, Trails, Sparks, Vortex and Plasma keep their names and what moves them, but are new: a honeycomb that lights up, ground that cracks on the kick, a signal that breaks, sequencer pads, comets, a grinder\'s sparks and a spiral',
+      'Celdas, Terremoto, Glitch, Pulso, Estela, Chispas, Vórtice y Plasma conservan su nombre y lo que los mueve, pero son nuevos: un panal que se enciende, suelo que se agrieta con el bombo, una señal que se rompe, pads de secuenciador, cometas, chispas de radial y una espiral',
+      'Cel·les, Terratrèmol, Glitch, Pols, Estela, Espurnes, Vòrtex i Plasma conserven el nom i el que els mou, però són nous: una bresca que s\'encén, terra que s\'esquerda amb el bombo, un senyal que es trenca, pads de seqüenciador, cometes, espurnes de radial i una espiral',
+    ),
+    go: [{ value: ['#visual', 'terremoto'] }],
+  },
+  {
     id: '2026-11-15-webcam',
     title: L('A Matrix that looks like it, and six more webcam visuals', 'Un Matrix que lo parece, y seis visuales de webcam más', 'Un Matrix que ho sembla, i sis visuals de webcam més'),
     text: L(
