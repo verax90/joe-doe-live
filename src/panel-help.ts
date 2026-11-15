@@ -1,6 +1,6 @@
 // A panel's explanation is there for the first time you open it; the tenth
-// time it is a wall between you and the button. So what runs past two lines
-// folds to two, with a "more" after it. Every panel gets this at once: the
+// time it is a wall between you and the button. So what runs to five lines
+// or more folds to two, with a "more" after it. Every panel gets this at once: the
 // texts stay whole (and in the Help), the panels open on their controls.
 import { onLangChange, t } from './i18n';
 import { readStorage, writeStorage } from './storage';
@@ -8,9 +8,10 @@ import { readStorage, writeStorage } from './storage';
 const LINES = 2;
 const KEY = 'jdl:help-open';
 
-// Whether a text of this height, at this line height, is worth folding: one
-// line over is not (the "more" would take the room it saved)
-export const worthFolding = (height: number, lineHeight: number, lines = LINES) => height > lineHeight * (lines + 1.2);
+// Whether a text of this height, at this line height, is worth folding: only
+// when it would hide three lines or more. Hiding one or two saves less room
+// than the "more" and the click cost
+export const worthFolding = (height: number, lineHeight: number, lines = LINES) => height > lineHeight * (lines + 2.5);
 
 export function setupPanelHelp() {
   // remembered open, by the text's own key: someone who wants a panel's
