@@ -63,12 +63,50 @@ function read() {
 export const motionX = () => read().x;
 export const motionY = () => read().y;
 export const motion = () => read().amount;
-Object.assign(globalThis, { motionX, motionY, motion });
+export const motionHeld = () => state.held;
+Object.assign(globalThis, { motionX, motionY, motion, motionHeld });
+
+// The mouse (or a finger on a touch screen) on the visuals is the point too,
+// while the code is hidden (with it in view a click there is for the code)
+export function setupPointerPoint() {
+  let drawing = false;
+  const canvas = () => document.getElementById('hydra-canvas');
+  const pointAt = (event: PointerEvent) => {
+    const box = canvas()?.getBoundingClientRect();
+    if (!box?.width) return null;
+    return { x: Math.min(1, Math.max(0, (event.clientX - box.left) / box.width)), y: Math.min(1, Math.max(0, (event.clientY - box.top) / box.height)) };
+  };
+  const onStage = (event: PointerEvent) => {
+    const target = event.target as HTMLElement;
+    return (
+      document.body.classList.contains('hide-code') &&
+      Boolean(target.closest('.stage')) &&
+      !target.closest('.panel, .bar, .foot, .menu-panel, dialog, button, input, select, a')
+    );
+  };
+  window.addEventListener('pointerdown', (event) => {
+    if (!onStage(event)) return;
+    drawing = true;
+    holdMotionPoint(pointAt(event));
+  });
+  window.addEventListener('pointermove', (event) => {
+    if (drawing) holdMotionPoint(pointAt(event));
+  });
+  const lift = () => {
+    if (!drawing) return;
+    drawing = false;
+    holdMotionPoint(null);
+  };
+  window.addEventListener('pointerup', lift);
+  window.addEventListener('pointercancel', lift);
+}
 
 // A finger on the phone's Visual tab is the point while it is down (x and y
 // as on the screen, y from the top), webcam or not; null when it lifts
 export function holdMotionPoint(point: { x: number; y: number } | null) {
   read();
+  // a new touch starts where it lands, not gliding there from the last one
+  if (point && !state.held) Object.assign(state, { x: point.x, y: point.y });
   state.held = Boolean(point);
   if (point) Object.assign(state, { targetX: point.x, targetY: point.y, targetAmount: 0.7 });
   else state.targetAmount = 0;

@@ -25,7 +25,7 @@ import { followsClock, setupMachines } from './machines';
 import { setupLiveKeys } from './live-keys';
 import { setupMenu } from './menu';
 import { setupPanelHelp } from './panel-help';
-import { setupMotion } from './motion';
+import { setupMotion, setupPointerPoint } from './motion';
 import { setupFinish } from './finish';
 import { setupFullscreen } from './fullscreen';
 import { setupDock } from './dock';
@@ -429,6 +429,7 @@ setupRemoteVisual({
   },
 });
 setupMotion();
+setupPointerPoint();
 room = setupRoom({
   editor,
   currentVisual: () => visualSelect.value,

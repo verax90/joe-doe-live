@@ -12,6 +12,26 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-15-ascii',
+    title: L('ASCII, teletext and a terminal', 'ASCII, teletexto y un terminal', 'ASCII, teletext i un terminal'),
+    text: L(
+      'Visuals written in characters: the webcam in colour ASCII or as a green terminal, a tunnel and a plasma in ASCII, teletext from the eighties (also for the webcam) and a terminal that scrolls with the volume',
+      'Visuales escritos con caracteres: la webcam en ASCII de color o de terminal verde, un túnel y un plasma en ASCII, teletexto de los ochenta (también con la webcam) y un terminal que corre con el volumen',
+      "Visuals escrits amb caràcters: la webcam en ASCII de color o de terminal verd, un túnel i un plasma en ASCII, teletext dels vuitanta (també amb la webcam) i un terminal que corre amb el volum",
+    ),
+    go: [{ value: ['#visual', 'maq-ascii-tunel'] }],
+  },
+  {
+    id: '2026-11-15-painting',
+    title: L('Paint with light', 'Pinta con luz', 'Pinta amb llum'),
+    text: L(
+      'Light painting (under Motion): hide the code and drag the mouse across the visuals, or a finger on the phone\'s Visual square. The strokes glow, swirl and fade; with nobody painting it paints by itself. The mouse now moves the other Motion visuals too',
+      'Pintura de luz (en Movimiento): oculta el código y arrastra el ratón por los visuales, o el dedo por el cuadro de la pestaña Visual del móvil. Los trazos brillan, giran y se apagan; si nadie pinta, pinta sola. El ratón mueve ya también los demás visuales de Movimiento',
+      "Pintura de llum (a Moviment): amaga el codi i arrossega el ratolí pels visuals, o el dit pel quadre de la pestanya Visual del mòbil. Els traços brillen, giren i s'apaguen; si ningú pinta, pinta sola. El ratolí mou ja també els altres visuals de Moviment",
+    ),
+    go: [{ value: ['#visual', 'mov-pintura'] }],
+  },
+  {
     id: '2026-11-15-voice',
     title: L('More visuals for your voice', 'Más visuales para tu voz', 'Més visuals per a la teva veu'),
     text: L(

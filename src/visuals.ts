@@ -430,6 +430,51 @@ src(o3)
   .out()`,
   },
   {
+    id: 'maq-ascii-tunel',
+    name: { en: 'ASCII tunnel (kick)', es: 'Túnel ASCII (bombo)', ca: 'Túnel ASCII (bombo)' },
+    code: `tunnel(() => time * 0.35 + kickCount() * 0.25, () => snareHit() * 1.2, () => kickHit())
+  .out(o3)
+asciiOf(o3, () => 72 + kickHit() * 24, 1)
+  .color(...tint(1.2))
+  .out()`,
+  },
+  {
+    id: 'maq-ascii-plasma',
+    name: { en: 'ASCII plasma (lows)', es: 'Plasma ASCII (graves)', ca: 'Plasma ASCII (greus)' },
+    code: `plasma(() => time * 0.08 + kickCount() * 0.08, () => kickHit(), () => bass())
+  .out(o3)
+asciiOf(o3, 120, 1)
+  .color(...tint(1.2))
+  .out()`,
+  },
+  {
+    id: 'maq-teletexto',
+    name: { en: 'Teletext (bar)', es: 'Teletexto (compás)', ca: 'Teletext (compàs)' },
+    code: `osc(5, 0.08, 1.6)
+  .kaleid(H("<4 6>"))
+  .rotate(() => time * 0.1)
+  .modulate(noise(2, 0.2), () => 0.1 + bass() * 0.3)
+  .out(o3)
+teletext(o3, () => 36 + kickHit() * 10)
+  .out()`,
+  },
+  {
+    id: 'maq-terminal',
+    name: { en: 'Terminal (volume)', es: 'Terminal (volumen)', ca: 'Terminal (volum)' },
+    code: `terminal(() => time * (1.2 + level() * 5), () => kickHit())
+  .out()`,
+  },
+  {
+    id: 'mov-pintura',
+    name: { en: 'Light painting (mouse or phone)', es: 'Pintura de luz (ratón o móvil)', ca: 'Pintura de llum (ratolí o mòbil)' },
+    // drag on the screen (code hidden) or on the phone's Visual square: the
+    // strokes glow in changing colours, swirl and fade; a kick sends them out
+    code: `lightBrush(o3, () => brush().x0, () => brush().y0, () => brush().x1, () => brush().y1, () => brush().on, () => time * 0.12, () => 1 + kickHit() * 5, () => justCameIn())
+  .out(o3)
+src(o3)
+  .out()`,
+  },
+  {
     id: 'mov-luz',
     name: { en: 'Light (follows you)', es: 'Luz (te sigue)', ca: 'Llum (et segueix)' },
     code: `shape(64, () => 0.02 + motion() * 0.1, 0.25)
@@ -534,6 +579,28 @@ flowMosh(o0, s0, o3, () => 1 + bass() * 1.5)
     code: `src(s0)
   .thresh(() => 0.45 + mid() * 0.2, 0.04)
   .color(...tint(1))
+  .out()`,
+  },
+  {
+    id: 'cam-ascii',
+    name: { en: 'Webcam (colour ASCII)', es: 'Webcam (ASCII de color)', ca: 'Webcam (ASCII de color)' },
+    camera: true,
+    code: `asciiOf(s0, () => 110 - bass() * 40, 0)
+  .out()`,
+  },
+  {
+    id: 'cam-ascii-verde',
+    name: { en: 'Webcam (green screen ASCII)', es: 'Webcam (ASCII de terminal)', ca: 'Webcam (ASCII de terminal)' },
+    camera: true,
+    code: `asciiOf(s0, 90, 2)
+  .add(src(o0).scrollY(0.002).color(0.6, 0.6, 0.6), () => 0.3 + kickHit() * 0.3)
+  .out()`,
+  },
+  {
+    id: 'cam-teletexto',
+    name: { en: 'Webcam (teletext)', es: 'Webcam (teletexto)', ca: 'Webcam (teletext)' },
+    camera: true,
+    code: `teletext(s0, () => 44 - bass() * 16)
   .out()`,
   },
   {
@@ -1851,6 +1918,121 @@ export const SHADERS = [
   return vec4(vec3(clamp(v * 0.75 + core * 0.5, 0.0, 1.0)), 1.0);`,
   },
   {
+    // ASCII made on the graphics card: the picture in cells, each written
+    // with a character as dense as the cell is bright ( .:-=+*#%@, drawn
+    // in 4×5 dots, packed one character per number). mode 0 keeps each cell's
+    // colour, 1 is white (for the theme's tint or a palette after it), 2 a
+    // green terminal
+    name: 'asciiOf',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'cols', default: 100 },
+      { type: 'float', name: 'mode', default: 0 },
+    ],
+    glsl: `
+  vec2 grid = vec2(floor(cols), floor(cols * resolution.y / resolution.x * 0.8333));
+  vec2 id = floor(_st * grid);
+  vec2 f = fract(_st * grid);
+  vec3 seen = texture2D(tex, (id + 0.5) / grid).rgb;
+  float bright = dot(seen, vec3(0.299, 0.587, 0.114));
+  float k = floor(clamp(bright * 1.15, 0.0, 0.999) * 10.0);
+  float glyph = k < 1.0 ? 0.0 : k < 2.0 ? 4.0 : k < 3.0 ? 16448.0 : k < 4.0 ? 3584.0 : k < 5.0 ? 57568.0 : k < 6.0 ? 20032.0 : k < 7.0 ? 675402.0 : k < 8.0 ? 390645.0 : k < 9.0 ? 599177.0 : 433031.0;
+  float px = floor(f.x * 5.0);
+  float py = floor(f.y * 6.0);
+  float bit = 19.0 - (py * 4.0 + px);
+  float on = (px < 4.0 && py < 5.0) ? mod(floor((glyph + 0.5) / exp2(bit)), 2.0) : 0.0;
+  vec3 ink = mode < 0.5 ? seen * 1.4 / max(max(seen.r, max(seen.g, seen.b)), 0.25) : mode < 1.5 ? vec3(0.35 + bright * 0.8) : vec3(0.12, 1.0, 0.35) * (0.35 + bright * 0.9);
+  return vec4(ink * on, 1.0);`,
+  },
+  {
+    // Teletext: the picture in the eight colours a television could show, in
+    // blocks of two by three per character, with the gaps of its separated
+    // graphics. cols is how many characters across
+    name: 'teletext',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'cols', default: 40 },
+    ],
+    glsl: `
+  vec2 grid = vec2(floor(cols), floor(cols * resolution.y / resolution.x * 1.2)) * vec2(2.0, 3.0);
+  vec2 id = floor(_st * grid);
+  vec2 f = fract(_st * grid);
+  vec3 seen = texture2D(tex, (id + 0.5) / grid).rgb;
+  vec3 eight = step(vec3(0.45), seen);
+  float block = step(0.12, f.x) * step(0.12, f.y);
+  float scan = 0.85 + 0.15 * step(0.5, fract(_st.y * resolution.y * 0.5));
+  return vec4(eight * block * scan, 1.0);`,
+  },
+  {
+    // A terminal: lines of made-up text scrolling up, each a different
+    // length, the newest at the bottom with a blinking cursor. clock moves
+    // it on; a kick flashes the newest line
+    name: 'terminal',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'flash', default: 0 },
+    ],
+    glsl: `
+  vec2 grid = vec2(80.0, floor(80.0 * resolution.y / resolution.x * 0.8333));
+  float scroll = clock * 2.0;
+  float rowF = _st.y * grid.y + fract(scroll);
+  float row = floor(rowF);
+  float line = row - floor(scroll);
+  vec2 f = vec2(fract(_st.x * grid.x), fract(rowF));
+  float col = floor(_st.x * grid.x);
+  float len = 6.0 + floor(fract(sin(line * 12.9898) * 43758.5453) * 62.0);
+  float indent = floor(fract(sin(line * 4.1) * 1234.5) * 3.0) * 2.0;
+  float written = step(indent, col) * step(col, len);
+  float gap = step(0.18, fract(sin((col + line * 97.0) * 3.3) * 4375.85));
+  float px = floor(f.x * 5.0);
+  float py = floor(f.y * 6.0);
+  // each place gets a real character (one of . : - = + * # % @), changing now and then
+  float pick = floor(fract(sin(dot(vec2(col, line), vec2(12.9898, 78.233))) * 43758.5453) * 9.0);
+  float glyph = pick < 1.0 ? 4.0 : pick < 2.0 ? 16448.0 : pick < 3.0 ? 3584.0 : pick < 4.0 ? 57568.0 : pick < 5.0 ? 20032.0 : pick < 6.0 ? 675402.0 : pick < 7.0 ? 390645.0 : pick < 8.0 ? 599177.0 : 433031.0;
+  float on = (px < 4.0 && py < 5.0) ? mod(floor((glyph + 0.5) / exp2(19.0 - (py * 4.0 + px))), 2.0) : 0.0;
+  float newest = step(grid.y - 1.0, row);
+  float age = clamp((grid.y - row) / grid.y, 0.0, 1.0);
+  float cursor = newest * step(len + 1.0, col) * step(col, len + 1.0) * step(0.5, fract(clock * 1.5)) * step(0.1, f.y);
+  float v = on * written * gap * (0.25 + 0.75 * (1.0 - age)) + newest * on * written * flash * 0.6 + cursor;
+  return vec4(vec3(0.12, 1.0, 0.35) * clamp(v, 0.0, 1.0), 1.0);`,
+  },
+  {
+    // Light painting: what was painted turns a little and drifts out (more
+    // on a kick) as it fades, and the stretch the brush made this frame is
+    // added in a colour that goes round the rainbow
+    name: 'lightBrush',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'before', default: NaN },
+      { type: 'float', name: 'ax', default: 0.5 },
+      { type: 'float', name: 'ay', default: 0.5 },
+      { type: 'float', name: 'bx', default: 0.5 },
+      { type: 'float', name: 'by', default: 0.5 },
+      { type: 'float', name: 'on', default: 0 },
+      { type: 'float', name: 'hue', default: 0 },
+      { type: 'float', name: 'drift', default: 1 },
+      { type: 'float', name: 'fresh', default: 0 },
+    ],
+    glsl: `
+  float turn = 0.0025 * drift;
+  vec2 c = _st - 0.5;
+  vec2 back = vec2(c.x * cos(turn) - c.y * sin(turn), c.x * sin(turn) + c.y * cos(turn)) * (1.0 - 0.002 * drift) + 0.5;
+  vec3 old = texture2D(before, back).rgb * 0.978 * (1.0 - fresh);
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = _st * aspect;
+  vec2 a = vec2(ax, ay) * aspect;
+  vec2 b = vec2(bx, by) * aspect;
+  vec2 ab = b - a;
+  float h = clamp(dot(p - a, ab) / max(dot(ab, ab), 1e-6), 0.0, 1.0);
+  float d = length(p - a - ab * h);
+  float stroke = (smoothstep(0.007, 0.002, d) + 0.0009 / (d + 0.006)) * on;
+  vec3 colour = 0.55 + 0.45 * cos(6.2831853 * (hue + vec3(0.0, 0.33, 0.67)));
+  return vec4(clamp(old + colour * stroke * 0.9, 0.0, 1.0), 1.0);`,
+  },
+  {
     // The finish (finish.ts): the picture, a glow from what is bright around
     // each point (sixteen looks at the picture, on two rings), darker
     // corners and grain
@@ -1971,6 +2153,32 @@ export const SHADERS = [
 // and for the first moment of a visual, so it opens on its own picture and
 // not on what the one before left
 let cameInAt = -Infinity;
+// The light-painting brush (Light painting): where the point was a frame ago
+// and where it is now, from the mouse, the phone or the webcam. With nobody
+// drawing for three seconds it draws by itself, a slow figure of eight, so
+// the screen is never empty; a touch takes it back at once
+const brushPen = { at: -1, x0: 0.5, y0: 0.5, x1: 0.5, y1: 0.5, on: 0, was: false, lastHeld: -Infinity };
+export function idleBrush(seconds: number) {
+  return { x: 0.5 + 0.32 * Math.sin(seconds * 0.9), y: 0.5 + 0.26 * Math.sin(seconds * 1.7 + 1) };
+}
+(globalThis as { brush?: () => typeof brushPen }).brush = () => {
+  const now = performance.now();
+  if (now - brushPen.at < 4) return brushPen;
+  const m = globalThis as { motionX?: () => number; motionY?: () => number; motionHeld?: () => boolean };
+  const held = m.motionHeld?.() ?? false;
+  if (held) brushPen.lastHeld = now;
+  const idle = !held && now - brushPen.lastHeld > 3000;
+  const at = idle ? idleBrush(now / 1000) : { x: m.motionX?.() ?? 0.5, y: m.motionY?.() ?? 0.5 };
+  const drawing = held || idle;
+  brushPen.x0 = drawing && brushPen.was ? brushPen.x1 : at.x;
+  brushPen.y0 = drawing && brushPen.was ? brushPen.y1 : at.y;
+  brushPen.x1 = at.x;
+  brushPen.y1 = at.y;
+  brushPen.on = drawing ? 1 : 0;
+  brushPen.was = drawing;
+  brushPen.at = now;
+  return brushPen;
+};
 // The heart monitor's pen (Touch (heartbeat)): where it was a frame ago and
 // where it is now. It sweeps across every four seconds; since the last
 // touch it draws a heartbeat's shape (a small bump, the spike down and up,
