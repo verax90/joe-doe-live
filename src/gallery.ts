@@ -7,6 +7,7 @@
 // on for a couple of seconds keeps a small picture of how it looked for you
 // (so the webcam ones show your own picture after their first time).
 import { onHydraFrame } from './ascii';
+import { DROP_EVENT } from './drop';
 import { onLangChange, pick, t, type StringKey } from './i18n';
 import { readStorage, writeStorage } from './storage';
 import { visualGroup, visuals, type Visual, type VisualGroup } from './visuals';
@@ -40,6 +41,21 @@ export function galleryMatches(visual: Visual, filter: Filter, query: string, fa
 export function cardName(name: string) {
   const inner = /^Webcam \((.+)\)$/.exec(name)?.[1];
   return inner ? inner[0].toUpperCase() + inner.slice(1) : name;
+}
+
+// The one that comes in on a build-up's drop: one of your favourites
+// (not the one on), else one of the same group as the one on (the
+// webcam ones only if a webcam one is on: no camera asked for by surprise)
+export function dropPick(current: Visual | undefined, favourites: Set<string>, random = Math.random) {
+  const favoured = visuals.filter((visual) => favourites.has(visual.id) && (!visual.camera || current?.camera));
+  if (favoured.filter((visual) => visual.id !== current?.id).length) return pickAnother(favoured.map((visual) => visual.id), current?.id ?? '', random);
+  const group = current ? visualGroup(current) : 'sound';
+  const from = group === 'top' || group === 'clips' ? 'sound' : group;
+  return pickAnother(
+    visuals.filter((visual) => visualGroup(visual) === from && (!visual.camera || current?.camera)).map((visual) => visual.id),
+    current?.id ?? '',
+    random,
+  );
 }
 
 // Another one at random from those shown, never the one on now
@@ -182,6 +198,15 @@ export function setupGallery(select: HTMLSelectElement) {
   };
 
   search.addEventListener('input', renderGrid);
+  window.addEventListener(DROP_EVENT, () => {
+    // From the code leaves the visuals to the pattern: nothing to change
+    if (select.value === 'code') return;
+    const next = dropPick(
+      visuals.find((visual) => visual.id === select.value),
+      favourites,
+    );
+    if (next) put(next);
+  });
   random.addEventListener('click', () => {
     const next = pickAnother(
       shown().map((visual) => visual.id),

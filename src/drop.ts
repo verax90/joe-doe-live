@@ -12,6 +12,9 @@ import { getLimiter } from './limiter';
 import { readStorage, writeStorage } from './storage';
 import { cancelShatter, shatterAt } from './shatter';
 
+// On the one of a build-up, when it is set to change the visual
+export const DROP_EVENT = 'jdl:drop';
+
 export type DropSettings = {
   bars: number;
   roll: boolean;
@@ -20,6 +23,8 @@ export type DropSettings = {
   gap: boolean;
   impact: boolean;
   glass: boolean;
+  // another visual comes in on the one (gallery.ts picks which)
+  visual: boolean;
   // what kind: what rolls (snare, clap or kick), what rises (noise or a tone
   // going up), which way the filter goes (the bass away, or everything going
   // dark), and how long the silence before (half a beat or a whole one)
@@ -36,6 +41,7 @@ const DEFAULTS: DropSettings = {
   gap: true,
   impact: true,
   glass: true,
+  visual: true,
   rollSound: 'sd',
   riserKind: 'noise',
   filterKind: 'high',
@@ -86,7 +92,7 @@ export function setupDrop(scheduler: Scheduler | undefined) {
   const goLabel = go.querySelector<HTMLElement>('span')!;
   const status = document.querySelector<HTMLElement>('#drop-status')!;
   const progress = document.querySelector<HTMLElement>('#drop-progress')!;
-  const boxes = (['roll', 'riser', 'filter', 'gap', 'impact', 'glass'] as const).map((key) => [key, document.querySelector<HTMLInputElement>(`#drop-${key}`)!] as const);
+  const boxes = (['roll', 'riser', 'filter', 'gap', 'impact', 'glass', 'visual'] as const).map((key) => [key, document.querySelector<HTMLInputElement>(`#drop-${key}`)!] as const);
   const kinds = [...document.querySelectorAll<HTMLButtonElement>('.drop-kind')];
   const barButtons = [...document.querySelectorAll<HTMLButtonElement>('.drop-bar')];
   const show = () => {
@@ -113,7 +119,7 @@ export function setupDrop(scheduler: Scheduler | undefined) {
   };
 
   // What a build left running, to call it off
-  let running: { nodes: AudioScheduledSourceNode[]; timer: number } | undefined;
+  let running: { nodes: AudioScheduledSourceNode[]; timer: number; swap?: number } | undefined;
 
   const reset = (context: BaseAudioContext) => {
     const limiter = getLimiter();
@@ -136,6 +142,7 @@ export function setupDrop(scheduler: Scheduler | undefined) {
       }
     }
     window.clearInterval(running.timer);
+    window.clearTimeout(running.swap);
     cancelShatter();
     if (limiter) reset(limiter.master.context);
     running = undefined;
@@ -245,6 +252,10 @@ export function setupDrop(scheduler: Scheduler | undefined) {
     // the screen cracks over the last bar and breaks on the one (shatter.ts),
     // at the moment it is heard, not when it is scheduled
     if (settings.glass) shatterAt(performance.now() + (dropAt - context.currentTime + (context.outputLatency || 0)) * 1000, barSeconds);
+    // and another visual comes in right then
+    const swap = settings.visual
+      ? window.setTimeout(() => window.dispatchEvent(new Event(DROP_EVENT)), (dropAt - context.currentTime + (context.outputLatency || 0)) * 1000)
+      : undefined;
     goLabel.textContent = t('dropCancel');
     go.dataset.icon = 'close';
     go.classList.add('is-running');
@@ -269,7 +280,7 @@ export function setupDrop(scheduler: Scheduler | undefined) {
         status.textContent = t('dropDone');
       }
     }, 50);
-    running = { nodes, timer };
+    running = { nodes, timer, swap };
   });
 
   idle();

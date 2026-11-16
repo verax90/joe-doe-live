@@ -30,7 +30,7 @@ describe('build-up', () => {
   });
 
   it('four kinds, each recognised from the settings it sets', () => {
-    const base = { bars: 4, roll: true, riser: true, filter: true, gap: true, impact: true, glass: true, rollSound: 'sd', riserKind: 'noise', filterKind: 'high', gapBeats: 0.5 } as const;
+    const base = { bars: 4, roll: true, riser: true, filter: true, gap: true, impact: true, glass: true, visual: true, rollSound: 'sd', riserKind: 'noise', filterKind: 'high', gapBeats: 0.5 } as const;
     for (const kind of DROP_KINDS) expect(kindOf({ ...base, ...kind.settings })).toBe(kind.id);
     expect(kindOf({ ...base, rollSound: 'cp', riserKind: 'noise' })).toBeUndefined();
   });

@@ -15,9 +15,9 @@ export const NEWS: News[] = [
     id: '2026-11-16-gallery',
     title: L('A gallery of visuals', 'Galería de visuales', 'Galeria de visuals'),
     text: L(
-      'The grid button next to the Visual menu: every look as a card with its picture, in groups, with a search, favourites (the star) and «Another» at random from the group. The webcam ones show your own picture after their first time',
-      'El botón de cuadrícula junto al menú de Visual: todos los visuales en tarjetas con su imagen, por grupos, con buscador, favoritos (la estrella) y «Otro» al azar del grupo. Los de webcam enseñan tu imagen después de la primera vez',
-      "El botó de quadrícula al costat del menú de Visual: tots els visuals en targetes amb la seva imatge, per grups, amb cercador, preferits (l'estrella) i «Un altre» a l'atzar del grup. Els de webcam mostren la teva imatge després de la primera vegada",
+      'The grid button next to the Visual menu: every look as a card with its picture, in groups, with a search, favourites (the star) and «Another» at random from the group. The webcam ones show your own picture after their first time. And a build-up now changes the visual on the drop: one of your favourites, or one of the same group',
+      'El botón de cuadrícula junto al menú de Visual: todos los visuales en tarjetas con su imagen, por grupos, con buscador, favoritos (la estrella) y «Otro» al azar del grupo. Los de webcam enseñan tu imagen después de la primera vez. Y el Subidón ahora cambia de visual en el drop: uno de tus favoritos, o uno del mismo grupo',
+      "El botó de quadrícula al costat del menú de Visual: tots els visuals en targetes amb la seva imatge, per grups, amb cercador, preferits (l'estrella) i «Un altre» a l'atzar del grup. Els de webcam mostren la teva imatge després de la primera vegada. I la Pujada ara canvia de visual al drop: un dels teus preferits, o un del mateix grup",
     ),
     go: [{ click: '#toggle-gallery' }],
   },
