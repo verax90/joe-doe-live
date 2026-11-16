@@ -747,6 +747,88 @@ motionOnly(s0, o3, () => 3 + bass() * 4)
   .out()`,
   },
   {
+    id: 'cam-hexagonos',
+    name: { en: 'Webcam (hexagons)', es: 'Webcam (hexágonos)', ca: 'Webcam (hexàgons)' },
+    camera: true,
+    code: `hexPixels(s0, () => 22 + bass() * 30)
+  .saturate(1.3)
+  .out()`,
+  },
+  {
+    id: 'cam-cristal',
+    name: { en: 'Webcam (broken glass)', es: 'Webcam (cristal roto)', ca: 'Webcam (vidre trencat)' },
+    camera: true,
+    // a kick shatters it a bit more
+    code: `brokenGlass(s0, H("<6 9 5 8>"), () => 0.015 + kickHit() * 0.05 + bass() * 0.03)
+  .out()`,
+  },
+  {
+    id: 'cam-punto-cruz',
+    name: { en: 'Webcam (cross stitch)', es: 'Webcam (punto de cruz)', ca: 'Webcam (punt de creu)' },
+    camera: true,
+    code: `crossStitch(s0, 12)
+  .out()`,
+  },
+  {
+    id: 'cam-piezas',
+    name: { en: 'Webcam (building bricks)', es: 'Webcam (piezas de construcción)', ca: 'Webcam (peces de construcció)' },
+    camera: true,
+    code: `bricks(s0, () => 22 + bass() * 14)
+  .out()`,
+  },
+  {
+    id: 'cam-rayos-x',
+    name: { en: 'Webcam (X-ray)', es: 'Webcam (rayos X)', ca: 'Webcam (raigs X)' },
+    camera: true,
+    code: `xray(s0, () => 1 + kickHit() * 2)
+  .out()`,
+  },
+  {
+    id: 'cam-holograma',
+    name: { en: 'Webcam (hologram)', es: 'Webcam (holograma)', ca: 'Webcam (holograma)' },
+    camera: true,
+    code: `hologram(s0, () => time, () => kickHit() + hatHit() * 0.5)
+  .add(src(o0).scale(1.01), 0.25)
+  .out()`,
+  },
+  {
+    id: 'cam-oleo',
+    name: { en: 'Webcam (oil painting)', es: 'Webcam (pintura al óleo)', ca: 'Webcam (pintura a l\'oli)' },
+    camera: true,
+    code: `oilPaint(s0, () => 5 + bass() * 6)
+  .saturate(1.4)
+  .out()`,
+  },
+  {
+    id: 'cam-periodico',
+    name: { en: 'Webcam (newsprint)', es: 'Webcam (trama de periódico)', ca: 'Webcam (trama de diari)' },
+    camera: true,
+    code: `newsprint(s0, () => 7 + bass() * 6)
+  .out()`,
+  },
+  {
+    id: 'cam-lapiz',
+    name: { en: 'Webcam (pencil drawing)', es: 'Webcam (dibujo a lápiz)', ca: 'Webcam (dibuix a llapis)' },
+    camera: true,
+    // the strokes tremble on each kick, as if drawn again
+    code: `pencil(s0, () => kickCount() * 1.7)
+  .out()`,
+  },
+  {
+    id: 'cam-tunel',
+    name: { en: 'Webcam (endless tunnel)', es: 'Webcam (túnel infinito)', ca: 'Webcam (túnel infinit)' },
+    camera: true,
+    // you in the middle, and every frame before you flying outwards
+    code: `src(o0)
+  .scale(() => 1.07 + bass() * 0.05)
+  .rotate(() => Math.sin(time * 0.3) * 0.04)
+  .hue(0.03)
+  .color(0.96, 0.96, 0.96)
+  .layer(shape(4, 0.46, 0.002).color(...tint(1.4)).mask(shape(4, 0.46, 0.002)))
+  .layer(src(s0).mask(shape(4, 0.42, 0.002)))
+  .out()`,
+  },
+  {
     id: 'cam-mirror',
     name: { en: 'Webcam (mirror)', es: 'Webcam (espejo)', ca: 'Webcam (mirall)' },
     camera: true,
@@ -2245,6 +2327,236 @@ export const SHADERS = [
   float puff = exp(-d * d / 0.0012) * on * 0.16;
   vec3 colour = 0.6 + 0.4 * cos(6.2831853 * (hue + vec3(0.0, 0.33, 0.67)));
   return vec4(clamp(old + colour * puff, 0.0, 1.0), 1.0);`,
+  },
+  {
+    // Hexagons: the picture in hexagonal tiles, each one colour, with a dark
+    // seam between them. size is a tile's width in pixels
+    name: 'hexPixels',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'size', default: 24 },
+    ],
+    glsl: `
+  vec2 p = _st * resolution / max(size, 2.0);
+  vec2 r = vec2(1.0, 1.7320508);
+  vec2 a = mod(p, r) - r * 0.5;
+  vec2 b = mod(p - r * 0.5, r) - r * 0.5;
+  vec2 gv = dot(a, a) < dot(b, b) ? a : b;
+  vec2 centre = (p - gv) * max(size, 2.0) / resolution;
+  vec3 c = texture2D(tex, centre).rgb;
+  vec2 q = abs(gv);
+  float d = max(dot(q, normalize(r)), q.x);
+  return vec4(c * smoothstep(0.5, 0.43, d), 1.0);`,
+  },
+  {
+    // Broken glass: the picture behind a cracked pane, every shard showing
+    // it a little moved and lit differently, with the cracks shining.
+    // shards is how many across; shift how far apart they have moved
+    name: 'brokenGlass',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'shards', default: 7 },
+      { type: 'float', name: 'shift', default: 0.02 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = _st * aspect * shards;
+  vec2 cell = floor(p);
+  float first = 9.0;
+  float second = 9.0;
+  vec2 owner = vec2(0.0);
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 n = cell + vec2(float(x), float(y));
+      vec2 point = n + fract(sin(vec2(dot(n, vec2(127.1, 311.7)), dot(n, vec2(269.5, 183.3)))) * 43758.5453);
+      float d = length(p - point);
+      if (d < first) {
+        second = first;
+        first = d;
+        owner = n;
+      } else if (d < second) {
+        second = d;
+      }
+    }
+  }
+  vec2 random = fract(sin(vec2(dot(owner, vec2(12.9898, 78.233)), dot(owner, vec2(39.346, 11.135)))) * 43758.5453) - 0.5;
+  vec3 c = texture2D(tex, _st + random * shift).rgb * (0.85 + random.x * 0.4);
+  float crack = smoothstep(0.06, 0.0, second - first);
+  return vec4(c + crack * 0.8, 1.0);`,
+  },
+  {
+    // Cross stitch: each cell an X of thread in the picture's colour on a
+    // light linen, as if embroidered. size is a stitch in pixels
+    name: 'crossStitch',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'size', default: 12 },
+    ],
+    glsl: `
+  vec2 grid = resolution / max(size, 3.0);
+  vec2 id = floor(_st * grid);
+  vec2 f = fract(_st * grid);
+  vec3 c = texture2D(tex, (id + 0.5) / grid).rgb;
+  float w = 0.26;
+  float one = smoothstep(w, w * 0.5, abs(f.x - f.y));
+  float two = smoothstep(w, w * 0.4, abs(f.x + f.y - 1.0));
+  float thread = max(one, two);
+  float sheen = 0.75 + 0.25 * sin((f.x + f.y) * 30.0);
+  vec3 linen = vec3(0.93, 0.9, 0.82) * (0.92 + 0.08 * step(0.9, max(f.x, f.y)));
+  return vec4(mix(linen, c * sheen, thread), 1.0);`,
+  },
+  {
+    // Building bricks: the picture in plastic bricks seen from above, a
+    // few flat colours, each with its round stud catching the light
+    name: 'bricks',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'size', default: 20 },
+    ],
+    glsl: `
+  vec2 grid = resolution / max(size, 4.0);
+  vec2 id = floor(_st * grid);
+  vec2 f = fract(_st * grid) - 0.5;
+  vec3 c = floor(texture2D(tex, (id + 0.5) / grid).rgb * 4.0 + 0.5) / 4.0;
+  float d = length(f);
+  float stud = smoothstep(0.32, 0.29, d);
+  float light = dot(normalize(f + 0.0001), vec2(-0.7, -0.7));
+  float rim = stud * smoothstep(0.2, 0.31, d) * light * 0.35;
+  float edge = smoothstep(0.5, 0.45, max(abs(f.x), abs(f.y)));
+  vec3 shaded = c * (0.75 + 0.25 * edge) + rim + stud * 0.04;
+  return vec4(shaded, 1.0);`,
+  },
+  {
+    // X-ray: dark is light and light is dark, in a cold blue, with the
+    // edges shining like bones
+    name: 'xray',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'glow', default: 1 },
+    ],
+    glsl: `
+  vec2 px = 1.5 / resolution;
+  vec3 w = vec3(0.299, 0.587, 0.114);
+  float c = dot(texture2D(tex, _st).rgb, w);
+  float gx = dot(texture2D(tex, _st + vec2(px.x, 0.0)).rgb, w) - dot(texture2D(tex, _st - vec2(px.x, 0.0)).rgb, w);
+  float gy = dot(texture2D(tex, _st + vec2(0.0, px.y)).rgb, w) - dot(texture2D(tex, _st - vec2(0.0, px.y)).rgb, w);
+  float edge = min(1.0, length(vec2(gx, gy)) * 4.0 * glow);
+  float inside = pow(1.0 - c, 1.6);
+  return vec4(vec3(0.55, 0.8, 1.0) * inside + vec3(0.85, 0.95, 1.0) * edge, 1.0);`,
+  },
+  {
+    // Hologram: you in cyan light, see-through, with lines running up,
+    // a flicker, and bands of the picture slipping sideways now and then
+    name: 'hologram',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'slip', default: 0 },
+    ],
+    glsl: `
+  float band = floor(_st.y * 24.0);
+  float jump = step(0.93, fract(sin(band * 91.7 + floor(clock * 8.0)) * 43758.5453));
+  vec2 at = _st + vec2((jump * 0.03 + slip * 0.02) * sin(band * 7.0 + clock * 30.0), 0.0);
+  float c = dot(texture2D(tex, at).rgb, vec3(0.299, 0.587, 0.114));
+  float r = dot(texture2D(tex, at + vec2(0.006, 0.0)).rgb, vec3(0.299, 0.587, 0.114));
+  float lines = 0.6 + 0.4 * sin((_st.y + clock * 0.1) * resolution.y * 1.2);
+  float flicker = 0.85 + 0.15 * sin(clock * 47.0) * sin(clock * 13.0);
+  vec3 col = vec3(0.1, 0.9, 1.0) * c + vec3(0.6, 0.1, 0.9) * max(r - c, 0.0) * 2.0;
+  return vec4(col * lines * flicker * 1.3, 1.0);`,
+  },
+  {
+    // Oil painting (a Kuwahara filter): each pixel takes the calmest of the
+    // four squares around it, so flat patches of colour with sharp edges,
+    // like brush strokes. radius is how big a stroke is, in pixels
+    name: 'oilPaint',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'radius', default: 4 },
+    ],
+    glsl: `
+  vec2 px = max(radius, 1.0) / 2.0 / resolution;
+  vec3 best = vec3(0.0);
+  float calmest = 1e9;
+  for (int q = 0; q < 4; q++) {
+    vec2 dir = vec2(q == 0 || q == 2 ? -1.0 : 1.0, q < 2 ? -1.0 : 1.0);
+    vec3 sum = vec3(0.0);
+    vec3 sum2 = vec3(0.0);
+    for (int y = 0; y < 3; y++) {
+      for (int x = 0; x < 3; x++) {
+        vec3 c = texture2D(tex, _st + dir * vec2(float(x), float(y)) * px).rgb;
+        sum += c;
+        sum2 += c * c;
+      }
+    }
+    vec3 mean = sum / 9.0;
+    vec3 v = sum2 / 9.0 - mean * mean;
+    float spread = v.r + v.g + v.b;
+    if (spread < calmest) {
+      calmest = spread;
+      best = mean;
+    }
+  }
+  return vec4(best, 1.0);`,
+  },
+  {
+    // Newsprint: the four inks of a press (cyan, magenta, yellow, black) in
+    // dots on rotated grids, bigger where there is more of each, on paper
+    name: 'newsprint',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'size', default: 7 },
+    ],
+    glsl: `
+  vec2 p = _st * resolution;
+  vec3 paper = vec3(0.96, 0.94, 0.88);
+  vec3 ink = paper;
+  for (int i = 0; i < 4; i++) {
+    float angle = i == 0 ? 0.26 : i == 1 ? 1.31 : i == 2 ? 0.0 : 0.79;
+    mat2 turn = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+    vec2 q = turn * p / max(size, 2.0);
+    vec2 centre = (floor(q) + 0.5);
+    vec2 back = (centre * max(size, 2.0)) * turn;
+    vec3 c = texture2D(tex, back / resolution).rgb;
+    float k = 1.0 - max(c.r, max(c.g, c.b));
+    vec3 cmy = (1.0 - c - k) / max(1.0 - k, 0.001);
+    float amount = i == 0 ? cmy.r : i == 1 ? cmy.g : i == 2 ? cmy.b : k;
+    float spot = smoothstep(0.05, 0.0, length(q - centre) - sqrt(max(amount, 0.0)) * 0.55);
+    vec3 colour = i == 0 ? vec3(0.0, 0.68, 0.94) : i == 1 ? vec3(0.93, 0.0, 0.55) : i == 2 ? vec3(1.0, 0.94, 0.0) : vec3(0.1);
+    ink *= mix(vec3(1.0), colour / paper, spot);
+  }
+  return vec4(ink, 1.0);`,
+  },
+  {
+    // Pencil: the outlines drawn in graphite on paper, the shadows hatched
+    // in diagonal strokes, more of them where it is darker
+    name: 'pencil',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'wobble', default: 0 },
+    ],
+    glsl: `
+  vec2 px = 1.5 / resolution;
+  vec3 w = vec3(0.299, 0.587, 0.114);
+  vec2 at = _st + vec2(sin(_st.y * 40.0 + wobble), cos(_st.x * 40.0 + wobble)) * 0.0015;
+  float c = dot(texture2D(tex, at).rgb, w);
+  float gx = dot(texture2D(tex, at + vec2(px.x, 0.0)).rgb, w) - dot(texture2D(tex, at - vec2(px.x, 0.0)).rgb, w);
+  float gy = dot(texture2D(tex, at + vec2(0.0, px.y)).rgb, w) - dot(texture2D(tex, at - vec2(0.0, px.y)).rgb, w);
+  float line = smoothstep(0.08, 0.3, length(vec2(gx, gy)));
+  vec2 q = _st * resolution;
+  float hatch1 = step(c, 0.55) * step(0.5, fract((q.x + q.y) / 6.0)) * 0.35;
+  float hatch2 = step(c, 0.3) * step(0.5, fract((q.x - q.y) / 6.0)) * 0.35;
+  float dark = clamp(line + hatch1 + hatch2, 0.0, 0.9);
+  vec3 paper = vec3(0.97, 0.96, 0.93);
+  return vec4(paper * (1.0 - dark), 1.0);`,
   },
   {
     // Light painting: what was painted turns a little and drifts out (more
