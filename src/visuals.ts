@@ -245,6 +245,80 @@ src(s1)
   .out()`,
   },
   {
+    id: 'hifi',
+    name: { en: 'Hi-fi (needles, LEDs and a cassette)', es: 'Pletina hi-fi (agujas, LEDs y casete)', ca: 'Pletina hi-fi (agulles, LEDs i casset)' },
+    // the needles and the lights follow what plays; the tape counter, the kicks
+    code: `retro('hifi')
+src(s1)
+  .out()`,
+  },
+  {
+    id: 'escritorio',
+    name: { en: '90s desktop (it draws by itself)', es: 'Escritorio de los 90 (pinta solo)', ca: 'Escriptori dels 90 (pinta sol)' },
+    // a new colour on every kick, a thicker stroke the harder it hits
+    code: `retro('desk')
+src(s1)
+  .out()`,
+  },
+  {
+    id: 'cobre',
+    name: { en: 'Copper bars (Amiga demo)', es: 'Barras de cobre (demo de Amiga)', ca: 'Barres de coure (demo d\'Amiga)' },
+    code: `copperBars(() => time, () => kickHit())
+  .out()`,
+  },
+  {
+    id: 'hipercubo',
+    name: { en: 'Wire hypercube', es: 'Hipercubo de alambre', ca: 'Hipercub de filferro' },
+    code: `wireCube(() => time + kickCount() * 0.2, () => 1 + kickHit() * 0.25)
+  .color(...tint(1.2))
+  .add(src(o0).scale(1.01).color(0.82, 0.82, 0.82), 0.8)
+  .out()`,
+  },
+  {
+    id: 'vida',
+    name: { en: 'Game of life (born on the kicks)', es: 'Juego de la vida (nace con el bombo)', ca: 'Joc de la vida (neix amb el bombo)' },
+    // a step on every eighth of a second; a kick sows living cells
+    code: `life(o3, 8, () => ((time * 8) % 1 < 0.2 ? 1 : 0), () => kickHit() * 0.4 + justCameIn() * 2, () => time)
+  .out(o3)
+src(o3).g()
+  .color(...tint(0.45))
+  .add(src(o3).r().color(...tint(1.3)))
+  .out()`,
+  },
+  {
+    id: 'truchet',
+    name: { en: 'Truchet maze', es: 'Laberinto Truchet', ca: 'Laberint Truchet' },
+    // a kick turns some of the tiles
+    code: `truchet(H("<10 14 8 12>"), () => kickCount(), () => time)
+  .color(...tint(1.2))
+  .out()`,
+  },
+  {
+    id: 'radar',
+    name: { en: 'Radar', es: 'Radar', ca: 'Radar' },
+    code: `radar(() => time, () => kickHit())
+  .out()`,
+  },
+  {
+    id: 'tormenta',
+    name: { en: 'Storm (lightning on the snare)', es: 'Tormenta (rayos con la caja)', ca: 'Tempesta (llamps amb la caixa)' },
+    code: `storm(() => time, () => snareHit(), () => 0.2 + (kickCount() * 0.37) % 0.6)
+  .out()`,
+  },
+  {
+    id: 'mandelbrot',
+    name: { en: 'Mandelbrot (endless zoom)', es: 'Mandelbrot (zoom infinito)', ca: 'Mandelbrot (zoom infinit)' },
+    code: `mandelZoom(() => time * 0.25, () => time * 0.03 + kickHit() * 0.05)
+  .out()`,
+  },
+  {
+    id: 'vinilo',
+    name: { en: 'Record turning', es: 'Vinilo girando', ca: 'Vinil girant' },
+    // 33 turns a minute; a kick scratches it
+    code: `vinyl(() => -time * 3.46, () => kickHit(), ...tint(1))
+  .out()`,
+  },
+  {
     id: 'tacto',
     name: { en: 'Touch (TouchMe)', es: 'Tacto (TouchMe)', ca: 'Tacte (TouchMe)' },
     code: `osc(8, 0.04, () => 0.2 + touch() * 0.25)
@@ -3164,6 +3238,256 @@ export const SHADERS = [
   colour = mix(colour, vec3(1.0), level / 6.0);
   float fibre = 0.95 + 0.05 * _noise(vec3(_st * resolution / 4.0, level));
   return vec4(colour * shadow * fibre, 1.0);`,
+  },
+  {
+    // Copper bars, as the old demos drew them: bands of colour shaded like
+    // metal tubes, swinging up and down over each other. clock moves them,
+    // fat makes them thicker (a kick)
+    name: 'copperBars',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'fat', default: 0 },
+    ],
+    glsl: `
+  vec3 colour = vec3(0.0);
+  float h = 0.045 + fat * 0.03;
+  for (int i = 0; i < 8; i++) {
+    float k = float(i);
+    float y = 0.5 + 0.36 * sin(clock * 1.3 + k * 0.55) * cos(clock * 0.31 + k * 0.2);
+    float d = abs(_st.y - y);
+    if (d < h) {
+      vec3 bar = 0.5 + 0.5 * cos(6.2831853 * (k * 0.13 + vec3(0.0, 0.33, 0.67)));
+      colour = bar * cos(d / h * 1.5707963) * 1.2 + pow(cos(d / h * 1.5707963), 12.0) * 0.4;
+    }
+  }
+  float floor_ = step(0.82, _st.y) * 0.15 * step(0.5, fract(_st.x * 20.0 + clock));
+  return vec4(colour + floor_, 1.0);`,
+  },
+  {
+    // A wire hypercube: a cube of glowing lines with a smaller one inside
+    // turning the other way, joined at the corners. size grows it
+    name: 'wireCube',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'size', default: 1 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 q = (_st - 0.5) * aspect;
+  q.y = -q.y;
+  float glow = 0.0;
+  for (int k = 0; k < 3; k++) {
+    for (int i = 0; i < 8; i++) {
+      for (int b = 0; b < 3; b++) {
+        float fi = float(i);
+        float bit = b == 0 ? 1.0 : b == 1 ? 2.0 : 4.0;
+        bool has = mod(floor(fi / bit), 2.0) > 0.5;
+        if (has && k < 2) continue;
+        float fj = k == 2 ? fi : fi + bit;
+        vec2 ends[2];
+        for (int e = 0; e < 2; e++) {
+          float n = e == 0 ? fi : fj;
+          float layer = k == 2 ? float(e) : float(k);
+          vec3 v = vec3(mod(n, 2.0) * 2.0 - 1.0, mod(floor(n / 2.0), 2.0) * 2.0 - 1.0, floor(n / 4.0) * 2.0 - 1.0);
+          float turn = layer < 0.5 ? 1.0 : -1.3;
+          float a = clock * 0.6 * turn;
+          float c2 = clock * 0.4 * turn;
+          v = vec3(v.x * cos(a) - v.z * sin(a), v.y, v.x * sin(a) + v.z * cos(a));
+          v = vec3(v.x, v.y * cos(c2) - v.z * sin(c2), v.y * sin(c2) + v.z * cos(c2));
+          v *= layer < 0.5 ? 1.0 : 0.5;
+          ends[e] = v.xy / (v.z + 4.0) * 1.3 * size;
+        }
+        if (k == 2 && b > 0) continue;
+        vec2 pa = q - ends[0];
+        vec2 ba = ends[1] - ends[0];
+        float hh = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
+        float d = length(pa - ba * hh);
+        glow += 0.0012 / (d + 0.003) + smoothstep(0.003, 0.0, d);
+      }
+    }
+  }
+  return vec4(vec3(min(glow, 2.0)), 1.0);`,
+  },
+  {
+    // The game of life: a grid of cells where each one lives on with two or
+    // three neighbours, is born with exactly three, and dies otherwise. It
+    // reads the last state from before (keep it in its own output) and
+    // takes a step when go is 1; sow drops new living cells at random.
+    // Red is alive, green fades after, for a trail
+    name: 'life',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'before', default: NaN },
+      { type: 'float', name: 'cell', default: 8 },
+      { type: 'float', name: 'go', default: 1 },
+      { type: 'float', name: 'sow', default: 0 },
+      { type: 'float', name: 'salt', default: 0 },
+    ],
+    glsl: `
+  vec2 grid = floor(resolution / max(cell, 2.0));
+  vec2 id = floor(_st * grid);
+  vec4 was = texture2D(before, (id + 0.5) / grid);
+  float alive = step(0.5, was.r);
+  float n = 0.0;
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      if (x == 0 && y == 0) continue;
+      n += step(0.5, texture2D(before, (mod(id + vec2(float(x), float(y)), grid) + 0.5) / grid).r);
+    }
+  }
+  float next = go < 0.5 ? alive : ((n > 2.5 && n < 3.5) || (alive > 0.5 && n > 1.5 && n < 3.5)) ? 1.0 : 0.0;
+  float chance = fract(sin(dot(id + salt, vec2(12.9898, 78.233))) * 43758.5453);
+  if (chance < sow * 0.3) next = 1.0;
+  return vec4(next, max(next, was.g * 0.93), 0.0, 1.0);`,
+  },
+  {
+    // Truchet tiles: every square holds two quarter circles joining the
+    // middles of its sides, turned one way or the other, so the arcs make
+    // endless winding paths; seed changes which way some of them turn
+    name: 'truchet',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'tiles', default: 12 },
+      { type: 'float', name: 'seed', default: 0 },
+      { type: 'float', name: 'clock', default: 0 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = _st * aspect * tiles;
+  vec2 id = floor(p);
+  vec2 f = fract(p);
+  float flip = step(0.5, fract(sin(dot(id + floor(seed) * 0.37, vec2(12.9898, 78.233))) * 43758.5453));
+  if (flip > 0.5) f.x = 1.0 - f.x;
+  float a = length(f);
+  float b = length(f - 1.0);
+  float d = min(abs(a - 0.5), abs(b - 0.5));
+  float line = smoothstep(0.09, 0.06, d);
+  float inside = (a < 0.5 ? 1.0 : 0.0) + (b < 0.5 ? 1.0 : 0.0);
+  float side = mod(inside + mod(id.x + id.y, 2.0) + flip, 2.0);
+  float flow = 0.5 + 0.5 * sin((a < b ? atan(f.y, f.x) : atan(1.0 - f.y, 1.0 - f.x)) * 8.0 - clock * 4.0);
+  vec3 colour = mix(vec3(0.08), vec3(0.22), side) + line * (0.6 + 0.4 * flow);
+  return vec4(colour, 1.0);`,
+  },
+  {
+    // Radar: rings and a cross on a round green screen, the beam sweeping
+    // round with a fading tail, and echoes lit as it passes; blip is a kick
+    name: 'radar',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'blip', default: 0 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 q = (_st - 0.5) * aspect;
+  float r = length(q);
+  float a = atan(q.y, q.x);
+  float sweep = mod(clock * 1.6, 6.2831853);
+  float behind = mod(sweep - a, 6.2831853);
+  float tail = exp(-behind * 2.5);
+  float rings = smoothstep(0.004, 0.0, abs(fract(r * 8.0) - 0.5) / 8.0 - 0.0) * 0.0 + smoothstep(0.003, 0.0, abs(mod(r, 0.11) - 0.055) - 0.053);
+  float cross = smoothstep(0.003, 0.0, min(abs(q.x), abs(q.y)));
+  float echoes = 0.0;
+  for (int i = 0; i < 9; i++) {
+    float k = float(i);
+    vec2 e = vec2(cos(k * 2.4 + floor(clock * 0.25)), sin(k * 2.4 + floor(clock * 0.25))) * (0.08 + fract(sin(k * 7.1) * 431.7) * 0.36);
+    float seen = exp(-mod(sweep - atan(e.y, e.x), 6.2831853) * 1.2);
+    echoes += smoothstep(0.018 + blip * 0.012, 0.0, length(q - e)) * seen;
+  }
+  float screen = smoothstep(0.47, 0.46, r);
+  float level = (tail * 0.7 + rings * 0.35 + cross * 0.3 + echoes * 1.4 + 0.05) * screen + smoothstep(0.475, 0.47, r) * (1.0 - screen) * 0.6;
+  return vec4(vec3(0.2, 1.0, 0.4) * level, 1.0);`,
+  },
+  {
+    // A storm: dark clouds rolling, rain slanting down, and on flash a bolt
+    // of lightning that lights up everything for a moment
+    name: 'storm',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'flash', default: 0 },
+      { type: 'float', name: 'where', default: 0.5 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = _st * aspect;
+  float cloud = 0.5 + 0.5 * _noise(vec3(p * 2.0 + vec2(clock * 0.05, 0.0), clock * 0.05));
+  cloud += 0.25 * _noise(vec3(p * 5.0 - vec2(clock * 0.1, 0.0), clock * 0.1));
+  vec3 sky = mix(vec3(0.02, 0.03, 0.06), vec3(0.18, 0.2, 0.26), cloud * (1.0 - _st.y));
+  vec2 r = vec2(p.x + p.y * 0.25, p.y);
+  float column = floor(r.x * 120.0);
+  float speed = 1.5 + fract(sin(column * 12.9) * 437.1);
+  float drop = fract(r.y * 3.0 - clock * speed + fract(sin(column * 7.3) * 91.7));
+  float rain = smoothstep(0.92, 1.0, drop) * step(0.5, fract(sin(column * 3.7) * 291.1)) * 0.35;
+  float x = where * aspect.x + 0.08 * _noise(vec3(p.y * 6.0, floor(clock * 4.0), 0.0)) + 0.03 * _noise(vec3(p.y * 30.0, 1.0, 0.0));
+  float bolt = smoothstep(0.008, 0.0, abs(p.x - x)) * flash + 0.004 / (abs(p.x - x) + 0.01) * flash;
+  vec3 colour = sky * (1.0 + flash * 2.5) + rain + vec3(0.8, 0.85, 1.0) * bolt;
+  return vec4(colour, 1.0);`,
+  },
+  {
+    // An endless zoom into the Mandelbrot set, towards one of its spirals,
+    // in colours that go round; deep is how far in (it starts again), hue
+    // turns the colours
+    name: 'mandelZoom',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'deep', default: 0 },
+      { type: 'float', name: 'hue', default: 0 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 q = (_st - 0.5) * aspect;
+  float zoom = exp(-mod(deep, 9.0));
+  vec2 c = vec2(-0.743643887, 0.131825904) + q * zoom * 2.5;
+  vec2 z = vec2(0.0);
+  float n = 0.0;
+  for (int i = 0; i < 160; i++) {
+    z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
+    if (dot(z, z) > 16.0) break;
+    n += 1.0;
+  }
+  if (n > 159.0) return vec4(0.0, 0.0, 0.0, 1.0);
+  float smooth_ = n - log2(log2(dot(z, z))) + 4.0;
+  vec3 colour = 0.5 + 0.5 * cos(6.2831853 * (smooth_ * 0.02 + hue + vec3(0.0, 0.33, 0.67)));
+  return vec4(colour, 1.0);`,
+  },
+  {
+    // A record turning on the platter: grooves catching the light in two
+    // bright wedges, the label in the middle with a mark that shows it
+    // going round; scratch nudges it back and forth
+    name: 'vinyl',
+    type: 'src',
+    inputs: [
+      { type: 'float', name: 'turn', default: 0 },
+      { type: 'float', name: 'scratch', default: 0 },
+      { type: 'float', name: 'r', default: 0.85 },
+      { type: 'float', name: 'g', default: 1 },
+      { type: 'float', name: 'b', default: 0.3 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 q = (_st - 0.5) * aspect;
+  float rad = length(q);
+  float a = atan(q.y, q.x);
+  float spin = a + turn + sin(scratch * 20.0) * scratch * 0.6;
+  vec3 colour = vec3(0.06);
+  float platter = smoothstep(0.47, 0.465, rad);
+  colour = mix(colour, vec3(0.22, 0.22, 0.24), platter);
+  float disc = smoothstep(0.44, 0.435, rad);
+  float grooves = 0.5 + 0.5 * sin(rad * 900.0);
+  float sheen = pow(abs(cos(a * 1.0 - 0.6)), 30.0) * 0.5;
+  vec3 record = vec3(0.03) + grooves * 0.025 + sheen * smoothstep(0.17, 0.2, rad);
+  colour = mix(colour, record, disc);
+  float label = smoothstep(0.155, 0.15, rad);
+  vec3 ink = vec3(r, g, b);
+  float mark = step(0.0, sin(spin * 1.0)) * smoothstep(0.06, 0.08, rad);
+  vec3 labelColour = mix(ink, ink * 0.55, mark);
+  float ring = smoothstep(0.003, 0.0, abs(rad - 0.12));
+  colour = mix(colour, labelColour + ring * 0.2, label);
+  colour = mix(colour, vec3(0.75), smoothstep(0.012, 0.009, rad));
+  return vec4(colour, 1.0);`,
   },
   {
     // Light painting: what was painted turns a little and drifts out (more

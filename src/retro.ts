@@ -8,10 +8,20 @@
 import { lang } from './i18n';
 
 type Hydra = { init(options: { src: HTMLCanvasElement; dynamic: boolean }): void };
-type Mode = 'vapor' | 'web';
+type Mode = 'vapor' | 'web' | 'hifi' | 'desk';
 type Thing = { kind: number; x: number; y: number; size: number; speed: number; spin: number; phase: number };
 
-const g = globalThis as { kickHit?: () => number; kickCount?: () => number; s1?: Hydra; retro?: typeof retro };
+const g = globalThis as {
+  kickHit?: () => number;
+  snareHit?: () => number;
+  kickCount?: () => number;
+  level?: () => number;
+  bass?: () => number;
+  high?: () => number;
+  spec?: (step: number) => number;
+  s1?: Hydra;
+  retro?: typeof retro;
+};
 let canvas: HTMLCanvasElement | undefined;
 let context: CanvasRenderingContext2D | null = null;
 let running = false;
@@ -371,6 +381,292 @@ function errorWindows(c: CanvasRenderingContext2D, w: number, h: number, t: numb
   }
 }
 
+// ---- the hi-fi: two needle meters, an LED equaliser with the peaks held,
+// and a cassette deck whose reels turn while it plays
+const needles = [0, 0];
+const peaks = Array.from({ length: 8 }, () => ({ v: 0, at: 0 }));
+function hifi(c: CanvasRenderingContext2D, w: number, h: number, t: number) {
+  const wood = c.createLinearGradient(0, 0, 0, h);
+  wood.addColorStop(0, '#3b2414');
+  wood.addColorStop(0.5, '#5a3820');
+  wood.addColorStop(1, '#3b2414');
+  c.fillStyle = wood;
+  c.fillRect(0, 0, w, h);
+  // the brushed aluminium front
+  const front = { x: w * 0.05, y: h * 0.12, w: w * 0.9, h: h * 0.76 };
+  const metal = c.createLinearGradient(0, front.y, 0, front.y + front.h);
+  metal.addColorStop(0, '#c9ccd1');
+  metal.addColorStop(1, '#8d9096');
+  c.fillStyle = metal;
+  c.fillRect(front.x, front.y, front.w, front.h);
+  c.fillStyle = 'rgba(255,255,255,0.06)';
+  for (let y = front.y; y < front.y + front.h; y += 3) c.fillRect(front.x, y, front.w, 1);
+  // two VU meters, left the low end, right the top
+  const read = [g.bass?.() ?? 0, Math.max(g.high?.() ?? 0, g.level?.() ?? 0)];
+  for (let m = 0; m < 2; m++) {
+    needles[m] += ((Math.min(1, read[m] * 1.3)) - needles[m]) * (read[m] > needles[m] ? 0.35 : 0.08);
+    const cx = front.x + front.w * (0.16 + m * 0.24);
+    const cy = front.y + front.h * 0.42;
+    const mw = front.w * 0.2;
+    const mh = front.h * 0.34;
+    c.fillStyle = '#1a1a1a';
+    c.fillRect(cx - mw / 2 - 4, cy - mh / 2 - 4, mw + 8, mh + 8);
+    const face = c.createLinearGradient(0, cy - mh / 2, 0, cy + mh / 2);
+    face.addColorStop(0, '#fff3c4');
+    face.addColorStop(1, '#f2c66b');
+    c.fillStyle = face;
+    c.fillRect(cx - mw / 2, cy - mh / 2, mw, mh);
+    const px = cx;
+    const py = cy + mh * 0.42;
+    const r = mh * 0.72;
+    c.lineWidth = 2;
+    for (let i = 0; i <= 10; i++) {
+      const a = -Math.PI * 0.78 + (i / 10) * Math.PI * 0.56;
+      c.strokeStyle = i >= 8 ? '#c4161c' : '#222';
+      c.beginPath();
+      c.moveTo(px + Math.cos(a) * r * 0.86, py + Math.sin(a) * r * 0.86);
+      c.lineTo(px + Math.cos(a) * r, py + Math.sin(a) * r);
+      c.stroke();
+    }
+    c.strokeStyle = '#c4161c';
+    c.lineWidth = 4;
+    c.beginPath();
+    c.arc(px, py, r * 0.93, -Math.PI * 0.78 + Math.PI * 0.56 * 0.8, -Math.PI * 0.22);
+    c.stroke();
+    c.fillStyle = '#222';
+    c.font = `bold ${Math.round(mh * 0.12)}px sans-serif`;
+    c.textAlign = 'center';
+    c.fillText('VU', px, cy + mh * 0.1);
+    const a = -Math.PI * 0.78 + needles[m] * Math.PI * 0.56;
+    c.strokeStyle = '#111';
+    c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(px, py);
+    c.lineTo(px + Math.cos(a) * r * 1.02, py + Math.sin(a) * r * 1.02);
+    c.stroke();
+    // the red light when it peaks
+    c.fillStyle = needles[m] > 0.85 ? '#ff2a2a' : '#5a1010';
+    c.beginPath();
+    c.arc(cx + mw * 0.4, cy - mh * 0.35, 5, 0, Math.PI * 2);
+    c.fill();
+  }
+  // the LED equaliser: eight bands of twelve lights, each holding its peak
+  const ex = front.x + front.w * 0.55;
+  const ey = front.y + front.h * 0.12;
+  const ew = front.w * 0.4;
+  const eh = front.h * 0.5;
+  c.fillStyle = '#0b0b0b';
+  c.fillRect(ex, ey, ew, eh);
+  const bandW = ew / 8;
+  const segH = eh / 13;
+  for (let b = 0; b < 8; b++) {
+    const v = Math.min(1, (g.spec?.(b) ?? 0) * 1.25);
+    const lit = Math.round(v * 12);
+    const peak = peaks[b];
+    if (lit >= peak.v) {
+      peak.v = lit;
+      peak.at = t;
+    } else if (t - peak.at > 0.6) peak.v = Math.max(lit, peak.v - 0.25);
+    for (let s = 0; s < 12; s++) {
+      const on = s < lit || s === Math.round(peak.v) - 1;
+      const colour = s >= 10 ? '#ff3030' : s >= 7 ? '#ffd030' : '#3dff5a';
+      c.fillStyle = on ? colour : 'rgba(255,255,255,0.05)';
+      c.fillRect(ex + b * bandW + bandW * 0.15, ey + eh - (s + 1) * segH, bandW * 0.7, segH * 0.7);
+    }
+  }
+  // the cassette deck
+  const dx = front.x + front.w * 0.06;
+  const dy = front.y + front.h * 0.7;
+  const dw = front.w * 0.42;
+  const dh = front.h * 0.24;
+  c.fillStyle = '#151515';
+  c.fillRect(dx, dy, dw, dh);
+  c.fillStyle = '#2a2a2a';
+  c.fillRect(dx + dw * 0.1, dy + dh * 0.15, dw * 0.8, dh * 0.7);
+  for (const side of [-1, 1]) {
+    c.save();
+    c.translate(dx + dw / 2 + side * dw * 0.2, dy + dh / 2);
+    c.rotate(t * 2.5);
+    c.fillStyle = '#ddd';
+    c.beginPath();
+    c.arc(0, 0, dh * 0.24, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = '#222';
+    for (let k = 0; k < 6; k++) {
+      c.rotate(Math.PI / 3);
+      c.fillRect(-2, dh * 0.08, 4, dh * 0.1);
+    }
+    c.restore();
+  }
+  // the tape counter: one more on every kick
+  const count = String((g.kickCount?.() ?? 0) % 1000).padStart(3, '0');
+  c.fillStyle = '#000';
+  c.fillRect(front.x + front.w * 0.55, dy + dh * 0.2, front.w * 0.12, dh * 0.6);
+  c.fillStyle = '#ff9a2a';
+  c.font = `bold ${Math.round(dh * 0.45)}px monospace`;
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.fillText(count, front.x + front.w * 0.61, dy + dh * 0.52);
+  // and the knobs
+  for (let k = 0; k < 3; k++) {
+    const kx = front.x + front.w * (0.74 + k * 0.08);
+    const ky = dy + dh * 0.5;
+    c.fillStyle = '#3a3a3a';
+    c.beginPath();
+    c.arc(kx, ky, dh * 0.34, 0, Math.PI * 2);
+    c.fill();
+    const a = -Math.PI * 0.75 + ((Math.sin(t * 0.3 + k) + 1) / 2) * Math.PI * 1.5;
+    c.strokeStyle = '#eee';
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(kx, ky);
+    c.lineTo(kx + Math.cos(a) * dh * 0.3, ky + Math.sin(a) * dh * 0.3);
+    c.stroke();
+  }
+  c.fillStyle = '#333';
+  c.font = `bold ${Math.round(h * 0.03)}px sans-serif`;
+  c.textAlign = 'left';
+  c.fillText('STEREO  ·  HI-FI', front.x + 14, front.y + 20);
+}
+
+// ---- an old desktop: icons, a drawing program that draws by itself to
+// the beat, a clock in the corner and the pointer wandering
+const ICONS = [
+  { en: 'My disk', es: 'Mi disco', ca: 'El meu disc' },
+  { en: 'Music', es: 'Música', ca: 'Música' },
+  { en: 'Games', es: 'Juegos', ca: 'Jocs' },
+  { en: 'Bin', es: 'Papelera', ca: 'Paperera' },
+];
+const PAINT = { en: 'Paint', es: 'Pintar', ca: 'Pintar' };
+let paper: HTMLCanvasElement | undefined;
+let pen = { x: 0.5, y: 0.5, hue: 0 };
+function desk(c: CanvasRenderingContext2D, w: number, h: number, t: number, kick: number) {
+  c.fillStyle = '#008080';
+  c.fillRect(0, 0, w, h);
+  const s = h * 0.06;
+  c.textAlign = 'center';
+  c.textBaseline = 'top';
+  c.font = `${Math.round(h * 0.024)}px sans-serif`;
+  ICONS.forEach((label, i) => {
+    const x = w * 0.07;
+    const y = h * 0.06 + i * h * 0.17;
+    c.save();
+    c.translate(x, y + s / 2);
+    if (i === 0) {
+      c.fillStyle = '#c0c0c0';
+      c.fillRect(-s / 2, -s / 3, s, s * 0.66);
+      c.fillStyle = '#2d6';
+      c.fillRect(s * 0.25, s * 0.1, s * 0.12, s * 0.08);
+    } else if (i === 1) {
+      c.fillStyle = '#ffd400';
+      c.beginPath();
+      c.arc(-s * 0.15, s * 0.2, s * 0.18, 0, Math.PI * 2);
+      c.fill();
+      c.fillRect(-s * 0.01, -s * 0.4, s * 0.06, s * 0.6);
+      c.fillRect(-s * 0.01, -s * 0.4, s * 0.3, s * 0.08);
+    } else if (i === 2) {
+      c.fillStyle = '#ddd';
+      c.fillRect(-s / 2, -s / 4, s, s / 2);
+      c.fillStyle = '#d22';
+      c.beginPath();
+      c.arc(s * 0.25, 0, s * 0.08, 0, Math.PI * 2);
+      c.fill();
+      c.fillStyle = '#333';
+      c.fillRect(-s * 0.35, -s * 0.04, s * 0.25, s * 0.08);
+      c.fillRect(-s * 0.26, -s * 0.13, s * 0.08, s * 0.26);
+    } else {
+      c.fillStyle = '#bbb';
+      c.fillRect(-s * 0.3, -s * 0.3, s * 0.6, s * 0.7);
+      c.fillStyle = '#888';
+      c.fillRect(-s * 0.36, -s * 0.38, s * 0.72, s * 0.1);
+    }
+    c.restore();
+    c.fillStyle = '#fff';
+    c.fillText(say(label), x, y + s * 1.1);
+  });
+  // the drawing program's window
+  const win = { x: w * 0.25, y: h * 0.08, w: w * 0.6, h: h * 0.7 };
+  c.fillStyle = '#c0c0c0';
+  c.fillRect(win.x, win.y, win.w, win.h);
+  c.fillStyle = '#fff';
+  c.fillRect(win.x, win.y, win.w, 2);
+  c.fillRect(win.x, win.y, 2, win.h);
+  c.fillStyle = '#404040';
+  c.fillRect(win.x, win.y + win.h - 2, win.w, 2);
+  c.fillRect(win.x + win.w - 2, win.y, 2, win.h);
+  const bar = c.createLinearGradient(win.x, 0, win.x + win.w, 0);
+  bar.addColorStop(0, '#000080');
+  bar.addColorStop(1, '#1084d0');
+  c.fillStyle = bar;
+  c.fillRect(win.x + 3, win.y + 3, win.w - 6, h * 0.04);
+  c.fillStyle = '#fff';
+  c.textAlign = 'left';
+  c.textBaseline = 'middle';
+  c.font = `bold ${Math.round(h * 0.025)}px sans-serif`;
+  c.fillText(say(PAINT), win.x + 10, win.y + 3 + h * 0.02);
+  // the palette down the left of the window
+  const colours = ['#000', '#fff', '#f00', '#ff0', '#0f0', '#0ff', '#00f', '#f0f'];
+  colours.forEach((colour, i) => {
+    c.fillStyle = colour;
+    c.fillRect(win.x + 8 + (i % 2) * 18, win.y + h * 0.07 + Math.floor(i / 2) * 18, 16, 16);
+  });
+  // the picture, kept between frames on its own canvas
+  const area = { x: win.x + 52, y: win.y + h * 0.06, w: win.w - 60, h: win.h - h * 0.06 - 8 };
+  if (!paper || paper.width !== Math.round(area.w) || paper.height !== Math.round(area.h)) {
+    paper = document.createElement('canvas');
+    paper.width = Math.round(area.w);
+    paper.height = Math.round(area.h);
+    const pc = paper.getContext('2d')!;
+    pc.fillStyle = '#fff';
+    pc.fillRect(0, 0, paper.width, paper.height);
+  }
+  const pc = paper.getContext('2d')!;
+  const next = {
+    x: 0.5 + 0.4 * Math.sin(t * 0.9) * Math.cos(t * 0.37),
+    y: 0.5 + 0.4 * Math.sin(t * 1.3 + 1) * Math.sin(t * 0.21 + 2),
+  };
+  if (kick > 0.9) pen.hue = (pen.hue + 47) % 360;
+  pc.strokeStyle = `hsl(${pen.hue}, 90%, 50%)`;
+  pc.lineWidth = 3 + kick * 14;
+  pc.lineCap = 'round';
+  pc.beginPath();
+  pc.moveTo(pen.x * paper.width, pen.y * paper.height);
+  pc.lineTo(next.x * paper.width, next.y * paper.height);
+  pc.stroke();
+  // a slow fade, so the picture keeps changing
+  pc.fillStyle = 'rgba(255,255,255,0.004)';
+  pc.fillRect(0, 0, paper.width, paper.height);
+  pen = { ...next, hue: pen.hue };
+  c.drawImage(paper, area.x, area.y);
+  // the pointer, drawing
+  const cx = area.x + next.x * area.w;
+  const cy = area.y + next.y * area.h;
+  c.fillStyle = '#fff';
+  c.strokeStyle = '#000';
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(cx, cy);
+  c.lineTo(cx, cy + 18);
+  c.lineTo(cx + 5, cy + 13);
+  c.lineTo(cx + 9, cy + 21);
+  c.lineTo(cx + 12, cy + 19);
+  c.lineTo(cx + 8, cy + 12);
+  c.lineTo(cx + 14, cy + 12);
+  c.closePath();
+  c.fill();
+  c.stroke();
+  // the bar at the bottom with the clock
+  c.fillStyle = '#c0c0c0';
+  c.fillRect(0, h - h * 0.06, w, h * 0.06);
+  c.fillStyle = '#fff';
+  c.fillRect(0, h - h * 0.06, w, 2);
+  const now = new Date();
+  c.fillStyle = '#000';
+  c.textAlign = 'right';
+  c.font = `${Math.round(h * 0.026)}px sans-serif`;
+  c.fillText(now.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' }), w - 12, h - h * 0.03);
+}
+
 function draw(now: number) {
   if (!running || !canvas || !context) return;
   frame = requestAnimationFrame(draw);
@@ -380,6 +676,16 @@ function draw(now: number) {
   const t = now / 1000;
   const kick = g.kickHit?.() ?? 0;
   c.save();
+  if (mode === 'hifi') {
+    hifi(c, w, h, t);
+    c.restore();
+    return;
+  }
+  if (mode === 'desk') {
+    desk(c, w, h, t, kick);
+    c.restore();
+    return;
+  }
   if (mode === 'vapor') vapor(c, w, h, t, kick);
   else web(c, w, h, t, kick);
   // the things drift sideways and bob; nearer ones in front, a kick lifts them

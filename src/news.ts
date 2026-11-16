@@ -12,6 +12,15 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-16-more-visuals',
+    title: L('Ten visuals without a camera', 'Diez visuales sin cámara', 'Deu visuals sense càmera'),
+    text: L(
+      'A hi-fi with needle meters, LEDs and a cassette, a 90s desktop that draws by itself, Amiga copper bars, a wire hypercube, the game of life born on the kicks, a Truchet maze, radar, a storm with lightning on the snare, an endless Mandelbrot zoom and a record turning',
+      'Una pletina hi-fi con agujas, LEDs y casete, un escritorio de los 90 que pinta solo, barras de cobre de Amiga, un hipercubo de alambre, el juego de la vida que nace con el bombo, un laberinto Truchet, un radar, una tormenta con rayos en la caja, un zoom infinito de Mandelbrot y un vinilo girando',
+      "Una pletina hi-fi amb agulles, LEDs i casset, un escriptori dels 90 que pinta sol, barres de coure d'Amiga, un hipercub de filferro, el joc de la vida que neix amb el bombo, un laberint Truchet, un radar, una tempesta amb llamps a la caixa, un zoom infinit de Mandelbrot i un vinil girant",
+    ),
+  },
+  {
     id: '2026-11-16-retro-webcam',
     title: L('Vaporwave, net art, smoke and thirty-five new webcam looks', 'Vaporwave, net art, humo y treinta y cinco efectos de webcam', 'Vaporwave, net art, fum i trenta-cinc efectes de webcam'),
     text: L(
