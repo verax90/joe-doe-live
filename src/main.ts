@@ -44,6 +44,7 @@ import { setupFinder } from './finder';
 import { setupProject } from './project';
 import { markApplied, setupPlayState } from './play-state';
 import { setupDrop } from './drop';
+import { setupGallery } from './gallery';
 import { setupSequencer } from './sequencer';
 import { setupOverlay } from './overlay';
 import { setupScalePicker } from './scale';
@@ -172,6 +173,7 @@ visualSelect.addEventListener('change', () => {
   pickVisual(visualSelect.value);
   runVisual();
 });
+setupGallery(visualSelect);
 
 // A theme recolours the UI, the code and the ASCII at once; the visual is
 // redrawn so its tint() follows too

@@ -57,6 +57,7 @@
         <select id="preset" class="control"></select>
         <label class="visually-hidden" for="visual" data-i18n="visual">Visual</label>
         <select id="visual" class="control" title="Visuals" data-i18n-title="visuals"></select>
+        <button id="visual-gallery" class="control control-icon" type="button" data-icon="gallery" aria-label="Gallery of visuals" data-i18n-label="galleryOpen" data-i18n-title="galleryOpen"></button>
         <label class="tempo" title="Tempo (BPM)" data-i18n-title="tempoTitle">
           <span class="tempo-label">BPM</span>
           <span class="tempo-field"><input id="bpm" class="control tempo-input" type="number" min="40" max="300" step="1" inputmode="numeric" /></span>
@@ -121,6 +122,7 @@
             </div>
             <div class="menu-group">
               <h3 class="menu-group-title" data-i18n="menuPicture">Visuals</h3>
+              <button id="toggle-gallery" class="menu-item" type="button" aria-pressed="false" data-icon="gallery" data-panel="gallery" data-i18n="galleryTitle">Gallery</button>
               <button id="toggle-vj" class="menu-item" type="button" aria-pressed="false" data-icon="vj" data-panel="vj" data-i18n="vjTitle">VJ</button>
               <button id="toggle-video" class="menu-item" type="button" aria-pressed="false" data-icon="video" data-panel="video" data-i18n="video">Video</button>
               <button id="toggle-projector" class="menu-item" type="button" aria-pressed="false" data-icon="projector" data-i18n="projectorTitle">Projector (second screen)</button>
@@ -348,6 +350,18 @@
         <p id="compose-status" class="panel-status" role="status"></p>
       </aside>
 
+      <aside class="panel gallery" id="gallery" hidden>
+        <h2 data-i18n="galleryTitle">Gallery</h2>
+        <p class="panel-help" data-i18n="galleryHelp">Every visual with its picture: click one and it is on; the star keeps it in Favourites.</p>
+        <div class="gallery-tops"></div>
+        <div class="gallery-search-row">
+          <input id="gallery-search" class="control" type="search" autocomplete="off" spellcheck="false" aria-label="Search" data-i18n-label="gallerySearch" />
+          <button id="gallery-random" class="control" type="button" data-icon="dice" data-i18n="galleryRandom">Another</button>
+        </div>
+        <div class="gallery-filters" role="group" aria-label="Groups" data-i18n-label="galleryGroups"></div>
+        <p id="gallery-count" class="gallery-count" role="status"></p>
+        <div class="gallery-grid"></div>
+      </aside>
       <aside class="panel" id="overlay-panel" hidden>
         <h2 data-i18n="overlayTitle">Caption</h2>
         <p class="panel-help" data-i18n="overlayHelp">Your name and the song over the visuals, for streams.</p>

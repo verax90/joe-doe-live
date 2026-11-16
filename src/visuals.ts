@@ -22,7 +22,9 @@ export const AUTO_VISUAL = 'auto';
 
 // The Visual menu groups them, so 55 looks are not one long list. The ones
 // that are not looks (from the code, automatic, none) stay at the top.
-export type VisualGroup = 'top' | 'sound' | 'machines' | 'motion' | 'touch' | 'voice' | 'cam' | 'clips';
+export type VisualGroup = 'top' | 'sound' | 'retro' | 'machines' | 'motion' | 'touch' | 'voice' | 'cam' | 'clips';
+// Old screens, old machines and the demos: their own group
+const RETRO = new Set(['vaporwave', 'net-art', 'hifi', 'escritorio', 'cobre', 'hipercubo', 'vida', 'truchet', 'radar', 'tormenta', 'mandelbrot', 'vinilo', 'vhs', 'matrix']);
 export function visualGroup(visual: Visual): VisualGroup {
   if (visual.id === CODE_VISUAL || visual.id === AUTO_VISUAL || visual.id === 'ninguno') return 'top';
   if (visual.clips) return 'clips';
@@ -31,6 +33,7 @@ export function visualGroup(visual: Visual): VisualGroup {
   if (visual.id.startsWith('mov')) return 'motion';
   if (visual.id.startsWith('tacto')) return 'touch';
   if (visual.id.startsWith('voz')) return 'voice';
+  if (RETRO.has(visual.id)) return 'retro';
   return 'sound';
 }
 
