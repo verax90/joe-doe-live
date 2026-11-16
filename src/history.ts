@@ -5,7 +5,7 @@
 // edit, so Ctrl+Z brings back what you had.
 import { setIcon } from './icon';
 import { keepingFocus } from './a11y';
-import { t } from './i18n';
+import { t, lang } from './i18n';
 import { readStorage, writeStorage } from './storage';
 import type { StrudelMirror } from './strudel';
 
@@ -57,7 +57,8 @@ export function recordPlayed(code: string) {
 export function setupHistory(editor: StrudelMirror) {
   const view = document.querySelector<HTMLElement>('#history-list')!;
   const status = document.querySelector<HTMLElement>('#history-status')!;
-  const time = (at: number) => new Date(at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  // in the studio's language (24 h in Spanish and Catalan, not the browser's AM/PM)
+  const time = (at: number) => new Date(at).toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   const load = (code: string) => {
     // one edit for the whole document: Ctrl+Z undoes it
@@ -83,7 +84,7 @@ export function setupHistory(editor: StrudelMirror) {
         const size = document.createElement('span');
         size.className = 'history-size';
         const changed = changedLines(version.code, list[i + 1]?.code);
-        size.textContent = i === list.length - 1 ? t('historyFirst') : t('historyChanged', { n: changed });
+        size.textContent = i === list.length - 1 ? t('historyFirst') : changed === 1 ? t('historyChangedOne') : t('historyChanged', { n: changed });
         const actions = document.createElement('span');
         actions.className = 'cheat-icons';
         const button = (glyph: string, label: string, onClick: () => void) => {

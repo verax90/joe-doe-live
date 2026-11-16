@@ -1918,6 +1918,21 @@ select.control {
   grid-column: 1 / -1;
 }
 
+/* In a panel a dropdown fills its field (the bar's 14rem cap cut names in
+   half), with less padding; two side by side stack when the panel is narrow,
+   so «Drum and bass» or «El código actual» read whole */
+.panel .panel-field select.control {
+  width: 100%;
+  max-width: none;
+  padding-inline: 0.55rem 0.3rem;
+  text-overflow: ellipsis;
+}
+
+.panel .set-add,
+.panel .compose-song {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
+}
+
 .set-song {
   display: grid;
   grid-template-columns: 1fr auto;

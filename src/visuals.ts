@@ -475,6 +475,17 @@ src(o3)
   .out()`,
   },
   {
+    id: 'mov-humo',
+    name: { en: 'Smoke (mouse or phone)', es: 'Humo (ratón o móvil)', ca: 'Fum (ratolí o mòbil)' },
+    // move over the screen (code hidden), the phone's Visual square or in
+    // front of the webcam: smoke comes out where you are, rises and curls
+    code: `smokeOf(o3, () => brush().x0, () => brush().y0, () => brush().x1, () => brush().y1, () => brush().on, () => time * 0.05, () => 1 + bass() * 3, () => justCameIn())
+  .out(o3)
+src(o3)
+  .add(src(o3).scale(0.98).brightness(0.05), 0.25)
+  .out()`,
+  },
+  {
     id: 'mov-luz',
     name: { en: 'Light (follows you)', es: 'Luz (te sigue)', ca: 'Llum (et segueix)' },
     code: `shape(64, () => 0.02 + motion() * 0.1, 0.25)
@@ -670,6 +681,47 @@ motionOnly(s0, o3, () => 3 + bass() * 4)
     camera: true,
     // you, made of falling characters: the camera decides which ones are lit
     code: `matrixRain(s0, 1, 0.9, () => kickHit())
+  .out()`,
+  },
+  {
+    id: 'cam-binario',
+    name: { en: 'Webcam (binary: 0 and 1)', es: 'Webcam (binario: 0 y 1)', ca: 'Webcam (binari: 0 i 1)' },
+    camera: true,
+    // you, made of digits that keep changing; a kick turns them all over
+    code: `binary(s0, () => 84 - bass() * 24, () => time * 2, () => kickHit())
+  .color(...tint(1.3))
+  .add(src(o0).scrollY(-0.003).color(0.55, 0.55, 0.55), 0.4)
+  .out()`,
+  },
+  {
+    id: 'cam-1bit',
+    name: { en: 'Webcam (1 bit, handheld console)', es: 'Webcam (1 bit, consola portátil)', ca: 'Webcam (1 bit, consola portàtil)' },
+    camera: true,
+    code: `dither(s0, () => 3 + bass() * 4, H("<0 0 0 1>"))
+  .out()`,
+  },
+  {
+    id: 'cam-lineas',
+    name: { en: 'Webcam (lines lifted by the light)', es: 'Webcam (líneas en relieve)', ca: 'Webcam (línies en relleu)' },
+    camera: true,
+    code: `ruttEtra(s0, () => 64 + mid() * 30, () => 0.06 + bass() * 0.14)
+  .color(...tint(1.2))
+  .out()`,
+  },
+  {
+    id: 'cam-chorreo',
+    name: { en: 'Webcam (pixel sorting)', es: 'Webcam (píxeles que chorrean)', ca: 'Webcam (píxels que regalimen)' },
+    camera: true,
+    // what is bright pours down; more with the bass
+    code: `pixelSort(s0, () => 0.12 + bass() * 0.3, () => 0.6 - mid() * 0.25)
+  .saturate(1.4)
+  .out()`,
+  },
+  {
+    id: 'cam-barras',
+    name: { en: 'Webcam (barcode)', es: 'Webcam (código de barras)', ca: 'Webcam (codi de barres)' },
+    camera: true,
+    code: `barcode(s0, () => 110 - bass() * 40, H("<10 14 8 12>"))
   .out()`,
   },
   {
@@ -1998,6 +2050,178 @@ export const SHADERS = [
   float cursor = newest * step(len + 1.0, col) * step(col, len + 1.0) * step(0.5, fract(clock * 1.5)) * step(0.1, f.y);
   float v = on * written * gap * (0.25 + 0.75 * (1.0 - age)) + newest * on * written * flash * 0.6 + cursor;
   return vec4(vec3(0.12, 1.0, 0.35) * clamp(v, 0.0, 1.0), 1.0);`,
+  },
+  {
+    // Binary: you, made of 0s and 1s. Each cell is a digit (in 4×5 dots, as
+    // asciiOf draws them) lit as bright as the camera is there; the digits
+    // keep changing, each column at its own speed, and flip turns them over
+    name: 'binary',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'cols', default: 80 },
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'flip', default: 0 },
+    ],
+    glsl: `
+  vec2 grid = vec2(floor(cols), floor(cols * resolution.y / resolution.x * 0.8333));
+  vec2 id = floor(_st * grid);
+  vec2 f = fract(_st * grid);
+  float bright = dot(texture2D(tex, (id + 0.5) / grid).rgb, vec3(0.299, 0.587, 0.114));
+  float speed = 1.0 + floor(fract(sin(id.x * 78.233) * 43758.5453) * 6.0);
+  float digit = step(0.5, fract(sin(dot(vec2(id.x, id.y + floor(clock * speed)), vec2(12.9898, 78.233))) * 43758.5453));
+  digit = abs(digit - step(0.5, flip));
+  float glyph = digit > 0.5 ? 312398.0 : 432534.0;
+  float px = floor(f.x * 5.0);
+  float py = floor(f.y * 6.0);
+  float bit = 19.0 - (py * 4.0 + px);
+  float on = (px < 4.0 && py < 5.0) ? mod(floor((glyph + 0.5) / exp2(bit)), 2.0) : 0.0;
+  float lit = smoothstep(0.12, 0.85, bright);
+  return vec4(vec3(on * (0.08 + lit * 1.1)), 1.0);`,
+  },
+  {
+    // 1 bit, the old handheld way: big pixels in four shades of green, the
+    // in-between tones made of an ordered pattern of dots (Bayer 4×4).
+    // size is how big a pixel is; mode 1 is plain black and white
+    name: 'dither',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'size', default: 3 },
+      { type: 'float', name: 'mode', default: 0 },
+    ],
+    glsl: `
+  vec2 cell = _st * resolution / max(size, 1.0);
+  vec2 a = floor(cell);
+  vec2 h = floor(a * 0.5);
+  float bayer = fract(dot(h, vec2(0.5, h.y * 0.75))) * 0.25 + fract(dot(a, vec2(0.5, a.y * 0.75)));
+  float bright = dot(texture2D(tex, (a + 0.5) * max(size, 1.0) / resolution).rgb, vec3(0.299, 0.587, 0.114));
+  bright = clamp((bright - 0.5) * 1.3 + 0.5, 0.0, 1.0);
+  if (mode > 0.5) return vec4(vec3(step(bayer, bright)), 1.0);
+  float level = clamp(floor(bright * 3.0 + bayer), 0.0, 3.0);
+  vec3 c = level < 0.5 ? vec3(0.06, 0.22, 0.06) : level < 1.5 ? vec3(0.19, 0.38, 0.19) : level < 2.5 ? vec3(0.55, 0.67, 0.06) : vec3(0.61, 0.74, 0.06);
+  return vec4(c, 1.0);`,
+  },
+  {
+    // Lines lifted by the light, the way the old Rutt/Etra video synth did:
+    // the picture as horizontal scan lines, each pushed up as bright as what
+    // is under it, so a face turns into a landscape of ridges
+    name: 'ruttEtra',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'lines', default: 70 },
+      { type: 'float', name: 'lift', default: 0.1 },
+    ],
+    glsl: `
+  float n = floor(lines);
+  float thick = 1.4 / resolution.y;
+  float best = 0.0;
+  vec3 ink = vec3(0.0);
+  float first = floor(_st.y * n);
+  for (int i = 0; i < 16; i++) {
+    float y = (first + float(i) + 0.5) / n;
+    if (y > 1.0) break;
+    vec3 seen = texture2D(tex, vec2(_st.x, y)).rgb;
+    float bright = dot(seen, vec3(0.299, 0.587, 0.114));
+    float shown = y - bright * lift;
+    float d = abs(_st.y - shown);
+    float lit = smoothstep(thick * 2.0, 0.0, d) * (0.25 + bright);
+    if (lit > best) {
+      best = lit;
+      ink = mix(vec3(bright), seen, 0.5) * 1.5;
+    }
+  }
+  return vec4(ink * best, 1.0);`,
+  },
+  {
+    // Pixel sorting, the glitch artists' trick: what is bright pours down
+    // in streaks over what is darker, like wet paint. length is how far it
+    // runs, and only what is brighter than level runs at all
+    name: 'pixelSort',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'length', default: 0.2 },
+      { type: 'float', name: 'level', default: 0.55 },
+    ],
+    glsl: `
+  vec3 here = texture2D(tex, _st).rgb;
+  vec3 best = here;
+  float bestBright = dot(here, vec3(0.299, 0.587, 0.114));
+  for (int i = 1; i <= 28; i++) {
+    float k = float(i) / 28.0;
+    vec3 above = texture2D(tex, _st - vec2(0.0, k * length)).rgb;
+    float b = dot(above, vec3(0.299, 0.587, 0.114));
+    if (b < level) break;
+    if (b > bestBright) {
+      best = above;
+      bestBright = b;
+    }
+  }
+  return vec4(best, 1.0);`,
+  },
+  {
+    // A barcode: the picture as black bars on white, thick where it is
+    // dark and thin where it is light, in rows like the labels in a shop
+    name: 'barcode',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'bars', default: 90 },
+      { type: 'float', name: 'rows', default: 10 },
+    ],
+    glsl: `
+  vec2 grid = vec2(floor(bars), floor(rows));
+  vec2 id = floor(_st * grid);
+  vec2 f = fract(_st * grid);
+  float bright = dot(texture2D(tex, (id + 0.5) / grid).rgb, vec3(0.299, 0.587, 0.114));
+  float bar = step(f.x, 0.08 + (1.0 - bright) * 0.84);
+  float gap = step(0.1, f.y);
+  return vec4(vec3(1.0 - bar * gap), 1.0);`,
+  },
+  {
+    // Smoke: what was there rises and curls (it is pushed along a field
+    // that swirls, and blurred a little as it goes) and fades; a soft puff
+    // is let out along the stretch the brush moved this frame
+    name: 'smokeOf',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'before', default: NaN },
+      { type: 'float', name: 'ax', default: 0.5 },
+      { type: 'float', name: 'ay', default: 0.5 },
+      { type: 'float', name: 'bx', default: 0.5 },
+      { type: 'float', name: 'by', default: 0.5 },
+      { type: 'float', name: 'on', default: 0 },
+      { type: 'float', name: 'hue', default: 0 },
+      { type: 'float', name: 'swirl', default: 1 },
+      { type: 'float', name: 'fresh', default: 0 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = _st * aspect * 3.0;
+  float e = 0.02;
+  float t = time * 0.15;
+  float n1 = _noise(vec3(p + vec2(0.0, e), t));
+  float n2 = _noise(vec3(p - vec2(0.0, e), t));
+  float n3 = _noise(vec3(p + vec2(e, 0.0), t));
+  float n4 = _noise(vec3(p - vec2(e, 0.0), t));
+  vec2 curl = vec2(n1 - n2, n4 - n3) / (2.0 * e);
+  vec2 back = _st + vec2(0.0, 0.0022) - curl * 0.0016 * swirl / aspect;
+  vec2 px = 1.0 / resolution;
+  vec3 old = (texture2D(before, back).rgb * 4.0
+    + texture2D(before, back + vec2(px.x, 0.0)).rgb + texture2D(before, back - vec2(px.x, 0.0)).rgb
+    + texture2D(before, back + vec2(0.0, px.y)).rgb + texture2D(before, back - vec2(0.0, px.y)).rgb) / 8.0;
+  old *= 0.985 * (1.0 - fresh);
+  vec2 q = _st * aspect;
+  vec2 a = vec2(ax, ay) * aspect;
+  vec2 b = vec2(bx, by) * aspect;
+  vec2 ab = b - a;
+  float h = clamp(dot(q - a, ab) / max(dot(ab, ab), 1e-6), 0.0, 1.0);
+  float d = length(q - a - ab * h);
+  float puff = exp(-d * d / 0.0012) * on * 0.16;
+  vec3 colour = 0.6 + 0.4 * cos(6.2831853 * (hue + vec3(0.0, 0.33, 0.67)));
+  return vec4(clamp(old + colour * puff, 0.0, 1.0), 1.0);`,
   },
   {
     // Light painting: what was painted turns a little and drifts out (more
