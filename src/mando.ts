@@ -396,6 +396,11 @@ const fromStudio = (message: StudioMessage) => {
     paletteSelect.value = message.id;
     return;
   }
+  // the colour this phone paints in (Light painting, Smoke): the dot wears it
+  if (message.t === 'pen') {
+    point.style.setProperty('--pen', message.colour);
+    return;
+  }
   if (message.t === 'vj') {
     showVjValues(message.vj);
     showLooks(message.looks);

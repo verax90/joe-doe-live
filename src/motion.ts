@@ -49,7 +49,7 @@ export const fullAt = (slider: number) => 0.3 * 0.08 ** slider; // 30 % down to 
 const ease = (value: number, target: number, elapsedMs: number, tauMs: number) =>
   value + (target - value) * (1 - Math.exp(-Math.max(0, elapsedMs) / tauMs));
 
-const state = { x: 0.5, y: 0.5, amount: 0, targetX: 0.5, targetY: 0.5, targetAmount: 0, at: 0, held: false };
+const state = { x: 0.5, y: 0.5, amount: 0, targetX: 0.5, targetY: 0.5, targetAmount: 0, at: 0, held: false, byPhone: false };
 function read() {
   const now = performance.now();
   const elapsed = now - state.at;
@@ -64,7 +64,9 @@ export const motionX = () => read().x;
 export const motionY = () => read().y;
 export const motion = () => read().amount;
 export const motionHeld = () => state.held;
-Object.assign(globalThis, { motionX, motionY, motion, motionHeld });
+// held from a phone: the phone draws with its own pen (pens.ts), not the brush
+export const motionByPhone = () => state.held && state.byPhone;
+Object.assign(globalThis, { motionX, motionY, motion, motionHeld, motionByPhone });
 
 // The mouse (or a finger on a touch screen) on the visuals is the point too,
 // while the code is hidden (with it in view a click there is for the code)
@@ -103,8 +105,9 @@ export function setupPointerPoint() {
 
 // A finger on the phone's Visual tab is the point while it is down (x and y
 // as on the screen, y from the top), webcam or not; null when it lifts
-export function holdMotionPoint(point: { x: number; y: number } | null) {
+export function holdMotionPoint(point: { x: number; y: number } | null, byPhone = false) {
   read();
+  state.byPhone = Boolean(point) && byPhone;
   // a new touch starts where it lands, not gliding there from the last one
   if (point && !state.held) Object.assign(state, { x: point.x, y: point.y });
   state.held = Boolean(point);

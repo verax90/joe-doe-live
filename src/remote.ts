@@ -13,6 +13,7 @@ import { roomId } from './room';
 import { readStorage, writeStorage } from './storage';
 import { toast } from './toast';
 import { setDjFilter } from './limiter';
+import { forgetPen, movePen, penFor } from './pens';
 
 // The XY filters the whole mix while a finger is on it (Remote panel option)
 const djOn = () => readStorage<boolean>('jdl:mando-dj', true);
@@ -54,7 +55,9 @@ export type StudioMessage =
   | { t: 'vj'; vj: Record<string, number>; looks: boolean[] }
   | { t: 'palette'; id: string }
   | { t: 'beat'; b: number }
-  | { t: 'transport'; playing: boolean; bpm: number };
+  | { t: 'transport'; playing: boolean; bpm: number }
+  // the colour this phone draws in
+  | { t: 'pen'; colour: string };
 
 // The phone's clip pads and crossfader, for the Clips panel to act on
 export const REMOTE_CLIP_EVENT = 'jdl:remote-clip';
@@ -135,9 +138,20 @@ export function applyRemote(message: RemoteMessage, target: EventTarget = window
     target.dispatchEvent(new CustomEvent<string>(REMOTE_PALETTE_EVENT, { detail: message.id }));
   } else if (message.t === 'point') {
     holdingPoint.add(from);
+    movePen(from, { x: clamp(message.x), y: clamp(message.y) });
+    // the point the Motion visuals follow: the first finger down leads
+    if ([...holdingPoint][0] !== from) return;
     target.dispatchEvent(new CustomEvent(REMOTE_POINT_EVENT, { detail: { x: clamp(message.x), y: clamp(message.y) } }));
   } else if (message.t === 'pointup') {
     holdingPoint.delete(from);
+    movePen(from, null);
+    // the next finger still down leads the point now, from where it is
+    const next = [...holdingPoint][0];
+    if (next !== undefined) {
+      const pen = penFor(next);
+      target.dispatchEvent(new CustomEvent(REMOTE_POINT_EVENT, { detail: { x: pen.x1, y: pen.y1 } }));
+      return;
+    }
     if (!holdingPoint.size) target.dispatchEvent(new CustomEvent(REMOTE_POINT_EVENT, { detail: null }));
   }
 }
@@ -183,6 +197,7 @@ export function setupRemote({ addTrack }: { addTrack: (pattern: string) => void 
     peer.on('connection', (connection) => {
       connection.on('open', () => {
         phones.add(connection);
+        connection.send({ t: 'pen', colour: penFor(connection).colour } satisfies StudioMessage);
         for (const make of greetings) {
           const hello = make();
           if (hello) connection.send(hello);
@@ -196,6 +211,7 @@ export function setupRemote({ addTrack }: { addTrack: (pattern: string) => void 
         // a phone that goes away with a finger down lets go
         if (holdingXy.has(connection)) applyRemote({ t: 'xyup' }, window, connection);
         if (holdingPoint.has(connection)) applyRemote({ t: 'pointup' }, window, connection);
+        forgetPen(connection);
         render();
       });
     });

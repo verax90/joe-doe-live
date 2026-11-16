@@ -129,3 +129,16 @@ describe('two phones at once', () => {
   });
 });
 
+
+describe('each phone its own pen', () => {
+  it('gives each phone a different colour and draws only while the finger is down', async () => {
+    const { penFor, anyPenDown, movePen, forgetPen } = await import('./pens');
+    expect(penFor('x').colour).not.toBe(penFor('y').colour);
+    movePen('x', { x: 0.2, y: 0.3 });
+    expect(anyPenDown()).toBe(true);
+    movePen('x', null);
+    expect(anyPenDown()).toBe(false);
+    forgetPen('x');
+    forgetPen('y');
+  });
+});

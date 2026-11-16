@@ -70,7 +70,7 @@ export function setupRemoteVisual({ list, current, pick }: Options) {
     tell();
   });
   window.addEventListener(REMOTE_HIT_EVENT, (event) => hearRole((event as CustomEvent<Role>).detail));
-  window.addEventListener(REMOTE_POINT_EVENT, (event) => holdMotionPoint((event as CustomEvent<{ x: number; y: number } | null>).detail));
+  window.addEventListener(REMOTE_POINT_EVENT, (event) => holdMotionPoint((event as CustomEvent<{ x: number; y: number } | null>).detail, true));
   window.addEventListener(REMOTE_VJ_EVENT, (event) => {
     const detail = (event as CustomEvent<{ c: VjControl; v: number } | null>).detail;
     // the effects only show with VJ on: moving one from the phone turns it on

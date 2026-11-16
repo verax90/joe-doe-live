@@ -5,6 +5,7 @@
 import { attachAscii } from './ascii';
 import { attachClips } from './clips';
 import { kickCount, kickHit } from './hits';
+import { stopPens } from './pens';
 import { stopRetro } from './retro';
 import { stopRidges } from './ridges';
 import { finishCode, visualComesIn, type Quality } from './finish';
@@ -568,7 +569,8 @@ teletext(o3, () => 36 + kickHit() * 10)
     name: { en: 'Light painting (mouse or phone)', es: 'Pintura de luz (ratón o móvil)', ca: 'Pintura de llum (ratolí o mòbil)' },
     // drag on the screen (code hidden) or on the phone's Visual square: the
     // strokes glow in changing colours, swirl and fade; a kick sends them out
-    code: `lightBrush(o3, () => brush().x0, () => brush().y0, () => brush().x1, () => brush().y1, () => brush().on, () => time * 0.12, () => 1 + kickHit() * 5, () => justCameIn())
+    code: `pens()
+lightBrush(o3, () => brush().x0, () => brush().y0, () => brush().x1, () => brush().y1, () => brush().on, () => time * 0.12, () => 1 + kickHit() * 5, () => justCameIn(), s3)
   .out(o3)
 src(o3)
   .out()`,
@@ -578,7 +580,8 @@ src(o3)
     name: { en: 'Smoke (mouse or phone)', es: 'Humo (ratón o móvil)', ca: 'Fum (ratolí o mòbil)' },
     // move over the screen (code hidden), the phone's Visual square or in
     // front of the webcam: smoke comes out where you are, rises and curls
-    code: `smokeOf(o3, () => brush().x0, () => brush().y0, () => brush().x1, () => brush().y1, () => brush().on, () => time * 0.05, () => 1 + bass() * 3, () => justCameIn())
+    code: `pens()
+smokeOf(o3, () => brush().x0, () => brush().y0, () => brush().x1, () => brush().y1, () => brush().on, () => time * 0.05, () => 1 + bass() * 3, () => justCameIn(), s3)
   .out(o3)
 src(o3)
   .add(src(o3).scale(0.98).brightness(0.05), 0.25)
@@ -1290,6 +1293,7 @@ let running = '';
 const run = (code: string) => {
   stopRidges(); // the Lines visual starts it again if it is the one running
   stopRetro(); // and Vaporwave and Net art theirs
+  stopPens(); // and the phones' pens
   // another visual fades in; the same one drawn again (a new Play, the VJ
   // switched on) does not blink
   visualComesIn(code, code !== running);
@@ -2540,6 +2544,7 @@ export const SHADERS = [
       { type: 'float', name: 'hue', default: 0 },
       { type: 'float', name: 'swirl', default: 1 },
       { type: 'float', name: 'fresh', default: 0 },
+      { type: 'sampler2D', name: 'inks', default: NaN },
     ],
     glsl: `
   vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
@@ -2565,7 +2570,7 @@ export const SHADERS = [
   float d = length(q - a - ab * h);
   float puff = exp(-d * d / 0.0012) * on * 0.16;
   vec3 colour = 0.6 + 0.4 * cos(6.2831853 * (hue + vec3(0.0, 0.33, 0.67)));
-  return vec4(clamp(old + colour * puff, 0.0, 1.0), 1.0);`,
+  return vec4(clamp(old + colour * puff + texture2D(inks, _st).rgb * 0.22, 0.0, 1.0), 1.0);`,
   },
   {
     // Hexagons: the picture in hexagonal tiles, each one colour, with a dark
@@ -3508,6 +3513,7 @@ export const SHADERS = [
       { type: 'float', name: 'hue', default: 0 },
       { type: 'float', name: 'drift', default: 1 },
       { type: 'float', name: 'fresh', default: 0 },
+      { type: 'sampler2D', name: 'inks', default: NaN },
     ],
     glsl: `
   float turn = 0.0025 * drift;
@@ -3523,7 +3529,8 @@ export const SHADERS = [
   float d = length(p - a - ab * h);
   float stroke = (smoothstep(0.007, 0.002, d) + 0.0009 / (d + 0.006)) * on;
   vec3 colour = 0.55 + 0.45 * cos(6.2831853 * (hue + vec3(0.0, 0.33, 0.67)));
-  return vec4(clamp(old + colour * stroke * 0.9, 0.0, 1.0), 1.0);`,
+  // and the phones' strokes, each in its own colour (pens.ts)
+  return vec4(clamp(old + colour * stroke * 0.9 + texture2D(inks, _st).rgb * 0.6, 0.0, 1.0), 1.0);`,
   },
   {
     // The finish (finish.ts): the picture, a glow from what is bright around
@@ -3657,9 +3664,11 @@ export function idleBrush(seconds: number) {
 (globalThis as { brush?: () => typeof brushPen }).brush = () => {
   const now = performance.now();
   if (now - brushPen.at < 4) return brushPen;
-  const m = globalThis as { motionX?: () => number; motionY?: () => number; motionHeld?: () => boolean };
-  const held = m.motionHeld?.() ?? false;
-  if (held) brushPen.lastHeld = now;
+  const m = globalThis as { motionX?: () => number; motionY?: () => number; motionHeld?: () => boolean; motionByPhone?: () => boolean };
+  // a phone draws with its own pen (pens.ts): the brush is the mouse and the webcam
+  const byPhone = m.motionByPhone?.() ?? false;
+  const held = (m.motionHeld?.() ?? false) && !byPhone;
+  if (held || byPhone) brushPen.lastHeld = now;
   const idle = !held && now - brushPen.lastHeld > 3000;
   const at = idle ? idleBrush(now / 1000) : { x: m.motionX?.() ?? 0.5, y: m.motionY?.() ?? 0.5 };
   const drawing = held || idle;
@@ -3854,6 +3863,7 @@ export async function applyVisual(id: string) {
   if (id !== AUTO_VISUAL) stopAuto();
   stopRidges();
   stopRetro();
+  stopPens();
   const hydra = await g.initHydra();
   // hush() in a pattern resets both, so they are set again on every visual
   capFrameRate();

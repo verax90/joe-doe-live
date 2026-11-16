@@ -2368,6 +2368,78 @@ select.control {
   font-style: italic;
 }
 
+/* Steps by hand (steps.ts): a row of boxes under a drum line's grid */
+.editor {
+  position: relative;
+}
+
+.editor .cm-content > canvas {
+  cursor: pointer;
+}
+
+/* .editor > div is the editor's own wrapper (transparent, full height):
+   this box is not */
+.editor > .steps-box {
+  min-height: 0;
+  background: var(--panel) !important;
+}
+
+.steps-box {
+  position: absolute;
+  z-index: 6;
+  max-width: calc(100% - 16px);
+  padding: 0.5rem 0.6rem 0.6rem;
+  border: 1px solid var(--accent);
+  border-radius: 0.5rem;
+  background: var(--panel);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.steps-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.steps-close {
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+.steps-row {
+  display: grid;
+  grid-template-columns: repeat(var(--steps), minmax(1.1rem, 1.8rem));
+  gap: 3px;
+  overflow-x: auto;
+}
+
+.steps-cell {
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--bg-elevated);
+  cursor: pointer;
+}
+
+.steps-cell.is-beat {
+  border-color: color-mix(in srgb, var(--fg) 40%, var(--line));
+}
+
+.steps-cell[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.steps-cell:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 1px;
+}
+
 /* The gallery of visuals: a wider panel, cards with their picture */
 /* only the cards scroll: the search and the groups stay on top */
 #gallery.panel {

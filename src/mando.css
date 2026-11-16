@@ -101,6 +101,12 @@ body {
   pointer-events: none;
 }
 
+/* on the Visual square, the dot in the colour this phone paints in */
+#point-dot {
+  background: var(--pen, var(--accent));
+  box-shadow: 0 0 24px var(--pen, var(--accent));
+}
+
 .pads {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

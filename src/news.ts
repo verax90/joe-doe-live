@@ -12,6 +12,15 @@ export type News = { id: string; title: Localized; text: Localized; go?: Step[] 
 
 export const NEWS: News[] = [
   {
+    id: '2026-11-16-pens-steps',
+    title: L('A colour per phone, and steps by hand', 'Un color por móvil, y pasos a mano', 'Un color per mòbil, i passos a mà'),
+    text: L(
+      'With several phones on Light painting or Smoke, each paints in its own colour at once (the dot on the phone wears it). And with the sequencer on, a click on the grid of a drum row opens its steps: each box puts a hit in or takes it out, heard at once',
+      'Con varios móviles en Pintura de luz o Humo, cada uno pinta en su color a la vez (el punto del móvil lo lleva). Y con el secuenciador puesto, pinchar la rejilla de una línea de batería abre sus pasos: cada casilla pone o quita un golpe y suena al momento',
+      "Amb diversos mòbils a Pintura de llum o Fum, cadascun pinta del seu color alhora (el punt del mòbil el porta). I amb el seqüenciador posat, clicar la graella d'una línia de bateria n'obre els passos: cada casella posa o treu un cop i sona a l'instant",
+    ),
+  },
+  {
     id: '2026-11-16-gallery',
     title: L('A gallery of visuals', 'Galería de visuales', 'Galeria de visuals'),
     text: L(
