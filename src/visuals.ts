@@ -5,6 +5,7 @@
 import { attachAscii } from './ascii';
 import { attachClips } from './clips';
 import { kickCount, kickHit } from './hits';
+import { stopRetro } from './retro';
 import { stopRidges } from './ridges';
 import { finishCode, visualComesIn, type Quality } from './finish';
 import { connectSource } from './video';
@@ -220,6 +221,27 @@ glitchOf(o3, () => 0.1 + high() * 1.5 + hatHit() * 0.6, () => time * 13 + kickCo
     code: `ridges()
 src(s1)
   .color(...tint(1))
+  .out()`,
+  },
+  {
+    id: 'vaporwave',
+    name: { en: 'Vaporwave (old things floating)', es: 'Vaporwave (cacharros flotando)', ca: 'Vaporwave (andròmines flotant)' },
+    // cassettes, old computers, floppies, CDs, palms and columns floating
+    // over a striped sun and a grid that runs with the beat
+    code: `retro('vapor')
+src(s1)
+  .add(src(s1).scrollX(0.004).color(0.4, 0, 0.6), 0.25)
+  .scrollY(() => kickHit() * 0.006)
+  .out()`,
+  },
+  {
+    id: 'net-art',
+    name: { en: 'Net art (a 90s home page)', es: 'Net art (página de los 90)', ca: 'Net art (pàgina dels 90)' },
+    // stars, a rainbow welcome, a visit counter, and an error window more on
+    // every kick, bouncing about
+    code: `retro('web')
+src(s1)
+  .modulate(osc(400, 0, 0).rotate(Math.PI / 2), () => hatHit() * 0.004)
   .out()`,
   },
   {
@@ -946,6 +968,7 @@ const barH = (pattern: unknown) => g.H!(typeof pattern === 'string' && g.mini ? 
 let running = '';
 const run = (code: string) => {
   stopRidges(); // the Lines visual starts it again if it is the one running
+  stopRetro(); // and Vaporwave and Net art theirs
   // another visual fades in; the same one drawn again (a new Play, the VJ
   // switched on) does not blink
   visualComesIn(code, code !== running);
@@ -2584,6 +2607,7 @@ export async function applyVisual(id: string) {
   if (!visual || !g.initHydra) return;
   if (id !== AUTO_VISUAL) stopAuto();
   stopRidges();
+  stopRetro();
   const hydra = await g.initHydra();
   // hush() in a pattern resets both, so they are set again on every visual
   capFrameRate();
