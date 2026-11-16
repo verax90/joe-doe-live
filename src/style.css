@@ -1760,9 +1760,25 @@ select.control {
     display: none;
   }
 
+  /* a phone: the panel covers the whole width (90vw left a strip of code
+     peeking out on the left, cut mid-word) */
   .panel {
     position: absolute;
     inset: 0 0 0 auto;
+    width: 100%;
+    border-left: none;
+  }
+
+  /* the panels at hand: big enough for a thumb, and fading out at the
+     right edge, so it shows there are more to swipe to */
+  .foot .dock-item {
+    height: 2rem;
+    padding: 0 0.8rem;
+  }
+
+  .foot .dock-list {
+    mask-image: linear-gradient(to right, #000 82%, transparent);
+    padding-right: 1.5rem;
   }
 }
 
