@@ -829,6 +829,89 @@ motionOnly(s0, o3, () => 3 + bass() * 4)
   .out()`,
   },
   {
+    id: 'cam-nocturna',
+    name: { en: 'Webcam (night vision)', es: 'Webcam (visión nocturna)', ca: 'Webcam (visió nocturna)' },
+    camera: true,
+    code: `nightVision(s0, () => time, () => 1 + kickHit() * 0.5)
+  .out()`,
+  },
+  {
+    id: 'cam-ojo-pez',
+    name: { en: 'Webcam (fish-eye)', es: 'Webcam (ojo de pez)', ca: 'Webcam (ull de peix)' },
+    camera: true,
+    // it swells on the bass
+    code: `fishEye(s0, () => 0.4 + bass() * 1.2)
+  .out()`,
+  },
+  {
+    id: 'cam-acuarela',
+    name: { en: 'Webcam (watercolour)', es: 'Webcam (acuarela)', ca: 'Webcam (aquarel·la)' },
+    camera: true,
+    code: `watercolour(s0, () => 3 + bass() * 4)
+  .saturate(1.3)
+  .out()`,
+  },
+  {
+    id: 'cam-cga',
+    name: { en: 'Webcam (CGA, four colours)', es: 'Webcam (CGA, cuatro colores)', ca: 'Webcam (CGA, quatre colors)' },
+    camera: true,
+    // the two palettes take turns every bar
+    code: `cga(s0, () => 4 + bass() * 4, H("<0 1>"))
+  .out()`,
+  },
+  {
+    id: 'cam-ondas',
+    name: { en: 'Webcam (ripples)', es: 'Webcam (ondas en el agua)', ca: 'Webcam (ones a l\'aigua)' },
+    camera: true,
+    // every kick drops a stone where you are
+    code: `waterRings(s0, () => sinceHit(kickHit(), 220), () => motionX(), () => motionY())
+  .out()`,
+  },
+  {
+    id: 'cam-aura',
+    name: { en: 'Webcam (rainbow aura)', es: 'Webcam (aura arcoíris)', ca: 'Webcam (aura arc de Sant Martí)' },
+    camera: true,
+    code: `aura(s0, () => time * 0.2, () => 2 + bass() * 4)
+  .add(src(o0).scrollY(0.004).scale(1.01).color(0.85, 0.85, 0.85), 0.75)
+  .out()`,
+  },
+  {
+    id: 'cam-cubismo',
+    name: { en: 'Webcam (cubism)', es: 'Webcam (cubismo)', ca: 'Webcam (cubisme)' },
+    camera: true,
+    // cut differently on every kick
+    code: `cubism(s0, () => kickCount() % 16, () => 0.7 + bass())
+  .out()`,
+  },
+  {
+    id: 'cam-leds',
+    name: { en: 'Webcam (LED wall)', es: 'Webcam (pantalla de LEDs)', ca: 'Webcam (pantalla de LEDs)' },
+    camera: true,
+    code: `ledWall(s0, () => 12 + bass() * 10)
+  .saturate(1.5)
+  .out()`,
+  },
+  {
+    id: 'cam-seguridad',
+    name: { en: 'Webcam (security cameras)', es: 'Webcam (cámaras de seguridad)', ca: 'Webcam (càmeres de seguretat)' },
+    camera: true,
+    code: `cctv(s0, () => time)
+  .out()`,
+  },
+  {
+    id: 'cam-tiempo',
+    name: { en: 'Webcam (time in colours)', es: 'Webcam (tiempo en colores)', ca: 'Webcam (temps en colors)' },
+    camera: true,
+    // red is now, green a moment ago, blue a while ago: what moves leaves
+    // coloured ghosts, what stays still is in its own colours
+    code: `src(o3).blend(src(s0), 0.15).out(o3)
+src(s0).color(1, 0, 0)
+  .add(src(o3).color(0, 1, 0))
+  .add(src(o0).color(0, 0, 0.93))
+  .add(src(s0).color(0, 0, 0.07))
+  .out()`,
+  },
+  {
     id: 'cam-mirror',
     name: { en: 'Webcam (mirror)', es: 'Webcam (espejo)', ca: 'Webcam (mirall)' },
     camera: true,
@@ -2557,6 +2640,212 @@ export const SHADERS = [
   float dark = clamp(line + hatch1 + hatch2, 0.0, 0.9);
   vec3 paper = vec3(0.97, 0.96, 0.93);
   return vec4(paper * (1.0 - dark), 1.0);`,
+  },
+  {
+    // Night vision: everything in a bright, grainy green, seen through the
+    // two round lenses of binoculars, with faint lines running down
+    name: 'nightVision',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'gain', default: 1 },
+    ],
+    glsl: `
+  float c = dot(texture2D(tex, _st).rgb, vec3(0.299, 0.587, 0.114));
+  c = clamp(pow(c, 0.7) * 1.4 * gain, 0.0, 1.0);
+  float grain = fract(sin(dot(_st * resolution + floor(clock * 30.0), vec2(12.9898, 78.233))) * 43758.5453);
+  c = c * 0.85 + grain * 0.18;
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = (_st - 0.5) * aspect;
+  float lens = max(smoothstep(0.42, 0.38, length(p - vec2(-0.22, 0.0))), smoothstep(0.42, 0.38, length(p - vec2(0.22, 0.0))));
+  float lines = 0.9 + 0.1 * sin((_st.y - clock * 0.2) * resolution.y * 0.8);
+  return vec4(vec3(0.25, 1.0, 0.35) * c * lens * lines, 1.0);`,
+  },
+  {
+    // Fish-eye: the middle swells towards you and the edges bend away, as
+    // through a door's peephole. amount 0 is flat
+    name: 'fishEye',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'amount', default: 0.6 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = (_st - 0.5) * aspect;
+  float r = length(p);
+  vec2 bent = r > 0.0 ? p / r * pow(r * 1.6, 1.0 + amount) / 1.6 : p;
+  vec2 at = bent / aspect + 0.5;
+  vec3 c = texture2D(tex, at).rgb;
+  float edge = smoothstep(0.62, 0.5, r);
+  return vec4(c * edge, 1.0);`,
+  },
+  {
+    // Watercolour: soft patches of colour that run into each other, darker
+    // where they meet, on rough paper
+    name: 'watercolour',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'bleed', default: 4 },
+    ],
+    glsl: `
+  vec2 px = max(bleed, 1.0) / resolution;
+  vec2 wet = vec2(_noise(vec3(_st * 9.0, 1.0)), _noise(vec3(_st * 9.0, 7.0))) * px * 2.0;
+  vec3 sum = vec3(0.0);
+  for (int y = -2; y <= 2; y++) {
+    for (int x = -2; x <= 2; x++) {
+      sum += texture2D(tex, _st + wet + vec2(float(x), float(y)) * px).rgb;
+    }
+  }
+  vec3 soft = floor(sum / 25.0 * 6.0 + 0.5) / 6.0;
+  vec3 here = texture2D(tex, _st + wet).rgb;
+  float rim = clamp(length(here - sum / 25.0) * 3.0, 0.0, 1.0);
+  float paper = 0.93 + 0.07 * _noise(vec3(_st * resolution / 3.0, 0.0));
+  vec3 colour = mix(vec3(1.0), soft, 0.85) * (1.0 - rim * 0.35);
+  return vec4(colour * paper, 1.0);`,
+  },
+  {
+    // CGA: the four colours of the first PC graphics cards, black, cyan,
+    // magenta and white (palette 1: black, green, red and yellow), in big
+    // pixels, with dots mixing the tones in between
+    name: 'cga',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'size', default: 4 },
+      { type: 'float', name: 'palette', default: 0 },
+    ],
+    glsl: `
+  vec2 cell = floor(_st * resolution / max(size, 1.0));
+  vec2 h = floor(cell * 0.5);
+  float bayer = fract(dot(h, vec2(0.5, h.y * 0.75))) * 0.25 + fract(dot(cell, vec2(0.5, cell.y * 0.75)));
+  vec3 c = texture2D(tex, (cell + 0.5) * max(size, 1.0) / resolution).rgb + (bayer - 0.5) * 0.35;
+  vec3 a = vec3(0.0);
+  vec3 b = palette < 0.5 ? vec3(0.33, 1.0, 1.0) : vec3(0.33, 1.0, 0.33);
+  vec3 m = palette < 0.5 ? vec3(1.0, 0.33, 1.0) : vec3(1.0, 0.33, 0.33);
+  vec3 w = palette < 0.5 ? vec3(1.0) : vec3(1.0, 1.0, 0.33);
+  vec3 best = a;
+  float near = distance(c, a);
+  if (distance(c, b) < near) { near = distance(c, b); best = b; }
+  if (distance(c, m) < near) { near = distance(c, m); best = m; }
+  if (distance(c, w) < near) { best = w; }
+  return vec4(best, 1.0);`,
+  },
+  {
+    // Rings on water spreading from a point, bending what is under them;
+    // age is how long since the stone fell, in seconds (0 just now)
+    name: 'waterRings',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'age', default: 1 },
+      { type: 'float', name: 'x', default: 0.5 },
+      { type: 'float', name: 'y', default: 0.5 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 d = (_st - vec2(x, y)) * aspect;
+  float r = length(d);
+  float front = age * 0.9;
+  float wave = sin((r - front) * 60.0) * exp(-abs(r - front) * 12.0) * exp(-age * 1.5);
+  vec2 at = _st + (r > 0.0 ? d / r : vec2(0.0)) / aspect * wave * 0.03;
+  vec3 c = texture2D(tex, at).rgb;
+  return vec4(c * (1.0 + wave * 0.4), 1.0);`,
+  },
+  {
+    // Aura: the outline of what is in front of the camera glowing in
+    // colours that go round the rainbow, the picture dark behind it
+    name: 'aura',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'hue', default: 0 },
+      { type: 'float', name: 'width', default: 3 },
+    ],
+    glsl: `
+  vec3 w = vec3(0.299, 0.587, 0.114);
+  float glow = 0.0;
+  for (int i = 1; i <= 3; i++) {
+    vec2 px = width * float(i) / resolution;
+    float gx = dot(texture2D(tex, _st + vec2(px.x, 0.0)).rgb, w) - dot(texture2D(tex, _st - vec2(px.x, 0.0)).rgb, w);
+    float gy = dot(texture2D(tex, _st + vec2(0.0, px.y)).rgb, w) - dot(texture2D(tex, _st - vec2(0.0, px.y)).rgb, w);
+    glow += length(vec2(gx, gy)) / float(i);
+  }
+  vec3 colour = 0.5 + 0.5 * cos(6.2831853 * (hue + _st.y * 0.5 + vec3(0.0, 0.33, 0.67)));
+  vec3 behind = texture2D(tex, _st).rgb * 0.18;
+  return vec4(behind + colour * smoothstep(0.05, 0.5, glow) * 1.4, 1.0);`,
+  },
+  {
+    // Cubism: the picture cut in rectangles of different sizes, each one
+    // showing it from a slightly different place and zoom, like a collage
+    name: 'cubism',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'seed', default: 0 },
+      { type: 'float', name: 'mess', default: 1 },
+    ],
+    glsl: `
+  float rows = 5.0;
+  float row = floor(_st.y * rows);
+  float cols = 2.0 + floor(fract(sin((row + seed) * 43.1) * 4375.5) * 4.0);
+  float shift = fract(sin((row + seed) * 17.3) * 9137.1);
+  vec2 cell = vec2(floor(_st.x * cols + shift), row);
+  vec2 f = vec2(fract(_st.x * cols + shift), fract(_st.y * rows));
+  vec2 rnd = fract(sin(vec2(dot(cell, vec2(12.9898, 78.233)), dot(cell, vec2(39.35, 11.13))) + seed) * 43758.5453) - 0.5;
+  float zoom = 1.0 + rnd.x * 0.5 * mess;
+  vec2 at = (_st - 0.5) / zoom + 0.5 + rnd * 0.08 * mess;
+  vec3 c = texture2D(tex, at).rgb * (0.85 + rnd.y * 0.4);
+  float seam = step(0.03, f.x) * step(0.04, f.y);
+  return vec4(c * seam, 1.0);`,
+  },
+  {
+    // A wall of LEDs: round lights in a grid, each one colour, glowing into
+    // the black between them. size is the gap from one to the next, in pixels
+    name: 'ledWall',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'size', default: 14 },
+    ],
+    glsl: `
+  vec2 grid = resolution / max(size, 4.0);
+  vec2 id = floor(_st * grid);
+  vec2 f = fract(_st * grid) - 0.5;
+  vec3 c = texture2D(tex, (id + 0.5) / grid).rgb;
+  c = pow(c, vec3(1.4)) * 1.5;
+  float d = length(f);
+  float led = smoothstep(0.36, 0.3, d) + 0.25 * smoothstep(0.5, 0.2, d);
+  return vec4(c * led, 1.0);`,
+  },
+  {
+    // Security cameras: four views of the room in grey, each looking at a
+    // different part, with grain, lines and a red recording dot blinking
+    name: 'cctv',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'clock', default: 0 },
+    ],
+    glsl: `
+  vec2 q = floor(_st * 2.0);
+  vec2 f = fract(_st * 2.0);
+  float view = q.x + q.y * 2.0;
+  vec2 centre = view < 0.5 ? vec2(0.5) : view < 1.5 ? vec2(0.3, 0.35) : view < 2.5 ? vec2(0.7, 0.4) : vec2(0.5, 0.65);
+  float zoom = view < 0.5 ? 1.0 : 1.8;
+  vec3 seen = texture2D(tex, centre + (f - 0.5) / zoom).rgb;
+  float c = dot(seen, vec3(0.299, 0.587, 0.114));
+  float grain = fract(sin(dot(_st * resolution + floor(clock * 24.0), vec2(12.9898, 78.233))) * 43758.5453);
+  c = c * 0.8 + grain * 0.15;
+  c *= 0.85 + 0.15 * sin(f.y * resolution.y * 1.5);
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  float rec = smoothstep(0.022, 0.016, length((f - vec2(0.06, 0.16)) * aspect)) * step(0.5, fract(clock * 0.8));
+  float border = 1.0 - step(0.006, f.x) * step(0.006, f.y) * step(f.x, 0.994) * step(f.y, 0.994);
+  vec3 colour = vec3(c) * vec3(0.9, 1.0, 0.95);
+  colour = mix(colour, vec3(1.0, 0.1, 0.1), rec);
+  return vec4(mix(colour, vec3(0.8), border), 1.0);`,
   },
   {
     // Light painting: what was painted turns a little and drifts out (more
