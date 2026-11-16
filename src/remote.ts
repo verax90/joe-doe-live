@@ -90,18 +90,26 @@ const g = globalThis as { phoneX?: () => number; phoneY?: () => number };
 g.phoneX = () => xy.x;
 g.phoneY = () => xy.y;
 
-// A message from the phone, as the MPK would have sent it
-export function applyRemote(message: RemoteMessage, target: EventTarget = window) {
+// Who has a finger on the XY and on the Visual square: with several phones
+// connected, one lifting its finger must not cut off another still playing
+const holdingXy = new Set<unknown>();
+const holdingPoint = new Set<unknown>();
+
+// A message from the phone, as the MPK would have sent it; from is which
+// phone sent it (one, when left out)
+export function applyRemote(message: RemoteMessage, target: EventTarget = window, from: unknown = 'phone') {
   if (message.t === 'pad' && message.i >= 0 && message.i < 8) {
     target.dispatchEvent(new CustomEvent<NoteDetail>(NOTE_EVENT, { detail: { note: 32 + message.i, velocity: clamp(message.v), device: 'phone' } }));
   } else if (message.t === 'cc' && message.cc >= 1 && message.cc <= 8) {
     target.dispatchEvent(new CustomEvent<CcDetail>(CC_EVENT, { detail: { cc: message.cc, value: clamp(message.v), channel: 1 } }));
   } else if (message.t === 'xy') {
+    holdingXy.add(from);
     xy.x = clamp(message.x);
     xy.y = clamp(message.y);
     if (djOn()) setDjFilter(xy.x, xy.y);
   } else if (message.t === 'xyup') {
-    setDjFilter(null);
+    holdingXy.delete(from);
+    if (!holdingXy.size) setDjFilter(null);
   } else if (message.t === 'layer' && Number.isInteger(message.i) && message.i >= 0 && message.i < 4) {
     target.dispatchEvent(new CustomEvent<number>(REMOTE_LAYER_EVENT, { detail: message.i }));
   } else if (message.t === 'play' || message.t === 'stop' || message.t === 'tap') {
@@ -126,9 +134,11 @@ export function applyRemote(message: RemoteMessage, target: EventTarget = window
   } else if (message.t === 'palette' && typeof message.id === 'string' && message.id.length < 24) {
     target.dispatchEvent(new CustomEvent<string>(REMOTE_PALETTE_EVENT, { detail: message.id }));
   } else if (message.t === 'point') {
+    holdingPoint.add(from);
     target.dispatchEvent(new CustomEvent(REMOTE_POINT_EVENT, { detail: { x: clamp(message.x), y: clamp(message.y) } }));
   } else if (message.t === 'pointup') {
-    target.dispatchEvent(new CustomEvent(REMOTE_POINT_EVENT, { detail: null }));
+    holdingPoint.delete(from);
+    if (!holdingPoint.size) target.dispatchEvent(new CustomEvent(REMOTE_POINT_EVENT, { detail: null }));
   }
 }
 
@@ -180,9 +190,12 @@ export function setupRemote({ addTrack }: { addTrack: (pattern: string) => void 
         render();
         toast(t('remoteJoined'));
       });
-      connection.on('data', (data) => applyRemote(data as RemoteMessage));
+      connection.on('data', (data) => applyRemote(data as RemoteMessage, window, connection));
       connection.on('close', () => {
         phones.delete(connection);
+        // a phone that goes away with a finger down lets go
+        if (holdingXy.has(connection)) applyRemote({ t: 'xyup' }, window, connection);
+        if (holdingPoint.has(connection)) applyRemote({ t: 'pointup' }, window, connection);
         render();
       });
     });

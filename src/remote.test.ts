@@ -114,3 +114,18 @@ describe('phone as controller', () => {
     expect(got).toEqual(['neon']);
   });
 });
+
+describe('two phones at once', () => {
+  it('one lifting its finger does not cut off the other', () => {
+    const target = new EventTarget();
+    const points: unknown[] = [];
+    target.addEventListener(REMOTE_POINT_EVENT, (event) => points.push((event as CustomEvent).detail));
+    applyRemote({ t: 'point', x: 0.1, y: 0.1 }, target, 'a');
+    applyRemote({ t: 'point', x: 0.9, y: 0.9 }, target, 'b');
+    applyRemote({ t: 'pointup' }, target, 'a');
+    expect(points.at(-1)).toEqual({ x: 0.9, y: 0.9 });
+    applyRemote({ t: 'pointup' }, target, 'b');
+    expect(points.at(-1)).toBeNull();
+  });
+});
+
