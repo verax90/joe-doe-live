@@ -29,3 +29,14 @@ describe('sequencer view', () => {
     expect(withSequencer('$: s("bd"')).toBeNull();
   });
 });
+
+describe('a voice written with the sequencer on', () => {
+  it('gets it too, in the next colour', async () => {
+    const { sequencerChanges, withSequencer, applyChanges } = await import('./tracks');
+    const on = withSequencer('$: s("bd*4")\n$: note("c e g")')!;
+    const later = on + '\n$: s("hh*8")';
+    const next = applyChanges(later, sequencerChanges(later)!);
+    expect(next.split('\n')[2]).toBe('$: s("hh*8").color("#ff5fd2")._punchcard()');
+    expect(sequencerChanges(next)).toEqual([]);
+  });
+});

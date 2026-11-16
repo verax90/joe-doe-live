@@ -69,7 +69,7 @@ import { setupStatus } from './status';
 import { readStorage, writeStorage } from './storage';
 import { whenEditorReady, whenStrudelReady, type StrudelMirror } from './strudel';
 import { loadDirtSamples } from './dirt';
-import { trackChanges } from './tracks';
+import { hasSequencer, sequencerChanges, trackChanges } from './tracks';
 import { setupTempo } from './tempo';
 import { applyTheme, readTheme, themes } from './themes';
 import { toast } from './toast';
@@ -250,6 +250,11 @@ const playCode = (code: string) => strudelRepl?.evaluate?.(code, true) ?? Promis
 const originalEvaluate = editor.evaluate.bind(editor);
 editor.evaluate = async (autostart?: boolean) => {
   await ensureAudio();
+  // with the sequencer on, a voice written since gets it too
+  if (hasSequencer(editor.code)) {
+    const changes = sequencerChanges(editor.code);
+    if (changes?.length) editor.editor?.dispatch({ changes });
+  }
   if (stemsActive()) await playCode(stemsVersion(editor.code));
   else await originalEvaluate(autostart);
   markApplied(editor.code);

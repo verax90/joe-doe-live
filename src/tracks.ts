@@ -186,17 +186,23 @@ const ADDED = new RegExp(`(?:\\.color\\("(?:${SEQUENCER_COLOURS.join('|')})"\\))
 export const hasSequencer = (code: string) => WIDGET.test(code);
 
 export function withSequencer(code: string) {
+  const changes = sequencerChanges(code);
+  return changes && applyChanges(code, changes);
+}
+
+// What adds the sequencer to the voices that lack it: all of them when it goes
+// on, or the ones written since (new colours, after the ones already used)
+export function sequencerChanges(code: string): Change[] | null {
   const parts = playingParts(code);
   if (!parts) return null;
-  let colour = 0;
-  const changes = parts
+  let colour = parts.filter((part) => WIDGET.test(part.text)).length;
+  return parts
     .filter((part) => !WIDGET.test(part.text))
     .map((part) => {
       const melodic = /\b(note|n|chord|freq)\(/.test(part.text) && !/\bs\(\s*["'`](bd|sd|hh|oh|cp|rim|lt|ht|mt|perc)/.test(part.text);
       const tint = /\.color\(/.test(part.text) ? '' : `.color("${SEQUENCER_COLOURS[colour++ % SEQUENCER_COLOURS.length]}")`;
       return { from: part.end, insert: `${tint}._${melodic ? 'pianoroll' : 'punchcard'}()` };
     });
-  return applyChanges(code, changes);
 }
 
 export const withoutSequencer = (code: string) => code.replace(ADDED, '');
