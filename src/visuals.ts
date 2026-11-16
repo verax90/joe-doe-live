@@ -912,6 +912,85 @@ src(s0).color(1, 0, 0)
   .out()`,
   },
   {
+    id: 'cam-spectrum',
+    name: { en: 'Webcam (ZX Spectrum)', es: 'Webcam (ZX Spectrum)', ca: 'Webcam (ZX Spectrum)' },
+    camera: true,
+    code: `spectrum(s0, () => 3 + bass() * 2)
+  .out()`,
+  },
+  {
+    id: 'cam-sintonia',
+    name: { en: 'Webcam (badly tuned TV)', es: 'Webcam (tele mal sintonizada)', ca: 'Webcam (tele mal sintonitzada)' },
+    camera: true,
+    // it tunes in and out; a kick loses it for a moment
+    code: `badTv(s0, () => time, () => 0.55 + Math.sin(time * 0.4) * 0.35 - kickHit() * 0.4)
+  .out()`,
+  },
+  {
+    id: 'cam-teles',
+    name: { en: 'Webcam (wall of TVs)', es: 'Webcam (pared de teles)', ca: 'Webcam (paret de teles)' },
+    camera: true,
+    code: `tvWall(s0, () => time)
+  .out()`,
+  },
+  {
+    id: 'cam-cine',
+    name: { en: 'Webcam (old film)', es: 'Webcam (cine antiguo)', ca: 'Webcam (cinema antic)' },
+    camera: true,
+    code: `oldFilm(s0, () => time, () => kickHit())
+  .out()`,
+  },
+  {
+    id: 'cam-instantanea',
+    name: { en: 'Webcam (instant photo)', es: 'Webcam (foto instantánea)', ca: 'Webcam (foto instantània)' },
+    camera: true,
+    code: `instantPhoto(s0, 1)
+  .scale(0.85)
+  .rotate(() => Math.sin(time * 0.4) * 0.04 + kickHit() * 0.02)
+  .out()`,
+  },
+  {
+    id: 'cam-trencadis',
+    name: { en: 'Webcam (trencadís, Gaudí tiles)', es: 'Webcam (trencadís de Gaudí)', ca: 'Webcam (trencadís de Gaudí)' },
+    camera: true,
+    code: `trencadis(s0, () => 16 + bass() * 10)
+  .out()`,
+  },
+  {
+    id: 'cam-oro',
+    name: { en: 'Webcam (embossed in gold)', es: 'Webcam (relieve dorado)', ca: 'Webcam (relleu daurat)' },
+    camera: true,
+    code: `goldRelief(s0, () => 3 + bass() * 5)
+  .out()`,
+  },
+  {
+    id: 'cam-ducha',
+    name: { en: 'Webcam (shower glass)', es: 'Webcam (cristal de ducha)', ca: 'Webcam (vidre de dutxa)' },
+    camera: true,
+    code: `ribbedGlass(s0, () => 36 + mid() * 20, () => 0.02 + bass() * 0.04)
+  .out()`,
+  },
+  {
+    id: 'cam-papel',
+    name: { en: 'Webcam (cut paper)', es: 'Webcam (papel recortado)', ca: 'Webcam (paper retallat)' },
+    camera: true,
+    // the colours of the card change on every bar
+    code: `paperCut(s0, H("<0 0.25 0.5 0.75>"))
+  .out()`,
+  },
+  {
+    id: 'cam-stop-motion',
+    name: { en: 'Webcam (stop motion)', es: 'Webcam (stop motion)', ca: 'Webcam (stop motion)' },
+    camera: true,
+    // a new photo six times a second and on every kick: you move in jumps
+    code: `src(o3).blend(src(s0), () => ((time * 6) % 1 < 0.15 || kickHit() > 0.8 ? 1 : 0)).out(o3)
+src(o3)
+  .saturate(1.2)
+  .contrast(1.1)
+  .scrollX(() => kickHit() * 0.01)
+  .out()`,
+  },
+  {
     id: 'cam-mirror',
     name: { en: 'Webcam (mirror)', es: 'Webcam (espejo)', ca: 'Webcam (mirall)' },
     camera: true,
@@ -2846,6 +2925,245 @@ export const SHADERS = [
   vec3 colour = vec3(c) * vec3(0.9, 1.0, 0.95);
   colour = mix(colour, vec3(1.0, 0.1, 0.1), rec);
   return vec4(mix(colour, vec3(0.8), border), 1.0);`,
+  },
+  {
+    // ZX Spectrum: in blocks of 8×8 pixels, each block only two of the
+    // machine's colours (one for the ink, one for the paper), so colour
+    // bleeds in squares as it did on the screen. size is a pixel's size
+    name: 'spectrum',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'size', default: 3 },
+    ],
+    glsl: `
+  vec2 px = floor(_st * resolution / max(size, 1.0));
+  vec2 block = floor(px / 8.0);
+  vec2 unit = max(size, 1.0) / resolution;
+  vec3 here = texture2D(tex, (px + 0.5) * unit).rgb;
+  vec3 avg = vec3(0.0);
+  for (int y = 0; y < 3; y++) {
+    for (int x = 0; x < 3; x++) {
+      avg += texture2D(tex, (block * 8.0 + vec2(float(x), float(y)) * 3.0 + 1.0) * unit).rgb;
+    }
+  }
+  avg /= 9.0;
+  float lumAvg = dot(avg, vec3(0.299, 0.587, 0.114));
+  float lumHere = dot(here, vec3(0.299, 0.587, 0.114));
+  vec3 want = avg / max(max(avg.r, max(avg.g, avg.b)), 0.2);
+  vec3 ink = vec3(0.0);
+  float near = 9.0;
+  for (int i = 1; i < 8; i++) {
+    float k = float(i);
+    vec3 c = vec3(mod(floor(k / 2.0), 2.0), floor(k / 4.0), mod(k, 2.0));
+    float d = distance(c, want);
+    if (d < near) { near = d; ink = c; }
+  }
+  float bright = step(0.5, lumAvg);
+  vec3 paper = lumAvg > 0.6 ? ink * 0.3 : vec3(0.0);
+  vec3 colour = lumHere >= lumAvg * 0.92 ? ink * (0.84 + 0.16 * bright) : paper;
+  return vec4(colour, 1.0);`,
+  },
+  {
+    // A badly tuned television: the picture rolls up now and then, wobbles
+    // sideways, has a ghost, and drowns in snow; tune 1 is clean
+    name: 'badTv',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'tune', default: 0.5 },
+    ],
+    glsl: `
+  float off = 1.0 - clamp(tune, 0.0, 1.0);
+  float roll = fract(clock * 0.3 * off * off);
+  float y = fract(_st.y + roll);
+  float wobble = sin(y * 40.0 + clock * 6.0) * 0.006 * off + sin(y * 3.0 + clock) * 0.01 * off;
+  vec3 c = texture2D(tex, vec2(_st.x + wobble, y)).rgb;
+  vec3 ghost = texture2D(tex, vec2(_st.x + wobble - 0.03, y)).rgb;
+  c = c * 0.8 + ghost * 0.25 * off;
+  float snow = fract(sin(dot(_st * resolution + fract(clock) * 913.0, vec2(12.9898, 78.233))) * 43758.5453);
+  float bar = smoothstep(0.0, 0.03, abs(fract(_st.y + roll) - 0.02)) ;
+  c = mix(c, vec3(snow), off * 0.6) * mix(1.0, bar, off);
+  return vec4(c, 1.0);`,
+  },
+  {
+    // A wall of old televisions, three by three, each showing the picture
+    // in its own colours, the odd one lost in snow for a moment
+    name: 'tvWall',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'clock', default: 0 },
+    ],
+    glsl: `
+  vec2 tile = floor(_st * 3.0);
+  vec2 f = fract(_st * 3.0);
+  float id = tile.x + tile.y * 3.0;
+  vec2 screen = (f - 0.08) / 0.84;
+  float inside = step(0.0, screen.x) * step(screen.x, 1.0) * step(0.0, screen.y) * step(screen.y, 1.0);
+  vec2 bent = screen - 0.5;
+  bent *= 1.0 + dot(bent, bent) * 0.2;
+  vec3 c = texture2D(tex, bent + 0.5).rgb;
+  float pick = mod(id, 4.0);
+  c = pick < 1.0 ? c : pick < 2.0 ? c.brg : pick < 3.0 ? vec3(dot(c, vec3(0.3, 0.59, 0.11))) : c.gbr;
+  float lost = step(0.92, fract(sin(id * 51.7 + floor(clock * 2.0)) * 4375.5));
+  float snow = fract(sin(dot(_st * resolution + fract(clock) * 777.0, vec2(12.9898, 78.233))) * 43758.5453);
+  c = mix(c, vec3(snow), lost);
+  c *= 0.85 + 0.15 * sin(screen.y * 300.0);
+  c *= smoothstep(0.75, 0.3, length(bent));
+  vec3 case_ = vec3(0.13, 0.12, 0.11) + 0.05 * f.y;
+  return vec4(mix(case_, c, inside), 1.0);`,
+  },
+  {
+    // An old film: sepia, flickering, with scratches running down, dust,
+    // the frame jumping a little and the corners dark
+    name: 'oldFilm',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'clock', default: 0 },
+      { type: 'float', name: 'jump', default: 0 },
+    ],
+    glsl: `
+  float frame = floor(clock * 18.0);
+  float hop = (fract(sin(frame * 12.9) * 4375.5) - 0.5) * 0.006 + jump * 0.02;
+  vec3 c = texture2D(tex, _st + vec2(0.0, hop)).rgb;
+  float l = dot(c, vec3(0.299, 0.587, 0.114));
+  vec3 sepia = vec3(1.07, 0.9, 0.68) * (l * 0.9 + 0.05);
+  float flicker = 0.9 + 0.1 * fract(sin(frame * 7.7) * 4375.5);
+  float scratchX = fract(sin(frame * 3.1) * 9137.1);
+  float scratch = smoothstep(0.002, 0.0, abs(_st.x - scratchX)) * step(0.5, fract(sin(frame * 1.3) * 777.0));
+  float dust = step(0.9994, fract(sin(dot(floor(_st * resolution / 2.0) + frame, vec2(12.9898, 78.233))) * 43758.5453));
+  vec2 v = _st - 0.5;
+  float vignette = smoothstep(0.8, 0.3, length(v));
+  vec3 colour = sepia * flicker * vignette + scratch * 0.5 - dust * 0.6;
+  return vec4(colour, 1.0);`,
+  },
+  {
+    // An instant photo: the picture in faded, warm colours inside a white
+    // frame with the wide strip at the bottom
+    name: 'instantPhoto',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'warm', default: 1 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = (_st - 0.5) * aspect;
+  float w = 0.34;
+  vec2 inner = vec2(p.x / (w * 2.0) + 0.5, (p.y + 0.4) / 0.68);
+  float photo = step(0.0, inner.x) * step(inner.x, 1.0) * step(0.0, inner.y) * step(inner.y, 1.0);
+  float frame = step(abs(p.x), w + 0.04) * step(-0.44, p.y) * step(p.y, 0.44);
+  vec3 c = texture2D(tex, vec2(0.5 + (inner.x - 0.5) * resolution.y / resolution.x, inner.y)).rgb;
+  c = c * 0.8 + 0.12;
+  c *= mix(vec3(1.0), vec3(1.08, 0.98, 0.82), warm);
+  c *= smoothstep(0.85, 0.35, length(inner - 0.5));
+  vec3 paper = vec3(0.95, 0.94, 0.9);
+  vec3 table = vec3(0.12, 0.1, 0.09);
+  return vec4(mix(mix(table, paper, frame), c, photo), 1.0);`,
+  },
+  {
+    // Trencadís, the broken-tile mosaic of Gaudí's benches: irregular
+    // pieces of glazed tile in bright colours, with white grout between
+    name: 'trencadis',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'pieces', default: 18 },
+    ],
+    glsl: `
+  vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+  vec2 p = _st * aspect * pieces;
+  vec2 cell = floor(p);
+  float first = 9.0;
+  float second = 9.0;
+  vec2 seed = vec2(0.0);
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 n = cell + vec2(float(x), float(y));
+      vec2 point = n + 0.15 + 0.7 * fract(sin(vec2(dot(n, vec2(127.1, 311.7)), dot(n, vec2(269.5, 183.3)))) * 43758.5453);
+      float d = length(p - point);
+      if (d < first) {
+        second = first;
+        first = d;
+        seed = point;
+      } else if (d < second) {
+        second = d;
+      }
+    }
+  }
+  vec3 c = texture2D(tex, seed / pieces / aspect).rgb;
+  c = floor(c / max(max(c.r, max(c.g, c.b)), 0.15) * 3.0 + 0.5) / 3.0 * (0.55 + 0.45 * max(c.r, max(c.g, c.b)));
+  float shine = pow(max(0.0, 1.0 - length(p - seed + 0.25)), 6.0) * 0.5;
+  float grout = smoothstep(0.1, 0.05, second - first);
+  return vec4(mix(c + shine, vec3(0.9, 0.88, 0.84), grout), 1.0);`,
+  },
+  {
+    // Embossed in gold: the picture pressed into a sheet of metal, lit from
+    // the top left
+    name: 'goldRelief',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'depth', default: 3 },
+    ],
+    glsl: `
+  vec2 px = 1.5 / resolution;
+  vec3 w = vec3(0.299, 0.587, 0.114);
+  float gx = dot(texture2D(tex, _st + vec2(px.x, 0.0)).rgb, w) - dot(texture2D(tex, _st - vec2(px.x, 0.0)).rgb, w);
+  float gy = dot(texture2D(tex, _st + vec2(0.0, px.y)).rgb, w) - dot(texture2D(tex, _st - vec2(0.0, px.y)).rgb, w);
+  vec3 n = normalize(vec3(-gx * depth, -gy * depth, 0.25));
+  float light = max(0.0, dot(n, normalize(vec3(-0.5, -0.6, 0.6))));
+  float spec = pow(light, 18.0);
+  vec3 gold = vec3(0.95, 0.72, 0.28);
+  return vec4(gold * (0.25 + light * 0.9) + spec * 0.6, 1.0);`,
+  },
+  {
+    // Ribbed glass, like a shower door: you seen through vertical ribs that
+    // bend and smear the picture in strips
+    name: 'ribbedGlass',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'ribs', default: 40 },
+      { type: 'float', name: 'bend', default: 0.03 },
+    ],
+    glsl: `
+  float f = fract(_st.x * ribs);
+  float lens = sin(f * 6.2831853) * bend;
+  vec3 c = vec3(0.0);
+  for (int i = -3; i <= 3; i++) {
+    c += texture2D(tex, _st + vec2(lens, float(i) * 0.006)).rgb;
+  }
+  c /= 7.0;
+  float edge = 0.88 + 0.12 * smoothstep(0.0, 0.2, f) * smoothstep(1.0, 0.8, f);
+  float shine = smoothstep(0.1, 0.0, abs(f - 0.3)) * 0.15;
+  return vec4(c * edge + shine, 1.0);`,
+  },
+  {
+    // Cut paper: the picture in four layers of coloured card, the lighter
+    // ones laid on top and casting a soft shadow on the ones below
+    name: 'paperCut',
+    type: 'src',
+    inputs: [
+      { type: 'sampler2D', name: 'tex', default: NaN },
+      { type: 'float', name: 'hue', default: 0 },
+    ],
+    glsl: `
+  vec3 w = vec3(0.299, 0.587, 0.114);
+  float level = floor(clamp(dot(texture2D(tex, _st).rgb, w), 0.0, 0.999) * 4.0);
+  float above = 0.0;
+  for (int i = 1; i <= 4; i++) {
+    vec2 at = _st - vec2(0.004, 0.006) * float(i);
+    above = max(above, floor(clamp(dot(texture2D(tex, at).rgb, w), 0.0, 0.999) * 4.0));
+  }
+  float shadow = above > level ? 0.72 : 1.0;
+  vec3 colour = 0.55 + 0.4 * cos(6.2831853 * (hue + level * 0.12 + vec3(0.0, 0.33, 0.67)));
+  colour = mix(colour, vec3(1.0), level / 6.0);
+  float fibre = 0.95 + 0.05 * _noise(vec3(_st * resolution / 4.0, level));
+  return vec4(colour * shadow * fibre, 1.0);`,
   },
   {
     // Light painting: what was painted turns a little and drifts out (more
